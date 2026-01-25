@@ -18,6 +18,30 @@ importers:
         specifier: ^5.3.0
         version: 5.9.3
 
+  docs:
+    dependencies:
+      '@astrojs/mdx':
+        specifier: ^4.3.0
+        version: 4.3.13(astro@5.16.15(@types/node@20.19.30)(ioredis@5.9.2)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.56.0)(terser@5.46.0)(typescript@5.9.3))
+      '@astrojs/sitemap':
+        specifier: ^3.7.0
+        version: 3.7.0
+      '@tailwindcss/vite':
+        specifier: ^4.1.18
+        version: 4.1.18(vite@6.4.1(@types/node@20.19.30)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0))
+      astro:
+        specifier: ^5.6.1
+        version: 5.16.15(@types/node@20.19.30)(ioredis@5.9.2)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.56.0)(terser@5.46.0)(typescript@5.9.3)
+      astro-expressive-code:
+        specifier: ^0.41.2
+        version: 0.41.6(astro@5.16.15(@types/node@20.19.30)(ioredis@5.9.2)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.56.0)(terser@5.46.0)(typescript@5.9.3))
+      sharp:
+        specifier: ^0.34.2
+        version: 0.34.5
+      tailwindcss:
+        specifier: ^4.1.18
+        version: 4.1.18
+
   packages/hitlimit:
     dependencies:
       '@hitlimit/types':
@@ -106,30 +130,6 @@ importers:
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
-
-  website:
-    dependencies:
-      '@astrojs/mdx':
-        specifier: ^4.3.0
-        version: 4.3.13(astro@5.16.15(@types/node@20.19.30)(ioredis@5.9.2)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.56.0)(terser@5.46.0)(typescript@5.9.3))
-      '@astrojs/sitemap':
-        specifier: ^3.7.0
-        version: 3.7.0
-      '@tailwindcss/vite':
-        specifier: ^4.1.18
-        version: 4.1.18(vite@6.4.1(@types/node@20.19.30)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0))
-      astro:
-        specifier: ^5.6.1
-        version: 5.16.15(@types/node@20.19.30)(ioredis@5.9.2)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.56.0)(terser@5.46.0)(typescript@5.9.3)
-      astro-expressive-code:
-        specifier: ^0.41.2
-        version: 0.41.6(astro@5.16.15(@types/node@20.19.30)(ioredis@5.9.2)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.56.0)(terser@5.46.0)(typescript@5.9.3))
-      sharp:
-        specifier: ^0.34.2
-        version: 0.34.5
-      tailwindcss:
-        specifier: ^4.1.18
-        version: 4.1.18
 
 packages:
 
