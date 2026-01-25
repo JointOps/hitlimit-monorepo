@@ -8,6 +8,7 @@ on:
 
 jobs:
   test-node:
+    name: Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -38,6 +39,7 @@ jobs:
           REDIS_URL: redis://localhost:6379
 
   test-bun:
+    name: Bun (latest)
     runs-on: ubuntu-latest
 
     services:
