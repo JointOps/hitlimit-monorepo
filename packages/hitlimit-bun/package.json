@@ -1,22 +1,39 @@
 {
   "name": "hitlimit-bun",
   "version": "1.0.0",
-  "description": "The fastest way to say no - Bun-native rate limiting",
+  "description": "Fast Bun-native rate limiting for Bun.serve & Elysia - API throttling with bun:sqlite, high performance request limiting",
   "author": "hitlimit",
   "license": "MIT",
+  "homepage": "https://hitlimit.dev/docs/bun",
   "repository": {
     "type": "git",
     "url": "https://github.com/JointOps/hitlimit-monorepo",
     "directory": "packages/hitlimit-bun"
   },
+  "bugs": {
+    "url": "https://github.com/JointOps/hitlimit-monorepo/issues"
+  },
   "keywords": [
     "rate-limit",
+    "rate-limiter",
     "rate-limiting",
     "bun",
+    "bun-rate-limit",
+    "bun-sqlite",
     "elysia",
+    "elysia-plugin",
+    "elysia-rate-limit",
     "middleware",
     "throttle",
-    "api"
+    "throttling",
+    "api",
+    "api-rate-limit",
+    "request-limit",
+    "ddos-protection",
+    "brute-force",
+    "redis",
+    "typescript",
+    "high-performance"
   ],
   "type": "module",
   "main": "./dist/index.js",

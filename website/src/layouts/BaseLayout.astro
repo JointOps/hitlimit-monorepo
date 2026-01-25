@@ -6,12 +6,19 @@ import Footer from '../components/Footer.astro';
 interface Props {
   title?: string;
   description?: string;
+  keywords?: string;
+  canonical?: string;
 }
 
 const {
-  title = 'hitlimit - The Fastest Rate Limiter',
-  description = 'Lightning-fast rate limiting for Node.js, Bun, and beyond. Protect your APIs with sub-millisecond performance.'
+  title = 'hitlimit - The Fastest Rate Limiter for Node.js, Bun, Express & NestJS',
+  description = 'Lightning-fast rate limiting middleware for Node.js, Bun, Express, NestJS, and Elysia. Protect your APIs with sub-millisecond performance, memory/SQLite/Redis stores, and zero config setup.',
+  keywords = 'rate limit, rate limiter, rate limiting, express rate limit, express middleware, nestjs rate limit, nestjs throttler, bun rate limit, elysia rate limit, nodejs rate limiter, api rate limiting, throttle requests, request throttling, ddos protection, brute force protection, redis rate limit, sqlite rate limit, api throttling, request limiting, npm rate limit',
+  canonical = 'https://hitlimit.dev'
 } = Astro.props;
+
+const siteUrl = 'https://hitlimit.dev';
+const ogImage = `${siteUrl}/og-image.png`;
 ---
 
 <!DOCTYPE html>
@@ -20,19 +27,57 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <meta name="keywords" content={keywords} />
+    <meta name="author" content="hitlimit" />
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="theme-color" content="#00e5ff" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
     <title>{title}</title>
 
-    <!-- Open Graph -->
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:image" content={ogImage} />
     <meta property="og:site_name" content="hitlimit" />
+    <meta property="og:locale" content="en_US" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonical} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "hitlimit",
+      "description": description,
+      "url": siteUrl,
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Cross-platform",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5",
+        "ratingCount": "1"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "hitlimit",
+        "url": siteUrl
+      },
+      "keywords": keywords
+    })} />
   </head>
   <body class="min-h-screen flex flex-col">
     <!-- Gradient mesh background -->

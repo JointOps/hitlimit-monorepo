@@ -7,9 +7,18 @@ import DocsSidebar from '../components/DocsSidebar.astro';
 interface Props {
   title?: string;
   description?: string;
+  keywords?: string;
 }
 
-const { title = 'Docs - hitlimit', description = 'hitlimit documentation' } = Astro.props;
+const {
+  title = 'Documentation - hitlimit | Rate Limiting for Node.js, Bun, Express, NestJS',
+  description = 'Complete documentation for hitlimit rate limiter. Learn how to implement fast API rate limiting in Express, NestJS, Bun, and Elysia with memory, SQLite, or Redis stores.',
+  keywords = 'hitlimit docs, rate limit documentation, express rate limit guide, nestjs throttler tutorial, bun rate limiter, elysia rate limit plugin, api rate limiting tutorial, nodejs rate limit example, redis rate limit setup, sqlite rate limit'
+} = Astro.props;
+
+const siteUrl = 'https://hitlimit.dev';
+const ogImage = `${siteUrl}/og-image.png`;
+const canonical = `${siteUrl}${Astro.url.pathname}`;
 ---
 
 <!DOCTYPE html>
@@ -18,8 +27,55 @@ const { title = 'Docs - hitlimit', description = 'hitlimit documentation' } = As
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <meta name="keywords" content={keywords} />
+    <meta name="author" content="hitlimit" />
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="theme-color" content="#00e5ff" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
     <title>{title}</title>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:site_name" content="hitlimit" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonical} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- JSON-LD Structured Data for Documentation -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": title,
+      "description": description,
+      "url": canonical,
+      "image": ogImage,
+      "author": {
+        "@type": "Organization",
+        "name": "hitlimit",
+        "url": siteUrl
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "hitlimit",
+        "url": siteUrl
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": canonical
+      },
+      "keywords": keywords
+    })} />
   </head>
   <body class="min-h-screen">
     <!-- Subtle background gradient -->

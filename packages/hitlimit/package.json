@@ -1,22 +1,38 @@
 {
   "name": "hitlimit",
   "version": "1.0.0",
-  "description": "The fastest way to say no - Rate limiting for Node.js",
+  "description": "Fast rate limiting middleware for Express, NestJS & Node.js - API throttling, brute force protection, request limiting",
   "author": "hitlimit",
   "license": "MIT",
+  "homepage": "https://hitlimit.dev",
   "repository": {
     "type": "git",
     "url": "https://github.com/JointOps/hitlimit-monorepo",
     "directory": "packages/hitlimit"
   },
+  "bugs": {
+    "url": "https://github.com/JointOps/hitlimit-monorepo/issues"
+  },
   "keywords": [
     "rate-limit",
+    "rate-limiter",
     "rate-limiting",
     "express",
+    "express-rate-limit",
     "nestjs",
+    "nestjs-throttler",
     "middleware",
     "throttle",
-    "api"
+    "throttling",
+    "api",
+    "api-rate-limit",
+    "request-limit",
+    "ddos-protection",
+    "brute-force",
+    "redis",
+    "sqlite",
+    "typescript",
+    "nodejs"
   ],
   "type": "module",
   "main": "./dist/index.js",

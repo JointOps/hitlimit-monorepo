@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import mdx from '@astrojs/mdx';
 import expressiveCode from 'astro-expressive-code';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   site: 'https://hitlimit.dev',
@@ -17,6 +18,7 @@ export default defineConfig({
       },
     }),
     mdx(),
+    sitemap(),
   ],
   vite: {
     plugins: [tailwindcss()],

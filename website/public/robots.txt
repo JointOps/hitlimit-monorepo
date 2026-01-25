@@ -1,0 +1,6 @@
+# hitlimit.dev robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://hitlimit.dev/sitemap-index.xml
