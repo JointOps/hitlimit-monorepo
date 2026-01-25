@@ -3,8 +3,8 @@
 ## Setup
 
 ```bash
-git clone https://github.com/hitlimit/hitlimit
-cd hitlimit
+git clone https://github.com/JointOps/hitlimit-monorepo
+cd hitlimit-monorepo
 pnpm install
 ```
 

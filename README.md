@@ -1,8 +1,14 @@
 # hitlimit
 
+[![npm version](https://img.shields.io/npm/v/hitlimit.svg)](https://www.npmjs.com/package/hitlimit)
+[![npm version](https://img.shields.io/npm/v/hitlimit-bun.svg?label=hitlimit-bun)](https://www.npmjs.com/package/hitlimit-bun)
+[![GitHub](https://img.shields.io/github/license/JointOps/hitlimit-monorepo)](https://github.com/JointOps/hitlimit-monorepo)
+
 > The fastest way to say no
 
 High-performance, framework-agnostic rate limiting for Node.js and Bun.
+
+**[Documentation](https://hitlimit.dev)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)**
 
 ## Packages
 

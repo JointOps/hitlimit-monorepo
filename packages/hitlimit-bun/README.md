@@ -1,8 +1,14 @@
 # hitlimit-bun
 
+[![npm version](https://img.shields.io/npm/v/hitlimit-bun.svg)](https://www.npmjs.com/package/hitlimit-bun)
+[![npm downloads](https://img.shields.io/npm/dm/hitlimit-bun.svg)](https://www.npmjs.com/package/hitlimit-bun)
+[![GitHub](https://img.shields.io/github/license/JointOps/hitlimit-monorepo)](https://github.com/JointOps/hitlimit-monorepo)
+
 > The fastest way to say no - Bun-native rate limiting
 
 High-performance rate limiting for Bun.serve and Elysia, using bun:sqlite by default for maximum performance.
+
+**[Documentation](https://hitlimit.dev/docs/bun)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)**
 
 ## Install
 

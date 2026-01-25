@@ -1,8 +1,14 @@
 # hitlimit
 
+[![npm version](https://img.shields.io/npm/v/hitlimit.svg)](https://www.npmjs.com/package/hitlimit)
+[![npm downloads](https://img.shields.io/npm/dm/hitlimit.svg)](https://www.npmjs.com/package/hitlimit)
+[![GitHub](https://img.shields.io/github/license/JointOps/hitlimit-monorepo)](https://github.com/JointOps/hitlimit-monorepo)
+
 > The fastest way to say no - Node.js rate limiting
 
 High-performance rate limiting middleware for Express, NestJS, and pure Node.js HTTP servers.
+
+**[Documentation](https://hitlimit.dev)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)**
 
 ## Install
 
