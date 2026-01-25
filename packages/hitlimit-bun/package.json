@@ -1,0 +1,79 @@
+{
+  "name": "hitlimit-bun",
+  "version": "1.0.0",
+  "description": "The fastest way to say no - Bun-native rate limiting",
+  "author": "hitlimit",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hitlimit/hitlimit",
+    "directory": "packages/hitlimit-bun"
+  },
+  "keywords": [
+    "rate-limit",
+    "rate-limiting",
+    "bun",
+    "elysia",
+    "middleware",
+    "throttle",
+    "api"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "bun": "./dist/index.js",
+      "import": "./dist/index.js"
+    },
+    "./elysia": {
+      "types": "./dist/elysia.d.ts",
+      "bun": "./dist/elysia.js",
+      "import": "./dist/elysia.js"
+    },
+    "./stores/memory": {
+      "types": "./dist/stores/memory.d.ts",
+      "bun": "./dist/stores/memory.js",
+      "import": "./dist/stores/memory.js"
+    },
+    "./stores/redis": {
+      "types": "./dist/stores/redis.d.ts",
+      "bun": "./dist/stores/redis.js",
+      "import": "./dist/stores/redis.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "bun build ./src/index.ts ./src/elysia.ts ./src/stores/memory.ts ./src/stores/redis.ts --outdir=./dist --target=bun && tsc --emitDeclarationOnly",
+    "clean": "rm -rf dist",
+    "test": "bun test",
+    "test:watch": "bun test --watch"
+  },
+  "dependencies": {
+    "@hitlimit/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "elysia": ">=1.0.0",
+    "ioredis": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "elysia": {
+      "optional": true
+    },
+    "ioredis": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@sinclair/typebox": "^0.34.48",
+    "@types/bun": "latest",
+    "elysia": "^1.0.0",
+    "ioredis": "^5.3.0",
+    "typescript": "^5.3.0"
+  }
+}
