@@ -42,7 +42,6 @@ Thumbs.db
 # Test coverage
 coverage/
 
-# Lock files (using pnpm)
-bun.lock
+# Lock files (keep pnpm-lock.yaml and bun.lock)
 yarn.lock
 package-lock.json

@@ -1,7 +1,10 @@
 {
   "name": "hitlimit-monorepo",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*",
+    "website"
+  ],
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",
