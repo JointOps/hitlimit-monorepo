@@ -32,7 +32,7 @@ jobs:
           cache: 'pnpm'
 
       - run: pnpm install
-      - run: pnpm build
+      - run: pnpm turbo run build --filter=hitlimit
       - run: pnpm test:node
         env:
           REDIS_URL: redis://localhost:6379
@@ -63,7 +63,7 @@ jobs:
           cache: 'pnpm'
 
       - run: pnpm install
-      - run: pnpm build
+      - run: pnpm turbo run build --filter=hitlimit-bun
       - run: pnpm test:bun
         env:
           REDIS_URL: redis://localhost:6379
