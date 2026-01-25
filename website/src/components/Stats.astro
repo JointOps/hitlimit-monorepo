@@ -1,0 +1,68 @@
+---
+const stats = [
+  { value: '200K+', label: 'Requests/second', sublabel: 'on modern hardware' },
+  { value: '<1ms', label: 'Latency', sublabel: 'p95 response time' },
+  { value: '0', label: 'Dependencies', sublabel: 'for core module' },
+  { value: '100%', label: 'TypeScript', sublabel: 'fully typed' },
+];
+
+const benchmarks = [
+  { store: 'Memory', throughput: '210K', latency: '0.08ms', color: 'cyan' },
+  { store: 'SQLite', throughput: '180K', latency: '0.15ms', color: 'purple' },
+  { store: 'Redis', throughput: '95K', latency: '0.45ms', color: 'cyan' },
+];
+---
+
+<section class="py-24 px-4 border-t border-[var(--color-border)]">
+  <div class="max-w-7xl mx-auto">
+    <!-- Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-24">
+      {stats.map((stat) => (
+        <div class="text-center">
+          <div class="text-4xl sm:text-5xl font-black gradient-text mb-2">{stat.value}</div>
+          <div class="text-lg font-semibold text-white mb-1">{stat.label}</div>
+          <div class="text-sm text-[var(--color-text-muted)]">{stat.sublabel}</div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Benchmark section -->
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+          Benchmarks that <span class="gradient-text">speak for themselves</span>
+        </h2>
+        <p class="text-lg text-[var(--color-text-secondary)]">
+          Tested on Apple M1 Max with 64GB RAM
+        </p>
+      </div>
+
+      <!-- Benchmark table -->
+      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] overflow-hidden">
+        <!-- Header -->
+        <div class="grid grid-cols-3 gap-4 p-6 bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
+          <div class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Store</div>
+          <div class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider text-center">Throughput</div>
+          <div class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider text-right">Latency (p95)</div>
+        </div>
+
+        <!-- Rows -->
+        {benchmarks.map((bench, i) => (
+          <div class={`grid grid-cols-3 gap-4 p-6 ${i !== benchmarks.length - 1 ? 'border-b border-[var(--color-border)]' : ''} transition-colors duration-200 hover:bg-[var(--color-bg-elevated)]`}>
+            <div class="flex items-center gap-3">
+              <div class={`w-3 h-3 rounded-full ${bench.color === 'cyan' ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-accent-secondary)]'}`}></div>
+              <span class="font-medium text-white">{bench.store}</span>
+            </div>
+            <div class="text-center">
+              <span class="font-mono font-bold text-white">{bench.throughput}</span>
+              <span class="text-[var(--color-text-muted)]"> req/s</span>
+            </div>
+            <div class="text-right">
+              <span class="font-mono font-bold text-white">{bench.latency}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,87 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Custom Key Functions - hitlimit">
+  <h1>Custom Key Functions</h1>
+  <p>Define custom key functions to rate limit by user ID, API key, or any other identifier.</p>
+
+  <h2 id="default-behavior">Default Behavior</h2>
+  <p>By default, hitlimit uses the client's IP address as the rate limit key.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+  <span class="cm">// key defaults to (req) => req.ip</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="user-id">Rate Limit by User ID</h2>
+  <p>Track rate limits per authenticated user instead of IP address.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => req.user?.id || req.ip
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="api-key">Rate Limit by API Key</h2>
+  <p>Use API keys from headers for per-client rate limiting.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">1000</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => {"{"}
+    <span class="kw">const</span> apiKey = req.headers[<span class="str">'x-api-key'</span>];
+    <span class="kw">return</span> apiKey || req.ip;
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="composite-key">Composite Keys</h2>
+  <p>Combine multiple identifiers for more granular rate limiting.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">50</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => <span class="str">`${"{"}</span>req.user?.id<span class="str">{"}"}:${"{"}</span>req.method<span class="str">{"}"}:${"{"}</span>req.path<span class="str">{"}"}`</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="endpoint-specific">Endpoint-Specific Limits</h2>
+  <p>Apply different limits per endpoint by including the path in the key.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => <span class="str">`${"{"}</span>req.ip<span class="str">{"}"}:${"{"}</span>req.baseUrl<span class="str">{"}"}`</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="async-key">Async Key Functions</h2>
+  <p>Key functions can be async if you need to look up user data.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  key: <span class="kw">async</span> (req) => {"{"}
+    <span class="kw">const</span> user = <span class="kw">await</span> <span class="fn">getUserFromToken</span>(req.headers.authorization);
+    <span class="kw">return</span> user?.organizationId || req.ip;
+  {"}"}
+{"}"})</code></pre>
+  </div>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

@@ -1,0 +1,103 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import Tabs from '../../../components/Tabs.astro';
+---
+
+<DocsLayout title="SQLite Store - hitlimit">
+  <h1>SQLite Store</h1>
+
+  <p>The SQLite store provides persistent rate limit storage using a local SQLite database. Perfect for single-server deployments that need data to survive restarts.</p>
+
+  <h2 id="installation">Installation</h2>
+
+  <p>The SQLite store requires <code>better-sqlite3</code> as a peer dependency:</p>
+
+  <Tabs
+    tabs={[
+      { label: 'npm', content: 'npm install better-sqlite3' },
+      { label: 'pnpm', content: 'pnpm add better-sqlite3' },
+      { label: 'yarn', content: 'yarn add better-sqlite3' },
+      { label: 'bun', content: 'bun add better-sqlite3' },
+    ]}
+  />
+
+  <h2 id="usage">Usage</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/sqlite'</span>
+
+app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">sqliteStore</span>({"{"}
+    path: <span class="str">'./rate-limits.db'</span>
+  {"}"})
+{"}"}))</code></pre>
+  </div>
+
+  <h2 id="options">Options</h2>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>path</code></td><td>string</td><td>':memory:'</td><td>Path to SQLite database file</td></tr>
+      <tr><td><code>tableName</code></td><td>string</td><td>'hitlimit'</td><td>Name of the rate limit table</td></tr>
+      <tr><td><code>cleanupInterval</code></td><td>number</td><td>60000</td><td>Interval (ms) to clean expired entries</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="example-with-all-options">Full Configuration</h2>
+
+  <div class="code-block">
+    <pre><code><span class="fn">sqliteStore</span>({"{"}
+  path: <span class="str">'./data/rate-limits.db'</span>,
+  tableName: <span class="str">'api_limits'</span>,
+  cleanupInterval: <span class="num">300000</span>  <span class="cm">// Clean every 5 minutes</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="characteristics">Characteristics</h2>
+
+  <ul>
+    <li><strong>Speed:</strong> Fast - local file I/O with WAL mode</li>
+    <li><strong>Persistence:</strong> Data survives restarts</li>
+    <li><strong>Scalability:</strong> Single server only</li>
+    <li><strong>Dependencies:</strong> Requires <code>better-sqlite3</code></li>
+  </ul>
+
+  <h2 id="when-to-use">When to Use</h2>
+
+  <ul>
+    <li>Single-server production deployments</li>
+    <li>When rate limits must persist across restarts</li>
+    <li>Serverless functions with persistent storage</li>
+    <li>Edge deployments where Redis is not available</li>
+  </ul>
+
+  <h2 id="schema">Database Schema</h2>
+
+  <p>The store automatically creates the following table:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">CREATE TABLE IF NOT EXISTS</span> hitlimit (
+  key <span class="str">TEXT PRIMARY KEY</span>,
+  count <span class="str">INTEGER NOT NULL</span>,
+  reset_at <span class="str">INTEGER NOT NULL</span>
+)</code></pre>
+  </div>
+</DocsLayout>
+
+<style>
+  .options-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .options-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .options-table tr:last-child td { border-bottom: none; }
+  .options-table code { background: var(--color-bg-elevated); color: var(--color-accent); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; }
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

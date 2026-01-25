@@ -1,0 +1,278 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Elysia Plugin - hitlimit">
+  <h1>Elysia Plugin</h1>
+
+  <p>
+    hitlimit provides a first-class plugin for <strong>Elysia</strong>, the ergonomic web framework for Bun.
+    The plugin integrates seamlessly with Elysia's plugin system and provides type-safe rate limiting.
+  </p>
+
+  <h2 id="installation">Installation</h2>
+
+  <p>Install hitlimit-bun alongside Elysia:</p>
+
+  <div class="code-block">
+    <pre><code>bun add elysia hitlimit-bun</code></pre>
+  </div>
+
+  <h2 id="basic-usage">Basic Usage</h2>
+
+  <p>Add rate limiting to your Elysia application:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">app.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} Elysia {"}"} <span class="kw">from</span> <span class="str">'elysia'</span>
+<span class="kw">import</span> {"{"} hitlimitPlugin {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun/elysia'</span>
+
+<span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
+  .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"}
+    limit: <span class="num">100</span>,
+    window: <span class="str">'1m'</span>
+  {"}"}))
+  .<span class="fn">get</span>(<span class="str">'/'</span>, () => <span class="str">'Hello World!'</span>)
+  .<span class="fn">get</span>(<span class="str">'/api/data'</span>, () => ({"{"} data: <span class="str">'protected'</span> {"}"}))
+  .<span class="fn">listen</span>(<span class="num">3000</span>)
+
+console.<span class="fn">log</span>(<span class="str">'Server running on port 3000'</span>)</code></pre>
+  </div>
+
+  <h2 id="route-specific">Route-Specific Limits</h2>
+
+  <p>Apply different limits to specific routes using guards:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">routes.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} Elysia {"}"} <span class="kw">from</span> <span class="str">'elysia'</span>
+<span class="kw">import</span> {"{"} hitlimitPlugin {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun/elysia'</span>
+
+<span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
+  <span class="cm">// Global rate limit</span>
+  .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"}))
+
+  <span class="cm">// Public routes</span>
+  .<span class="fn">get</span>(<span class="str">'/'</span>, () => <span class="str">'Welcome'</span>)
+
+  <span class="cm">// Stricter limit for auth routes</span>
+  .<span class="fn">group</span>(<span class="str">'/auth'</span>, (app) =>
+    app
+      .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"} limit: <span class="num">5</span>, window: <span class="str">'15m'</span>, name: <span class="str">'auth'</span> {"}"}))
+      .<span class="fn">post</span>(<span class="str">'/login'</span>, ({"{"} body {"}"}) => <span class="str">'Login'</span>)
+      .<span class="fn">post</span>(<span class="str">'/register'</span>, ({"{"} body {"}"}) => <span class="str">'Register'</span>)
+  )
+
+  <span class="cm">// Higher limit for API routes</span>
+  .<span class="fn">group</span>(<span class="str">'/api'</span>, (app) =>
+    app
+      .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"} limit: <span class="num">1000</span>, window: <span class="str">'1m'</span>, name: <span class="str">'api'</span> {"}"}))
+      .<span class="fn">get</span>(<span class="str">'/users'</span>, () => [])
+      .<span class="fn">get</span>(<span class="str">'/posts'</span>, () => [])
+  )
+  .<span class="fn">listen</span>(<span class="num">3000</span>)</code></pre>
+  </div>
+
+  <h2 id="custom-key">Custom Key Extraction</h2>
+
+  <p>Rate limit by user ID, API key, or other identifiers:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">custom-key.ts</span>
+    </div>
+    <pre><code><span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
+  .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"}
+    limit: <span class="num">100</span>,
+    window: <span class="str">'1m'</span>,
+    <span class="fn">key</span>({"{"} request, headers {"}"}) {"{"}
+      <span class="cm">// Rate limit by API key</span>
+      <span class="kw">return</span> headers[<span class="str">'x-api-key'</span>] || <span class="fn">getClientIP</span>(request)
+    {"}"}
+  {"}"}))
+  .<span class="fn">get</span>(<span class="str">'/api'</span>, () => <span class="str">'Protected'</span>)</code></pre>
+  </div>
+
+  <h2 id="response-customization">Custom Error Response</h2>
+
+  <p>Customize the rate limit exceeded response:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">custom-response.ts</span>
+    </div>
+    <pre><code><span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
+  .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"}
+    limit: <span class="num">100</span>,
+    window: <span class="str">'1m'</span>,
+    <span class="fn">onRateLimited</span>({"{"} set, reset {"}"}) {"{"}
+      set.status = <span class="num">429</span>
+      set.headers[<span class="str">'Retry-After'</span>] = String(reset)
+
+      <span class="kw">return</span> {"{"}
+        error: <span class="str">'Too many requests'</span>,
+        message: <span class="str">'Please slow down'</span>,
+        retryAfter: reset
+      {"}"}
+    {"}"}
+  {"}"}))
+  .<span class="fn">get</span>(<span class="str">'/'</span>, () => <span class="str">'Hello'</span>)</code></pre>
+  </div>
+
+  <h2 id="with-stores">Using Stores</h2>
+
+  <p>Use SQLite or Redis stores for persistence:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">stores.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} Elysia {"}"} <span class="kw">from</span> <span class="str">'elysia'</span>
+<span class="kw">import</span> {"{"} hitlimitPlugin, bunSqliteStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun/elysia'</span>
+
+<span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
+  .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"}
+    limit: <span class="num">100</span>,
+    window: <span class="str">'1m'</span>,
+    store: <span class="fn">bunSqliteStore</span>({"{"}
+      path: <span class="str">'./rate-limits.db'</span>
+    {"}"})
+  {"}"}))
+  .<span class="fn">get</span>(<span class="str">'/'</span>, () => <span class="str">'Hello World'</span>)
+  .<span class="fn">listen</span>(<span class="num">3000</span>)</code></pre>
+  </div>
+
+  <h2 id="plugin-options">Plugin Options</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Option</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>limit</code></td>
+        <td><code>number</code></td>
+        <td>Maximum requests per window</td>
+      </tr>
+      <tr>
+        <td><code>window</code></td>
+        <td><code>string</code></td>
+        <td>Time window (e.g., '1m', '1h')</td>
+      </tr>
+      <tr>
+        <td><code>key</code></td>
+        <td><code>function</code></td>
+        <td>Custom key extraction function</td>
+      </tr>
+      <tr>
+        <td><code>store</code></td>
+        <td><code>Store</code></td>
+        <td>Storage backend (memory, sqlite, redis)</td>
+      </tr>
+      <tr>
+        <td><code>name</code></td>
+        <td><code>string</code></td>
+        <td>Unique name for scoped limiters</td>
+      </tr>
+      <tr>
+        <td><code>onRateLimited</code></td>
+        <td><code>function</code></td>
+        <td>Custom handler when rate limited</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="next-steps">Next Steps</h2>
+
+  <ul>
+    <li><a href="/docs/bun/stores">Stores</a> - Configure native SQLite store</li>
+    <li><a href="/docs/bun/performance">Performance</a> - Optimization tips</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+  .code-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+  }
+  .dot.red { background: rgba(239, 68, 68, 0.8); }
+  .dot.yellow { background: rgba(234, 179, 8, 0.8); }
+  .dot.green { background: rgba(34, 197, 94, 0.8); }
+  .code-filename {
+    margin-left: 1rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+  .code-block pre {
+    padding: 1.5rem;
+    margin: 0;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: var(--color-text-muted); }
+</style>

@@ -1,0 +1,196 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Monitoring Guide - hitlimit">
+  <h1>Monitoring Guide</h1>
+
+  <p>Monitor rate limiting activity and integrate with observability tools.</p>
+
+  <h2 id="events">Rate Limit Events</h2>
+
+  <p>Track rate limiting activity with event handlers:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  onRateLimit: (req, info) => {"{"}
+    console.<span class="fn">log</span>(<span class="str">`Rate limited: </span>${"{"}info.key{"}"}<span class="str">`</span>, {"{"}
+      count: info.count,
+      limit: info.limit,
+      resetTime: info.resetTime
+    {"}"})
+  {"}"},
+  onRequest: (req, info) => {"{"}
+    <span class="cm">// Called on every request</span>
+    metrics.<span class="fn">increment</span>(<span class="str">'ratelimit.request'</span>)
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="prometheus">Prometheus Integration</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} Counter, Gauge {"}"} <span class="kw">from</span> <span class="str">'prom-client'</span>
+
+<span class="kw">const</span> rateLimitHits = <span class="kw">new</span> <span class="fn">Counter</span>({"{"}
+  name: <span class="str">'ratelimit_hits_total'</span>,
+  help: <span class="str">'Total rate limit hits'</span>,
+  labelNames: [<span class="str">'path'</span>, <span class="str">'status'</span>]
+{"}"})
+
+<span class="kw">const</span> rateLimitRemaining = <span class="kw">new</span> <span class="fn">Gauge</span>({"{"}
+  name: <span class="str">'ratelimit_remaining'</span>,
+  help: <span class="str">'Remaining requests in window'</span>,
+  labelNames: [<span class="str">'key'</span>]
+{"}"})
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  onRateLimit: (req, info) => {"{"}
+    rateLimitHits.<span class="fn">inc</span>({"{"} path: req.path, status: <span class="str">'limited'</span> {"}"})
+  {"}"},
+  onRequest: (req, info) => {"{"}
+    rateLimitHits.<span class="fn">inc</span>({"{"} path: req.path, status: <span class="str">'allowed'</span> {"}"})
+    rateLimitRemaining.<span class="fn">set</span>(
+      {"{"} key: info.key {"}"},
+      info.limit - info.count
+    )
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="datadog">DataDog Integration</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} StatsD {"}"} <span class="kw">from</span> <span class="str">'hot-shots'</span>
+
+<span class="kw">const</span> dogstatsd = <span class="kw">new</span> <span class="fn">StatsD</span>({"{"}
+  host: <span class="str">'localhost'</span>,
+  port: <span class="num">8125</span>,
+  prefix: <span class="str">'api.'</span>
+{"}"})
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  onRateLimit: (req, info) => {"{"}
+    dogstatsd.<span class="fn">increment</span>(<span class="str">'ratelimit.blocked'</span>, [
+      <span class="str">`path:</span>${"{"}req.path{"}"}<span class="str">`</span>
+    ])
+  {"}"},
+  onRequest: (req, info) => {"{"}
+    dogstatsd.<span class="fn">gauge</span>(
+      <span class="str">'ratelimit.remaining'</span>,
+      info.limit - info.count,
+      [<span class="str">`key:</span>${"{"}info.key{"}"}<span class="str">`</span>]
+    )
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="logging">Structured Logging</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> pino <span class="kw">from</span> <span class="str">'pino'</span>
+
+<span class="kw">const</span> logger = <span class="fn">pino</span>({"{"} level: <span class="str">'info'</span> {"}"})
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  onRateLimit: (req, info) => {"{"}
+    logger.<span class="fn">warn</span>({"{"}
+      event: <span class="str">'rate_limit_exceeded'</span>,
+      key: info.key,
+      path: req.path,
+      count: info.count,
+      limit: info.limit,
+      ip: req.ip,
+      userAgent: req.headers[<span class="str">'user-agent'</span>]
+    {"}"})
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="alerting">Alerting Rules</h2>
+
+  <p>Example Prometheus alerting rules:</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm"># prometheus/alerts.yml</span>
+groups:
+  - name: ratelimit
+    rules:
+      - alert: HighRateLimitRate
+        expr: rate(ratelimit_hits_total{"{"}status=<span class="str">"limited"</span>{"}"}[<span class="num">5</span>m]) > <span class="num">10</span>
+        for: <span class="num">2</span>m
+        labels:
+          severity: warning
+        annotations:
+          summary: <span class="str">"High rate limit hit rate"</span>
+
+      - alert: RateLimitSpike
+        expr: rate(ratelimit_hits_total{"{"}status=<span class="str">"limited"</span>{"}"}[<span class="num">1</span>m]) > <span class="num">100</span>
+        for: <span class="num">1</span>m
+        labels:
+          severity: critical
+        annotations:
+          summary: <span class="str">"Rate limit spike detected"</span></code></pre>
+  </div>
+
+  <h2 id="dashboard">Dashboard Metrics</h2>
+
+  <p>Key metrics to track:</p>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Metric</th><th>Type</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>ratelimit_hits_total</code></td><td>Counter</td><td>Total requests by status</td></tr>
+      <tr><td><code>ratelimit_remaining</code></td><td>Gauge</td><td>Remaining quota per key</td></tr>
+      <tr><td><code>ratelimit_latency_ms</code></td><td>Histogram</td><td>Rate limit check latency</td></tr>
+      <tr><td><code>ratelimit_keys_active</code></td><td>Gauge</td><td>Active rate limit keys</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="health-endpoint">Health Check Endpoint</h2>
+
+  <div class="code-block">
+    <pre><code>app.<span class="fn">get</span>(<span class="str">'/health/ratelimit'</span>, <span class="kw">async</span> (req, res) => {"{"}
+  <span class="kw">const</span> store = limiter.store
+
+  <span class="kw">try</span> {"{"}
+    <span class="cm">// Test store connectivity</span>
+    <span class="kw">await</span> store.<span class="fn">get</span>(<span class="str">'health:check'</span>)
+
+    res.<span class="fn">json</span>({"{"}
+      status: <span class="str">'healthy'</span>,
+      store: store.constructor.name
+    {"}"})
+  {"}"} <span class="kw">catch</span> (err) {"{"}
+    res.<span class="fn">status</span>(<span class="num">503</span>).<span class="fn">json</span>({"{"}
+      status: <span class="str">'unhealthy'</span>,
+      error: err.message
+    {"}"})
+  {"}"}
+{"}"})</code></pre>
+  </div>
+</DocsLayout>
+
+<style>
+  .options-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .options-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .options-table tr:last-child td { border-bottom: none; }
+  .options-table code { background: var(--color-bg-elevated); color: var(--color-accent); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; }
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

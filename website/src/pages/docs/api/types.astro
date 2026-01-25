@@ -1,0 +1,164 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="TypeScript Types - hitlimit">
+  <h1>TypeScript Types</h1>
+
+  <p>Complete TypeScript type definitions for hitlimit.</p>
+
+  <h2 id="hitlimit-options">HitlimitOptions</h2>
+
+  <p>Main configuration options for the hitlimit function.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">interface</span> HitlimitOptions {"{"}
+  <span class="cm">/** Maximum requests per window */</span>
+  limit: <span class="kw">number</span>
+
+  <span class="cm">/** Time window (e.g., '1m', '1h', 60000) */</span>
+  window: <span class="kw">string</span> | <span class="kw">number</span>
+
+  <span class="cm">/** Key extraction function */</span>
+  key?: (req: Request) => <span class="kw">string</span>
+
+  <span class="cm">/** Storage backend */</span>
+  store?: Store
+
+  <span class="cm">/** Skip rate limiting for certain requests */</span>
+  skip?: (req: Request) => <span class="kw">boolean</span>
+
+  <span class="cm">/** Include rate limit headers */</span>
+  headers?: <span class="kw">boolean</span>
+
+  <span class="cm">/** HTTP status when rate limited */</span>
+  statusCode?: <span class="kw">number</span>
+
+  <span class="cm">/** Custom error response */</span>
+  response?: <span class="kw">object</span> | ((req: Request, res: Response) => <span class="kw">object</span>)
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="rate-limit-info">RateLimitInfo</h2>
+
+  <p>Rate limit state for a specific key.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">interface</span> RateLimitInfo {"{"}
+  <span class="cm">/** Current request count */</span>
+  count: <span class="kw">number</span>
+
+  <span class="cm">/** Unix timestamp when window resets */</span>
+  resetTime: <span class="kw">number</span>
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="store">Store</h2>
+
+  <p>Interface for rate limit storage backends.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">interface</span> Store {"{"}
+  <span class="cm">/** Get current rate limit info */</span>
+  <span class="fn">get</span>(key: <span class="kw">string</span>): Promise&lt;RateLimitInfo | <span class="kw">null</span>&gt;
+
+  <span class="cm">/** Increment counter and return updated info */</span>
+  <span class="fn">increment</span>(key: <span class="kw">string</span>, windowMs: <span class="kw">number</span>): Promise&lt;RateLimitInfo&gt;
+
+  <span class="cm">/** Reset rate limit for a key */</span>
+  <span class="fn">reset</span>(key: <span class="kw">string</span>): Promise&lt;<span class="kw">void</span>&gt;
+
+  <span class="cm">/** Optional cleanup method */</span>
+  <span class="fn">close</span>?(): Promise&lt;<span class="kw">void</span>&gt;
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="store-options">Store Options</h2>
+
+  <h3>MemoryStoreOptions</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">interface</span> MemoryStoreOptions {"{"}
+  <span class="cm">/** Cleanup interval in ms (default: 60000) */</span>
+  cleanupInterval?: <span class="kw">number</span>
+{"}"}</code></pre>
+  </div>
+
+  <h3>SqliteStoreOptions</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">interface</span> SqliteStoreOptions {"{"}
+  <span class="cm">/** Path to SQLite database file */</span>
+  path: <span class="kw">string</span>
+
+  <span class="cm">/** Table name (default: 'rate_limits') */</span>
+  tableName?: <span class="kw">string</span>
+{"}"}</code></pre>
+  </div>
+
+  <h3>RedisStoreOptions</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">interface</span> RedisStoreOptions {"{"}
+  <span class="cm">/** Redis connection URL */</span>
+  url: <span class="kw">string</span>
+
+  <span class="cm">/** Key prefix (default: 'rl:') */</span>
+  prefix?: <span class="kw">string</span>
+
+  <span class="cm">/** Existing Redis client */</span>
+  client?: RedisClient
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="middleware">Middleware Types</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">type</span> Middleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => <span class="kw">void</span> | Promise&lt;<span class="kw">void</span>&gt;
+
+<span class="kw">type</span> NextFunction = (err?: <span class="kw">any</span>) => <span class="kw">void</span></code></pre>
+  </div>
+
+  <h2 id="augmented-types">Augmented Request</h2>
+
+  <p>The request object is augmented with rate limit info:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">interface</span> Request {"{"}
+  rateLimit?: {"{"}
+    limit: <span class="kw">number</span>
+    remaining: <span class="kw">number</span>
+    resetTime: <span class="kw">number</span>
+  {"}"}
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="usage">Usage Example</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} HitlimitOptions, Store {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+
+<span class="kw">const</span> options: HitlimitOptions = {"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  headers: <span class="kw">true</span>
+{"}"}
+
+<span class="kw">const</span> customStore: Store = {"{"}
+  <span class="kw">async</span> <span class="fn">get</span>(key) {"{"} <span class="cm">/* ... */</span> {"}"},
+  <span class="kw">async</span> <span class="fn">increment</span>(key, windowMs) {"{"} <span class="cm">/* ... */</span> {"}"},
+  <span class="kw">async</span> <span class="fn">reset</span>(key) {"{"} <span class="cm">/* ... */</span> {"}"}
+{"}"}</code></pre>
+  </div>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

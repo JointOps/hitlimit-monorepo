@@ -1,0 +1,263 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Bun Stores - hitlimit">
+  <h1>Bun Stores</h1>
+
+  <p>
+    hitlimit-bun provides optimized storage backends that take advantage of Bun's native capabilities.
+    The native SQLite store is particularly powerful, offering persistence with exceptional performance.
+  </p>
+
+  <h2 id="memory-store">Memory Store</h2>
+
+  <p>The default store, ideal for single-instance deployments:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">memory.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">memoryStore</span>()  <span class="cm">// Default, can be omitted</span>
+{"}"})</code></pre>
+  </div>
+
+  <p><strong>Pros:</strong> Zero latency, no dependencies<br/>
+  <strong>Cons:</strong> Lost on restart, single-instance only</p>
+
+  <h2 id="sqlite-store">Native SQLite Store</h2>
+
+  <p>
+    Bun includes native SQLite support via <code>bun:sqlite</code>. This store provides persistence
+    with near-memory performance.
+  </p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">sqlite.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, bunSqliteStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">bunSqliteStore</span>({"{"}
+    path: <span class="str">'./rate-limits.db'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h3 id="sqlite-options">SQLite Store Options</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">sqlite-options.ts</span>
+    </div>
+    <pre><code><span class="kw">const</span> store = <span class="fn">bunSqliteStore</span>({"{"}
+  <span class="cm">// Database file path (required)</span>
+  path: <span class="str">'./data/rate-limits.db'</span>,
+
+  <span class="cm">// Table name (default: 'rate_limits')</span>
+  tableName: <span class="str">'api_limits'</span>,
+
+  <span class="cm">// Enable WAL mode for better concurrency (default: true)</span>
+  walMode: <span class="kw">true</span>,
+
+  <span class="cm">// Cleanup expired entries interval in ms (default: 60000)</span>
+  cleanupInterval: <span class="num">30000</span>,
+
+  <span class="cm">// Use in-memory SQLite (not persisted)</span>
+  <span class="cm">// path: ':memory:'</span>
+{"}"})</code></pre>
+  </div>
+
+  <h3 id="sqlite-performance">SQLite Performance Tips</h3>
+
+  <ul>
+    <li><strong>WAL Mode</strong> - Enabled by default for better concurrent read/write performance</li>
+    <li><strong>Prepared Statements</strong> - hitlimit uses prepared statements for optimal query performance</li>
+    <li><strong>Automatic Cleanup</strong> - Expired entries are cleaned periodically to prevent bloat</li>
+  </ul>
+
+  <h2 id="in-memory-sqlite">In-Memory SQLite</h2>
+
+  <p>For testing or ephemeral rate limiting with SQLite's API:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> store = <span class="fn">bunSqliteStore</span>({"{"}
+  path: <span class="str">':memory:'</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="redis-store">Redis Store</h2>
+
+  <p>For distributed deployments across multiple instances:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">redis.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/redis'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">redisStore</span>({"{"}
+    url: <span class="str">'redis://localhost:6379'</span>,
+    prefix: <span class="str">'rl:'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="custom-store">Custom Store</h2>
+
+  <p>Implement the store interface for custom backends:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">custom-store.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+
+<span class="kw">const</span> customStore: Store = {"{"}
+  <span class="kw">async</span> <span class="fn">increment</span>(key: <span class="kw">string</span>, windowMs: <span class="kw">number</span>) {"{"}
+    <span class="cm">// Increment and return current count + reset time</span>
+    <span class="kw">return</span> {"{"} count: <span class="num">1</span>, reset: Date.<span class="fn">now</span>() + windowMs {"}"}
+  {"}"},
+
+  <span class="kw">async</span> <span class="fn">get</span>(key: <span class="kw">string</span>) {"{"}
+    <span class="cm">// Return current count and reset time</span>
+    <span class="kw">return</span> {"{"} count: <span class="num">0</span>, reset: <span class="num">0</span> {"}"}
+  {"}"},
+
+  <span class="kw">async</span> <span class="fn">reset</span>(key: <span class="kw">string</span>) {"{"}
+    <span class="cm">// Reset the counter for a key</span>
+  {"}"}
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="store-comparison">Store Comparison</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Store</th>
+        <th>Persistence</th>
+        <th>Distributed</th>
+        <th>Performance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Memory</strong></td>
+        <td>No</td>
+        <td>No</td>
+        <td>Fastest</td>
+      </tr>
+      <tr>
+        <td><strong>SQLite</strong></td>
+        <td>Yes</td>
+        <td>No</td>
+        <td>Very Fast</td>
+      </tr>
+      <tr>
+        <td><strong>Redis</strong></td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>Fast</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="next-steps">Next Steps</h2>
+
+  <ul>
+    <li><a href="/docs/bun/performance">Performance</a> - Benchmarks and optimization</li>
+    <li><a href="/docs/bun/bun-serve">Bun.serve</a> - Server integration patterns</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+  .code-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+  }
+  .dot.red { background: rgba(239, 68, 68, 0.8); }
+  .dot.yellow { background: rgba(234, 179, 8, 0.8); }
+  .dot.green { background: rgba(34, 197, 94, 0.8); }
+  .code-filename {
+    margin-left: 1rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+  .code-block pre {
+    padding: 1.5rem;
+    margin: 0;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: var(--color-text-muted); }
+</style>

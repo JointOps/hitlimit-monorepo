@@ -1,0 +1,827 @@
+---
+interface SearchItem {
+  title: string;
+  section: string;
+  href: string;
+  content: string;
+  headings: string[];
+}
+
+// Comprehensive search data for all docs
+const searchData: SearchItem[] = [
+  // Getting Started
+  { title: 'Introduction', section: 'Getting Started', href: '/docs', content: 'hitlimit rate limiting library typescript node.js bun express nestjs fast lightweight', headings: ['Features', 'Why hitlimit'] },
+  { title: 'Installation', section: 'Getting Started', href: '/docs/installation', content: 'npm install pnpm yarn bun add package setup', headings: ['npm', 'pnpm', 'yarn', 'bun'] },
+  { title: 'Quick Start', section: 'Getting Started', href: '/docs/quick-start', content: 'getting started basic usage example middleware setup', headings: ['Basic Usage', 'Configuration'] },
+
+  // Configuration
+  { title: 'All Options', section: 'Configuration', href: '/docs/configuration/options', content: 'configuration options settings limit window store key skip message headers', headings: ['limit', 'window', 'store', 'key', 'skip', 'message'] },
+  { title: 'Time Windows', section: 'Configuration', href: '/docs/configuration/window', content: 'time window duration seconds minutes hours days sliding fixed', headings: ['Formats', 'Sliding Window', 'Fixed Window'] },
+  { title: 'Tiered Limits', section: 'Configuration', href: '/docs/configuration/tiered', content: 'tiered limits different rates user roles admin premium free', headings: ['User Tiers', 'Dynamic Limits'] },
+  { title: 'Custom Keys', section: 'Configuration', href: '/docs/configuration/custom-key', content: 'custom key extraction user id api key ip address identifier', headings: ['By User ID', 'By API Key', 'By IP'] },
+  { title: 'Custom Responses', section: 'Configuration', href: '/docs/configuration/custom-response', content: 'custom response error message 429 too many requests json html', headings: ['JSON Response', 'Custom Handler'] },
+  { title: 'Headers', section: 'Configuration', href: '/docs/configuration/headers', content: 'rate limit headers x-ratelimit-limit remaining reset retry-after', headings: ['Standard Headers', 'Custom Headers'] },
+  { title: 'Skip/Whitelist', section: 'Configuration', href: '/docs/configuration/skip', content: 'skip whitelist bypass exclude admin routes health check', headings: ['Skip Function', 'Whitelist IPs'] },
+
+  // Stores
+  { title: 'Overview', section: 'Stores', href: '/docs/stores/overview', content: 'stores storage backend memory redis sqlite persistence distributed', headings: ['Memory', 'Redis', 'SQLite'] },
+  { title: 'Memory Store', section: 'Stores', href: '/docs/stores/memory', content: 'memory store in-memory default development local single instance', headings: ['Usage', 'Options', 'Limitations'] },
+  { title: 'SQLite Store', section: 'Stores', href: '/docs/stores/sqlite', content: 'sqlite store database persistent better-sqlite3 file local', headings: ['Installation', 'Usage', 'Options'] },
+  { title: 'Redis Store', section: 'Stores', href: '/docs/stores/redis', content: 'redis store distributed cluster ioredis scaling production', headings: ['Installation', 'Usage', 'Cluster', 'Options'] },
+  { title: 'Custom Stores', section: 'Stores', href: '/docs/stores/custom', content: 'custom store implementation interface adapter create own', headings: ['Interface', 'Implementation', 'Example'] },
+
+  // Adapters
+  { title: 'Express.js', section: 'Adapters', href: '/docs/adapters/express', content: 'express expressjs middleware router route specific global', headings: ['Installation', 'Basic Usage', 'Route-Specific', 'Custom Key'] },
+  { title: 'NestJS', section: 'Adapters', href: '/docs/adapters/nestjs', content: 'nestjs module guard decorator controller global throttler', headings: ['Installation', 'Module Setup', 'Guard', 'Decorator'] },
+  { title: 'Node.js HTTP', section: 'Adapters', href: '/docs/adapters/node', content: 'node nodejs http native server raw createServer handler', headings: ['Installation', 'Basic Usage', 'Middleware Style'] },
+
+  // Bun
+  { title: 'Introduction', section: 'Bun', href: '/docs/bun', content: 'bun runtime fast performance native typescript', headings: ['Why Bun', 'Features'] },
+  { title: 'Installation', section: 'Bun', href: '/docs/bun/installation', content: 'bun install add package setup', headings: ['Installation'] },
+  { title: 'Quick Start', section: 'Bun', href: '/docs/bun/quick-start', content: 'bun quick start getting started basic', headings: ['Basic Usage'] },
+  { title: 'Bun.serve', section: 'Bun', href: '/docs/bun/bun-serve', content: 'bun serve server http native handler fetch', headings: ['Usage', 'Configuration'] },
+  { title: 'Elysia Plugin', section: 'Bun', href: '/docs/bun/elysia', content: 'elysia plugin framework web bun fast', headings: ['Installation', 'Usage', 'Options'] },
+  { title: 'Stores', section: 'Bun', href: '/docs/bun/stores', content: 'bun stores sqlite memory redis native', headings: ['Memory', 'SQLite', 'Redis'] },
+  { title: 'Performance', section: 'Bun', href: '/docs/bun/performance', content: 'performance benchmarks fast speed optimization', headings: ['Benchmarks', 'Tips'] },
+
+  // API Reference
+  { title: 'hitlimit()', section: 'API Reference', href: '/docs/api/hitlimit', content: 'hitlimit function api main middleware create limiter', headings: ['Signature', 'Options', 'Returns'] },
+  { title: 'Stores', section: 'API Reference', href: '/docs/api/stores', content: 'stores api interface methods increment get reset', headings: ['Interface', 'Methods'] },
+  { title: 'TypeScript Types', section: 'API Reference', href: '/docs/api/types', content: 'typescript types interfaces generics type definitions', headings: ['Options', 'Store', 'Result'] },
+
+  // Guides
+  { title: 'Production', section: 'Guides', href: '/docs/guides/production', content: 'production deployment best practices security redis cluster', headings: ['Best Practices', 'Security', 'Scaling'] },
+  { title: 'Scaling', section: 'Guides', href: '/docs/guides/scaling', content: 'scaling horizontal distributed multiple instances load balancer', headings: ['Horizontal Scaling', 'Redis Cluster'] },
+  { title: 'Monitoring', section: 'Guides', href: '/docs/guides/monitoring', content: 'monitoring metrics logging prometheus grafana alerts', headings: ['Metrics', 'Logging', 'Alerts'] },
+  { title: 'Testing', section: 'Guides', href: '/docs/guides/testing', content: 'testing unit integration mock jest vitest', headings: ['Unit Tests', 'Integration', 'Mocking'] },
+];
+---
+
+<!-- Search Trigger Button -->
+<button class="search-trigger" id="search-trigger" type="button" aria-label="Search documentation">
+  <svg class="search-trigger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="8"/>
+    <path d="m21 21-4.3-4.3"/>
+  </svg>
+  <span class="search-trigger-text">Search docs...</span>
+  <kbd class="search-trigger-kbd">
+    <span class="kbd-cmd">⌘</span>K
+  </kbd>
+</button>
+
+<!-- Search Modal -->
+<div class="search-modal-overlay" id="search-modal" aria-hidden="true">
+  <div class="search-modal">
+    <div class="search-modal-header">
+      <div class="search-input-container">
+        <svg class="search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.3-4.3"/>
+        </svg>
+        <input
+          type="text"
+          class="search-modal-input"
+          id="search-input"
+          placeholder="Search documentation..."
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        />
+        <kbd class="search-esc">ESC</kbd>
+      </div>
+    </div>
+
+    <div class="search-modal-body" id="search-body">
+      <div class="search-initial" id="search-initial">
+        <div class="search-section-label">Quick Links</div>
+        <a href="/docs/quick-start" class="search-quick-link">
+          <span class="quick-link-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+          </span>
+          <span class="quick-link-text">Quick Start Guide</span>
+          <span class="quick-link-arrow">→</span>
+        </a>
+        <a href="/docs/configuration/options" class="search-quick-link">
+          <span class="quick-link-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
+          <span class="quick-link-text">Configuration Options</span>
+          <span class="quick-link-arrow">→</span>
+        </a>
+        <a href="/docs/stores/redis" class="search-quick-link">
+          <span class="quick-link-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <ellipse cx="12" cy="5" rx="9" ry="3"/>
+              <path d="M3 5V19A9 3 0 0 0 21 19V5"/>
+              <path d="M3 12A9 3 0 0 0 21 12"/>
+            </svg>
+          </span>
+          <span class="quick-link-text">Redis Store Setup</span>
+          <span class="quick-link-arrow">→</span>
+        </a>
+        <a href="/docs/adapters/express" class="search-quick-link">
+          <span class="quick-link-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a6 6 0 0 1-6 6v0a6 6 0 0 1-6-6V8Z"/>
+            </svg>
+          </span>
+          <span class="quick-link-text">Express.js Integration</span>
+          <span class="quick-link-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="search-results" id="search-results"></div>
+
+      <div class="search-no-results" id="search-no-results">
+        <div class="no-results-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.3-4.3"/>
+            <path d="M8 8l6 6M14 8l-6 6"/>
+          </svg>
+        </div>
+        <div class="no-results-text">No results found</div>
+        <div class="no-results-hint">Try different keywords or browse sections</div>
+      </div>
+    </div>
+
+    <div class="search-modal-footer">
+      <div class="search-footer-hints">
+        <span class="search-hint">
+          <kbd>↑</kbd><kbd>↓</kbd> Navigate
+        </span>
+        <span class="search-hint">
+          <kbd>↵</kbd> Select
+        </span>
+        <span class="search-hint">
+          <kbd>ESC</kbd> Close
+        </span>
+      </div>
+      <div class="search-footer-brand">
+        <span>Search by</span>
+        <span class="brand-name">hitlimit</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pass search data to client -->
+<script define:vars={{ searchData }}>
+  window.__DOCS_SEARCH_DATA__ = searchData;
+</script>
+
+<style>
+  /* Search Trigger Button */
+  .search-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
+    border-radius: 0.625rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .search-trigger:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .search-trigger:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.1);
+  }
+
+  .search-trigger-icon {
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+  }
+
+  .search-trigger-text {
+    flex: 1;
+    text-align: left;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+  }
+
+  .search-trigger-kbd {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+  }
+
+  .kbd-cmd {
+    font-size: 0.75rem;
+  }
+
+  /* Modal Overlay */
+  .search-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 10vh 1rem;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+  }
+
+  .search-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Modal */
+  .search-modal {
+    width: 100%;
+    max-width: 640px;
+    max-height: 70vh;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 20px 50px rgba(0, 0, 0, 0.5),
+      0 0 100px rgba(0, 229, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.96) translateY(-10px);
+    transition: transform 0.2s ease;
+  }
+
+  .search-modal-overlay.active .search-modal {
+    transform: scale(1) translateY(0);
+  }
+
+  /* Modal Header */
+  .search-modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .search-input-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 0 1rem;
+    transition: all 0.2s ease;
+  }
+
+  .search-input-container:focus-within {
+    border-color: var(--color-accent);
+    background: rgba(0, 229, 255, 0.03);
+    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.1);
+  }
+
+  .search-input-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+  }
+
+  .search-input-container:focus-within .search-input-icon {
+    color: var(--color-accent);
+  }
+
+  .search-modal-input {
+    flex: 1;
+    padding: 0.875rem 0;
+    font-size: 1rem;
+    color: white;
+    background: transparent;
+    border: none;
+    outline: none;
+  }
+
+  .search-modal-input::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  .search-esc {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.625rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+  }
+
+  /* Modal Body */
+  .search-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+  }
+
+  /* Initial State / Quick Links */
+  .search-initial {
+    padding: 0.5rem;
+  }
+
+  .search-section-label {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+  }
+
+  .search-quick-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease;
+  }
+
+  .search-quick-link:hover {
+    background: rgba(0, 229, 255, 0.08);
+  }
+
+  .quick-link-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: rgba(0, 229, 255, 0.1);
+    border-radius: 0.5rem;
+    color: var(--color-accent);
+  }
+
+  .quick-link-icon svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .quick-link-text {
+    flex: 1;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .search-quick-link:hover .quick-link-text {
+    color: white;
+  }
+
+  .quick-link-arrow {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: all 0.15s ease;
+  }
+
+  .search-quick-link:hover .quick-link-arrow {
+    opacity: 1;
+    transform: translateX(0);
+    color: var(--color-accent);
+  }
+
+  /* Search Results */
+  .search-results {
+    display: none;
+  }
+
+  .search-results.active {
+    display: block;
+  }
+
+  .search-result-group {
+    padding: 0.5rem;
+  }
+
+  .search-result-group + .search-result-group {
+    border-top: 1px solid var(--color-border);
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+  }
+
+  .search-result-group-label {
+    padding: 0.25rem 0.75rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+  }
+
+  .search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all 0.15s ease;
+  }
+
+  .search-result-item:hover,
+  .search-result-item.selected {
+    background: rgba(0, 229, 255, 0.08);
+  }
+
+  .search-result-item.selected {
+    box-shadow: inset 0 0 0 1px rgba(0, 229, 255, 0.3);
+  }
+
+  .result-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 0.5rem;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+  }
+
+  .search-result-item:hover .result-icon,
+  .search-result-item.selected .result-icon {
+    background: rgba(0, 229, 255, 0.15);
+    color: var(--color-accent);
+  }
+
+  .result-icon svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .result-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .result-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.125rem;
+    transition: color 0.15s ease;
+  }
+
+  .search-result-item:hover .result-title,
+  .search-result-item.selected .result-title {
+    color: white;
+  }
+
+  .result-title mark {
+    background: rgba(0, 229, 255, 0.3);
+    color: white;
+    padding: 0 0.125rem;
+    border-radius: 0.125rem;
+  }
+
+  .result-breadcrumb {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
+
+  .result-arrow {
+    color: var(--color-text-muted);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: all 0.15s ease;
+  }
+
+  .search-result-item:hover .result-arrow,
+  .search-result-item.selected .result-arrow {
+    opacity: 1;
+    transform: translateX(0);
+    color: var(--color-accent);
+  }
+
+  /* No Results */
+  .search-no-results {
+    display: none;
+    padding: 3rem 1rem;
+    text-align: center;
+  }
+
+  .search-no-results.active {
+    display: block;
+  }
+
+  .no-results-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: var(--color-text-muted);
+    opacity: 0.5;
+  }
+
+  .no-results-icon svg {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .no-results-text {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .no-results-hint {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+  }
+
+  /* Modal Footer */
+  .search-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .search-footer-hints {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .search-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+  }
+
+  .search-hint kbd {
+    padding: 0.125rem 0.375rem;
+    font-size: 0.625rem;
+    font-family: var(--font-mono);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+  }
+
+  .search-footer-brand {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .brand-name {
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Hide states */
+  .search-initial.hidden,
+  .search-results:not(.active),
+  .search-no-results:not(.active) {
+    display: none;
+  }
+</style>
+
+<script>
+  function initSearch() {
+    const trigger = document.getElementById('search-trigger');
+    const modal = document.getElementById('search-modal');
+    const input = document.getElementById('search-input') as HTMLInputElement;
+    const body = document.getElementById('search-body');
+    const initial = document.getElementById('search-initial');
+    const results = document.getElementById('search-results');
+    const noResults = document.getElementById('search-no-results');
+
+    const searchData = (window as any).__DOCS_SEARCH_DATA__ || [];
+    let selectedIndex = -1;
+    let currentResults: any[] = [];
+
+    if (!trigger || !modal || !input) return;
+
+    // Section icons
+    const sectionIcons: Record<string, string> = {
+      'Getting Started': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+      'Configuration': '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+      'Stores': '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+      'Adapters': '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a6 6 0 0 1-6 6v0a6 6 0 0 1-6-6V8Z"/>',
+      'Bun': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+      'API Reference': '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+      'Guides': '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h8"/>',
+    };
+
+    function openModal() {
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+      input.focus();
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+      input.value = '';
+      selectedIndex = -1;
+      currentResults = [];
+      showInitial();
+      document.body.style.overflow = '';
+    }
+
+    function showInitial() {
+      initial?.classList.remove('hidden');
+      results?.classList.remove('active');
+      noResults?.classList.remove('active');
+    }
+
+    function showResults() {
+      initial?.classList.add('hidden');
+      results?.classList.add('active');
+      noResults?.classList.remove('active');
+    }
+
+    function showNoResults() {
+      initial?.classList.add('hidden');
+      results?.classList.remove('active');
+      noResults?.classList.add('active');
+    }
+
+    function highlightMatch(text: string, query: string): string {
+      if (!query) return text;
+      const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    function search(query: string) {
+      if (!query.trim()) {
+        showInitial();
+        return;
+      }
+
+      const q = query.toLowerCase();
+      currentResults = searchData.filter((item: any) =>
+        item.title.toLowerCase().includes(q) ||
+        item.section.toLowerCase().includes(q) ||
+        item.content.toLowerCase().includes(q) ||
+        item.headings.some((h: string) => h.toLowerCase().includes(q))
+      );
+
+      if (currentResults.length === 0) {
+        showNoResults();
+        return;
+      }
+
+      // Group by section
+      const grouped: Record<string, any[]> = {};
+      currentResults.forEach((item: any) => {
+        if (!grouped[item.section]) grouped[item.section] = [];
+        grouped[item.section].push(item);
+      });
+
+      // Render results
+      let html = '';
+      Object.entries(grouped).forEach(([section, items]) => {
+        html += `<div class="search-result-group">`;
+        html += `<div class="search-result-group-label">${section}</div>`;
+        items.forEach((item: any, idx: number) => {
+          const globalIdx = currentResults.indexOf(item);
+          const icon = sectionIcons[section] || sectionIcons['Getting Started'];
+          html += `
+            <a href="${item.href}" class="search-result-item" data-index="${globalIdx}">
+              <span class="result-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icon}</svg>
+              </span>
+              <span class="result-content">
+                <div class="result-title">${highlightMatch(item.title, query)}</div>
+                <div class="result-breadcrumb">Docs → ${section}</div>
+              </span>
+              <span class="result-arrow">→</span>
+            </a>
+          `;
+        });
+        html += `</div>`;
+      });
+
+      if (results) results.innerHTML = html;
+      selectedIndex = 0;
+      updateSelection();
+      showResults();
+    }
+
+    function updateSelection() {
+      const items = results?.querySelectorAll('.search-result-item');
+      items?.forEach((item, idx) => {
+        item.classList.toggle('selected', idx === selectedIndex);
+        if (idx === selectedIndex) {
+          item.scrollIntoView({ block: 'nearest' });
+        }
+      });
+    }
+
+    // Event listeners
+    trigger.addEventListener('click', openModal);
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    input.addEventListener('input', () => {
+      search(input.value);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      // Open with Cmd/Ctrl + K
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        if (modal.classList.contains('active')) {
+          closeModal();
+        } else {
+          openModal();
+        }
+      }
+
+      // Open with /
+      if (e.key === '/' && !modal.classList.contains('active') &&
+          document.activeElement?.tagName !== 'INPUT' &&
+          document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        openModal();
+      }
+
+      // Close with Escape
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        closeModal();
+      }
+
+      // Navigate with arrows
+      if (modal.classList.contains('active') && currentResults.length > 0) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectedIndex = Math.min(selectedIndex + 1, currentResults.length - 1);
+          updateSelection();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectedIndex = Math.max(selectedIndex - 1, 0);
+          updateSelection();
+        } else if (e.key === 'Enter' && selectedIndex >= 0) {
+          e.preventDefault();
+          const items = results?.querySelectorAll('.search-result-item');
+          if (items && items[selectedIndex]) {
+            (items[selectedIndex] as HTMLAnchorElement).click();
+          }
+        }
+      }
+    });
+
+    // Handle quick link and result clicks
+    modal.addEventListener('click', (e) => {
+      const link = (e.target as Element).closest('a');
+      if (link) {
+        closeModal();
+      }
+    });
+  }
+
+  // Initialize
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSearch);
+  } else {
+    initSearch();
+  }
+
+  document.addEventListener('astro:after-swap', initSearch);
+</script>

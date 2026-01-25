@@ -1,0 +1,100 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Quick Start - hitlimit">
+  <h1>Quick Start</h1>
+
+  <p>Get up and running with hitlimit in under 5 minutes.</p>
+
+  <h2 id="basic-usage">Basic Usage</h2>
+
+  <p>The simplest way to add rate limiting to your Express app:</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">app.ts</span></div>
+    <pre><code><span class="kw">import</span> express <span class="kw">from</span> <span class="str">'express'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+
+<span class="kw">const</span> app = <span class="fn">express</span>()
+
+<span class="cm">// 100 requests per minute per IP</span>
+app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"}))
+
+app.<span class="fn">get</span>(<span class="str">'/api/data'</span>, (req, res) => {"{"}
+  res.<span class="fn">json</span>({"{"} message: <span class="str">'Hello World!'</span> {"}"})
+{"}"})
+
+app.<span class="fn">listen</span>(<span class="num">3000</span>)</code></pre>
+  </div>
+
+  <h2 id="time-windows">Time Windows</h2>
+
+  <p>Use human-readable time strings:</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})   <span class="cm">// 100 per minute</span>
+<span class="fn">hitlimit</span>({"{"} limit: <span class="num">1000</span>, window: <span class="str">'1h'</span> {"}"})  <span class="cm">// 1000 per hour</span>
+<span class="fn">hitlimit</span>({"{"} limit: <span class="num">10000</span>, window: <span class="str">'1d'</span> {"}"}) <span class="cm">// 10000 per day</span></code></pre>
+  </div>
+
+  <h2 id="custom-key">Custom Key</h2>
+
+  <p>Rate limit by user ID, API key, or any identifier:</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// By user ID</span>
+<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => req.user?.id || req.ip
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="stores">Using Stores</h2>
+
+  <p>Choose the right store for your use case:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/sqlite'</span>
+
+<span class="cm">// Memory (default, single instance)</span>
+<span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
+
+<span class="cm">// SQLite (persistent)</span>
+<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">sqliteStore</span>({"{"} path: <span class="str">'./rate-limits.db'</span> {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="response-headers">Response Headers</h2>
+
+  <p>hitlimit automatically adds rate limit headers:</p>
+
+  <div class="code-block">
+    <pre><code>RateLimit-Limit: 100
+RateLimit-Remaining: 73
+RateLimit-Reset: 1640000000
+Retry-After: 27  <span class="cm">(only when rate limited)</span></code></pre>
+  </div>
+
+  <h2 id="next-steps">Next Steps</h2>
+
+  <ul>
+    <li><a href="/docs/configuration/options">Configuration Options</a> - All available options</li>
+    <li><a href="/docs/stores/overview">Stores</a> - Memory, SQLite, Redis</li>
+    <li><a href="/docs/adapters/express">Express Adapter</a> - Express.js integration</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-header { padding: 0.5rem 1rem; border-bottom: 1px solid var(--color-border); background: var(--color-bg-elevated); }
+  .code-label { font-size: 0.75rem; color: var(--color-text-muted); font-family: var(--font-mono); }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

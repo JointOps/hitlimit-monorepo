@@ -1,0 +1,136 @@
+---
+interface Tab {
+  label: string;
+  content: string;
+}
+
+interface Props {
+  tabs: Tab[];
+  id?: string;
+}
+
+const { tabs, id = `tabs-${Math.random().toString(36).slice(2, 8)}` } = Astro.props;
+---
+
+<div class="tabs-container" data-tabs-id={id}>
+  <div class="tabs-header">
+    {tabs.map((tab, index) => (
+      <button
+        class={`tab-button ${index === 0 ? 'active' : ''}`}
+        data-tab-index={index}
+        type="button"
+      >
+        {tab.label}
+      </button>
+    ))}
+  </div>
+  <div class="tabs-content">
+    {tabs.map((tab, index) => (
+      <div
+        class={`tab-panel ${index === 0 ? 'active' : ''}`}
+        data-tab-panel={index}
+      >
+        <pre><code set:html={tab.content} /></pre>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .tabs-container {
+    margin: 1.5rem 0;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+
+  .tabs-header {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+    overflow-x: auto;
+  }
+
+  .tab-button {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .tab-button:hover {
+    color: var(--color-text-secondary);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .tab-button.active {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+    background: rgba(0, 229, 255, 0.05);
+  }
+
+  .tabs-content {
+    position: relative;
+  }
+
+  .tab-panel {
+    display: none;
+    padding: 1rem 1.25rem;
+  }
+
+  .tab-panel.active {
+    display: block;
+  }
+
+  .tab-panel pre {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+
+  .tab-panel code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  /* Syntax highlighting */
+  .tab-panel :global(.kw) { color: #c792ea; }
+  .tab-panel :global(.str) { color: #a6e22e; }
+  .tab-panel :global(.num) { color: #fd971f; }
+  .tab-panel :global(.fn) { color: #66d9ef; }
+  .tab-panel :global(.cm) { color: #71717a; }
+</style>
+
+<script>
+  document.querySelectorAll('.tabs-container').forEach(container => {
+    const buttons = container.querySelectorAll('.tab-button');
+    const panels = container.querySelectorAll('.tab-panel');
+
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        const index = button.getAttribute('data-tab-index');
+
+        // Update buttons
+        buttons.forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+
+        // Update panels
+        panels.forEach(p => p.classList.remove('active'));
+        const activePanel = container.querySelector(`[data-tab-panel="${index}"]`);
+        if (activePanel) activePanel.classList.add('active');
+      });
+    });
+  });
+</script>

@@ -1,0 +1,143 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import Tabs from '../../../components/Tabs.astro';
+---
+
+<DocsLayout title="Express.js Adapter - hitlimit">
+  <h1>Express.js Adapter</h1>
+
+  <p>The Express adapter provides seamless integration with Express.js applications through middleware.</p>
+
+  <h2 id="installation">Installation</h2>
+
+  <Tabs
+    tabs={[
+      { label: 'npm', content: 'npm install hitlimit' },
+      { label: 'pnpm', content: 'pnpm add hitlimit' },
+      { label: 'yarn', content: 'yarn add hitlimit' },
+      { label: 'bun', content: 'bun add hitlimit' },
+    ]}
+  />
+
+  <h2 id="basic-usage">Basic Usage</h2>
+
+  <p>Use hitlimit as Express middleware:</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">app.ts</span></div>
+    <pre><code><span class="kw">import</span> express <span class="kw">from</span> <span class="str">'express'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+
+<span class="kw">const</span> app = <span class="fn">express</span>()
+
+<span class="cm">// Apply to all routes</span>
+app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+{"}"}))
+
+app.<span class="fn">listen</span>(<span class="num">3000</span>)</code></pre>
+  </div>
+
+  <h2 id="route-specific">Route-Specific Rate Limiting</h2>
+
+  <p>Apply different limits to specific routes:</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">routes.ts</span></div>
+    <pre><code><span class="kw">const</span> apiLimiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+{"}"})
+
+<span class="kw">const</span> authLimiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">5</span>,
+  window: <span class="str">'15m'</span>,
+  message: <span class="str">'Too many login attempts'</span>
+{"}"})
+
+app.<span class="fn">use</span>(<span class="str">'/api'</span>, apiLimiter)
+app.<span class="fn">use</span>(<span class="str">'/auth/login'</span>, authLimiter)</code></pre>
+  </div>
+
+  <h2 id="custom-key">Custom Key Extraction</h2>
+
+  <p>Rate limit by user ID, API key, or custom identifiers:</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => {"{"}
+    <span class="cm">// Rate limit by user ID if authenticated, otherwise by IP</span>
+    <span class="kw">return</span> req.user?.id || req.ip
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="skip-requests">Skipping Requests</h2>
+
+  <p>Bypass rate limiting for certain requests:</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  skip: (req) => {"{"}
+    <span class="cm">// Skip rate limiting for admins</span>
+    <span class="kw">return</span> req.user?.role === <span class="str">'admin'</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="custom-response">Custom Error Response</h2>
+
+  <p>Customize the response when rate limit is exceeded:</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  onLimit: (req, res) => {"{"}
+    res.<span class="fn">status</span>(<span class="num">429</span>).<span class="fn">json</span>({"{"}
+      error: <span class="str">'Rate limit exceeded'</span>,
+      retryAfter: res.<span class="fn">getHeader</span>(<span class="str">'Retry-After'</span>)
+    {"}"})
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="with-stores">Using with Stores</h2>
+
+  <p>Use Redis or SQLite for distributed rate limiting:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/redis'</span>
+
+app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">redisStore</span>({"{"}
+    url: <span class="str">'redis://localhost:6379'</span>
+  {"}"})
+{"}"}))</code></pre>
+  </div>
+
+  <h2 id="next-steps">Next Steps</h2>
+
+  <ul>
+    <li><a href="/docs/configuration/options">Configuration Options</a> - All available options</li>
+    <li><a href="/docs/stores/overview">Stores</a> - Memory, SQLite, Redis</li>
+    <li><a href="/docs/adapters/nestjs">NestJS Adapter</a> - NestJS integration</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-header { padding: 0.5rem 1rem; border-bottom: 1px solid var(--color-border); background: var(--color-bg-elevated); }
+  .code-label { font-size: 0.75rem; color: var(--color-text-muted); font-family: var(--font-mono); }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

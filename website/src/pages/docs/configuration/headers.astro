@@ -1,0 +1,100 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Rate Limit Headers - hitlimit">
+  <h1>Rate Limit Headers</h1>
+  <p>Configure the rate limit response headers sent with each request.</p>
+
+  <h2 id="default-headers">Default Headers</h2>
+  <p>By default, hitlimit includes standard rate limit headers in all responses.</p>
+
+  <div class="code-block">
+    <pre><code>X-RateLimit-Limit: <span class="num">100</span>
+X-RateLimit-Remaining: <span class="num">95</span>
+X-RateLimit-Reset: <span class="num">1706284800</span></code></pre>
+  </div>
+
+  <h2 id="header-descriptions">Header Descriptions</h2>
+
+  <table class="headers-table">
+    <thead>
+      <tr><th>Header</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>X-RateLimit-Limit</code></td><td>Maximum requests allowed in the window</td></tr>
+      <tr><td><code>X-RateLimit-Remaining</code></td><td>Number of requests remaining in the current window</td></tr>
+      <tr><td><code>X-RateLimit-Reset</code></td><td>Unix timestamp when the rate limit window resets</td></tr>
+      <tr><td><code>Retry-After</code></td><td>Seconds until the rate limit resets (only on 429 responses)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="disable-headers">Disable Headers</h2>
+  <p>Turn off rate limit headers entirely.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  headers: <span class="kw">false</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="custom-header-names">Custom Header Names</h2>
+  <p>Use custom header names for compatibility with your API standards.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  headers: {"{"}
+    limit: <span class="str">'RateLimit-Limit'</span>,
+    remaining: <span class="str">'RateLimit-Remaining'</span>,
+    reset: <span class="str">'RateLimit-Reset'</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="draft-spec">IETF Draft Specification</h2>
+  <p>Use headers compliant with the IETF rate limit header draft specification.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  headers: <span class="str">'draft-7'</span>
+{"}"})
+
+<span class="cm">// Results in headers:</span>
+<span class="cm">// RateLimit-Limit: 100</span>
+<span class="cm">// RateLimit-Remaining: 95</span>
+<span class="cm">// RateLimit-Reset: 60</span></code></pre>
+  </div>
+
+  <h2 id="selective-headers">Selective Headers</h2>
+  <p>Include only specific headers by setting others to <code>false</code>.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  headers: {"{"}
+    limit: <span class="str">'X-RateLimit-Limit'</span>,
+    remaining: <span class="kw">false</span>,  <span class="cm">// Don't expose remaining count</span>
+    reset: <span class="str">'X-RateLimit-Reset'</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+  .headers-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .headers-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .headers-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .headers-table tr:last-child td { border-bottom: none; }
+  .headers-table code { background: var(--color-bg-elevated); color: var(--color-accent); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; }
+</style>

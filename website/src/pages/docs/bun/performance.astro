@@ -1,0 +1,343 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Performance - Bun - hitlimit">
+  <h1>Bun Performance</h1>
+
+  <p>
+    hitlimit-bun is optimized to take full advantage of Bun's performance characteristics.
+    This guide covers benchmarks, optimization tips, and best practices for high-throughput applications.
+  </p>
+
+  <h2 id="benchmarks">Benchmarks</h2>
+
+  <p>Performance measurements on Apple M1 Max with 64GB RAM:</p>
+
+  <div class="benchmark-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Store</th>
+          <th>Throughput</th>
+          <th>Latency (p50)</th>
+          <th>Latency (p99)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Memory</strong></td>
+          <td class="highlight">280K req/s</td>
+          <td>0.05ms</td>
+          <td>0.12ms</td>
+        </tr>
+        <tr>
+          <td><strong>SQLite (WAL)</strong></td>
+          <td class="highlight">220K req/s</td>
+          <td>0.08ms</td>
+          <td>0.18ms</td>
+        </tr>
+        <tr>
+          <td><strong>SQLite (Memory)</strong></td>
+          <td class="highlight">260K req/s</td>
+          <td>0.06ms</td>
+          <td>0.14ms</td>
+        </tr>
+        <tr>
+          <td><strong>Redis (Local)</strong></td>
+          <td class="highlight">95K req/s</td>
+          <td>0.35ms</td>
+          <td>0.85ms</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="note">Benchmarked using Bun 1.0+ with hitlimit-bun, single-threaded</p>
+
+  <h2 id="vs-nodejs">Bun vs Node.js</h2>
+
+  <p>hitlimit performance comparison between Bun and Node.js:</p>
+
+  <div class="benchmark-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Runtime</th>
+          <th>Memory Store</th>
+          <th>SQLite Store</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Bun 1.0+</strong></td>
+          <td class="highlight">280K req/s</td>
+          <td class="highlight">220K req/s</td>
+        </tr>
+        <tr>
+          <td><strong>Node.js 20</strong></td>
+          <td>200K req/s</td>
+          <td>180K req/s</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="optimization-tips">Optimization Tips</h2>
+
+  <h3 id="tip-1">1. Use Native SQLite Over Redis for Single-Instance</h3>
+
+  <p>Bun's native SQLite is faster than Redis for single-instance deployments:</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// Prefer this for single-instance deployments</span>
+<span class="kw">const</span> store = <span class="fn">bunSqliteStore</span>({"{"} path: <span class="str">'./rate-limits.db'</span> {"}"})
+
+<span class="cm">// Use Redis only for distributed deployments</span>
+<span class="cm">// const store = redisStore({"{"} url: '...' {"}"})</span></code></pre>
+  </div>
+
+  <h3 id="tip-2">2. Enable WAL Mode</h3>
+
+  <p>WAL mode is enabled by default and provides better concurrent read/write performance:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> store = <span class="fn">bunSqliteStore</span>({"{"}
+  path: <span class="str">'./rate-limits.db'</span>,
+  walMode: <span class="kw">true</span>  <span class="cm">// Default</span>
+{"}"})</code></pre>
+  </div>
+
+  <h3 id="tip-3">3. Tune Cleanup Interval</h3>
+
+  <p>Adjust cleanup frequency based on your traffic patterns:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> store = <span class="fn">bunSqliteStore</span>({"{"}
+  path: <span class="str">'./rate-limits.db'</span>,
+  <span class="cm">// High traffic: less frequent cleanup</span>
+  cleanupInterval: <span class="num">120000</span>,  <span class="cm">// 2 minutes</span>
+
+  <span class="cm">// Low traffic: more frequent cleanup</span>
+  <span class="cm">// cleanupInterval: 30000,  // 30 seconds</span>
+{"}"})</code></pre>
+  </div>
+
+  <h3 id="tip-4">4. Use Efficient Key Functions</h3>
+
+  <p>Keep key extraction fast and avoid expensive operations:</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// Good: Simple, fast key extraction</span>
+<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  <span class="fn">key</span>(req) {"{"}
+    <span class="kw">return</span> req.headers.<span class="fn">get</span>(<span class="str">'X-API-Key'</span>) || <span class="str">'anon'</span>
+  {"}"}
+{"}"})
+
+<span class="cm">// Avoid: Expensive operations in key function</span>
+<span class="cm">// key: async (req) => await lookupUser(req)  // Don't do this</span></code></pre>
+  </div>
+
+  <h3 id="tip-5">5. Batch Rate Limit Checks</h3>
+
+  <p>For batch APIs, check rate limits once per batch:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">batch.ts</span>
+    </div>
+    <pre><code><span class="cm">// Rate limit by batch, not per item</span>
+Bun.<span class="fn">serve</span>({"{"}
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> items = <span class="kw">await</span> req.<span class="fn">json</span>()
+
+    <span class="cm">// One check per request, not per item</span>
+    <span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(req)
+
+    <span class="kw">if</span> (!result.allowed) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Rate limited'</span>, {"{"} status: <span class="num">429</span> {"}"})
+    {"}"}
+
+    <span class="cm">// Process all items...</span>
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'OK'</span>)
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="running-benchmarks">Running Benchmarks</h2>
+
+  <p>Run your own benchmarks with the included script:</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm"># Clone the repository</span>
+git clone https://github.com/hitlimit/hitlimit
+cd hitlimit
+
+<span class="cm"># Run Bun benchmarks</span>
+bun run bench:bun
+
+<span class="cm"># Compare with Node.js</span>
+bun run bench:compare</code></pre>
+  </div>
+
+  <h2 id="production-config">Production Configuration</h2>
+
+  <p>Recommended configuration for production deployments:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">production.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, bunSqliteStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">1000</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">bunSqliteStore</span>({"{"}
+    path: <span class="str">'./data/rate-limits.db'</span>,
+    walMode: <span class="kw">true</span>,
+    cleanupInterval: <span class="num">60000</span>
+  {"}"}),
+  <span class="cm">// Fail open on errors (don't block requests)</span>
+  failOpen: <span class="kw">true</span>,
+  <span class="cm">// Skip rate limiting for health checks</span>
+  <span class="fn">skip</span>(req) {"{"}
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">URL</span>(req.url).pathname === <span class="str">'/health'</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="monitoring">Monitoring</h2>
+
+  <p>Monitor rate limiter performance:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  <span class="fn">onRateLimited</span>(key, req) {"{"}
+    <span class="cm">// Log or send metrics</span>
+    console.<span class="fn">log</span>(<span class="str">`Rate limited: ${"{"}key{"}"}`</span>)
+    metrics.<span class="fn">increment</span>(<span class="str">'rate_limit_exceeded'</span>)
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="next-steps">Next Steps</h2>
+
+  <ul>
+    <li><a href="/docs/bun/stores">Stores</a> - Configure storage backends</li>
+    <li><a href="/docs/bun/bun-serve">Bun.serve</a> - Server integration patterns</li>
+    <li><a href="/docs/bun/elysia">Elysia Plugin</a> - Framework integration</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+  .code-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+  }
+  .dot.red { background: rgba(239, 68, 68, 0.8); }
+  .dot.yellow { background: rgba(234, 179, 8, 0.8); }
+  .dot.green { background: rgba(34, 197, 94, 0.8); }
+  .code-filename {
+    margin-left: 1rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+  .code-block pre {
+    padding: 1.5rem;
+    margin: 0;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: var(--color-text-muted); }
+
+  .benchmark-table {
+    margin: 1.5rem 0;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+  }
+  .benchmark-table table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+  }
+  .benchmark-table th {
+    background: var(--color-bg-surface);
+    font-weight: 600;
+    text-align: left;
+    padding: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .benchmark-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+  }
+  .benchmark-table tr:last-child td {
+    border-bottom: none;
+  }
+  .benchmark-table tr:hover {
+    background: var(--color-bg-surface);
+  }
+  .benchmark-table .highlight {
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+  .note {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+</style>

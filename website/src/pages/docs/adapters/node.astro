@@ -1,0 +1,162 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import Tabs from '../../../components/Tabs.astro';
+---
+
+<DocsLayout title="Node.js HTTP Adapter - hitlimit">
+  <h1>Node.js HTTP Adapter</h1>
+
+  <p>The raw Node.js adapter works directly with the built-in <code>http</code> module without any framework.</p>
+
+  <h2 id="installation">Installation</h2>
+
+  <Tabs
+    tabs={[
+      { label: 'npm', content: 'npm install hitlimit' },
+      { label: 'pnpm', content: 'pnpm add hitlimit' },
+      { label: 'yarn', content: 'yarn add hitlimit' },
+      { label: 'bun', content: 'bun add hitlimit' },
+    ]}
+  />
+
+  <h2 id="basic-usage">Basic Usage</h2>
+
+  <p>Use hitlimit with Node.js http server:</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">server.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} createServer {"}"} <span class="kw">from</span> <span class="str">'http'</span>
+<span class="kw">import</span> {"{"} hitlimitHandler {"}"} <span class="kw">from</span> <span class="str">'hitlimit/node'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimitHandler</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+{"}"})
+
+<span class="kw">const</span> server = <span class="fn">createServer</span>(<span class="kw">async</span> (req, res) => {"{"}
+  <span class="cm">// Check rate limit</span>
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">limiter</span>(req, res)
+
+  <span class="kw">if</span> (result.limited) {"{"}
+    <span class="kw">return</span> <span class="cm">// Response already sent</span>
+  {"}"}
+
+  <span class="cm">// Handle request</span>
+  res.<span class="fn">writeHead</span>(<span class="num">200</span>, {"{"} <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> {"}"})
+  res.<span class="fn">end</span>(JSON.<span class="fn">stringify</span>({"{"} message: <span class="str">'Hello World'</span> {"}"}))
+{"}"})
+
+server.<span class="fn">listen</span>(<span class="num">3000</span>)</code></pre>
+  </div>
+
+  <h2 id="middleware-style">Middleware Style</h2>
+
+  <p>Use the middleware-style handler for cleaner code:</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">server.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} createServer {"}"} <span class="kw">from</span> <span class="str">'http'</span>
+<span class="kw">import</span> {"{"} hitlimitMiddleware {"}"} <span class="kw">from</span> <span class="str">'hitlimit/node'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimitMiddleware</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+{"}"})
+
+<span class="kw">const</span> server = <span class="fn">createServer</span>((req, res) => {"{"}
+  <span class="fn">limiter</span>(req, res, () => {"{"}
+    <span class="cm">// Request passed rate limit check</span>
+    res.<span class="fn">writeHead</span>(<span class="num">200</span>)
+    res.<span class="fn">end</span>(<span class="str">'OK'</span>)
+  {"}"})
+{"}"})
+
+server.<span class="fn">listen</span>(<span class="num">3000</span>)</code></pre>
+  </div>
+
+  <h2 id="custom-key">Custom Key Extraction</h2>
+
+  <p>Rate limit by custom identifiers:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> limiter = <span class="fn">hitlimitHandler</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => {"{"}
+    <span class="cm">// Extract API key from header</span>
+    <span class="kw">return</span> req.headers[<span class="str">'x-api-key'</span>] || <span class="fn">getClientIp</span>(req)
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="custom-response">Custom Error Response</h2>
+
+  <p>Customize the rate limit exceeded response:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> limiter = <span class="fn">hitlimitHandler</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  onLimit: (req, res, info) => {"{"}
+    res.<span class="fn">writeHead</span>(<span class="num">429</span>, {"{"}
+      <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>,
+      <span class="str">'Retry-After'</span>: String(info.resetIn)
+    {"}"})
+    res.<span class="fn">end</span>(JSON.<span class="fn">stringify</span>({"{"}
+      error: <span class="str">'Too many requests'</span>,
+      retryAfter: info.resetIn
+    {"}"}))
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="with-stores">Using with Stores</h2>
+
+  <p>Use a persistent store for production:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} hitlimitHandler {"}"} <span class="kw">from</span> <span class="str">'hitlimit/node'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/redis'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimitHandler</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">redisStore</span>({"{"}
+    url: <span class="str">'redis://localhost:6379'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="rate-limit-info">Accessing Rate Limit Info</h2>
+
+  <p>Get detailed rate limit information:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">limiter</span>(req, res)
+
+console.<span class="fn">log</span>(result)
+<span class="cm">// {"{"}
+//   limited: false,
+//   limit: 100,
+//   remaining: 73,
+//   reset: 1640000000
+// {"}"}</span></code></pre>
+  </div>
+
+  <h2 id="next-steps">Next Steps</h2>
+
+  <ul>
+    <li><a href="/docs/configuration/options">Configuration Options</a> - All available options</li>
+    <li><a href="/docs/stores/overview">Stores</a> - Memory, SQLite, Redis</li>
+    <li><a href="/docs/adapters/express">Express Adapter</a> - Express.js integration</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-header { padding: 0.5rem 1rem; border-bottom: 1px solid var(--color-border); background: var(--color-bg-elevated); }
+  .code-label { font-size: 0.75rem; color: var(--color-text-muted); font-family: var(--font-mono); }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

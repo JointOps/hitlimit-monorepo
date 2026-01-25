@@ -1,0 +1,163 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import Tabs from '../../../components/Tabs.astro';
+---
+
+<DocsLayout title="NestJS Adapter - hitlimit">
+  <h1>NestJS Adapter</h1>
+
+  <p>The NestJS adapter provides a module, guard, and decorator for seamless integration with NestJS applications.</p>
+
+  <h2 id="installation">Installation</h2>
+
+  <Tabs
+    tabs={[
+      { label: 'npm', content: 'npm install hitlimit @hitlimit/nestjs' },
+      { label: 'pnpm', content: 'pnpm add hitlimit @hitlimit/nestjs' },
+      { label: 'yarn', content: 'yarn add hitlimit @hitlimit/nestjs' },
+      { label: 'bun', content: 'bun add hitlimit @hitlimit/nestjs' },
+    ]}
+  />
+
+  <h2 id="module-setup">Module Setup</h2>
+
+  <p>Import the HitlimitModule in your app module:</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">app.module.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} Module {"}"} <span class="kw">from</span> <span class="str">'@nestjs/common'</span>
+<span class="kw">import</span> {"{"} HitlimitModule {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/nestjs'</span>
+
+@<span class="fn">Module</span>({"{"}
+  imports: [
+    HitlimitModule.<span class="fn">forRoot</span>({"{"}
+      limit: <span class="num">100</span>,
+      window: <span class="str">'1m'</span>
+    {"}"})
+  ]
+{"}"})
+<span class="kw">export class</span> AppModule {"{"}{"}"}</code></pre>
+  </div>
+
+  <h2 id="async-config">Async Configuration</h2>
+
+  <p>Use async configuration for dynamic settings:</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">app.module.ts</span></div>
+    <pre><code>HitlimitModule.<span class="fn">forRootAsync</span>({"{"}
+  imports: [ConfigModule],
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => ({"{"}
+    limit: config.<span class="fn">get</span>(<span class="str">'RATE_LIMIT'</span>),
+    window: config.<span class="fn">get</span>(<span class="str">'RATE_WINDOW'</span>)
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="guard">Using the Guard</h2>
+
+  <p>Apply rate limiting globally or per controller:</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">main.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} HitlimitGuard {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/nestjs'</span>
+
+<span class="kw">async function</span> <span class="fn">bootstrap</span>() {"{"}
+  <span class="kw">const</span> app = <span class="kw">await</span> NestFactory.<span class="fn">create</span>(AppModule)
+
+  <span class="cm">// Apply globally</span>
+  app.<span class="fn">useGlobalGuards</span>(<span class="kw">new</span> <span class="fn">HitlimitGuard</span>())
+
+  <span class="kw">await</span> app.<span class="fn">listen</span>(<span class="num">3000</span>)
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="decorator">Using the Decorator</h2>
+
+  <p>Apply custom limits to specific routes using the <code>@RateLimit</code> decorator:</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">users.controller.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} Controller, Get, Post {"}"} <span class="kw">from</span> <span class="str">'@nestjs/common'</span>
+<span class="kw">import</span> {"{"} RateLimit {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/nestjs'</span>
+
+@<span class="fn">Controller</span>(<span class="str">'users'</span>)
+<span class="kw">export class</span> UsersController {"{"}
+
+  @<span class="fn">Get</span>()
+  @<span class="fn">RateLimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
+  <span class="fn">findAll</span>() {"{"}
+    <span class="kw">return</span> <span class="kw">this</span>.usersService.<span class="fn">findAll</span>()
+  {"}"}
+
+  @<span class="fn">Post</span>(<span class="str">'login'</span>)
+  @<span class="fn">RateLimit</span>({"{"} limit: <span class="num">5</span>, window: <span class="str">'15m'</span> {"}"})
+  <span class="fn">login</span>() {"{"}
+    <span class="kw">return</span> <span class="kw">this</span>.authService.<span class="fn">login</span>()
+  {"}"}
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="skip-decorator">Skip Rate Limiting</h2>
+
+  <p>Use the <code>@SkipRateLimit</code> decorator to bypass rate limiting:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} SkipRateLimit {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/nestjs'</span>
+
+@<span class="fn">Get</span>(<span class="str">'health'</span>)
+@<span class="fn">SkipRateLimit</span>()
+<span class="fn">healthCheck</span>() {"{"}
+  <span class="kw">return</span> {"{"} status: <span class="str">'ok'</span> {"}"}
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="custom-key">Custom Key Extraction</h2>
+
+  <p>Extract rate limit key from the execution context:</p>
+
+  <div class="code-block">
+    <pre><code>HitlimitModule.<span class="fn">forRoot</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  key: (context) => {"{"}
+    <span class="kw">const</span> request = context.<span class="fn">switchToHttp</span>().<span class="fn">getRequest</span>()
+    <span class="kw">return</span> request.user?.id || request.ip
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="with-stores">Using with Stores</h2>
+
+  <p>Configure a Redis store for distributed deployments:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/redis'</span>
+
+HitlimitModule.<span class="fn">forRoot</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">redisStore</span>({"{"}
+    url: <span class="str">'redis://localhost:6379'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="next-steps">Next Steps</h2>
+
+  <ul>
+    <li><a href="/docs/configuration/options">Configuration Options</a> - All available options</li>
+    <li><a href="/docs/stores/overview">Stores</a> - Memory, SQLite, Redis</li>
+    <li><a href="/docs/adapters/express">Express Adapter</a> - Express.js integration</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-header { padding: 0.5rem 1rem; border-bottom: 1px solid var(--color-border); background: var(--color-bg-elevated); }
+  .code-label { font-size: 0.75rem; color: var(--color-text-muted); font-family: var(--font-mono); }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

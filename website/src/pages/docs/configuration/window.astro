@@ -1,0 +1,33 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Time Windows - hitlimit">
+  <h1>Time Windows</h1>
+  <p>Configure rate limit time windows using human-readable strings or milliseconds.</p>
+
+  <h2 id="string-format">String Format</h2>
+  <div class="code-block">
+    <pre><code><span class="str">'1s'</span>   <span class="cm">// 1 second</span>
+<span class="str">'30s'</span>  <span class="cm">// 30 seconds</span>
+<span class="str">'1m'</span>   <span class="cm">// 1 minute</span>
+<span class="str">'15m'</span>  <span class="cm">// 15 minutes</span>
+<span class="str">'1h'</span>   <span class="cm">// 1 hour</span>
+<span class="str">'1d'</span>   <span class="cm">// 1 day</span></code></pre>
+  </div>
+
+  <h2 id="milliseconds">Milliseconds</h2>
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="num">60000</span> {"}"}) <span class="cm">// 1 minute in ms</span></code></pre>
+  </div>
+
+  <h2 id="sliding-window">Sliding Window</h2>
+  <p>By default, hitlimit uses a sliding window algorithm for smoother rate limiting.</p>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); }
+  .code-block pre { margin: 0; padding: 1rem; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

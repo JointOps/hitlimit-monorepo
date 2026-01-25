@@ -1,0 +1,160 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Scaling Guide - hitlimit">
+  <h1>Scaling Guide</h1>
+
+  <p>Scale hitlimit from a single server to a distributed architecture.</p>
+
+  <h2 id="single-instance">Single Instance</h2>
+
+  <p>For small deployments, the memory store works well:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">memoryStore</span>({"{"}
+    cleanupInterval: <span class="num">60000</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="horizontal-scaling">Horizontal Scaling with Redis</h2>
+
+  <p>For multiple instances, use Redis to share state:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">1000</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">redisStore</span>({"{"}
+    url: <span class="str">'redis://redis-cluster:6379'</span>,
+    prefix: <span class="str">'api:ratelimit:'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="redis-cluster">Redis Cluster Configuration</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} createCluster {"}"} <span class="kw">from</span> <span class="str">'redis'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> cluster = <span class="fn">createCluster</span>({"{"}
+  rootNodes: [
+    {"{"} url: <span class="str">'redis://node1:6379'</span> {"}"},
+    {"{"} url: <span class="str">'redis://node2:6379'</span> {"}"},
+    {"{"} url: <span class="str">'redis://node3:6379'</span> {"}"}
+  ]
+{"}"})
+
+<span class="kw">await</span> cluster.<span class="fn">connect</span>()
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">1000</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">redisStore</span>({"{"} client: cluster {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="multi-tier">Multi-Tier Rate Limiting</h2>
+
+  <p>Apply different limits to different routes:</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// Global: 1000 requests per minute</span>
+<span class="kw">const</span> globalLimiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">1000</span>,
+  window: <span class="str">'1m'</span>,
+  store
+{"}"})
+
+<span class="cm">// Strict: 10 requests per minute for auth</span>
+<span class="kw">const</span> authLimiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">10</span>,
+  window: <span class="str">'1m'</span>,
+  store,
+  key: (req) => <span class="str">`auth:</span>${"{"}req.ip{"}"}<span class="str">`</span>
+{"}"})
+
+<span class="cm">// Relaxed: 5000 requests per minute for reads</span>
+<span class="kw">const</span> readLimiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">5000</span>,
+  window: <span class="str">'1m'</span>,
+  store,
+  key: (req) => <span class="str">`read:</span>${"{"}req.ip{"}"}<span class="str">`</span>
+{"}"})
+
+app.<span class="fn">use</span>(globalLimiter)
+app.<span class="fn">use</span>(<span class="str">'/auth'</span>, authLimiter)
+app.<span class="fn">use</span>(<span class="str">'/api/read'</span>, readLimiter)</code></pre>
+  </div>
+
+  <h2 id="sliding-window">Sliding Window Algorithm</h2>
+
+  <p>hitlimit uses a sliding window for accurate rate limiting:</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// Fixed window: Resets at exact intervals</span>
+<span class="cm">// User could make 100 requests at :59 and 100 at :00</span>
+
+<span class="cm">// Sliding window: Smooths out bursts</span>
+<span class="cm">// hitlimit tracks requests across window boundaries</span>
+<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  algorithm: <span class="str">'sliding'</span>  <span class="cm">// Default</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="performance">Performance Tips</h2>
+
+  <ul>
+    <li><strong>Key design</strong>: Keep keys short to reduce memory usage</li>
+    <li><strong>Cleanup</strong>: Configure appropriate cleanup intervals</li>
+    <li><strong>Connection pooling</strong>: Reuse Redis connections</li>
+    <li><strong>Skip paths</strong>: Exclude health checks and static assets</li>
+  </ul>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  skip: (req) => {"{"}
+    <span class="kw">return</span> req.path === <span class="str">'/health'</span> ||
+           req.path.<span class="fn">startsWith</span>(<span class="str">'/static'</span>)
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="benchmarks">Performance Benchmarks</h2>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Store</th><th>Ops/sec</th><th>Latency (p99)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>memoryStore</td><td>500,000+</td><td>&lt;0.1ms</td></tr>
+      <tr><td>sqliteStore</td><td>50,000+</td><td>&lt;1ms</td></tr>
+      <tr><td>redisStore</td><td>100,000+</td><td>&lt;2ms</td></tr>
+    </tbody>
+  </table>
+</DocsLayout>
+
+<style>
+  .options-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .options-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .options-table tr:last-child td { border-bottom: none; }
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

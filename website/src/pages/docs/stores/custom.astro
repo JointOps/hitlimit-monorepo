@@ -1,0 +1,147 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Custom Stores - hitlimit">
+  <h1>Custom Stores</h1>
+
+  <p>Create your own store to integrate with any storage backend. All stores must implement the <code>Store</code> interface.</p>
+
+  <h2 id="store-interface">Store Interface</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">interface</span> Store {"{"}
+  <span class="cm">/**
+   * Increment the counter for a key
+   * @param key - Unique identifier (e.g., IP address)
+   * @param window - Time window in milliseconds
+   * @returns Current count and reset timestamp
+   */</span>
+  <span class="fn">increment</span>(key: <span class="str">string</span>, window: <span class="str">number</span>): <span class="fn">Promise</span>&lt;{"{"}
+    count: <span class="str">number</span>
+    resetAt: <span class="str">number</span>
+  {"}"}&gt;
+
+  <span class="cm">/**
+   * Reset the counter for a key
+   * @param key - Unique identifier to reset
+   */</span>
+  <span class="fn">reset</span>(key: <span class="str">string</span>): <span class="fn">Promise</span>&lt;<span class="str">void</span>&gt;
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="basic-example">Basic Example</h2>
+
+  <p>A simple in-memory store implementation:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+
+<span class="kw">export function</span> <span class="fn">myStore</span>(): Store {"{"}
+  <span class="kw">const</span> data = <span class="kw">new</span> <span class="fn">Map</span>&lt;<span class="str">string</span>, {"{"} count: <span class="str">number</span>; resetAt: <span class="str">number</span> {"}"}&gt;()
+
+  <span class="kw">return</span> {"{"}
+    <span class="kw">async</span> <span class="fn">increment</span>(key, window) {"{"}
+      <span class="kw">const</span> now = Date.<span class="fn">now</span>()
+      <span class="kw">const</span> entry = data.<span class="fn">get</span>(key)
+
+      <span class="cm">// Reset if window expired</span>
+      <span class="kw">if</span> (!entry || now >= entry.resetAt) {"{"}
+        <span class="kw">const</span> record = {"{"} count: <span class="num">1</span>, resetAt: now + window {"}"}
+        data.<span class="fn">set</span>(key, record)
+        <span class="kw">return</span> record
+      {"}"}
+
+      <span class="cm">// Increment existing</span>
+      entry.count++
+      <span class="kw">return</span> {"{"} count: entry.count, resetAt: entry.resetAt {"}"}
+    {"}"},
+
+    <span class="kw">async</span> <span class="fn">reset</span>(key) {"{"}
+      data.<span class="fn">delete</span>(key)
+    {"}"}
+  {"}"}
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="using-custom-store">Using Your Store</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} myStore {"}"} <span class="kw">from</span> <span class="str">'./my-store'</span>
+
+app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">myStore</span>()
+{"}"}))</code></pre>
+  </div>
+
+  <h2 id="advanced-example">Advanced: Database Store</h2>
+
+  <p>Example using a generic database client:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+
+<span class="kw">interface</span> DbStoreOptions {"{"}
+  client: <span class="str">any</span>
+  tableName?: <span class="str">string</span>
+{"}"}
+
+<span class="kw">export function</span> <span class="fn">dbStore</span>(options: DbStoreOptions): Store {"{"}
+  <span class="kw">const</span> {"{"} client, tableName = <span class="str">'rate_limits'</span> {"}"} = options
+
+  <span class="kw">return</span> {"{"}
+    <span class="kw">async</span> <span class="fn">increment</span>(key, window) {"{"}
+      <span class="kw">const</span> now = Date.<span class="fn">now</span>()
+      <span class="kw">const</span> resetAt = now + window
+
+      <span class="cm">// Upsert with atomic increment</span>
+      <span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">query</span>(<span class="str">`
+        INSERT INTO ${"{"}tableName{"}"} (key, count, reset_at)
+        VALUES ($1, 1, $2)
+        ON CONFLICT (key) DO UPDATE SET
+          count = CASE
+            WHEN ${"{"}tableName{"}"}.reset_at <= $3 THEN 1
+            ELSE ${"{"}tableName{"}"}.count + 1
+          END,
+          reset_at = CASE
+            WHEN ${"{"}tableName{"}"}.reset_at <= $3 THEN $2
+            ELSE ${"{"}tableName{"}"}.reset_at
+          END
+        RETURNING count, reset_at
+      `</span>, [key, resetAt, now])
+
+      <span class="kw">return</span> {"{"}
+        count: result.rows[<span class="num">0</span>].count,
+        resetAt: result.rows[<span class="num">0</span>].reset_at
+      {"}"}
+    {"}"},
+
+    <span class="kw">async</span> <span class="fn">reset</span>(key) {"{"}
+      <span class="kw">await</span> client.<span class="fn">query</span>(
+        <span class="str">`DELETE FROM ${"{"}tableName{"}"} WHERE key = $1`</span>,
+        [key]
+      )
+    {"}"}
+  {"}"}
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="best-practices">Best Practices</h2>
+
+  <ul>
+    <li><strong>Atomic operations:</strong> Ensure increment is atomic to prevent race conditions</li>
+    <li><strong>TTL/Cleanup:</strong> Implement automatic cleanup of expired entries</li>
+    <li><strong>Error handling:</strong> Handle connection failures gracefully</li>
+    <li><strong>Performance:</strong> Minimize latency as this runs on every request</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

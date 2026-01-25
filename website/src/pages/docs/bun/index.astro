@@ -1,0 +1,128 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Bun - hitlimit">
+  <h1>Bun Integration</h1>
+
+  <p>
+    hitlimit provides first-class support for <strong>Bun</strong>, the fast all-in-one JavaScript runtime.
+    With Bun's native SQLite support and optimized performance, hitlimit achieves exceptional throughput
+    for rate limiting in Bun applications.
+  </p>
+
+  <h2 id="why-bun">Why Use hitlimit with Bun?</h2>
+
+  <ul>
+    <li><strong>Native SQLite</strong> - Leverage Bun's built-in SQLite for zero-dependency persistent storage</li>
+    <li><strong>Optimized Performance</strong> - Take advantage of Bun's speed with our optimized adapters</li>
+    <li><strong>Bun.serve Integration</strong> - Direct integration with Bun's HTTP server</li>
+    <li><strong>Elysia Plugin</strong> - First-class plugin for the Elysia framework</li>
+  </ul>
+
+  <h2 id="quick-example">Quick Example</h2>
+
+  <p>Rate limit a Bun.serve application in seconds:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">server.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
+
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(req)
+
+    <span class="kw">if</span> (!result.allowed) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Rate limited'</span>, {"{"} status: <span class="num">429</span> {"}"})
+    {"}"}
+
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Hello from Bun!'</span>)
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="available-packages">Available Packages</h2>
+
+  <p>For Bun applications, use the optimized package:</p>
+
+  <div class="code-block">
+    <pre><code>bun add hitlimit-bun</code></pre>
+  </div>
+
+  <p>This package includes Bun-specific optimizations and native SQLite store support.</p>
+
+  <h2 id="documentation">Documentation</h2>
+
+  <ul>
+    <li><a href="/docs/bun/installation">Installation</a> - Install hitlimit for Bun</li>
+    <li><a href="/docs/bun/quick-start">Quick Start</a> - Get started in 5 minutes</li>
+    <li><a href="/docs/bun/bun-serve">Bun.serve</a> - Direct HTTP server integration</li>
+    <li><a href="/docs/bun/elysia">Elysia</a> - Elysia framework plugin</li>
+    <li><a href="/docs/bun/stores">Stores</a> - Native SQLite and memory stores</li>
+    <li><a href="/docs/bun/performance">Performance</a> - Benchmarks and optimization tips</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+  .code-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+  }
+  .dot.red { background: rgba(239, 68, 68, 0.8); }
+  .dot.yellow { background: rgba(234, 179, 8, 0.8); }
+  .dot.green { background: rgba(34, 197, 94, 0.8); }
+  .code-filename {
+    margin-left: 1rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+  .code-block pre {
+    padding: 1.5rem;
+    margin: 0;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: var(--color-text-muted); }
+</style>

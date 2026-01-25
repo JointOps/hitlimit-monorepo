@@ -1,0 +1,117 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Skip Rate Limiting - hitlimit">
+  <h1>Skip Rate Limiting</h1>
+  <p>Bypass rate limiting for certain requests using the skip option.</p>
+
+  <h2 id="basic-skip">Basic Skip Function</h2>
+  <p>Provide a function that returns <code>true</code> to skip rate limiting for a request.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  skip: (req) => req.path === <span class="str">'/health'</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="skip-paths">Skip Specific Paths</h2>
+  <p>Exclude multiple paths from rate limiting.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> skipPaths = [<span class="str">'/health'</span>, <span class="str">'/metrics'</span>, <span class="str">'/ready'</span>];
+
+<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  skip: (req) => skipPaths.<span class="fn">includes</span>(req.path)
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="skip-users">Skip Authenticated Users</h2>
+  <p>Bypass rate limiting for trusted or authenticated users.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  skip: (req) => req.user?.role === <span class="str">'admin'</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="skip-ip">Skip Trusted IPs</h2>
+  <p>Allow unlimited requests from internal or trusted IP addresses.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> trustedIPs = [
+  <span class="str">'127.0.0.1'</span>,
+  <span class="str">'10.0.0.0/8'</span>,
+  <span class="str">'192.168.1.0/24'</span>
+];
+
+<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  skip: (req) => <span class="fn">isTrustedIP</span>(req.ip, trustedIPs)
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="skip-methods">Skip Certain Methods</h2>
+  <p>Only rate limit specific HTTP methods.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  skip: (req) => req.method === <span class="str">'GET'</span> <span class="cm">// Only limit POST, PUT, DELETE</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="async-skip">Async Skip Function</h2>
+  <p>Use an async function when you need to check external sources.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  skip: <span class="kw">async</span> (req) => {"{"}
+    <span class="kw">const</span> apiKey = req.headers[<span class="str">'x-api-key'</span>];
+    <span class="kw">if</span> (!apiKey) <span class="kw">return false</span>;
+
+    <span class="kw">const</span> client = <span class="kw">await</span> <span class="fn">getClient</span>(apiKey);
+    <span class="kw">return</span> client?.tier === <span class="str">'unlimited'</span>;
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="combine-conditions">Combine Conditions</h2>
+  <p>Use multiple conditions for more complex skip logic.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  skip: (req) => {"{"}
+    <span class="cm">// Skip health checks</span>
+    <span class="kw">if</span> (req.path === <span class="str">'/health'</span>) <span class="kw">return true</span>;
+
+    <span class="cm">// Skip admin users</span>
+    <span class="kw">if</span> (req.user?.role === <span class="str">'admin'</span>) <span class="kw">return true</span>;
+
+    <span class="cm">// Skip internal requests</span>
+    <span class="kw">if</span> (req.headers[<span class="str">'x-internal'</span>] === <span class="str">'true'</span>) <span class="kw">return true</span>;
+
+    <span class="kw">return false</span>;
+  {"}"}
+{"}"})</code></pre>
+  </div>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

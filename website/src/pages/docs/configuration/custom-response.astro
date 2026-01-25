@@ -1,0 +1,109 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Custom Response - hitlimit">
+  <h1>Custom Response</h1>
+  <p>Customize the 429 response body when a client exceeds the rate limit.</p>
+
+  <h2 id="default-response">Default Response</h2>
+  <p>By default, hitlimit returns a simple JSON error message.</p>
+
+  <div class="code-block">
+    <pre><code>{"{"} <span class="str">"error"</span>: <span class="str">"Too many requests, please try again later."</span> {"}"}</code></pre>
+  </div>
+
+  <h2 id="static-response">Static Response Object</h2>
+  <p>Provide a custom object to return when rate limited.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  response: {"{"}
+    error: <span class="str">'Rate limit exceeded'</span>,
+    code: <span class="str">'RATE_LIMITED'</span>,
+    retryAfter: <span class="num">60</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="dynamic-response">Dynamic Response Function</h2>
+  <p>Use a function to generate a custom response with request context.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  response: (req, info) => ({"{"}
+    error: <span class="str">'Too many requests'</span>,
+    limit: info.limit,
+    remaining: info.remaining,
+    resetAt: info.reset,
+    path: req.path
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="custom-status">Custom Status Code</h2>
+  <p>Change the HTTP status code for rate limited responses.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  statusCode: <span class="num">503</span>, <span class="cm">// Service Unavailable</span>
+  response: {"{"}
+    error: <span class="str">'Service temporarily unavailable'</span>,
+    retryAfter: <span class="num">60</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="html-response">HTML Response</h2>
+  <p>Return HTML instead of JSON by using a handler function.</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  handler: (req, res) => {"{"}
+    res.<span class="fn">status</span>(<span class="num">429</span>).<span class="fn">send</span>(<span class="str">`
+      &lt;html&gt;
+        &lt;body&gt;
+          &lt;h1&gt;Rate Limit Exceeded&lt;/h1&gt;
+          &lt;p&gt;Please try again later.&lt;/p&gt;
+        &lt;/body&gt;
+      &lt;/html&gt;
+    `</span>);
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="response-info">Response Info Object</h2>
+  <p>The <code>info</code> parameter in response functions contains rate limit details.</p>
+
+  <table class="info-table">
+    <thead>
+      <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>limit</code></td><td>number</td><td>Maximum requests allowed</td></tr>
+      <tr><td><code>remaining</code></td><td>number</td><td>Requests remaining (always 0 when limited)</td></tr>
+      <tr><td><code>reset</code></td><td>number</td><td>Unix timestamp when the window resets</td></tr>
+      <tr><td><code>retryAfter</code></td><td>number</td><td>Seconds until the window resets</td></tr>
+    </tbody>
+  </table>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+  .info-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .info-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .info-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .info-table tr:last-child td { border-bottom: none; }
+  .info-table code { background: var(--color-bg-elevated); color: var(--color-accent); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; }
+</style>

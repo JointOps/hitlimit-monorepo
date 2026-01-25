@@ -1,0 +1,138 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Production Deployment - hitlimit">
+  <h1>Production Deployment</h1>
+
+  <p>Best practices for deploying hitlimit in production environments.</p>
+
+  <h2 id="choose-store">Choose the Right Store</h2>
+
+  <p>Select a storage backend based on your deployment:</p>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Deployment</th><th>Recommended Store</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Single instance</td><td>memoryStore</td><td>Fast, no setup required</td></tr>
+      <tr><td>Single server, persistence</td><td>sqliteStore</td><td>Survives restarts</td></tr>
+      <tr><td>Multiple instances</td><td>redisStore</td><td>Shared state across nodes</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="redis-setup">Redis Setup for Production</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">redisStore</span>({"{"}
+    url: process.env.REDIS_URL,
+    prefix: <span class="str">'api:rl:'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="environment-config">Environment-Based Configuration</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> isProd = process.env.NODE_ENV === <span class="str">'production'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: isProd ? <span class="num">100</span> : <span class="num">1000</span>,  <span class="cm">// Relaxed in dev</span>
+  window: <span class="str">'1m'</span>,
+  store: isProd
+    ? <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"})
+    : <span class="fn">memoryStore</span>(),
+  skip: (req) => !isProd && req.headers[<span class="str">'x-skip-ratelimit'</span>]
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="graceful-shutdown">Graceful Shutdown</h2>
+
+  <p>Clean up store connections on shutdown:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> store = <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"})
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span>, store {"}"})
+
+process.<span class="fn">on</span>(<span class="str">'SIGTERM'</span>, <span class="kw">async</span> () => {"{"}
+  <span class="kw">await</span> store.<span class="fn">close</span>()
+  process.<span class="fn">exit</span>(<span class="num">0</span>)
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="headers">Security Headers</h2>
+
+  <p>hitlimit sets standard rate limit headers:</p>
+
+  <div class="code-block">
+    <pre><code>RateLimit-Limit: <span class="num">100</span>
+RateLimit-Remaining: <span class="num">42</span>
+RateLimit-Reset: <span class="num">1640000060</span>
+Retry-After: <span class="num">27</span>  <span class="cm">// Only when limited</span></code></pre>
+  </div>
+
+  <h2 id="error-handling">Custom Error Responses</h2>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  statusCode: <span class="num">429</span>,
+  response: {"{"}
+    error: <span class="str">'rate_limit_exceeded'</span>,
+    message: <span class="str">'Too many requests. Please try again later.'</span>,
+    documentation: <span class="str">'https://api.example.com/docs/rate-limits'</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="behind-proxy">Behind a Load Balancer</h2>
+
+  <p>When behind a proxy, use the correct IP source:</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// Trust X-Forwarded-For header</span>
+app.<span class="fn">set</span>(<span class="str">'trust proxy'</span>, <span class="kw">true</span>)
+
+<span class="cm">// Or use custom key extraction</span>
+<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => {"{"}
+    <span class="kw">const</span> forwarded = req.headers[<span class="str">'x-forwarded-for'</span>]
+    <span class="kw">return</span> forwarded?.split(<span class="str">','</span>)[<span class="num">0</span>].trim() || req.ip
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="checklist">Production Checklist</h2>
+
+  <ul>
+    <li>Use Redis or persistent store for multi-instance deployments</li>
+    <li>Configure appropriate limits for your API</li>
+    <li>Set up graceful shutdown handlers</li>
+    <li>Enable rate limit headers for client visibility</li>
+    <li>Configure trust proxy if behind a load balancer</li>
+    <li>Monitor rate limit metrics</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .options-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .options-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .options-table tr:last-child td { border-bottom: none; }
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

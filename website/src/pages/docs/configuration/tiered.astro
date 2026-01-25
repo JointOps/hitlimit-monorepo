@@ -1,0 +1,79 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Tiered Rate Limits - hitlimit">
+  <h1>Tiered Rate Limits</h1>
+  <p>Apply different rate limits based on user tiers such as free, pro, and enterprise plans.</p>
+
+  <h2 id="basic-tiered">Basic Tiered Limits</h2>
+  <p>Use the <code>key</code> and <code>limit</code> options together to implement tiered rate limiting.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> tierLimits = {"{"}
+  free: <span class="num">100</span>,
+  pro: <span class="num">1000</span>,
+  enterprise: <span class="num">10000</span>
+{"}"};
+
+<span class="fn">hitlimit</span>({"{"}
+  limit: (req) => {"{"}
+    <span class="kw">const</span> tier = req.user?.tier || <span class="str">'free'</span>;
+    <span class="kw">return</span> tierLimits[tier];
+  {"}"},
+  window: <span class="str">'1h'</span>,
+  key: (req) => req.user?.id || req.ip
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="different-windows">Different Windows per Tier</h2>
+  <p>You can also vary the time window based on the user tier.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> tierConfig = {"{"}
+  free: {"{"} limit: <span class="num">100</span>, window: <span class="str">'1h'</span> {"}"},
+  pro: {"{"} limit: <span class="num">500</span>, window: <span class="str">'1m'</span> {"}"},
+  enterprise: {"{"} limit: <span class="num">5000</span>, window: <span class="str">'1m'</span> {"}"}
+{"}"};
+
+app.<span class="fn">use</span>((req, res, next) => {"{"}
+  <span class="kw">const</span> tier = req.user?.tier || <span class="str">'free'</span>;
+  <span class="kw">const</span> config = tierConfig[tier];
+
+  <span class="fn">hitlimit</span>({"{"}
+    limit: config.limit,
+    window: config.window,
+    key: () => <span class="str">`${"{"}</span>tier<span class="str">{"}"}:${"{"}</span>req.user?.id || req.ip<span class="str">{"}"}`</span>
+  {"}"})(req, res, next);
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="multiple-limiters">Multiple Limiters</h2>
+  <p>Apply separate rate limiters for different endpoints or user groups.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> freeLimiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1h'</span>
+{"}"});
+
+<span class="kw">const</span> proLimiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">1000</span>,
+  window: <span class="str">'1h'</span>
+{"}"});
+
+app.<span class="fn">use</span>(<span class="str">'/api'</span>, (req, res, next) => {"{"}
+  <span class="kw">if</span> (req.user?.tier === <span class="str">'pro'</span>) {"{"}
+    <span class="kw">return</span> <span class="fn">proLimiter</span>(req, res, next);
+  {"}"}
+  <span class="kw">return</span> <span class="fn">freeLimiter</span>(req, res, next);
+{"}"})</code></pre>
+  </div>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

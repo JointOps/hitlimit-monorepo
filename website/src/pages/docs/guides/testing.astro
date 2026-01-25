@@ -1,0 +1,201 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Testing Guide - hitlimit">
+  <h1>Testing Guide</h1>
+
+  <p>Strategies and examples for testing rate-limited applications.</p>
+
+  <h2 id="unit-testing">Unit Testing the Limiter</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} describe, it, expect, beforeEach {"}"} <span class="kw">from</span> <span class="str">'vitest'</span>
+<span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+
+<span class="fn">describe</span>(<span class="str">'Rate Limiter'</span>, () => {"{"}
+  <span class="kw">let</span> store: ReturnType&lt;<span class="kw">typeof</span> memoryStore&gt;
+  <span class="kw">let</span> limiter: ReturnType&lt;<span class="kw">typeof</span> hitlimit&gt;
+
+  <span class="fn">beforeEach</span>(() => {"{"}
+    store = <span class="fn">memoryStore</span>()
+    limiter = <span class="fn">hitlimit</span>({"{"}
+      limit: <span class="num">3</span>,
+      window: <span class="str">'1m'</span>,
+      store
+    {"}"})
+  {"}"})
+
+  <span class="fn">it</span>(<span class="str">'allows requests under limit'</span>, <span class="kw">async</span> () => {"{"}
+    <span class="kw">const</span> req = {"{"} ip: <span class="str">'127.0.0.1'</span> {"}"}
+    <span class="kw">const</span> res = {"{"} set: vi.<span class="fn">fn</span>() {"}"}
+    <span class="kw">const</span> next = vi.<span class="fn">fn</span>()
+
+    <span class="kw">await</span> <span class="fn">limiter</span>(req, res, next)
+
+    <span class="fn">expect</span>(next).<span class="fn">toHaveBeenCalled</span>()
+  {"}"})
+
+  <span class="fn">it</span>(<span class="str">'blocks requests over limit'</span>, <span class="kw">async</span> () => {"{"}
+    <span class="kw">const</span> req = {"{"} ip: <span class="str">'127.0.0.1'</span> {"}"}
+    <span class="kw">const</span> res = {"{"}
+      set: vi.<span class="fn">fn</span>(),
+      status: vi.<span class="fn">fn</span>().<span class="fn">mockReturnThis</span>(),
+      json: vi.<span class="fn">fn</span>()
+    {"}"}
+    <span class="kw">const</span> next = vi.<span class="fn">fn</span>()
+
+    <span class="cm">// Exhaust the limit</span>
+    <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; <span class="num">3</span>; i++) {"{"}
+      <span class="kw">await</span> <span class="fn">limiter</span>(req, res, next)
+    {"}"}
+
+    <span class="cm">// This should be blocked</span>
+    <span class="kw">await</span> <span class="fn">limiter</span>(req, res, next)
+
+    <span class="fn">expect</span>(res.status).<span class="fn">toHaveBeenCalledWith</span>(<span class="num">429</span>)
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="integration-testing">Integration Testing</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} describe, it, expect {"}"} <span class="kw">from</span> <span class="str">'vitest'</span>
+<span class="kw">import</span> supertest <span class="kw">from</span> <span class="str">'supertest'</span>
+<span class="kw">import</span> {"{"} app {"}"} <span class="kw">from</span> <span class="str">'./app'</span>
+
+<span class="fn">describe</span>(<span class="str">'API Rate Limiting'</span>, () => {"{"}
+  <span class="fn">it</span>(<span class="str">'returns rate limit headers'</span>, <span class="kw">async</span> () => {"{"}
+    <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">supertest</span>(app)
+      .<span class="fn">get</span>(<span class="str">'/api/data'</span>)
+      .<span class="fn">expect</span>(<span class="num">200</span>)
+
+    <span class="fn">expect</span>(res.headers[<span class="str">'ratelimit-limit'</span>]).<span class="fn">toBe</span>(<span class="str">'100'</span>)
+    <span class="fn">expect</span>(res.headers[<span class="str">'ratelimit-remaining'</span>]).<span class="fn">toBeDefined</span>()
+    <span class="fn">expect</span>(res.headers[<span class="str">'ratelimit-reset'</span>]).<span class="fn">toBeDefined</span>()
+  {"}"})
+
+  <span class="fn">it</span>(<span class="str">'returns 429 when rate limited'</span>, <span class="kw">async</span> () => {"{"}
+    <span class="kw">const</span> requests = Array(<span class="num">101</span>).<span class="fn">fill</span>(<span class="kw">null</span>).<span class="fn">map</span>(() =>
+      <span class="fn">supertest</span>(app).<span class="fn">get</span>(<span class="str">'/api/data'</span>)
+    )
+
+    <span class="kw">const</span> responses = <span class="kw">await</span> Promise.<span class="fn">all</span>(requests)
+    <span class="kw">const</span> blocked = responses.<span class="fn">filter</span>(r => r.status === <span class="num">429</span>)
+
+    <span class="fn">expect</span>(blocked.length).<span class="fn">toBeGreaterThan</span>(<span class="num">0</span>)
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="mocking">Mocking the Store</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} vi {"}"} <span class="kw">from</span> <span class="str">'vitest'</span>
+
+<span class="kw">const</span> mockStore = {"{"}
+  get: vi.<span class="fn">fn</span>(),
+  increment: vi.<span class="fn">fn</span>(),
+  reset: vi.<span class="fn">fn</span>(),
+  close: vi.<span class="fn">fn</span>()
+{"}"}
+
+<span class="cm">// Simulate rate limited state</span>
+mockStore.increment.<span class="fn">mockResolvedValue</span>({"{"}
+  count: <span class="num">101</span>,
+  resetTime: Date.<span class="fn">now</span>() + <span class="num">60000</span>
+{"}"})
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: mockStore
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="test-helpers">Test Helpers</h2>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// test/helpers/ratelimit.ts</span>
+<span class="kw">import</span> {"{"} memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+
+<span class="kw">export function</span> <span class="fn">createTestStore</span>() {"{"}
+  <span class="kw">return</span> <span class="fn">memoryStore</span>({"{"} cleanupInterval: <span class="num">0</span> {"}"})
+{"}"}
+
+<span class="kw">export async function</span> <span class="fn">exhaustLimit</span>(
+  store: Store,
+  key: <span class="kw">string</span>,
+  limit: <span class="kw">number</span>,
+  windowMs: <span class="kw">number</span>
+) {"{"}
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; limit; i++) {"{"}
+    <span class="kw">await</span> store.<span class="fn">increment</span>(key, windowMs)
+  {"}"}
+{"}"}
+
+<span class="kw">export async function</span> <span class="fn">waitForReset</span>(resetTime: <span class="kw">number</span>) {"{"}
+  <span class="kw">const</span> waitMs = resetTime - Date.<span class="fn">now</span>() + <span class="num">100</span>
+  <span class="kw">if</span> (waitMs > <span class="num">0</span>) {"{"}
+    <span class="kw">await</span> <span class="kw">new</span> <span class="fn">Promise</span>(r => <span class="fn">setTimeout</span>(r, waitMs))
+  {"}"}
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="skip-in-tests">Skipping Rate Limits in Tests</h2>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// Disable rate limiting in test environment</span>
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  skip: () => process.env.NODE_ENV === <span class="str">'test'</span>
+{"}"})
+
+<span class="cm">// Or use a very high limit</span>
+<span class="kw">const</span> testLimit = process.env.NODE_ENV === <span class="str">'test'</span>
+  ? <span class="num">1000000</span>
+  : <span class="num">100</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: testLimit,
+  window: <span class="str">'1m'</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="e2e-testing">E2E Testing</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} test, expect {"}"} <span class="kw">from</span> <span class="str">'@playwright/test'</span>
+
+<span class="fn">test</span>(<span class="str">'shows rate limit error message'</span>, <span class="kw">async</span> ({"{"} page {"}"}) => {"{"}
+  <span class="cm">// Make requests until rate limited</span>
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; <span class="num">101</span>; i++) {"{"}
+    <span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'/api/test'</span>)
+  {"}"}
+
+  <span class="cm">// Verify error message is displayed</span>
+  <span class="kw">await</span> <span class="fn">expect</span>(page.<span class="fn">locator</span>(<span class="str">'text=Too many requests'</span>))
+    .<span class="fn">toBeVisible</span>()
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="best-practices">Testing Best Practices</h2>
+
+  <ul>
+    <li>Use fresh store instances for each test</li>
+    <li>Test both success and rate-limited scenarios</li>
+    <li>Verify correct headers are returned</li>
+    <li>Test custom key extraction functions</li>
+    <li>Test skip conditions work as expected</li>
+    <li>Use time mocking for window-based tests</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

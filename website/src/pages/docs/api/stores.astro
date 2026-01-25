@@ -1,0 +1,128 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Store API - hitlimit">
+  <h1>Store API</h1>
+
+  <p>Stores manage rate limit data persistence. All stores implement the <code>Store</code> interface.</p>
+
+  <h2 id="interface">Store Interface</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">interface</span> Store {"{"}
+  <span class="fn">get</span>(key: <span class="kw">string</span>): Promise&lt;RateLimitInfo | <span class="kw">null</span>&gt;
+  <span class="fn">increment</span>(key: <span class="kw">string</span>, windowMs: <span class="kw">number</span>): Promise&lt;RateLimitInfo&gt;
+  <span class="fn">reset</span>(key: <span class="kw">string</span>): Promise&lt;<span class="kw">void</span>&gt;
+  <span class="fn">close</span>?(): Promise&lt;<span class="kw">void</span>&gt;
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="methods">Methods</h2>
+
+  <h3>get(key)</h3>
+  <p>Retrieves current rate limit info for a key.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> info = <span class="kw">await</span> store.<span class="fn">get</span>(<span class="str">'user:123'</span>)
+<span class="cm">// Returns: {"{"} count: 42, resetTime: 1640000060000 {"}"} or null</span></code></pre>
+  </div>
+
+  <h3>increment(key, windowMs)</h3>
+  <p>Increments the request count and returns updated info.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> info = <span class="kw">await</span> store.<span class="fn">increment</span>(<span class="str">'user:123'</span>, <span class="num">60000</span>)
+<span class="cm">// Returns: {"{"} count: 43, resetTime: 1640000060000 {"}"}</span></code></pre>
+  </div>
+
+  <h3>reset(key)</h3>
+  <p>Resets the rate limit for a specific key.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">await</span> store.<span class="fn">reset</span>(<span class="str">'user:123'</span>)</code></pre>
+  </div>
+
+  <h3>close()</h3>
+  <p>Optional cleanup method for closing connections.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">await</span> store.<span class="fn">close</span>()</code></pre>
+  </div>
+
+  <h2 id="built-in-stores">Built-in Stores</h2>
+
+  <h3>memoryStore()</h3>
+  <p>In-memory storage, suitable for single-instance deployments.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+
+<span class="kw">const</span> store = <span class="fn">memoryStore</span>({"{"}
+  cleanupInterval: <span class="num">60000</span>  <span class="cm">// Clean expired entries every 60s</span>
+{"}"})</code></pre>
+  </div>
+
+  <h3>sqliteStore()</h3>
+  <p>Persistent SQLite storage for single-server deployments.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/sqlite'</span>
+
+<span class="kw">const</span> store = <span class="fn">sqliteStore</span>({"{"}
+  path: <span class="str">'./rate-limits.db'</span>,
+  tableName: <span class="str">'rate_limits'</span>  <span class="cm">// Optional</span>
+{"}"})</code></pre>
+  </div>
+
+  <h3>redisStore()</h3>
+  <p>Redis storage for distributed deployments.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> store = <span class="fn">redisStore</span>({"{"}
+  url: <span class="str">'redis://localhost:6379'</span>,
+  prefix: <span class="str">'rl:'</span>  <span class="cm">// Key prefix</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="custom-store">Creating a Custom Store</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store, RateLimitInfo {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+
+<span class="kw">class</span> MyStore <span class="kw">implements</span> Store {"{"}
+  <span class="kw">private</span> data = <span class="kw">new</span> <span class="fn">Map</span>&lt;<span class="kw">string</span>, RateLimitInfo&gt;()
+
+  <span class="kw">async</span> <span class="fn">get</span>(key: <span class="kw">string</span>) {"{"}
+    <span class="kw">return</span> <span class="kw">this</span>.data.<span class="fn">get</span>(key) || <span class="kw">null</span>
+  {"}"}
+
+  <span class="kw">async</span> <span class="fn">increment</span>(key: <span class="kw">string</span>, windowMs: <span class="kw">number</span>) {"{"}
+    <span class="kw">const</span> now = Date.<span class="fn">now</span>()
+    <span class="kw">const</span> existing = <span class="kw">this</span>.data.<span class="fn">get</span>(key)
+
+    <span class="kw">if</span> (existing && existing.resetTime > now) {"{"}
+      existing.count++
+      <span class="kw">return</span> existing
+    {"}"}
+
+    <span class="kw">const</span> info = {"{"} count: <span class="num">1</span>, resetTime: now + windowMs {"}"}
+    <span class="kw">this</span>.data.<span class="fn">set</span>(key, info)
+    <span class="kw">return</span> info
+  {"}"}
+
+  <span class="kw">async</span> <span class="fn">reset</span>(key: <span class="kw">string</span>) {"{"}
+    <span class="kw">this</span>.data.<span class="fn">delete</span>(key)
+  {"}"}
+{"}"}</code></pre>
+  </div>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

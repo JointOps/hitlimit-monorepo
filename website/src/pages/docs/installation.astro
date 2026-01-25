@@ -1,0 +1,65 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import Tabs from '../../components/Tabs.astro';
+---
+
+<DocsLayout title="Installation - hitlimit">
+  <h1>Installation</h1>
+
+  <p>Install hitlimit using your preferred package manager.</p>
+
+  <h2 id="nodejs">Node.js</h2>
+
+  <Tabs
+    tabs={[
+      { label: 'npm', content: 'npm install hitlimit' },
+      { label: 'pnpm', content: 'pnpm add hitlimit' },
+      { label: 'yarn', content: 'yarn add hitlimit' },
+      { label: 'bun', content: 'bun add hitlimit' },
+    ]}
+  />
+
+  <h2 id="bun">Bun (Optimized)</h2>
+
+  <p>For Bun applications, use the Bun-optimized package with native SQLite:</p>
+
+  <Tabs
+    tabs={[
+      { label: 'bun', content: 'bun add hitlimit-bun' },
+    ]}
+  />
+
+  <h2 id="stores">Optional Store Packages</h2>
+
+  <p>Install additional stores as needed:</p>
+
+  <h3>Redis Store</h3>
+  <Tabs
+    tabs={[
+      { label: 'npm', content: 'npm install @hitlimit/redis ioredis' },
+      { label: 'pnpm', content: 'pnpm add @hitlimit/redis ioredis' },
+      { label: 'yarn', content: 'yarn add @hitlimit/redis ioredis' },
+    ]}
+  />
+
+  <h3>SQLite Store (Node.js)</h3>
+  <Tabs
+    tabs={[
+      { label: 'npm', content: 'npm install better-sqlite3' },
+      { label: 'pnpm', content: 'pnpm add better-sqlite3' },
+      { label: 'yarn', content: 'yarn add better-sqlite3' },
+    ]}
+  />
+
+  <h2 id="requirements">Requirements</h2>
+
+  <ul>
+    <li><strong>Node.js</strong>: v18.0.0 or higher</li>
+    <li><strong>Bun</strong>: v1.0.0 or higher</li>
+    <li><strong>TypeScript</strong>: v5.0 or higher (optional)</li>
+  </ul>
+
+  <h2 id="next-steps">Next Steps</h2>
+
+  <p>Now that you have hitlimit installed, head over to the <a href="/docs/quick-start">Quick Start</a> guide to set up your first rate limiter.</p>
+</DocsLayout>

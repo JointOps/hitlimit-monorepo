@@ -1,0 +1,511 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import DocsSidebar from '../components/DocsSidebar.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = 'Docs - hitlimit', description = 'hitlimit documentation' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen">
+    <!-- Subtle background gradient -->
+    <div class="fixed inset-0 -z-10 pointer-events-none">
+      <div class="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(0,229,255,0.06),transparent_70%)] blur-3xl"></div>
+    </div>
+
+    <Nav />
+
+    <div class="flex pt-24">
+      <!-- Sidebar -->
+      <aside class="hidden lg:block w-72 flex-shrink-0">
+        <div class="fixed top-24 w-72 h-[calc(100vh-6rem)] border-r border-[var(--color-border)] overflow-hidden">
+          <DocsSidebar />
+        </div>
+      </aside>
+
+      <!-- Main content -->
+      <main class="flex-1 min-w-0 px-6 lg:px-12 py-8 max-w-4xl">
+        <article class="prose prose-invert prose-lg max-w-none">
+          <slot />
+        </article>
+
+        <!-- Pagination -->
+        <div class="mt-16 pt-8 border-t border-[var(--color-border)]">
+          <div class="flex items-center justify-between">
+            <a href="#" class="group flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
+              <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Previous
+            </a>
+            <a href="#" class="group flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
+              Next
+              <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </main>
+
+      <!-- Table of Contents -->
+      <aside class="hidden xl:block w-64 flex-shrink-0">
+        <div class="toc-wrapper">
+          <div class="toc-header">
+            <svg class="toc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="6" x2="21" y2="6"/>
+              <line x1="8" y1="12" x2="21" y2="12"/>
+              <line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/>
+              <line x1="3" y1="12" x2="3.01" y2="12"/>
+              <line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+            <span>On this page</span>
+          </div>
+          <div class="toc-progress-container">
+            <div class="toc-progress-bar" id="toc-progress"></div>
+          </div>
+          <nav id="toc" class="toc-nav">
+            <!-- TOC will be populated by JS -->
+          </nav>
+          <div class="toc-actions">
+            <button class="toc-action-btn" id="scroll-to-top" title="Scroll to top">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5"/>
+                <polyline points="5 12 12 5 19 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  /* Prose overrides for docs */
+  .prose {
+    --tw-prose-body: var(--color-text-secondary);
+    --tw-prose-headings: var(--color-text-primary);
+    --tw-prose-links: var(--color-accent);
+    --tw-prose-code: var(--color-accent);
+  }
+
+  .prose h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+
+  .prose h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    position: relative;
+  }
+
+  .prose h2::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-secondary));
+    border-radius: 1px;
+  }
+
+  .prose h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .prose p {
+    line-height: 1.8;
+    margin-bottom: 1.25rem;
+  }
+
+  .prose a {
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .prose a:hover {
+    text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+  }
+
+  .prose code:not(pre code) {
+    background: var(--color-bg-elevated);
+    color: var(--color-accent);
+    padding: 0.2em 0.5em;
+    border-radius: 6px;
+    font-size: 0.875em;
+    font-family: var(--font-mono);
+    border: 1px solid var(--color-border);
+  }
+
+  .prose ul, .prose ol {
+    margin: 1.5rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .prose li {
+    margin-bottom: 0.5rem;
+    line-height: 1.7;
+  }
+
+  .prose li::marker {
+    color: var(--color-accent);
+  }
+
+  .prose blockquote {
+    border-left: 3px solid var(--color-accent);
+    background: var(--color-bg-surface);
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .prose table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 2rem 0;
+  }
+
+  .prose th {
+    background: var(--color-bg-surface);
+    font-weight: 600;
+    text-align: left;
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .prose td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .prose tr:last-child td {
+    border-bottom: none;
+  }
+
+  .prose hr {
+    border: none;
+    height: 1px;
+    background: var(--color-border);
+    margin: 3rem 0;
+  }
+
+  /* Table of Contents */
+  .toc-wrapper {
+    position: fixed;
+    top: 6rem;
+    width: 16rem;
+    max-height: calc(100vh - 8rem);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .toc-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .toc-icon {
+    width: 0.875rem;
+    height: 0.875rem;
+    opacity: 0.7;
+  }
+
+  .toc-progress-container {
+    height: 2px;
+    background: var(--color-border);
+    border-radius: 1px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+
+  .toc-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-secondary));
+    border-radius: 1px;
+    transition: width 0.15s ease-out;
+    box-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+  }
+
+  .toc-nav {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    padding-left: 0.75rem;
+  }
+
+  .toc-nav::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--color-border);
+  }
+
+  .toc-link {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 0.5rem 0;
+    text-decoration: none;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .toc-link-indicator {
+    position: absolute;
+    left: -0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: var(--color-accent);
+    border-radius: 0 2px 2px 0;
+    transition: all 0.2s ease;
+  }
+
+  .toc-link.active .toc-link-indicator {
+    height: 1rem;
+    box-shadow: 0 0 8px var(--color-accent), 0 0 16px rgba(0, 229, 255, 0.3);
+  }
+
+  .toc-link-text {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--color-text-muted);
+    transition: all 0.2s ease;
+  }
+
+  .toc-link:hover .toc-link-text {
+    color: var(--color-text-secondary);
+  }
+
+  .toc-link.active .toc-link-text {
+    color: var(--color-accent);
+    font-weight: 500;
+    text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+  }
+
+  .toc-link.h3 {
+    padding-left: 1rem;
+  }
+
+  .toc-link.h3 .toc-link-text {
+    font-size: 0.75rem;
+  }
+
+  .toc-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: center;
+  }
+
+  .toc-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .toc-action-btn:hover {
+    background: rgba(0, 229, 255, 0.1);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+  }
+
+  .toc-action-btn svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  /* Empty state */
+  .toc-empty {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+    padding: 0.5rem 0;
+  }
+</style>
+
+<script>
+  function initTOC() {
+    const article = document.querySelector('article');
+    const toc = document.getElementById('toc');
+    const progressBar = document.getElementById('toc-progress');
+    const scrollToTopBtn = document.getElementById('scroll-to-top');
+
+    if (!article || !toc) return;
+
+    // Clear existing TOC
+    toc.innerHTML = '';
+
+    const headings = article.querySelectorAll('h2, h3');
+
+    if (headings.length === 0) {
+      toc.innerHTML = '<div class="toc-empty">No sections found</div>';
+      return;
+    }
+
+    // Generate TOC links
+    headings.forEach((heading, index) => {
+      const id = heading.id || `heading-${index}`;
+      heading.id = id;
+
+      const link = document.createElement('a');
+      link.href = `#${id}`;
+      link.className = `toc-link ${heading.tagName.toLowerCase()}`;
+      link.dataset.target = id;
+      link.innerHTML = `
+        <span class="toc-link-indicator"></span>
+        <span class="toc-link-text">${heading.textContent}</span>
+      `;
+
+      // Smooth scroll on click
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.getElementById(id);
+        if (target) {
+          const offset = 100;
+          const top = target.getBoundingClientRect().top + window.scrollY - offset;
+          window.scrollTo({ top, behavior: 'smooth' });
+          history.pushState(null, '', `#${id}`);
+        }
+      });
+
+      toc.appendChild(link);
+    });
+
+    // Scroll spy - highlight active section
+    const tocLinks = toc.querySelectorAll('.toc-link');
+
+    function updateActiveSection() {
+      const scrollPosition = window.scrollY + 120;
+      let activeIndex = 0;
+
+      headings.forEach((heading, index) => {
+        if (heading.offsetTop <= scrollPosition) {
+          activeIndex = index;
+        }
+      });
+
+      tocLinks.forEach((link, index) => {
+        link.classList.toggle('active', index === activeIndex);
+      });
+    }
+
+    // Progress bar
+    function updateProgress() {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      if (progressBar) {
+        progressBar.style.width = `${Math.min(progress, 100)}%`;
+      }
+    }
+
+    // Scroll handler with throttling
+    let ticking = false;
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          updateActiveSection();
+          updateProgress();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Initial update
+    updateActiveSection();
+    updateProgress();
+
+    // Scroll to top button
+    if (scrollToTopBtn) {
+      scrollToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    // Handle initial hash
+    if (window.location.hash) {
+      const targetId = window.location.hash.slice(1);
+      const target = document.getElementById(targetId);
+      if (target) {
+        setTimeout(() => {
+          const offset = 100;
+          const top = target.getBoundingClientRect().top + window.scrollY - offset;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }
+
+  // Initialize
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTOC);
+  } else {
+    initTOC();
+  }
+
+  // Re-init on Astro page transitions
+  document.addEventListener('astro:after-swap', initTOC);
+</script>

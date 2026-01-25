@@ -1,0 +1,111 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="hitlimit() Function - hitlimit">
+  <h1>hitlimit() Function</h1>
+
+  <p>The main function to create rate limiting middleware.</p>
+
+  <h2 id="signature">Function Signature</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">function</span> <span class="fn">hitlimit</span>(options: HitlimitOptions): Middleware</code></pre>
+  </div>
+
+  <h2 id="parameters">Parameters</h2>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>options</code></td><td>HitlimitOptions</td><td>Yes</td><td>Configuration object</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="options">Options Object</h2>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>limit</code></td><td>number</td><td>100</td><td>Max requests per window</td></tr>
+      <tr><td><code>window</code></td><td>string | number</td><td>'1m'</td><td>Time window duration</td></tr>
+      <tr><td><code>key</code></td><td>(req) => string</td><td>req.ip</td><td>Key extraction function</td></tr>
+      <tr><td><code>store</code></td><td>Store</td><td>memoryStore()</td><td>Storage backend</td></tr>
+      <tr><td><code>skip</code></td><td>(req) => boolean</td><td>undefined</td><td>Skip rate limiting</td></tr>
+      <tr><td><code>headers</code></td><td>boolean</td><td>true</td><td>Include rate limit headers</td></tr>
+      <tr><td><code>statusCode</code></td><td>number</td><td>429</td><td>Status code when limited</td></tr>
+      <tr><td><code>response</code></td><td>object | function</td><td>-</td><td>Custom error response</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="returns">Return Value</h2>
+
+  <p>Returns a middleware function compatible with Express, Hono, and other frameworks.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">type</span> Middleware = (req: Request, res: Response, next: NextFunction) => <span class="kw">void</span></code></pre>
+  </div>
+
+  <h2 id="basic-example">Basic Example</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+
+<span class="cm">// 100 requests per minute</span>
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="advanced-example">Advanced Example</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">1000</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => req.headers[<span class="str">'x-api-key'</span>] || req.ip,
+  store: <span class="fn">redisStore</span>({"{"} url: <span class="str">'redis://localhost:6379'</span> {"}"}),
+  skip: (req) => req.path === <span class="str">'/health'</span>,
+  headers: <span class="kw">true</span>,
+  statusCode: <span class="num">429</span>,
+  response: (req, res) => ({"{"}
+    error: <span class="str">'Rate limit exceeded'</span>,
+    retryAfter: res.getHeader(<span class="str">'Retry-After'</span>)
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="error-handling">Error Handling</h2>
+
+  <p>When rate limited, the middleware responds with:</p>
+
+  <div class="code-block">
+    <pre><code>HTTP/1.1 <span class="num">429</span> Too Many Requests
+RateLimit-Limit: <span class="num">100</span>
+RateLimit-Remaining: <span class="num">0</span>
+RateLimit-Reset: <span class="num">1640000060</span>
+Retry-After: <span class="num">60</span>
+
+{"{"} <span class="str">"error"</span>: <span class="str">"Too Many Requests"</span> {"}"}</code></pre>
+  </div>
+</DocsLayout>
+
+<style>
+  .options-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .options-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .options-table tr:last-child td { border-bottom: none; }
+  .options-table code { background: var(--color-bg-elevated); color: var(--color-accent); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; }
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

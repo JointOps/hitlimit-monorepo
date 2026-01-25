@@ -1,0 +1,210 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Quick Start - Bun - hitlimit">
+  <h1>Bun Quick Start</h1>
+
+  <p>Get up and running with hitlimit in Bun in under 5 minutes.</p>
+
+  <h2 id="basic-usage">Basic Usage</h2>
+
+  <p>The simplest way to add rate limiting to a Bun.serve application:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">server.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+{"}"})
+
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> {"{"} allowed, remaining, reset {"}"} = <span class="kw">await</span> limiter.<span class="fn">check</span>(req)
+
+    <span class="kw">if</span> (!allowed) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Too Many Requests'</span>, {"{"}
+        status: <span class="num">429</span>,
+        headers: {"{"} <span class="str">'Retry-After'</span>: String(reset) {"}"}
+      {"}"})
+    {"}"}
+
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Hello World!'</span>, {"{"}
+      headers: {"{"}
+        <span class="str">'X-RateLimit-Remaining'</span>: String(remaining)
+      {"}"}
+    {"}"})
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="time-windows">Time Windows</h2>
+
+  <p>Use human-readable time strings:</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})   <span class="cm">// 100 per minute</span>
+<span class="fn">hitlimit</span>({"{"} limit: <span class="num">1000</span>, window: <span class="str">'1h'</span> {"}"})  <span class="cm">// 1000 per hour</span>
+<span class="fn">hitlimit</span>({"{"} limit: <span class="num">10000</span>, window: <span class="str">'1d'</span> {"}"}) <span class="cm">// 10000 per day</span>
+<span class="fn">hitlimit</span>({"{"} limit: <span class="num">5</span>, window: <span class="str">'10s'</span> {"}"})    <span class="cm">// 5 per 10 seconds</span></code></pre>
+  </div>
+
+  <h2 id="custom-key">Custom Key Extraction</h2>
+
+  <p>Rate limit by custom identifiers:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">custom-key.ts</span>
+    </div>
+    <pre><code><span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  <span class="cm">// Rate limit by API key header</span>
+  <span class="fn">key</span>(req) {"{"}
+    <span class="kw">return</span> req.headers.<span class="fn">get</span>(<span class="str">'X-API-Key'</span>) || <span class="fn">getClientIP</span>(req)
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="sqlite-store">Using Native SQLite Store</h2>
+
+  <p>Bun includes native SQLite support. Use it for persistent rate limiting:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">sqlite-store.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, bunSqliteStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">bunSqliteStore</span>({"{"}
+    path: <span class="str">'./rate-limits.db'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="middleware-pattern">Middleware Pattern</h2>
+
+  <p>Create a reusable rate limiting middleware:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">middleware.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
+
+<span class="kw">type</span> Handler = (req: Request) => Response | Promise&lt;Response&gt;
+
+<span class="kw">function</span> <span class="fn">withRateLimit</span>(handler: Handler): Handler {"{"}
+  <span class="kw">return</span> <span class="kw">async</span> (req) => {"{"}
+    <span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(req)
+
+    <span class="kw">if</span> (!result.allowed) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(JSON.<span class="fn">stringify</span>({"{"}
+        error: <span class="str">'Rate limit exceeded'</span>,
+        retryAfter: result.reset
+      {"}"}), {"{"}
+        status: <span class="num">429</span>,
+        headers: {"{"} <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> {"}"}
+      {"}"})
+    {"}"}
+
+    <span class="kw">return</span> <span class="fn">handler</span>(req)
+  {"}"}
+{"}"}
+
+<span class="kw">export</span> {"{"} withRateLimit {"}"}</code></pre>
+  </div>
+
+  <h2 id="next-steps">Next Steps</h2>
+
+  <ul>
+    <li><a href="/docs/bun/bun-serve">Bun.serve Integration</a> - Advanced server patterns</li>
+    <li><a href="/docs/bun/elysia">Elysia Plugin</a> - Use with Elysia framework</li>
+    <li><a href="/docs/bun/stores">Stores</a> - Native SQLite and memory stores</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+  .code-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+  }
+  .dot.red { background: rgba(239, 68, 68, 0.8); }
+  .dot.yellow { background: rgba(234, 179, 8, 0.8); }
+  .dot.green { background: rgba(34, 197, 94, 0.8); }
+  .code-filename {
+    margin-left: 1rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+  .code-block pre {
+    padding: 1.5rem;
+    margin: 0;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: var(--color-text-muted); }
+</style>

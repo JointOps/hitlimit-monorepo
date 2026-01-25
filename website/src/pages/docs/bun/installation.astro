@@ -1,0 +1,78 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import Tabs from '../../../components/Tabs.astro';
+---
+
+<DocsLayout title="Installation - Bun - hitlimit">
+  <h1>Bun Installation</h1>
+
+  <p>Install hitlimit for Bun using the Bun package manager.</p>
+
+  <h2 id="install">Install the Package</h2>
+
+  <Tabs
+    tabs={[
+      { label: 'bun', content: 'bun add hitlimit-bun' },
+    ]}
+  />
+
+  <p>
+    The <code>hitlimit-bun</code> package is optimized specifically for Bun and includes
+    native SQLite store support out of the box.
+  </p>
+
+  <h2 id="verify">Verify Installation</h2>
+
+  <p>Create a test file to verify the installation:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">test.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">10</span>, window: <span class="str">'1m'</span> {"}"})
+
+console.<span class="fn">log</span>(<span class="str">'hitlimit-bun installed successfully!'</span>)</code></pre>
+  </div>
+
+  <p>Run the test:</p>
+
+  <Tabs tabs={[{ label: 'bun', content: 'bun run test.ts' }]} />
+
+  <h2 id="optional-deps">Optional Dependencies</h2>
+
+  <p>For Redis support in Bun:</p>
+
+  <Tabs tabs={[{ label: 'bun', content: 'bun add @hitlimit/redis ioredis' }]} />
+
+  <h2 id="requirements">Requirements</h2>
+
+  <ul>
+    <li><strong>Bun</strong>: v1.0.0 or higher</li>
+    <li><strong>TypeScript</strong>: v5.0 or higher (optional but recommended)</li>
+  </ul>
+
+  <h2 id="next-steps">Next Steps</h2>
+
+  <p>Now that you have hitlimit-bun installed, proceed to the <a href="/docs/bun/quick-start">Quick Start</a> guide.</p>
+</DocsLayout>
+
+<style>
+  .code-block { margin: 1.5rem 0; border-radius: 1rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); background: var(--color-bg-elevated); }
+  .code-dots { display: flex; gap: 0.5rem; }
+  .dot { width: 0.75rem; height: 0.75rem; border-radius: 50%; }
+  .dot.red { background: rgba(239, 68, 68, 0.8); }
+  .dot.yellow { background: rgba(234, 179, 8, 0.8); }
+  .dot.green { background: rgba(34, 197, 94, 0.8); }
+  .code-filename { margin-left: 1rem; font-size: 0.75rem; color: var(--color-text-muted); font-family: var(--font-mono); }
+  .code-block pre { padding: 1.5rem; margin: 0; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; }
+</style>

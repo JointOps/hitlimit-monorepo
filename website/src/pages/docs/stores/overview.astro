@@ -1,0 +1,83 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Stores Overview - hitlimit">
+  <h1>Stores Overview</h1>
+
+  <p>Stores are the backend that hitlimit uses to track request counts. Choose the right store based on your deployment needs.</p>
+
+  <h2 id="available-stores">Available Stores</h2>
+
+  <table class="stores-table">
+    <thead>
+      <tr><th>Store</th><th>Persistence</th><th>Multi-instance</th><th>Best For</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><a href="/docs/stores/memory">Memory</a></td><td>No</td><td>No</td><td>Development, single instance</td></tr>
+      <tr><td><a href="/docs/stores/sqlite">SQLite</a></td><td>Yes</td><td>No</td><td>Single server, persistence needed</td></tr>
+      <tr><td><a href="/docs/stores/redis">Redis</a></td><td>Yes</td><td>Yes</td><td>Distributed systems, high traffic</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="quick-comparison">Quick Comparison</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/sqlite'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="cm">// Memory - default, no config needed</span>
+<span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
+
+<span class="cm">// SQLite - persistent storage</span>
+<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">sqliteStore</span>({"{"} path: <span class="str">'./limits.db'</span> {"}"})
+{"}"})
+
+<span class="cm">// Redis - distributed</span>
+<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">redisStore</span>({"{"} url: <span class="str">'redis://localhost:6379'</span> {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="choosing-a-store">Choosing a Store</h2>
+
+  <ul>
+    <li><strong>Development:</strong> Use the default memory store for simplicity</li>
+    <li><strong>Single server production:</strong> SQLite provides persistence without external dependencies</li>
+    <li><strong>Multiple servers:</strong> Redis ensures consistent rate limiting across all instances</li>
+    <li><strong>Custom requirements:</strong> <a href="/docs/stores/custom">Create your own store</a></li>
+  </ul>
+
+  <h2 id="store-interface">Store Interface</h2>
+
+  <p>All stores implement the same interface:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">interface</span> Store {"{"}
+  <span class="fn">increment</span>(key: <span class="str">string</span>, window: <span class="str">number</span>): <span class="fn">Promise</span>&lt;{"{"}
+    count: <span class="str">number</span>
+    resetAt: <span class="str">number</span>
+  {"}"}&gt;
+  <span class="fn">reset</span>(key: <span class="str">string</span>): <span class="fn">Promise</span>&lt;<span class="str">void</span>&gt;
+{"}"}</code></pre>
+  </div>
+</DocsLayout>
+
+<style>
+  .stores-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .stores-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .stores-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .stores-table tr:last-child td { border-bottom: none; }
+  .stores-table a { color: var(--color-accent); text-decoration: none; }
+  .stores-table a:hover { text-decoration: underline; }
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

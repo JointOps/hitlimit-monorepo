@@ -1,0 +1,255 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout title="Bun.serve - hitlimit">
+  <h1>Bun.serve Integration</h1>
+
+  <p>
+    hitlimit provides direct integration with Bun's native HTTP server for maximum performance.
+    This guide covers patterns for using rate limiting with <code>Bun.serve</code>.
+  </p>
+
+  <h2 id="basic-integration">Basic Integration</h2>
+
+  <p>Add rate limiting to any Bun.serve application:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">server.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
+
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> {"{"} allowed, remaining, reset, limit {"}"} = <span class="kw">await</span> limiter.<span class="fn">check</span>(req)
+
+    <span class="kw">const</span> headers = {"{"}
+      <span class="str">'X-RateLimit-Limit'</span>: String(limit),
+      <span class="str">'X-RateLimit-Remaining'</span>: String(remaining),
+      <span class="str">'X-RateLimit-Reset'</span>: String(reset)
+    {"}"}
+
+    <span class="kw">if</span> (!allowed) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Rate limit exceeded'</span>, {"{"}
+        status: <span class="num">429</span>,
+        headers: {"{"} ...headers, <span class="str">'Retry-After'</span>: String(reset) {"}"}
+      {"}"})
+    {"}"}
+
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Hello World!'</span>, {"{"} headers {"}"})
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="route-based">Route-Based Rate Limiting</h2>
+
+  <p>Apply different limits to different routes:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">routes.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+
+<span class="cm">// Different limiters for different endpoints</span>
+<span class="kw">const</span> apiLimiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
+<span class="kw">const</span> authLimiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">5</span>, window: <span class="str">'15m'</span> {"}"})
+<span class="kw">const</span> uploadLimiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">10</span>, window: <span class="str">'1h'</span> {"}"})
+
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> url = <span class="kw">new</span> <span class="fn">URL</span>(req.url)
+
+    <span class="cm">// Select limiter based on route</span>
+    <span class="kw">let</span> limiter = apiLimiter
+    <span class="kw">if</span> (url.pathname.<span class="fn">startsWith</span>(<span class="str">'/auth'</span>)) {"{"}
+      limiter = authLimiter
+    {"}"} <span class="kw">else if</span> (url.pathname.<span class="fn">startsWith</span>(<span class="str">'/upload'</span>)) {"{"}
+      limiter = uploadLimiter
+    {"}"}
+
+    <span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(req)
+
+    <span class="kw">if</span> (!result.allowed) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Rate limited'</span>, {"{"} status: <span class="num">429</span> {"}"})
+    {"}"}
+
+    <span class="cm">// Route handling...</span>
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'OK'</span>)
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="ip-extraction">IP Address Extraction</h2>
+
+  <p>Extract client IP from various headers:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">ip-extraction.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  <span class="fn">key</span>(req, server) {"{"}
+    <span class="cm">// Check for proxy headers first</span>
+    <span class="kw">const</span> forwarded = req.headers.<span class="fn">get</span>(<span class="str">'X-Forwarded-For'</span>)
+    <span class="kw">if</span> (forwarded) {"{"}
+      <span class="kw">return</span> forwarded.<span class="fn">split</span>(<span class="str">','</span>)[<span class="num">0</span>].<span class="fn">trim</span>()
+    {"}"}
+
+    <span class="cm">// Cloudflare</span>
+    <span class="kw">const</span> cfIP = req.headers.<span class="fn">get</span>(<span class="str">'CF-Connecting-IP'</span>)
+    <span class="kw">if</span> (cfIP) <span class="kw">return</span> cfIP
+
+    <span class="cm">// Fallback to Bun's socket address</span>
+    <span class="kw">return</span> server.requestIP(req)?.address || <span class="str">'unknown'</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="websockets">WebSocket Support</h2>
+
+  <p>Rate limit WebSocket connections:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">websocket.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+
+<span class="kw">const</span> wsLimiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">10</span>, window: <span class="str">'1m'</span> {"}"})
+
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req, server) {"{"}
+    <span class="kw">if</span> (req.headers.<span class="fn">get</span>(<span class="str">'upgrade'</span>) === <span class="str">'websocket'</span>) {"{"}
+      <span class="kw">const</span> result = <span class="kw">await</span> wsLimiter.<span class="fn">check</span>(req)
+
+      <span class="kw">if</span> (!result.allowed) {"{"}
+        <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Too many connections'</span>, {"{"} status: <span class="num">429</span> {"}"})
+      {"}"}
+
+      server.<span class="fn">upgrade</span>(req)
+      <span class="kw">return</span>
+    {"}"}
+
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Use WebSocket'</span>)
+  {"}"},
+  websocket: {"{"}
+    <span class="fn">message</span>(ws, msg) {"{"}
+      ws.<span class="fn">send</span>(<span class="str">`Echo: ${"{"}msg{"}"}`</span>)
+    {"}"}
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="error-handling">Error Handling</h2>
+
+  <p>Handle rate limiter errors gracefully:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+  <span class="kw">try</span> {"{"}
+    <span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(req)
+    <span class="kw">if</span> (!result.allowed) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Rate limited'</span>, {"{"} status: <span class="num">429</span> {"}"})
+    {"}"}
+  {"}"} <span class="kw">catch</span> (error) {"{"}
+    <span class="cm">// Log error but allow request (fail-open)</span>
+    console.<span class="fn">error</span>(<span class="str">'Rate limiter error:'</span>, error)
+  {"}"}
+
+  <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'OK'</span>)
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="next-steps">Next Steps</h2>
+
+  <ul>
+    <li><a href="/docs/bun/elysia">Elysia Plugin</a> - Use with Elysia framework</li>
+    <li><a href="/docs/bun/stores">Stores</a> - Native SQLite configuration</li>
+    <li><a href="/docs/bun/performance">Performance</a> - Optimization tips</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+  .code-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+  }
+  .dot.red { background: rgba(239, 68, 68, 0.8); }
+  .dot.yellow { background: rgba(234, 179, 8, 0.8); }
+  .dot.green { background: rgba(34, 197, 94, 0.8); }
+  .code-filename {
+    margin-left: 1rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+  .code-block pre {
+    padding: 1.5rem;
+    margin: 0;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: var(--color-text-muted); }
+</style>
