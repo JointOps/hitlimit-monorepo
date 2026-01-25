@@ -1,0 +1,32 @@
+{
+  "name": "@hitlimit/types",
+  "version": "1.0.0",
+  "description": "Type definitions for hitlimit rate limiting library",
+  "author": "hitlimit",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hitlimit/hitlimit",
+    "directory": "packages/types"
+  },
+  "keywords": ["rate-limit", "types", "typescript"],
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}
