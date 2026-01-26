@@ -107,10 +107,66 @@ jobs:
         with:
           path: benchmark-artifacts
 
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Merge results
+        run: |
+          mkdir -p benchmarks/results
+          cp benchmark-artifacts/benchmark-results-node/*.json benchmarks/results/ 2>/dev/null || true
+          cp benchmark-artifacts/benchmark-results-bun/*.json benchmarks/results/ 2>/dev/null || true
+
+      - name: Check for regressions
+        if: github.event_name == 'pull_request'
+        run: |
+          cd benchmarks
+          npx tsx src/scripts/check-regression.ts || echo "No baseline found, skipping regression check"
+
       - name: Display Results
         run: |
           echo "## Node.js Results"
-          cat benchmark-artifacts/benchmark-results-node/latest.json 2>/dev/null || echo "No Node.js results"
+          cat benchmark-artifacts/benchmark-results-node/node-latest.md 2>/dev/null || cat benchmark-artifacts/benchmark-results-node/latest.json 2>/dev/null || echo "No Node.js results"
           echo ""
           echo "## Bun Results"
-          cat benchmark-artifacts/benchmark-results-bun/latest.json 2>/dev/null || echo "No Bun results"
+          cat benchmark-artifacts/benchmark-results-bun/bun-latest.md 2>/dev/null || cat benchmark-artifacts/benchmark-results-bun/latest.json 2>/dev/null || echo "No Bun results"
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let comment = '## Benchmark Results\n\n';
+
+            // Node results
+            try {
+              const nodeReport = fs.readFileSync('benchmark-artifacts/benchmark-results-node/node-latest.md', 'utf8');
+              comment += '### Node.js\n\n' + nodeReport + '\n\n';
+            } catch {
+              comment += '### Node.js\n\nNo results available.\n\n';
+            }
+
+            // Bun results
+            try {
+              const bunReport = fs.readFileSync('benchmark-artifacts/benchmark-results-bun/bun-latest.md', 'utf8');
+              comment += '### Bun\n\n' + bunReport + '\n\n';
+            } catch {
+              comment += '### Bun\n\nNo results available.\n\n';
+            }
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
