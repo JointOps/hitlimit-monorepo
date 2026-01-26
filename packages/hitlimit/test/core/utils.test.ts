@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseWindow, hashKey } from '../../src/core/utils.js'
+import { parseWindow } from '../../src/core/utils.js'
 
 describe('parseWindow', () => {
   it('parses seconds', () => {
@@ -59,42 +59,3 @@ describe('parseWindow', () => {
   })
 })
 
-describe('hashKey', () => {
-  it('returns consistent hash for same input', () => {
-    const hash1 = hashKey('test-key')
-    const hash2 = hashKey('test-key')
-    expect(hash1).toBe(hash2)
-  })
-
-  it('returns different hash for different input', () => {
-    const hash1 = hashKey('key1')
-    const hash2 = hashKey('key2')
-    expect(hash1).not.toBe(hash2)
-  })
-
-  it('returns fixed length string', () => {
-    const hash = hashKey('any-key')
-    expect(hash.length).toBe(16)
-  })
-
-  it('handles empty string', () => {
-    const hash = hashKey('')
-    expect(hash.length).toBe(16)
-  })
-
-  it('handles special characters', () => {
-    const hash = hashKey('key:with/special@chars#!')
-    expect(hash.length).toBe(16)
-  })
-
-  it('handles unicode', () => {
-    const hash = hashKey('ключ-日本語-🔑')
-    expect(hash.length).toBe(16)
-  })
-
-  it('handles very long keys', () => {
-    const longKey = 'x'.repeat(10000)
-    const hash = hashKey(longKey)
-    expect(hash.length).toBe(16)
-  })
-})

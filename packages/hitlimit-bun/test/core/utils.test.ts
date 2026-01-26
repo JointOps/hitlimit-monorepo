@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test'
-import { parseWindow, hashKey } from '../../src/core/utils'
+import { parseWindow } from '../../src/core/utils'
 
 describe('parseWindow', () => {
   it('parses seconds', () => {
@@ -34,21 +34,3 @@ describe('parseWindow', () => {
   })
 })
 
-describe('hashKey', () => {
-  it('returns consistent hash for same input', () => {
-    const hash1 = hashKey('test-key')
-    const hash2 = hashKey('test-key')
-    expect(hash1).toBe(hash2)
-  })
-
-  it('returns different hash for different input', () => {
-    const hash1 = hashKey('key1')
-    const hash2 = hashKey('key2')
-    expect(hash1).not.toBe(hash2)
-  })
-
-  it('returns non-empty string', () => {
-    const hash = hashKey('any-key')
-    expect(hash.length).toBeGreaterThan(0)
-  })
-})

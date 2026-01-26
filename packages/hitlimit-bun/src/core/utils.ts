@@ -13,7 +13,3 @@ export function parseWindow(window: string | number): number {
 
   return parseInt(match[1]) * UNITS[match[2]]
 }
-
-export function hashKey(key: string): string {
-  return Bun.hash(key).toString(16)
-}

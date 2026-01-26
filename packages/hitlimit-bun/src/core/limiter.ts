@@ -1,5 +1,5 @@
 import type { HitLimitInfo, HitLimitResult, ResolvedConfig } from '@joint-ops/hitlimit-types'
-import { parseWindow, hashKey } from './utils.js'
+import { parseWindow } from './utils.js'
 import { buildHeaders } from './headers.js'
 import { buildBody } from './response.js'
 
@@ -7,8 +7,8 @@ export async function checkLimit<TRequest>(
   config: ResolvedConfig<TRequest>,
   req: TRequest
 ): Promise<HitLimitResult> {
-  const rawKey = await config.key(req)
-  const key = hashKey(rawKey)
+  // Use raw key directly - no hashing needed for rate limit keys
+  const key = await config.key(req)
 
   let limit = config.limit
   let windowMs = config.windowMs
@@ -28,7 +28,7 @@ export async function checkLimit<TRequest>(
   if (limit === Infinity) {
     return {
       allowed: true,
-      info: { limit, remaining: Infinity, resetIn: 0, resetAt: 0, key: rawKey, tier: tierName },
+      info: { limit, remaining: Infinity, resetIn: 0, resetAt: 0, key, tier: tierName },
       headers: {},
       body: {}
     }
@@ -45,7 +45,7 @@ export async function checkLimit<TRequest>(
     remaining,
     resetIn,
     resetAt: result.resetAt,
-    key: rawKey,
+    key,
     tier: tierName
   }
 
