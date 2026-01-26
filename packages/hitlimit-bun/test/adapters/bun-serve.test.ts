@@ -52,8 +52,8 @@ describe('Bun.serve Adapter', () => {
 
     server = Bun.serve({
       port: 0,
-      fetch(req, server) {
-        const blocked = limiter.check(req, server)
+      async fetch(req, server) {
+        const blocked = await limiter.check(req, server)
         if (blocked) return blocked
         return new Response('OK')
       }
