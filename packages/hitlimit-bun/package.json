@@ -72,7 +72,7 @@
     "test:watch": "bun test --watch"
   },
   "dependencies": {
-    "@hitlimit/types": "workspace:*"
+    "@hitlimit/types": "file:../types"
   },
   "peerDependencies": {
     "elysia": ">=1.0.0",

@@ -64,4 +64,52 @@ describe('buildBody', () => {
     expect(body.type).toBe('rate_limit')
     expect(body.documentation_url).toBe('https://example.com/docs')
   })
+
+  it('handles info with undefined tier gracefully', () => {
+    const infoNoTier: HitLimitInfo = { ...baseInfo, tier: undefined }
+    const response = (info: HitLimitInfo) => ({
+      message: 'Limited',
+      tier: info.tier ?? 'default'
+    })
+    const body = buildBody(response, infoNoTier)
+
+    expect(body.tier).toBe('default')
+  })
+
+  it('handles response function that returns object with undefined values', () => {
+    const response = () => ({
+      message: 'Limited',
+      extra: undefined
+    })
+    const body = buildBody(response, baseInfo)
+
+    expect(body.message).toBe('Limited')
+    expect(body.extra).toBeUndefined()
+  })
+
+  it('handles response with numeric values', () => {
+    const response = {
+      errorCode: 429,
+      waitSeconds: 60,
+      maxRetries: 3
+    }
+    const body = buildBody(response, baseInfo)
+
+    expect(body.errorCode).toBe(429)
+    expect(body.waitSeconds).toBe(60)
+    expect(body.maxRetries).toBe(3)
+  })
+
+  it('handles response with nested objects', () => {
+    const response = {
+      error: {
+        code: 'RATE_LIMITED',
+        details: { limit: 100 }
+      }
+    }
+    const body = buildBody(response, baseInfo)
+
+    expect(body.error.code).toBe('RATE_LIMITED')
+    expect(body.error.details.limit).toBe(100)
+  })
 })

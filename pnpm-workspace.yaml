@@ -1,4 +1,6 @@
 packages:
-  - 'packages/*'
+  - 'packages/types'
+  - 'packages/hitlimit'
+  # hitlimit-bun is EXCLUDED - it uses bun natively
   - 'docs'
   - 'benchmarks'

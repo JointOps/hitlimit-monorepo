@@ -1,0 +1,156 @@
+---
+---
+
+<section class="py-24 px-4 border-t border-[var(--color-border)]">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+        See the <span class="gradient-text">difference</span>
+      </h2>
+      <p class="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto">
+        Built-in tiered limits mean less code and fewer bugs. Compare implementing user tiers.
+      </p>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-8">
+      <!-- Before: express-rate-limit -->
+      <div class="relative">
+        <div class="absolute -top-3 left-4 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-semibold uppercase tracking-wider">
+          Before
+        </div>
+        <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] overflow-hidden">
+          <div class="flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
+            <div class="flex gap-2">
+              <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+            </div>
+            <span class="ml-4 text-xs text-[var(--color-text-muted)] font-mono">express-rate-limit</span>
+          </div>
+          <div class="p-6 font-mono text-sm overflow-x-auto">
+            <pre class="code-text"><code><span class="cm">// Create separate limiters for each tier</span>
+<span class="kw">const</span> freeLimiter = <span class="fn">rateLimit</span>({"{"}
+  windowMs: <span class="num">60</span> * <span class="num">60</span> * <span class="num">1000</span>, <span class="cm">// 1 hour?</span>
+  max: <span class="num">100</span>
+{"}"})
+
+<span class="kw">const</span> proLimiter = <span class="fn">rateLimit</span>({"{"}
+  windowMs: <span class="num">60</span> * <span class="num">60</span> * <span class="num">1000</span>,
+  max: <span class="num">5000</span>
+{"}"})
+
+<span class="kw">const</span> enterpriseLimiter = <span class="fn">rateLimit</span>({"{"}
+  windowMs: <span class="num">60</span> * <span class="num">60</span> * <span class="num">1000</span>,
+  max: <span class="num">100000</span>
+{"}"})
+
+<span class="cm">// Manual routing logic</span>
+app.<span class="fn">use</span>((<span class="pr">req</span>, <span class="pr">res</span>, <span class="pr">next</span>) => {"{"}
+  <span class="kw">const</span> tier = <span class="fn">getUserTier</span>(req)
+  <span class="kw">if</span> (tier === <span class="str">'enterprise'</span>) {"{"}
+    <span class="kw">return</span> <span class="fn">enterpriseLimiter</span>(req, res, next)
+  {"}"} <span class="kw">else if</span> (tier === <span class="str">'pro'</span>) {"{"}
+    <span class="kw">return</span> <span class="fn">proLimiter</span>(req, res, next)
+  {"}"}
+  <span class="kw">return</span> <span class="fn">freeLimiter</span>(req, res, next)
+{"}"})</code></pre>
+          </div>
+          <div class="px-6 py-4 border-t border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
+            <div class="flex items-center gap-4 text-sm text-[var(--color-text-muted)]">
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                25 lines
+              </span>
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Manual tier logic
+              </span>
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Milliseconds
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- After: hitlimit -->
+      <div class="relative">
+        <div class="absolute -top-3 left-4 px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30 text-green-400 text-xs font-semibold uppercase tracking-wider">
+          After
+        </div>
+        <div class="rounded-2xl border border-[var(--color-accent)]/30 bg-[var(--color-bg-surface)] overflow-hidden shadow-[0_0_40px_rgba(0,229,255,0.1)]">
+          <div class="flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
+            <div class="flex gap-2">
+              <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+            </div>
+            <span class="ml-4 text-xs text-[var(--color-accent)] font-mono font-semibold">hitlimit</span>
+          </div>
+          <div class="p-6 font-mono text-sm overflow-x-auto">
+            <pre class="code-text"><code>app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+  tiers: {"{"}
+    free: {"{"} limit: <span class="num">100</span>, window: <span class="str">'1h'</span> {"}"},
+    pro: {"{"} limit: <span class="num">5000</span>, window: <span class="str">'1h'</span> {"}"},
+    enterprise: {"{"} limit: <span class="num">Infinity</span> {"}"}
+  {"}"},
+  tier: (<span class="pr">req</span>) => req.user?.plan || <span class="str">'free'</span>
+{"}"}))</code></pre>
+          </div>
+          <div class="px-6 py-4 border-t border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
+            <div class="flex items-center gap-4 text-sm text-[var(--color-text-muted)]">
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                8 lines
+              </span>
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Built-in tiers
+              </span>
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Human time
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reduction callout -->
+    <div class="mt-12 text-center">
+      <div class="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5">
+        <span class="text-4xl font-black gradient-text">68%</span>
+        <span class="text-[var(--color-text-secondary)]">less code for the same functionality</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .code-text {
+    color: #a1a1aa;
+  }
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: #71717a; }
+  .pr { color: #f8f8f2; }
+</style>

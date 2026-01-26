@@ -1,0 +1,160 @@
+---
+const features = [
+  { name: 'Zero-config setup', hitlimit: true, expressRL: true, rateFlexible: false, nestThrottler: true },
+  { name: 'Tiered limits (SaaS)', hitlimit: 'Built-in', expressRL: 'Manual', rateFlexible: 'Manual', nestThrottler: false, highlight: true },
+  { name: 'Human time windows', hitlimit: "'15m'", expressRL: '900000', rateFlexible: '900', nestThrottler: '60000', highlight: true },
+  { name: 'Bun native support', hitlimit: 'bun:sqlite', expressRL: false, rateFlexible: false, nestThrottler: false, highlight: true },
+  { name: 'Express adapter', hitlimit: true, expressRL: true, rateFlexible: 'DIY', nestThrottler: false },
+  { name: 'NestJS adapter', hitlimit: true, expressRL: false, rateFlexible: 'DIY', nestThrottler: true },
+  { name: 'Elysia adapter', hitlimit: true, expressRL: false, rateFlexible: false, nestThrottler: false, highlight: true },
+  { name: 'SQLite store', hitlimit: true, expressRL: false, rateFlexible: true, nestThrottler: false },
+  { name: 'Redis store', hitlimit: true, expressRL: 'External', rateFlexible: true, nestThrottler: 'External' },
+  { name: 'Per-request fail mode', hitlimit: true, expressRL: false, rateFlexible: false, nestThrottler: false, highlight: true },
+  { name: 'Skip/whitelist', hitlimit: true, expressRL: true, rateFlexible: false, nestThrottler: true },
+  { name: 'Standard headers', hitlimit: 'Both', expressRL: 'Draft-8', rateFlexible: false, nestThrottler: false },
+  { name: 'Async key functions', hitlimit: true, expressRL: true, rateFlexible: true, nestThrottler: false },
+  { name: 'TypeScript', hitlimit: 'Full', expressRL: true, rateFlexible: true, nestThrottler: true },
+  { name: 'Bundle size', hitlimit: '~5KB', expressRL: '~15KB', rateFlexible: '~45KB', nestThrottler: '~20KB', highlight: true },
+];
+
+function renderValue(val: boolean | string) {
+  if (val === true) return { icon: 'check', color: 'green' };
+  if (val === false) return { icon: 'x', color: 'red' };
+  if (val === 'Manual' || val === 'DIY' || val === 'External') return { text: val, color: 'yellow' };
+  return { text: val, color: 'green' };
+}
+---
+
+<section class="py-24 px-4 border-t border-[var(--color-border)]">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+        How hitlimit <span class="gradient-text">compares</span>
+      </h2>
+      <p class="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto">
+        See why developers are switching to hitlimit for rate limiting.
+      </p>
+    </div>
+
+    <!-- Callout badges -->
+    <div class="flex flex-wrap justify-center gap-4 mb-12">
+      <div class="px-4 py-2 rounded-full border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5 text-sm">
+        <span class="text-[var(--color-accent)] font-semibold">Only</span> rate limiter with native Bun support
+      </div>
+      <div class="px-4 py-2 rounded-full border border-[var(--color-accent-secondary)]/30 bg-[var(--color-accent-secondary)]/5 text-sm">
+        <span class="text-[var(--color-accent-secondary)] font-semibold">Built-in</span> tiered limits for SaaS
+      </div>
+      <div class="px-4 py-2 rounded-full border border-green-500/30 bg-green-500/5 text-sm">
+        <span class="text-green-400 font-semibold">5x smaller</span> than alternatives
+      </div>
+    </div>
+
+    <!-- Comparison table -->
+    <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] overflow-hidden">
+      <!-- Header -->
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[700px]">
+          <thead>
+            <tr class="bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
+              <th class="text-left p-4 text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Feature</th>
+              <th class="text-center p-4 text-sm font-semibold uppercase tracking-wider">
+                <span class="gradient-text">hitlimit</span>
+              </th>
+              <th class="text-center p-4 text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">express-rate-limit</th>
+              <th class="text-center p-4 text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">rate-limiter-flexible</th>
+              <th class="text-center p-4 text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">@nestjs/throttler</th>
+            </tr>
+          </thead>
+          <tbody>
+            {features.map((feature, i) => {
+              const hitlimitVal = renderValue(feature.hitlimit);
+              const expressVal = renderValue(feature.expressRL);
+              const flexVal = renderValue(feature.rateFlexible);
+              const nestVal = renderValue(feature.nestThrottler);
+
+              return (
+                <tr class={`border-b border-[var(--color-border)] last:border-0 ${feature.highlight ? 'bg-[var(--color-accent)]/5' : ''} hover:bg-[var(--color-bg-elevated)] transition-colors`}>
+                  <td class="p-4 text-sm font-medium text-white">
+                    {feature.name}
+                    {feature.highlight && (
+                      <span class="ml-2 px-2 py-0.5 rounded-full bg-[var(--color-accent)]/20 text-[var(--color-accent)] text-xs font-semibold">USP</span>
+                    )}
+                  </td>
+                  <td class="p-4 text-center">
+                    {hitlimitVal.icon === 'check' ? (
+                      <svg class="w-5 h-5 mx-auto text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    ) : hitlimitVal.text ? (
+                      <span class={`text-sm font-mono font-semibold ${hitlimitVal.color === 'green' ? 'text-green-400' : 'text-yellow-400'}`}>{hitlimitVal.text}</span>
+                    ) : null}
+                  </td>
+                  <td class="p-4 text-center">
+                    {expressVal.icon === 'check' ? (
+                      <svg class="w-5 h-5 mx-auto text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    ) : expressVal.icon === 'x' ? (
+                      <svg class="w-5 h-5 mx-auto text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    ) : (
+                      <span class={`text-sm font-mono ${expressVal.color === 'yellow' ? 'text-yellow-400' : 'text-[var(--color-text-muted)]'}`}>{expressVal.text}</span>
+                    )}
+                  </td>
+                  <td class="p-4 text-center">
+                    {flexVal.icon === 'check' ? (
+                      <svg class="w-5 h-5 mx-auto text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    ) : flexVal.icon === 'x' ? (
+                      <svg class="w-5 h-5 mx-auto text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    ) : (
+                      <span class={`text-sm font-mono ${flexVal.color === 'yellow' ? 'text-yellow-400' : 'text-[var(--color-text-muted)]'}`}>{flexVal.text}</span>
+                    )}
+                  </td>
+                  <td class="p-4 text-center">
+                    {nestVal.icon === 'check' ? (
+                      <svg class="w-5 h-5 mx-auto text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    ) : nestVal.icon === 'x' ? (
+                      <svg class="w-5 h-5 mx-auto text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    ) : (
+                      <span class={`text-sm font-mono ${nestVal.color === 'yellow' ? 'text-yellow-400' : 'text-[var(--color-text-muted)]'}`}>{nestVal.text}</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="mt-6 flex flex-wrap justify-center gap-6 text-sm text-[var(--color-text-muted)]">
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Built-in
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-yellow-400 font-mono text-xs">Manual</span>
+        External package / DIY
+      </div>
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Not available
+      </div>
+    </div>
+  </div>
+</section>

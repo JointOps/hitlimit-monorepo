@@ -161,12 +161,12 @@ router.<span class="fn">post</span>(<span class="str">'/purchase'</span>,
 <span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"})
 
 <span class="cm">// Check if showing is a premiere (first 3 days)</span>
-<span class="kw">const</span> <span class="fn">isPremiere</span> = <span class="kw">async</span> (showingId: <span class="type">string</span>): <span class="type">Promise</span><<span class="type">boolean</span>> => {"{"}
+<span class="kw">const</span> <span class="fn">isPremiere</span> = <span class="kw">async</span> (showingId: <span class="type">string</span>): <span class="type">Promise</span>&lt;<span class="type">boolean</span>&gt; =&gt; {"{"}
   <span class="kw">const</span> showing = <span class="kw">await</span> db.showings.<span class="fn">findById</span>(showingId)
   <span class="kw">const</span> movie = <span class="kw">await</span> db.movies.<span class="fn">findById</span>(showing.movieId)
   <span class="kw">const</span> releaseDate = <span class="kw">new</span> <span class="fn">Date</span>(movie.releaseDate)
   <span class="kw">const</span> daysSinceRelease = (Date.<span class="fn">now</span>() - releaseDate.<span class="fn">getTime</span>()) / (<span class="num">1000</span> * <span class="num">60</span> * <span class="num">60</span> * <span class="num">24</span>)
-  <span class="kw">return</span> daysSinceRelease < <span class="num">3</span>
+  <span class="kw">return</span> daysSinceRelease &lt; <span class="num">3</span>
 {"}"}
 
 <span class="cm">// Stricter limits for premiere showings</span>

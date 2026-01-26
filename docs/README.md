@@ -21,7 +21,7 @@ pnpm preview
 ## Structure
 
 ```
-website/
+docs/
 ├── public/           # Static assets (favicon, etc.)
 ├── src/
 │   ├── components/   # Astro components

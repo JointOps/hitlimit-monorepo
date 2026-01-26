@@ -213,7 +213,7 @@ router.<span class="fn">get</span>(<span class="str">'/users/:id'</span>, limits
   key: (req) => <span class="str">`hashtags:</span>${"{"} req.user.id {"}"}<span class="str">`</span>,
   skip: (req) => {"{"}
     <span class="kw">const</span> hashtags = (req.body.content.<span class="fn">match</span>(/#\w+/g) || []).length
-    <span class="kw">return</span> hashtags <= <span class="num">5</span> <span class="cm">// Allow up to 5 hashtags per post</span>
+    <span class="kw">return</span> hashtags &lt;= <span class="num">5</span> <span class="cm">// Allow up to 5 hashtags per post</span>
   {"}"},
   response: () => ({"{"}
     error: <span class="str">'HASHTAG_SPAM'</span>,
@@ -244,8 +244,8 @@ router.<span class="fn">get</span>(<span class="str">'/users/:id'</span>, limits
   <span class="kw">const</span> accountAge = Date.<span class="fn">now</span>() - <span class="kw">new</span> <span class="fn">Date</span>(user.createdAt).<span class="fn">getTime</span>()
   <span class="kw">const</span> daysSinceCreation = accountAge / (<span class="num">1000</span> * <span class="num">60</span> * <span class="num">60</span> * <span class="num">24</span>)
 
-  <span class="kw">if</span> (daysSinceCreation < <span class="num">7</span>) <span class="kw">return</span> <span class="str">'new'</span>
-  <span class="kw">if</span> (daysSinceCreation < <span class="num">30</span>) <span class="kw">return</span> <span class="str">'basic'</span>
+  <span class="kw">if</span> (daysSinceCreation &lt; <span class="num">7</span>) <span class="kw">return</span> <span class="str">'new'</span>
+  <span class="kw">if</span> (daysSinceCreation &lt; <span class="num">30</span>) <span class="kw">return</span> <span class="str">'basic'</span>
   <span class="kw">return</span> <span class="str">'trusted'</span>
 {"}"}
 

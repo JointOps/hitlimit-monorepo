@@ -1,27 +1,44 @@
 {
   "name": "hitlimit-monorepo",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "docs",
-    "benchmarks"
-  ],
   "scripts": {
+    "setup": "npx tsx scripts/setup.ts",
+    "setup:quick": "./scripts/setup.sh",
+    "setup:node": "pnpm install",
+    "setup:bun": "cd packages/hitlimit-bun && bun install",
+
     "build": "turbo run build",
-    "test": "turbo run test",
-    "test:node": "turbo run test --filter=hitlimit",
-    "test:bun": "turbo run test --filter=hitlimit-bun",
-    "clean": "turbo run clean",
-    "typecheck": "turbo run typecheck",
-    "publish:all": "pnpm -r publish --access public",
+    "build:node": "turbo run build --filter=hitlimit --filter=@hitlimit/types",
+    "build:bun": "cd packages/hitlimit-bun && bun run build",
+
+    "test": "./scripts/test-all.sh",
+    "test:node": "turbo run test --filter=hitlimit --filter=@hitlimit/types",
+    "test:bun": "cd packages/hitlimit-bun && bun test",
+
     "benchmark": "pnpm --filter hitlimit-benchmarks bench",
+    "benchmark:all": "./scripts/benchmark-all.sh",
     "benchmark:memory": "pnpm --filter hitlimit-benchmarks bench:memory",
     "benchmark:sqlite": "pnpm --filter hitlimit-benchmarks bench:sqlite",
     "benchmark:redis": "pnpm --filter hitlimit-benchmarks bench:redis",
-    "benchmark:bun": "pnpm --filter hitlimit-benchmarks bench:bun"
+    "benchmark:bun": "cd benchmarks/bun && bun run index.ts",
+
+    "clean": "turbo run clean && rm -rf node_modules && cd packages/hitlimit-bun && rm -rf node_modules",
+    "typecheck": "turbo run typecheck",
+
+    "release": "./scripts/release.sh",
+    "release:verify": "./scripts/verify-release.sh",
+    "version:bump": "./scripts/bump-version.sh",
+
+    "docs:dev": "cd docs && pnpm dev",
+    "docs:build": "cd docs && pnpm build",
+    "docs:preview": "cd docs && pnpm preview",
+
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
   },
   "devDependencies": {
     "@sinclair/typebox": "^0.34.48",
+    "tsx": "^4.7.0",
     "turbo": "^2.0.0",
     "typescript": "^5.3.0"
   },

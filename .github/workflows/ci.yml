@@ -7,6 +7,9 @@ on:
     branches: [main]
 
 jobs:
+  # ============================================================
+  # Node.js packages (types, hitlimit) - uses pnpm
+  # ============================================================
   test-node:
     name: Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
@@ -32,15 +35,26 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
 
-      - run: pnpm install
-      - run: pnpm turbo run build --filter=hitlimit
-      - run: pnpm test:node
+      - name: Install Node.js dependencies
+        run: pnpm install
+
+      - name: Build Node.js packages
+        run: pnpm turbo run build --filter=@hitlimit/types --filter=hitlimit
+
+      - name: Test Node.js packages
+        run: pnpm turbo run test --filter=@hitlimit/types --filter=hitlimit
         env:
           REDIS_URL: redis://localhost:6379
 
+  # ============================================================
+  # Bun package (hitlimit-bun) - uses bun natively
+  # ============================================================
   test-bun:
-    name: Bun (latest)
+    name: Bun ${{ matrix.bun-version }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        bun-version: [latest, canary]
 
     services:
       redis:
@@ -53,7 +67,47 @@ jobs:
 
       - uses: oven-sh/setup-bun@v1
         with:
-          bun-version: latest
+          bun-version: ${{ matrix.bun-version }}
+
+      # Need pnpm/node to build @hitlimit/types dependency
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Node.js dependencies (for types)
+        run: pnpm install
+
+      - name: Build @hitlimit/types
+        run: pnpm turbo run build --filter=@hitlimit/types
+
+      - name: Install Bun dependencies
+        working-directory: packages/hitlimit-bun
+        run: bun install
+
+      - name: Build hitlimit-bun
+        working-directory: packages/hitlimit-bun
+        run: bun run build
+
+      - name: Test hitlimit-bun
+        working-directory: packages/hitlimit-bun
+        run: bun test
+        env:
+          REDIS_URL: redis://localhost:6379
+
+  # ============================================================
+  # Typecheck all packages
+  # ============================================================
+  typecheck:
+    name: TypeScript
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v2
         with:
@@ -64,8 +118,20 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
-      - run: pnpm install
-      - run: pnpm turbo run build --filter=hitlimit-bun
-      - run: pnpm test:bun
-        env:
-          REDIS_URL: redis://localhost:6379
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install Node.js dependencies
+        run: pnpm install
+
+      - name: Install Bun dependencies
+        working-directory: packages/hitlimit-bun
+        run: bun install
+
+      - name: Build and typecheck all
+        run: pnpm turbo run build --filter=@hitlimit/types --filter=hitlimit
+
+      - name: Typecheck hitlimit-bun
+        working-directory: packages/hitlimit-bun
+        run: bunx tsc --noEmit

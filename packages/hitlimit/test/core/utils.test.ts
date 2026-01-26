@@ -32,6 +32,31 @@ describe('parseWindow', () => {
     expect(() => parseWindow('10x')).toThrow()
     expect(() => parseWindow('')).toThrow()
   })
+
+  it('handles zero values', () => {
+    expect(parseWindow('0s')).toBe(0)
+    expect(parseWindow('0m')).toBe(0)
+    expect(parseWindow(0)).toBe(0)
+  })
+
+  it('handles large values', () => {
+    expect(parseWindow('365d')).toBe(365 * 86400000)
+    expect(parseWindow('1000h')).toBe(1000 * 3600000)
+  })
+
+  it('handles decimal in number passthrough', () => {
+    expect(parseWindow(1500.5)).toBe(1500.5)
+  })
+
+  it('throws on negative values', () => {
+    expect(() => parseWindow('-1s')).toThrow()
+    expect(() => parseWindow('-5m')).toThrow()
+  })
+
+  it('handles leading zeros', () => {
+    expect(parseWindow('01s')).toBe(1000)
+    expect(parseWindow('001m')).toBe(60000)
+  })
 })
 
 describe('hashKey', () => {
@@ -49,6 +74,27 @@ describe('hashKey', () => {
 
   it('returns fixed length string', () => {
     const hash = hashKey('any-key')
+    expect(hash.length).toBe(16)
+  })
+
+  it('handles empty string', () => {
+    const hash = hashKey('')
+    expect(hash.length).toBe(16)
+  })
+
+  it('handles special characters', () => {
+    const hash = hashKey('key:with/special@chars#!')
+    expect(hash.length).toBe(16)
+  })
+
+  it('handles unicode', () => {
+    const hash = hashKey('ключ-日本語-🔑')
+    expect(hash.length).toBe(16)
+  })
+
+  it('handles very long keys', () => {
+    const longKey = 'x'.repeat(10000)
+    const hash = hashKey(longKey)
     expect(hash.length).toBe(16)
   })
 })

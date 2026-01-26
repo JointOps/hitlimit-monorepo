@@ -69,8 +69,21 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
 
-      - run: pnpm install
-      - run: pnpm build
+      # Build Node.js dependencies first
+      - name: Install Node.js dependencies
+        run: pnpm install
+
+      - name: Build @hitlimit/types
+        run: pnpm turbo run build --filter=@hitlimit/types
+
+      # Build hitlimit-bun with bun
+      - name: Install Bun dependencies
+        working-directory: packages/hitlimit-bun
+        run: bun install
+
+      - name: Build hitlimit-bun
+        working-directory: packages/hitlimit-bun
+        run: bun run build
 
       - name: Run Bun Store Benchmarks
         run: bun benchmarks/bun/index.ts

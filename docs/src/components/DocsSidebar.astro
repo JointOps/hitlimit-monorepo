@@ -1,156 +1,19 @@
 ---
 import SearchModal from './SearchModal.astro';
-
-interface SidebarItem {
-  label: string;
-  href: string;
-}
-
-interface SubSection {
-  title: string;
-  items: SidebarItem[];
-}
-
-interface SidebarSection {
-  title: string;
-  icon: string;
-  items?: SidebarItem[];
-  subsections?: SubSection[];
-}
-
-const sidebar: SidebarSection[] = [
-  {
-    title: 'Getting Started',
-    icon: 'rocket',
-    items: [
-      { label: 'Introduction', href: '/docs' },
-      { label: 'Installation', href: '/docs/installation' },
-      { label: 'Quick Start', href: '/docs/quick-start' },
-    ],
-  },
-  {
-    title: 'Configuration',
-    icon: 'settings',
-    items: [
-      { label: 'All Options', href: '/docs/configuration/options' },
-      { label: 'Time Windows', href: '/docs/configuration/window' },
-      { label: 'Tiered Limits', href: '/docs/configuration/tiered' },
-      { label: 'Custom Keys', href: '/docs/configuration/custom-key' },
-      { label: 'Custom Responses', href: '/docs/configuration/custom-response' },
-      { label: 'Headers', href: '/docs/configuration/headers' },
-      { label: 'Skip/Whitelist', href: '/docs/configuration/skip' },
-    ],
-  },
-  {
-    title: 'Stores',
-    icon: 'database',
-    items: [
-      { label: 'Overview', href: '/docs/stores/overview' },
-      { label: 'Memory Store', href: '/docs/stores/memory' },
-      { label: 'SQLite Store', href: '/docs/stores/sqlite' },
-      { label: 'Redis Store', href: '/docs/stores/redis' },
-      { label: 'Custom Stores', href: '/docs/stores/custom' },
-    ],
-  },
-  {
-    title: 'Adapters',
-    icon: 'plug',
-    items: [
-      { label: 'Express.js', href: '/docs/adapters/express' },
-      { label: 'NestJS', href: '/docs/adapters/nestjs' },
-      { label: 'Node.js HTTP', href: '/docs/adapters/node' },
-    ],
-  },
-  {
-    title: 'Bun',
-    icon: 'zap',
-    subsections: [
-      {
-        title: 'Getting Started',
-        items: [
-          { label: 'Introduction', href: '/docs/bun' },
-          { label: 'Installation', href: '/docs/bun/installation' },
-          { label: 'Quick Start', href: '/docs/bun/quick-start' },
-        ],
-      },
-      {
-        title: 'Adapters',
-        items: [
-          { label: 'Bun.serve', href: '/docs/bun/bun-serve' },
-          { label: 'Elysia Plugin', href: '/docs/bun/elysia' },
-        ],
-      },
-      {
-        title: 'Advanced',
-        items: [
-          { label: 'Stores', href: '/docs/bun/stores' },
-          { label: 'Performance', href: '/docs/bun/performance' },
-        ],
-      },
-    ],
-  },
-  {
-    title: 'API Reference',
-    icon: 'code',
-    items: [
-      { label: 'hitlimit()', href: '/docs/api/hitlimit' },
-      { label: 'Stores', href: '/docs/api/stores' },
-      { label: 'TypeScript Types', href: '/docs/api/types' },
-    ],
-  },
-  {
-    title: 'Examples',
-    icon: 'layers',
-    items: [
-      { label: 'Overview', href: '/docs/examples' },
-      { label: 'SaaS API', href: '/docs/examples/saas' },
-      { label: 'Authentication', href: '/docs/examples/auth' },
-      { label: 'E-commerce', href: '/docs/examples/ecommerce' },
-      { label: 'Social Platform', href: '/docs/examples/social' },
-      { label: 'Gaming Backend', href: '/docs/examples/gaming' },
-      { label: 'Cinema Booking', href: '/docs/examples/cinema' },
-    ],
-  },
-  {
-    title: 'Benchmarks',
-    icon: 'activity',
-    items: [
-      { label: 'Performance', href: '/docs/benchmarks' },
-    ],
-  },
-  {
-    title: 'Guides',
-    icon: 'book',
-    items: [
-      { label: 'Production', href: '/docs/guides/production' },
-      { label: 'Scaling', href: '/docs/guides/scaling' },
-      { label: 'Monitoring', href: '/docs/guides/monitoring' },
-      { label: 'Testing', href: '/docs/guides/testing' },
-    ],
-  },
-];
+import {
+  navigation as sidebar,
+  getActiveSectionIndex,
+  getSectionItemCount,
+  type NavSection
+} from '../config/navigation';
 
 const currentPath = Astro.url.pathname;
 
 // Find which section contains the active page
-const activeSectionIndex = sidebar.findIndex(section => {
-  if (section.items) {
-    return section.items.some(item =>
-      currentPath === item.href || currentPath === item.href + '/'
-    );
-  }
-  if (section.subsections) {
-    return section.subsections.some(sub =>
-      sub.items.some(item =>
-        currentPath === item.href || currentPath === item.href + '/'
-      )
-    );
-  }
-  return false;
-});
+const activeSectionIndex = getActiveSectionIndex(currentPath);
 
-// Find active subsection for Bun
-const getActiveSubsection = (section: SidebarSection) => {
+// Find active subsection for sections with subsections
+const getActiveSubsection = (section: NavSection) => {
   if (!section.subsections) return -1;
   return section.subsections.findIndex(sub =>
     sub.items.some(item =>
@@ -160,13 +23,7 @@ const getActiveSubsection = (section: SidebarSection) => {
 };
 
 // Count total items including subsections
-const getTotalItems = (section: SidebarSection) => {
-  if (section.items) return section.items.length;
-  if (section.subsections) {
-    return section.subsections.reduce((total, sub) => total + sub.items.length, 0);
-  }
-  return 0;
-};
+const getTotalItems = getSectionItemCount;
 
 // Icons as SVG paths
 const icons: Record<string, string> = {

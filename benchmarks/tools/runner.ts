@@ -1,4 +1,10 @@
 import { performance } from 'perf_hooks'
+import { existsSync, mkdirSync, writeFileSync } from 'fs'
+import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 export interface BenchmarkResult {
   name: string
@@ -74,12 +80,9 @@ export function formatResults(results: BenchmarkResult[]): void {
 }
 
 export function saveResults(results: BenchmarkResult[], filename: string): void {
-  const fs = require('fs')
-  const path = require('path')
-
-  const resultsDir = path.join(__dirname, '..', 'results')
-  if (!fs.existsSync(resultsDir)) {
-    fs.mkdirSync(resultsDir, { recursive: true })
+  const resultsDir = join(__dirname, '..', 'results')
+  if (!existsSync(resultsDir)) {
+    mkdirSync(resultsDir, { recursive: true })
   }
 
   const data = {
@@ -92,8 +95,8 @@ export function saveResults(results: BenchmarkResult[], filename: string): void 
     results
   }
 
-  fs.writeFileSync(
-    path.join(resultsDir, filename),
+  writeFileSync(
+    join(resultsDir, filename),
     JSON.stringify(data, null, 2)
   )
 }

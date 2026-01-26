@@ -154,6 +154,36 @@ import { redisStore } from 'hitlimit-bun/stores/redis'
 }
 ```
 
+## Contributing
+
+We welcome contributions! After cloning the repo, run the setup script:
+
+```bash
+git clone https://github.com/JointOps/hitlimit-monorepo
+cd hitlimit-monorepo
+npx tsx scripts/setup.ts
+```
+
+The setup script will:
+- Check that you have Node.js (18+), pnpm, and Bun installed
+- Provide helpful installation instructions if anything is missing
+- Install all dependencies for both Node.js and Bun packages
+- Build all packages
+- Run tests to verify everything works
+
+**Requirements:**
+- [Node.js](https://nodejs.org) 18+
+- [pnpm](https://pnpm.io) 8+
+- [Bun](https://bun.sh) 1.0+
+
+**Quick Commands:**
+```bash
+pnpm test          # Run all tests
+pnpm build         # Build all packages
+pnpm benchmark     # Run benchmarks
+pnpm docs:dev      # Start docs dev server
+```
+
 ## License
 
 MIT

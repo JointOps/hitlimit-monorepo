@@ -1,0 +1,68 @@
+---
+const useCases = [
+  {
+    icon: '🚀',
+    title: 'SaaS APIs',
+    description: 'Tiered limits for free, pro, and enterprise users. Built-in support for user plans.',
+    link: '/docs/examples/saas',
+    color: 'cyan',
+  },
+  {
+    icon: '🛒',
+    title: 'E-Commerce',
+    description: 'Protect cart and checkout APIs from abuse. Inventory and payment endpoints stay safe.',
+    link: '/docs/examples/ecommerce',
+    color: 'purple',
+  },
+  {
+    icon: '🎮',
+    title: 'Gaming',
+    description: 'Matchmaking and leaderboard APIs. Prevent spam and ensure fair play for all players.',
+    link: '/docs/examples/gaming',
+    color: 'cyan',
+  },
+  {
+    icon: '🔐',
+    title: 'Authentication',
+    description: 'Login brute force protection. Strict limits on auth endpoints. Account security first.',
+    link: '/docs/examples/auth',
+    color: 'purple',
+  },
+];
+---
+
+<section class="py-24 px-4 border-t border-[var(--color-border)]">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+        Built for <span class="gradient-text">real applications</span>
+      </h2>
+      <p class="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto">
+        From startups to enterprises, hitlimit protects APIs in production every day.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {useCases.map((useCase) => (
+        <a
+          href={useCase.link}
+          class={`group relative p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] transition-all duration-300 hover:border-${useCase.color === 'cyan' ? '[rgba(0,229,255,0.3)]' : '[rgba(168,85,247,0.3)]'} hover:-translate-y-2 hover:shadow-2xl`}
+        >
+          <div class={`absolute inset-0 rounded-2xl bg-gradient-to-br ${useCase.color === 'cyan' ? 'from-[rgba(0,229,255,0.1)]' : 'from-[rgba(168,85,247,0.1)]'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+
+          <div class="relative">
+            <div class="text-4xl mb-4">{useCase.icon}</div>
+            <h3 class="text-lg font-semibold mb-2 text-white group-hover:text-[var(--color-accent)] transition-colors">{useCase.title}</h3>
+            <p class="text-sm text-[var(--color-text-secondary)] leading-relaxed mb-4">{useCase.description}</p>
+            <div class="flex items-center gap-1 text-sm font-medium text-[var(--color-accent)] opacity-0 group-hover:opacity-100 transition-opacity">
+              See example
+              <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>

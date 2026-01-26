@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-01-26T12:09:57.755Z",
+  "environment": {
+    "node": "v24.4.1",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "results": [
+    {
+      "name": "Memory Store - Single Key",
+      "opsPerSecond": 4428731,
+      "avgLatencyMs": 0.0002,
+      "p50LatencyMs": 0.0002,
+      "p95LatencyMs": 0.0002,
+      "p99LatencyMs": 0.0003,
+      "memoryUsedMB": 5.17
+    },
+    {
+      "name": "Memory Store - 10,000 Keys",
+      "opsPerSecond": 2642392,
+      "avgLatencyMs": 0.0004,
+      "p50LatencyMs": 0.0002,
+      "p95LatencyMs": 0.0004,
+      "p99LatencyMs": 0.001,
+      "memoryUsedMB": 5.59
+    },
+    {
+      "name": "SQLite Store - :memory:",
+      "opsPerSecond": 488447,
+      "avgLatencyMs": 0.002,
+      "p50LatencyMs": 0.0019,
+      "p95LatencyMs": 0.0021,
+      "p99LatencyMs": 0.0031,
+      "memoryUsedMB": -0.85
+    },
+    {
+      "name": "Redis Store - Local",
+      "opsPerSecond": 2237,
+      "avgLatencyMs": 0.447,
+      "p50LatencyMs": 0.1923,
+      "p95LatencyMs": 1.228,
+      "p99LatencyMs": 4.5571,
+      "memoryUsedMB": 13.42
+    }
+  ]
+}

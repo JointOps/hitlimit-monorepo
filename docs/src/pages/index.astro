@@ -2,13 +2,22 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import Features from '../components/Features.astro';
+import CodeComparison from '../components/CodeComparison.astro';
+import ComparisonTable from '../components/ComparisonTable.astro';
 import Stats from '../components/Stats.astro';
+import UseCases from '../components/UseCases.astro';
 import CTA from '../components/CTA.astro';
 ---
 
-<BaseLayout>
+<BaseLayout
+  title="hitlimit - The fastest way to say no | Rate Limiting for Node.js & Bun"
+  description="High-performance rate limiting with tiered limits, zero config, and native Bun support. Works with Express, NestJS, and Elysia. ~5KB bundle size."
+>
   <Hero />
   <Features />
+  <CodeComparison />
+  <ComparisonTable />
   <Stats />
+  <UseCases />
   <CTA />
 </BaseLayout>

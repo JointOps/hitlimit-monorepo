@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import DocsSidebar from '../components/DocsSidebar.astro';
+import { getPageNavigation } from '../config/navigation';
 
 interface Props {
   title?: string;
@@ -19,6 +20,9 @@ const {
 const siteUrl = 'https://hitlimit.dev';
 const ogImage = `${siteUrl}/og-image.png`;
 const canonical = `${siteUrl}${Astro.url.pathname}`;
+
+// Get prev/next navigation
+const { prev, next } = getPageNavigation(Astro.url.pathname);
 ---
 
 <!DOCTYPE html>
@@ -100,22 +104,38 @@ const canonical = `${siteUrl}${Astro.url.pathname}`;
         </article>
 
         <!-- Pagination -->
-        <div class="mt-16 pt-8 border-t border-[var(--color-border)]">
-          <div class="flex items-center justify-between">
-            <a href="#" class="group flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
-              <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Previous
-            </a>
-            <a href="#" class="group flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
-              Next
-              <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </a>
+        <nav class="mt-16 pt-8 border-t border-[var(--color-border)]" aria-label="Documentation pages">
+          <div class="flex items-stretch justify-between gap-4">
+            {prev ? (
+              <a href={prev.href} class="group flex-1 flex flex-col gap-1 p-4 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-all">
+                <span class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+                  <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Previous
+                </span>
+                <span class="font-medium text-white group-hover:text-[var(--color-primary)] transition-colors">{prev.label}</span>
+                <span class="text-xs text-[var(--color-text-secondary)]">{prev.section}</span>
+              </a>
+            ) : (
+              <div class="flex-1"></div>
+            )}
+            {next ? (
+              <a href={next.href} class="group flex-1 flex flex-col items-end gap-1 p-4 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-all text-right">
+                <span class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+                  Next
+                  <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <span class="font-medium text-white group-hover:text-[var(--color-primary)] transition-colors">{next.label}</span>
+                <span class="text-xs text-[var(--color-text-secondary)]">{next.section}</span>
+              </a>
+            ) : (
+              <div class="flex-1"></div>
+            )}
           </div>
-        </div>
+        </nav>
       </main>
 
       <!-- Table of Contents -->
@@ -492,13 +512,35 @@ const canonical = `${siteUrl}${Astro.url.pathname}`;
 
     function updateActiveSection() {
       const scrollPosition = window.scrollY + 120;
-      let activeIndex = 0;
+      const windowHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+      const isNearBottom = (window.scrollY + windowHeight) >= (docHeight - 100);
 
+      let activeIndex = -1;
+
+      // Find the current active heading
       headings.forEach((heading, index) => {
         if (heading.offsetTop <= scrollPosition) {
           activeIndex = index;
         }
       });
+
+      // If near bottom of page, highlight the last visible heading
+      if (isNearBottom && headings.length > 0) {
+        // Find the last heading that's visible in the viewport
+        for (let i = headings.length - 1; i >= 0; i--) {
+          const rect = headings[i].getBoundingClientRect();
+          if (rect.top < windowHeight) {
+            activeIndex = i;
+            break;
+          }
+        }
+      }
+
+      // Ensure at least the first heading is highlighted when at top
+      if (activeIndex === -1 && headings.length > 0) {
+        activeIndex = 0;
+      }
 
       tocLinks.forEach((link, index) => {
         link.classList.toggle('active', index === activeIndex);
