@@ -6,7 +6,7 @@ import expressiveCode from 'astro-expressive-code';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://hitlimit.dev',
+  site: 'https://hitlimit.jointops.dev',
   integrations: [
     expressiveCode({
       themes: ['github-dark'],

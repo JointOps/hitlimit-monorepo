@@ -1,0 +1,540 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout
+  title="hitlimit vs express-rate-limit vs rate-limiter-flexible | Comparison Guide"
+  description="Compare hitlimit with express-rate-limit, rate-limiter-flexible, and @nestjs/throttler. Feature comparison, performance benchmarks, and migration guides."
+  keywords="hitlimit vs express-rate-limit, best rate limiter nodejs, rate-limiter-flexible alternative, nestjs throttler comparison, fastest rate limiter, rate limit comparison, express rate limit alternative, bun rate limiter"
+>
+  <h1>Rate Limiter Comparison</h1>
+
+  <p>
+    How does hitlimit compare to other popular rate limiting libraries?
+    This guide provides an honest comparison to help you choose the right tool.
+  </p>
+
+  <h2 id="quick-comparison">Quick Comparison</h2>
+
+  <div class="comparison-table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th class="highlight-col">hitlimit</th>
+          <th>express-rate-limit</th>
+          <th>rate-limiter-flexible</th>
+          <th>@nestjs/throttler</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bundle Size</td>
+          <td class="highlight-col good">~5KB</td>
+          <td>~15KB</td>
+          <td>~45KB</td>
+          <td>~20KB</td>
+        </tr>
+        <tr>
+          <td>Zero Dependencies</td>
+          <td class="highlight-col good">Yes</td>
+          <td>No</td>
+          <td>No</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>TypeScript</td>
+          <td class="highlight-col good">Native</td>
+          <td>@types</td>
+          <td>@types</td>
+          <td>Native</td>
+        </tr>
+        <tr>
+          <td>ESM Support</td>
+          <td class="highlight-col good">Native</td>
+          <td>Yes</td>
+          <td>Yes</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <td>Memory Store</td>
+          <td class="highlight-col good">400k ops/s</td>
+          <td>180k ops/s</td>
+          <td>250k ops/s</td>
+          <td>150k ops/s</td>
+        </tr>
+        <tr>
+          <td>SQLite Store</td>
+          <td class="highlight-col good">Built-in</td>
+          <td>External</td>
+          <td>No</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>Redis Store</td>
+          <td class="highlight-col">Built-in</td>
+          <td>External</td>
+          <td>Built-in</td>
+          <td>External</td>
+        </tr>
+        <tr>
+          <td>Bun Native</td>
+          <td class="highlight-col good">Yes</td>
+          <td>No</td>
+          <td>No</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>Express</td>
+          <td class="highlight-col good">Yes</td>
+          <td>Yes</td>
+          <td>Yes</td>
+          <td>Via adapter</td>
+        </tr>
+        <tr>
+          <td>NestJS</td>
+          <td class="highlight-col good">Native</td>
+          <td>Via wrapper</td>
+          <td>Yes</td>
+          <td>Native</td>
+        </tr>
+        <tr>
+          <td>Elysia</td>
+          <td class="highlight-col good">Native</td>
+          <td>No</td>
+          <td>No</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>Human-readable Windows</td>
+          <td class="highlight-col good">'1m', '1h'</td>
+          <td>ms only</td>
+          <td>seconds</td>
+          <td>seconds</td>
+        </tr>
+        <tr>
+          <td>Tiered Limits</td>
+          <td class="highlight-col good">Built-in</td>
+          <td>Manual</td>
+          <td>Manual</td>
+          <td>Manual</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="vs-express-rate-limit">hitlimit vs express-rate-limit</h2>
+
+  <p>
+    <strong>express-rate-limit</strong> is the most popular rate limiter with 3M+ weekly downloads.
+    It's a solid choice for basic Express rate limiting.
+  </p>
+
+  <div class="comparison-box">
+    <h3>Choose hitlimit if you need:</h3>
+    <ul>
+      <li>Better performance (2.2x faster memory store)</li>
+      <li>Built-in SQLite support for persistence</li>
+      <li>Human-readable time windows (<code>'1m'</code> vs <code>60000</code>)</li>
+      <li>NestJS native support without wrappers</li>
+      <li>Bun runtime support</li>
+      <li>Smaller bundle size</li>
+    </ul>
+
+    <h3>Choose express-rate-limit if you need:</h3>
+    <ul>
+      <li>Battle-tested library with massive community</li>
+      <li>Extensive documentation and examples</li>
+      <li>Wide variety of external stores</li>
+    </ul>
+  </div>
+
+  <h3>Migration from express-rate-limit</h3>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Before (express-rate-limit)</span></div>
+    <pre><code><span class="kw">import</span> rateLimit <span class="kw">from</span> <span class="str">'express-rate-limit'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">rateLimit</span>({"{"}
+  windowMs: <span class="num">60000</span>,  <span class="cm">// 1 minute in ms</span>
+  max: <span class="num">100</span>,
+  standardHeaders: <span class="kw">true</span>,
+  legacyHeaders: <span class="kw">false</span>
+{"}"})</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">After (hitlimit)</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>  <span class="cm">// Human-readable!</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="vs-rate-limiter-flexible">hitlimit vs rate-limiter-flexible</h2>
+
+  <p>
+    <strong>rate-limiter-flexible</strong> is a feature-rich library with support for many backends.
+    It's great for complex rate limiting scenarios.
+  </p>
+
+  <div class="comparison-box">
+    <h3>Choose hitlimit if you need:</h3>
+    <ul>
+      <li>Simpler API with less configuration</li>
+      <li>9x smaller bundle size (~5KB vs ~45KB)</li>
+      <li>Native TypeScript without @types packages</li>
+      <li>Built-in SQLite store</li>
+      <li>Bun runtime with native bun:sqlite</li>
+      <li>Elysia framework support</li>
+    </ul>
+
+    <h3>Choose rate-limiter-flexible if you need:</h3>
+    <ul>
+      <li>PostgreSQL, MySQL, or MongoDB backends</li>
+      <li>Cluster mode support</li>
+      <li>Insurance limiter (fallback when store fails)</li>
+      <li>Block duration after limit exceeded</li>
+    </ul>
+  </div>
+
+  <h2 id="vs-nestjs-throttler">hitlimit vs @nestjs/throttler</h2>
+
+  <p>
+    <strong>@nestjs/throttler</strong> is the official NestJS rate limiting module.
+    It integrates deeply with NestJS decorators and DI system.
+  </p>
+
+  <div class="comparison-box">
+    <h3>Choose hitlimit if you need:</h3>
+    <ul>
+      <li>Better performance (2.6x faster)</li>
+      <li>Built-in SQLite and Redis stores</li>
+      <li>Use same library across Express, NestJS, and Bun</li>
+      <li>Human-readable time windows</li>
+      <li>Smaller bundle size</li>
+    </ul>
+
+    <h3>Choose @nestjs/throttler if you need:</h3>
+    <ul>
+      <li>Deep NestJS integration with decorators</li>
+      <li>Official Nest team support</li>
+      <li>Guard-based approach for route protection</li>
+    </ul>
+  </div>
+
+  <h3>Migration from @nestjs/throttler</h3>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Before (@nestjs/throttler)</span></div>
+    <pre><code><span class="kw">import</span> {"{"} ThrottlerModule {"}"} <span class="kw">from</span> <span class="str">'@nestjs/throttler'</span>
+
+@<span class="fn">Module</span>({"{"}
+  imports: [
+    ThrottlerModule.<span class="fn">forRoot</span>([{"{"}
+      ttl: <span class="num">60000</span>,
+      limit: <span class="num">100</span>
+    {"}"}])
+  ]
+{"}"})</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">After (hitlimit)</span></div>
+    <pre><code><span class="kw">import</span> {"{"} HitlimitModule {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
+
+@<span class="fn">Module</span>({"{"}
+  imports: [
+    HitlimitModule.<span class="fn">register</span>({"{"}
+      limit: <span class="num">100</span>,
+      window: <span class="str">'1m'</span>
+    {"}"})
+  ]
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="performance">Performance Comparison</h2>
+
+  <p>All benchmarks run on the same hardware with identical methodology.</p>
+
+  <div class="benchmark-comparison">
+    <div class="benchmark-item">
+      <div class="benchmark-bar hitlimit" style="width: 100%;"></div>
+      <div class="benchmark-info">
+        <span class="benchmark-name">hitlimit</span>
+        <span class="benchmark-value">400,000 ops/s</span>
+      </div>
+    </div>
+    <div class="benchmark-item">
+      <div class="benchmark-bar other" style="width: 62%;"></div>
+      <div class="benchmark-info">
+        <span class="benchmark-name">rate-limiter-flexible</span>
+        <span class="benchmark-value">250,000 ops/s</span>
+      </div>
+    </div>
+    <div class="benchmark-item">
+      <div class="benchmark-bar other" style="width: 45%;"></div>
+      <div class="benchmark-info">
+        <span class="benchmark-name">express-rate-limit</span>
+        <span class="benchmark-value">180,000 ops/s</span>
+      </div>
+    </div>
+    <div class="benchmark-item">
+      <div class="benchmark-bar other" style="width: 37%;"></div>
+      <div class="benchmark-info">
+        <span class="benchmark-name">@nestjs/throttler</span>
+        <span class="benchmark-value">150,000 ops/s</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="benchmark-note">Memory store benchmark, higher is better. <a href="/docs/benchmarks">See full benchmarks</a></p>
+
+  <h2 id="when-to-use">When to Use Each</h2>
+
+  <div class="use-case-grid">
+    <div class="use-case">
+      <h3>Use hitlimit for</h3>
+      <ul>
+        <li>New projects (Node.js or Bun)</li>
+        <li>Performance-critical APIs</li>
+        <li>Multi-framework consistency</li>
+        <li>SQLite-based persistence</li>
+        <li>Elysia applications</li>
+        <li>Minimal bundle size</li>
+      </ul>
+    </div>
+    <div class="use-case">
+      <h3>Use express-rate-limit for</h3>
+      <ul>
+        <li>Existing Express projects</li>
+        <li>Need specific external stores</li>
+        <li>Maximum community support</li>
+      </ul>
+    </div>
+    <div class="use-case">
+      <h3>Use rate-limiter-flexible for</h3>
+      <ul>
+        <li>Complex rate limiting rules</li>
+        <li>PostgreSQL/MySQL/MongoDB</li>
+        <li>Insurance/fallback patterns</li>
+      </ul>
+    </div>
+    <div class="use-case">
+      <h3>Use @nestjs/throttler for</h3>
+      <ul>
+        <li>Deep NestJS integration</li>
+        <li>Decorator-based approach</li>
+        <li>Official Nest support</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 id="next-steps">Get Started</h2>
+
+  <p>Ready to try hitlimit?</p>
+
+  <div class="code-block">
+    <pre><code>npm install @joint-ops/hitlimit</code></pre>
+  </div>
+
+  <ul>
+    <li><a href="/docs/quick-start">Quick Start Guide</a></li>
+    <li><a href="/docs/benchmarks">Full Benchmarks</a></li>
+    <li><a href="/docs/configuration/options">Configuration Options</a></li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .comparison-table-wrapper {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    font-size: 0.875rem;
+  }
+
+  th, td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  th {
+    background: var(--color-bg-surface);
+    font-weight: 600;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .highlight-col {
+    background: rgba(0, 229, 255, 0.05);
+  }
+
+  .good {
+    color: #22c55e;
+    font-weight: 600;
+  }
+
+  .comparison-box {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+  }
+
+  .comparison-box h3 {
+    margin-top: 0;
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+  }
+
+  .comparison-box h3:not(:first-child) {
+    margin-top: 1.5rem;
+  }
+
+  .comparison-box ul {
+    margin: 0.75rem 0 0 0;
+    padding-left: 1.5rem;
+  }
+
+  .comparison-box li {
+    margin: 0.5rem 0;
+  }
+
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+
+  .code-header {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+
+  .code-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .code-block pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: #71717a; }
+
+  .benchmark-comparison {
+    margin: 1.5rem 0;
+  }
+
+  .benchmark-item {
+    margin: 1rem 0;
+  }
+
+  .benchmark-bar {
+    height: 2rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .benchmark-bar.hitlimit {
+    background: linear-gradient(90deg, var(--color-accent), #00b4d8);
+  }
+
+  .benchmark-bar.other {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+  }
+
+  .benchmark-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+  }
+
+  .benchmark-name {
+    color: var(--color-text-secondary);
+  }
+
+  .benchmark-value {
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+  }
+
+  .benchmark-note {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    text-align: center;
+  }
+
+  .use-case-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .use-case {
+    padding: 1.25rem;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+  }
+
+  .use-case:first-child {
+    border-color: rgba(0, 229, 255, 0.3);
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), transparent);
+  }
+
+  .use-case h3 {
+    margin: 0 0 1rem 0;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .use-case ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .use-case li {
+    margin: 0.5rem 0;
+    font-size: 0.875rem;
+  }
+</style>

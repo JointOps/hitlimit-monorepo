@@ -3,7 +3,11 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 import Tabs from '../../../components/Tabs.astro';
 ---
 
-<DocsLayout title="Node.js HTTP Adapter - hitlimit">
+<DocsLayout
+  title="Node.js HTTP Rate Limiter - hitlimit | Raw HTTP Server Rate Limiting"
+  description="Node.js HTTP server rate limiting with hitlimit. Protect your APIs without frameworks using the raw http module. High-performance request throttling with memory, SQLite, or Redis stores."
+  keywords="nodejs rate limit, node http rate limiter, nodejs api protection, http server rate limiting, node request throttling, nodejs brute force protection, raw http rate limit, nodejs middleware"
+>
   <h1>Node.js HTTP Adapter</h1>
 
   <p>The raw Node.js adapter works directly with the built-in <code>http</code> module without any framework.</p>
@@ -12,7 +16,7 @@ import Tabs from '../../../components/Tabs.astro';
 
   <Tabs
     tabs={[
-      { label: 'npm', content: 'npm install hitlimit' },
+      { label: 'npm', content: 'npm install @joint-ops/hitlimit' },
       { label: 'pnpm', content: 'pnpm add @joint-ops/hitlimit' },
       { label: 'yarn', content: 'yarn add @joint-ops/hitlimit' },
       { label: 'bun', content: 'bun add @joint-ops/hitlimit' },
