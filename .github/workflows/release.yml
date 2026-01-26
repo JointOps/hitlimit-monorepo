@@ -76,11 +76,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Install Bun dependencies
-        run: cd packages/hitlimit-bun && bun install
-
       - name: Build packages
         run: pnpm build
+
+      - name: Install Bun dependencies
+        run: cd packages/hitlimit-bun && bun install
 
       - name: Run Node.js tests
         run: pnpm test:node
@@ -119,11 +119,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Install Bun dependencies
-        run: cd packages/hitlimit-bun && bun install
-
       - name: Build all packages
         run: pnpm build
+
+      - name: Install Bun dependencies
+        run: cd packages/hitlimit-bun && bun install
 
       # --- Publish @joint-ops/hitlimit-types ---
       - name: Publish @joint-ops/hitlimit-types

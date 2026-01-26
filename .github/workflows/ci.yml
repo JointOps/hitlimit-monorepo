@@ -125,12 +125,12 @@ jobs:
       - name: Install Node.js dependencies
         run: pnpm install
 
+      - name: Build and typecheck all
+        run: pnpm turbo run build --filter=@joint-ops/hitlimit-types --filter=@joint-ops/hitlimit
+
       - name: Install Bun dependencies
         working-directory: packages/hitlimit-bun
         run: bun install
-
-      - name: Build and typecheck all
-        run: pnpm turbo run build --filter=@joint-ops/hitlimit-types --filter=@joint-ops/hitlimit
 
       - name: Typecheck hitlimit-bun
         working-directory: packages/hitlimit-bun
