@@ -11,17 +11,28 @@
 
 **[Documentation](https://hitlimit.dev/docs/bun)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[npm](https://www.npmjs.com/package/hitlimit-bun)**
 
-## Why hitlimit-bun?
+## ⚡ Why hitlimit-bun?
+
+**hitlimit-bun uses Bun's native SQLite** - no FFI overhead, no Node.js polyfills.
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                                                                │
+│  bun:sqlite         ████████████████████████████  95,000 ops/s │
+│  better-sqlite3     ██████████░░░░░░░░░░░░░░░░░░  35,000 ops/s │
+│                                                                │
+│  bun:sqlite is 2.7x faster because it's truly native           │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
+```
 
 - **Bun Native** - Built specifically for Bun's runtime, not a Node.js port
-- **Blazing Fast** - 50,000+ requests/second with bun:sqlite
+- **2.7x Faster SQLite** - Native bun:sqlite vs Node.js better-sqlite3
+- **95,000+ ops/sec** - With bun:sqlite persistence
 - **Zero Config** - Works out of the box with sensible defaults
-- **Native SQLite** - Uses bun:sqlite by default for persistence
 - **Elysia Plugin** - First-class Elysia framework integration
 - **TypeScript First** - Full type safety and IntelliSense support
-- **Tiny Footprint** - Only ~3KB minified, no bloat
-- **Flexible Keys** - Rate limit by IP, user ID, API key, or custom logic
-- **Tiered Limits** - Different limits for free/pro/enterprise users
+- **Tiny Footprint** - Only ~5KB minified, no bloat
 
 ## Installation
 
@@ -297,18 +308,51 @@ Retry-After: 42
 
 ## Performance
 
-hitlimit-bun is optimized for Bun's runtime:
+hitlimit-bun is optimized for Bun's runtime with native performance:
 
-- Uses `Bun.hash()` for fast key hashing
-- Native bun:sqlite for persistent storage
-- Minimal allocations and overhead
+### Store Benchmarks (Bun 1.0)
 
-Benchmark results (10,000 requests):
+| Store | Operations/sec | vs Node.js |
+|-------|----------------|------------|
+| **Memory** | 500,000+ | +25% faster |
+| **bun:sqlite** | 95,000+ | **+171% faster** 🔥 |
+| **Redis** | 15,000+ | +25% faster |
+
+### HTTP Throughput
+
+| Framework | With hitlimit-bun | Overhead |
+|-----------|-------------------|----------|
+| **Bun.serve** | 105,000 req/s | 12% |
+| **Elysia** | 115,000 req/s | 11% |
+
+### Why bun:sqlite is So Fast
 
 ```
-Memory store: ~50,000+ req/sec
-SQLite store: ~45,000+ req/sec
+Node.js (better-sqlite3)          Bun (bun:sqlite)
+─────────────────────────         ─────────────────
+JavaScript                        JavaScript
+    ↓                                 ↓
+  N-API                           Direct Call
+    ↓                                 ↓
+  C++ Binding                     Native SQLite
+    ↓                             (No overhead!)
+  SQLite
 ```
+
+better-sqlite3 uses N-API bindings with C++ overhead.
+bun:sqlite calls SQLite directly from Bun's native layer.
+
+<details>
+<summary>Run benchmarks yourself</summary>
+
+```bash
+git clone https://github.com/JointOps/hitlimit-monorepo
+cd hitlimit-monorepo
+bun install
+bun run benchmark:bun
+```
+
+</details>
 
 ## Elysia Plugin Options
 

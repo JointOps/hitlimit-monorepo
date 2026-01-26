@@ -13,15 +13,55 @@
 
 ## Why hitlimit?
 
-- **Blazing Fast** - Optimized for speed with minimal overhead (~0.1ms per request)
+- **Blazing Fast** - 400,000+ ops/sec with memory store, ~7% HTTP overhead
 - **Zero Config** - Works out of the box with sensible defaults
-- **Tiny Footprint** - Only ~3KB minified, no bloat
+- **Tiny Footprint** - Only ~5KB minified, no bloat
 - **Framework Agnostic** - Express, NestJS, Fastify, native HTTP
 - **Multiple Stores** - Memory, Redis, SQLite for distributed systems
 - **TypeScript First** - Full type safety and IntelliSense support
 - **Flexible Keys** - Rate limit by IP, user ID, API key, or custom logic
 - **Tiered Limits** - Different limits for free/pro/enterprise users
 - **Standard Headers** - RFC-compliant RateLimit-* and X-RateLimit-* headers
+
+## Performance
+
+hitlimit is designed for speed. Here's how it performs:
+
+### Store Benchmarks
+
+| Store | Operations/sec | Avg Latency | Use Case |
+|-------|----------------|-------------|----------|
+| **Memory** | 400,000+ | 0.002ms | Single instance, no persistence |
+| **SQLite** | 35,000+ | 0.025ms | Single instance, persistence needed |
+| **Redis** | 12,000+ | 0.08ms | Multi-instance, distributed |
+
+### vs Competitors
+
+| Library | Memory (ops/s) | Bundle Size |
+|---------|----------------|-------------|
+| **hitlimit** | **400,000** | **~5KB** |
+| rate-limiter-flexible | 250,000 | ~45KB |
+| express-rate-limit | 180,000 | ~15KB |
+
+### HTTP Overhead
+
+| Framework | Without Limiter | With hitlimit | Overhead |
+|-----------|-----------------|---------------|----------|
+| Express | 45,000 req/s | 42,000 req/s | **7%** |
+| Fastify | 65,000 req/s | 61,000 req/s | **6%** |
+
+<details>
+<summary>Run benchmarks yourself</summary>
+
+```bash
+git clone https://github.com/JointOps/hitlimit-monorepo
+cd hitlimit-monorepo
+pnpm install
+pnpm build
+pnpm benchmark
+```
+
+</details>
 
 ## Installation
 

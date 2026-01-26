@@ -1,0 +1,103 @@
+name: Benchmarks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  benchmark-node:
+    name: Node.js Benchmarks
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - run: pnpm install
+      - run: pnpm build
+
+      - name: Run Node.js Store Benchmarks
+        run: pnpm benchmark
+        env:
+          REDIS_URL: redis://localhost:6379
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-node
+          path: benchmarks/results/
+
+  benchmark-bun:
+    name: Bun Benchmarks
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - run: pnpm install
+      - run: pnpm build
+
+      - name: Run Bun Store Benchmarks
+        run: bun benchmarks/bun/index.ts
+        env:
+          REDIS_URL: redis://localhost:6379
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-bun
+          path: benchmarks/results/
+
+  comparison:
+    name: Runtime Comparison
+    runs-on: ubuntu-latest
+    needs: [benchmark-node, benchmark-bun]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: benchmark-artifacts
+
+      - name: Display Results
+        run: |
+          echo "## Node.js Results"
+          cat benchmark-artifacts/benchmark-results-node/latest.json 2>/dev/null || echo "No Node.js results"
+          echo ""
+          echo "## Bun Results"
+          cat benchmark-artifacts/benchmark-results-bun/latest.json 2>/dev/null || echo "No Bun results"
