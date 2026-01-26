@@ -3,7 +3,11 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 import Tabs from '../../../components/Tabs.astro';
 ---
 
-<DocsLayout title="Installation - Bun - hitlimit">
+<DocsLayout
+  title="Install hitlimit-bun - Bun Native Rate Limiter | bun:sqlite Performance"
+  description="Install hitlimit-bun for Bun applications. Bun-native rate limiting with bun:sqlite for maximum performance. The fastest rate limiter for Bun.serve and Elysia."
+  keywords="bun install hitlimit, bun rate limiter, hitlimit-bun install, bun add rate limit, elysia rate limit, bun:sqlite rate limit, bun native package"
+>
   <h1>Bun Installation</h1>
 
   <p>Install hitlimit for Bun using the Bun package manager.</p>
@@ -12,7 +16,7 @@ import Tabs from '../../../components/Tabs.astro';
 
   <Tabs
     tabs={[
-      { label: 'bun', content: 'bun add hitlimit-bun' },
+      { label: 'bun', content: 'bun add @joint-ops/hitlimit-bun' },
     ]}
   />
 
@@ -34,7 +38,7 @@ import Tabs from '../../../components/Tabs.astro';
       </div>
       <span class="code-filename">test.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">10</span>, window: <span class="str">'1m'</span> {"}"})
 
@@ -47,9 +51,9 @@ console.<span class="fn">log</span>(<span class="str">'hitlimit-bun installed su
 
   <h2 id="optional-deps">Optional Dependencies</h2>
 
-  <p>For Redis support in Bun:</p>
+  <p>For Redis support in Bun, install the <code>ioredis</code> peer dependency:</p>
 
-  <Tabs tabs={[{ label: 'bun', content: 'bun add @hitlimit/redis ioredis' }]} />
+  <Tabs tabs={[{ label: 'bun', content: 'bun add ioredis' }]} />
 
   <h2 id="requirements">Requirements</h2>
 

@@ -23,7 +23,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
       </div>
       <span class="code-filename">server.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
 
@@ -63,7 +63,7 @@ Bun.<span class="fn">serve</span>({"{"}
       </div>
       <span class="code-filename">routes.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="cm">// Different limiters for different endpoints</span>
 <span class="kw">const</span> apiLimiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
@@ -108,7 +108,7 @@ Bun.<span class="fn">serve</span>({"{"}
       </div>
       <span class="code-filename">ip-extraction.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
@@ -143,7 +143,7 @@ Bun.<span class="fn">serve</span>({"{"}
       </div>
       <span class="code-filename">websocket.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="kw">const</span> wsLimiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">10</span>, window: <span class="str">'1m'</span> {"}"})
 

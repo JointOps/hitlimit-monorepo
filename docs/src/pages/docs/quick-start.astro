@@ -18,7 +18,7 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
   <div class="code-block">
     <div class="code-header"><span class="code-label">app.ts</span></div>
     <pre><code><span class="kw">import</span> express <span class="kw">from</span> <span class="str">'express'</span>
-<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 <span class="kw">const</span> app = <span class="fn">express</span>()
 
@@ -60,8 +60,8 @@ app.<span class="fn">listen</span>(<span class="num">3000</span>)</code></pre>
   <p>Choose the right store for your use case:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
-<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/sqlite'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/sqlite'</span>
 
 <span class="cm">// Memory (default, single instance)</span>
 <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})

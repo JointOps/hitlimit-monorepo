@@ -2,10 +2,11 @@
 
 [![npm version](https://img.shields.io/npm/v/@joint-ops/hitlimit-types.svg)](https://www.npmjs.com/package/@joint-ops/hitlimit-types)
 [![GitHub](https://img.shields.io/github/license/JointOps/hitlimit-monorepo)](https://github.com/JointOps/hitlimit-monorepo)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 
 > TypeScript type definitions for hitlimit rate limiting libraries
 
-This package contains shared TypeScript interfaces and types used by [hitlimit](https://www.npmjs.com/package/hitlimit) and [hitlimit-bun](https://www.npmjs.com/package/hitlimit-bun).
+This package contains shared TypeScript interfaces and types used by [@joint-ops/hitlimit](https://www.npmjs.com/package/@joint-ops/hitlimit) and [@joint-ops/hitlimit-bun](https://www.npmjs.com/package/@joint-ops/hitlimit-bun).
 
 ## Installation
 
@@ -13,10 +14,10 @@ This package is automatically installed as a dependency of `hitlimit` and `hitli
 
 ```bash
 # Install hitlimit (includes types automatically)
-npm install hitlimit
+npm install @joint-ops/hitlimit
 
 # Or for Bun
-bun add hitlimit-bun
+bun add @joint-ops/hitlimit-bun
 ```
 
 ## Usage
@@ -90,9 +91,13 @@ interface Logger {
 
 ## Related Packages
 
-- [hitlimit](https://www.npmjs.com/package/hitlimit) - Rate limiting for Node.js (Express, NestJS)
-- [hitlimit-bun](https://www.npmjs.com/package/hitlimit-bun) - Rate limiting for Bun (Bun.serve, Elysia)
+- [@joint-ops/hitlimit](https://www.npmjs.com/package/@joint-ops/hitlimit) - Rate limiting for Node.js (Express, NestJS)
+- [@joint-ops/hitlimit-bun](https://www.npmjs.com/package/@joint-ops/hitlimit-bun) - Rate limiting for Bun (Bun.serve, Elysia)
 
 ## License
 
 MIT
+
+## Keywords
+
+rate limit types, typescript rate limit, rate limiter types, hitlimit, api types, middleware types, typescript definitions

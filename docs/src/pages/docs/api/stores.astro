@@ -56,7 +56,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <p>In-memory storage, suitable for single-instance deployments.</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+    <pre><code><span class="kw">import</span> {"{"} memoryStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 <span class="kw">const</span> store = <span class="fn">memoryStore</span>({"{"}
   cleanupInterval: <span class="num">60000</span>  <span class="cm">// Clean expired entries every 60s</span>
@@ -67,7 +67,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <p>Persistent SQLite storage for single-server deployments.</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/sqlite'</span>
+    <pre><code><span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/sqlite'</span>
 
 <span class="kw">const</span> store = <span class="fn">sqliteStore</span>({"{"}
   path: <span class="str">'./rate-limits.db'</span>,
@@ -79,7 +79,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <p>Redis storage for distributed deployments.</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+    <pre><code><span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
 
 <span class="kw">const</span> store = <span class="fn">redisStore</span>({"{"}
   url: <span class="str">'redis://localhost:6379'</span>,
@@ -90,7 +90,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <h2 id="custom-store">Creating a Custom Store</h2>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store, RateLimitInfo {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store, RateLimitInfo {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 <span class="kw">class</span> MyStore <span class="kw">implements</span> Store {"{"}
   <span class="kw">private</span> data = <span class="kw">new</span> <span class="fn">Map</span>&lt;<span class="kw">string</span>, RateLimitInfo&gt;()

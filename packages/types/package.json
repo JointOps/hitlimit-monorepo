@@ -2,7 +2,11 @@
   "name": "@joint-ops/hitlimit-types",
   "version": "1.0.0",
   "description": "Type definitions for hitlimit rate limiting library",
-  "author": "JointOps",
+  "author": {
+    "name": "Shayan M Hussain",
+    "email": "shayanhussain48@gmail.com",
+    "url": "https://github.com/ShayanHussainSB"
+  },
   "license": "MIT",
   "homepage": "https://hitlimit.dev",
   "repository": {
@@ -15,8 +19,14 @@
   },
   "keywords": [
     "rate-limit",
+    "rate-limiter",
     "types",
-    "typescript"
+    "typescript",
+    "type-definitions",
+    "hitlimit",
+    "rate-limit-types",
+    "api-types",
+    "middleware-types"
   ],
   "type": "module",
   "main": "./dist/index.js",

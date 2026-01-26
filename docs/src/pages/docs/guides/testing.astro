@@ -11,7 +11,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 
   <div class="code-block">
     <pre><code><span class="kw">import</span> {"{"} describe, it, expect, beforeEach {"}"} <span class="kw">from</span> <span class="str">'vitest'</span>
-<span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 <span class="fn">describe</span>(<span class="str">'Rate Limiter'</span>, () => {"{"}
   <span class="kw">let</span> store: ReturnType&lt;<span class="kw">typeof</span> memoryStore&gt;
@@ -118,7 +118,7 @@ mockStore.increment.<span class="fn">mockResolvedValue</span>({"{"}
 
   <div class="code-block">
     <pre><code><span class="cm">// test/helpers/ratelimit.ts</span>
-<span class="kw">import</span> {"{"} memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} memoryStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 <span class="kw">export function</span> <span class="fn">createTestStore</span>() {"{"}
   <span class="kw">return</span> <span class="fn">memoryStore</span>({"{"} cleanupInterval: <span class="num">0</span> {"}"})

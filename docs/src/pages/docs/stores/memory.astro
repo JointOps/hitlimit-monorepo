@@ -12,7 +12,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <p>The memory store is used by default when no store is specified:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 <span class="cm">// Memory store is the default</span>
 app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"}))</code></pre>
@@ -21,7 +21,7 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"} limit: <s
   <p>Or explicitly configure it:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,

@@ -20,7 +20,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
       </div>
       <span class="code-filename">server.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
@@ -95,7 +95,7 @@ Bun.<span class="fn">serve</span>({"{"}
       </div>
       <span class="code-filename">sqlite-store.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit, bunSqliteStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, bunSqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
@@ -119,7 +119,7 @@ Bun.<span class="fn">serve</span>({"{"}
       </div>
       <span class="code-filename">middleware.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
 

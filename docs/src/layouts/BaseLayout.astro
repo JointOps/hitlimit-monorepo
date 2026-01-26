@@ -12,9 +12,9 @@ interface Props {
 }
 
 const {
-  title = 'hitlimit - The Fastest Rate Limiter for Node.js, Bun, Express & NestJS',
-  description = 'Lightning-fast rate limiting middleware for Node.js, Bun, Express, NestJS, and Elysia. Protect your APIs with sub-millisecond performance, memory/SQLite/Redis stores, and zero config setup.',
-  keywords = 'rate limit, rate limiter, rate limiting, express rate limit, express middleware, nestjs rate limit, nestjs throttler, bun rate limit, elysia rate limit, nodejs rate limiter, api rate limiting, throttle requests, request throttling, ddos protection, brute force protection, redis rate limit, sqlite rate limit, api throttling, request limiting, npm rate limit',
+  title = 'hitlimit - The Fastest Rate Limiter for Node.js, Bun, Express & NestJS | express-rate-limit alternative',
+  description = 'Lightning-fast rate limiting middleware for Node.js, Bun, Express, NestJS, and Elysia. A faster, lighter alternative to express-rate-limit and rate-limiter-flexible. Sub-millisecond performance, memory/SQLite/Redis stores, zero config.',
+  keywords = 'rate limit, rate limiter, rate limiting, express rate limit, express-rate-limit, express-rate-limit alternative, rate-limiter-flexible, rate-limiter-flexible alternative, express middleware, nestjs rate limit, nestjs throttler, @nestjs/throttler, bun rate limit, bun rate limiter, elysia rate limit, elysia plugin, nodejs rate limiter, node rate limit, api rate limiting, throttle requests, request throttling, ddos protection, brute force protection, login protection, redis rate limit, sqlite rate limit, api throttling, request limiting, npm rate limit, sliding window, fixed window, token bucket, api security, request limiter',
   canonical = 'https://hitlimit.dev'
 } = Astro.props;
 
@@ -29,7 +29,7 @@ const ogImage = `${siteUrl}/og-image.png`;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <meta name="keywords" content={keywords} />
-    <meta name="author" content="hitlimit" />
+    <meta name="author" content="JointOps" />
     <meta name="robots" content="index, follow" />
     <meta name="googlebot" content="index, follow" />
     <meta name="theme-color" content="#00e5ff" />
@@ -74,8 +74,8 @@ const ogImage = `${siteUrl}/og-image.png`;
       },
       "author": {
         "@type": "Organization",
-        "name": "hitlimit",
-        "url": siteUrl
+        "name": "JointOps",
+        "url": "https://jointops.dev"
       },
       "keywords": keywords
     })} />

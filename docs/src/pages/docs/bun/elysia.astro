@@ -36,7 +36,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
       <span class="code-filename">app.ts</span>
     </div>
     <pre><code><span class="kw">import</span> {"{"} Elysia {"}"} <span class="kw">from</span> <span class="str">'elysia'</span>
-<span class="kw">import</span> {"{"} hitlimitPlugin {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun/elysia'</span>
+<span class="kw">import</span> {"{"} hitlimitPlugin {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/elysia'</span>
 
 <span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
   .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"}
@@ -64,7 +64,7 @@ console.<span class="fn">log</span>(<span class="str">'Server running on port 30
       <span class="code-filename">routes.ts</span>
     </div>
     <pre><code><span class="kw">import</span> {"{"} Elysia {"}"} <span class="kw">from</span> <span class="str">'elysia'</span>
-<span class="kw">import</span> {"{"} hitlimitPlugin {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun/elysia'</span>
+<span class="kw">import</span> {"{"} hitlimitPlugin {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/elysia'</span>
 
 <span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
   <span class="cm">// Global rate limit</span>
@@ -161,7 +161,7 @@ console.<span class="fn">log</span>(<span class="str">'Server running on port 30
       <span class="code-filename">stores.ts</span>
     </div>
     <pre><code><span class="kw">import</span> {"{"} Elysia {"}"} <span class="kw">from</span> <span class="str">'elysia'</span>
-<span class="kw">import</span> {"{"} hitlimitPlugin, bunSqliteStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun/elysia'</span>
+<span class="kw">import</span> {"{"} hitlimitPlugin, bunSqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/elysia'</span>
 
 <span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
   .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"}

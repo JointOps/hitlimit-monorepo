@@ -12,7 +12,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <p>For small deployments, the memory store works well:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
@@ -28,8 +28,8 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <p>For multiple instances, use Redis to share state:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
-<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">1000</span>,
@@ -45,7 +45,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 
   <div class="code-block">
     <pre><code><span class="kw">import</span> {"{"} createCluster {"}"} <span class="kw">from</span> <span class="str">'redis'</span>
-<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
 
 <span class="kw">const</span> cluster = <span class="fn">createCluster</span>({"{"}
   rootNodes: [

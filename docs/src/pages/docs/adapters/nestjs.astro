@@ -16,10 +16,10 @@ import Tabs from '../../../components/Tabs.astro';
 
   <Tabs
     tabs={[
-      { label: 'npm', content: 'npm install hitlimit @hitlimit/nestjs' },
-      { label: 'pnpm', content: 'pnpm add hitlimit @hitlimit/nestjs' },
-      { label: 'yarn', content: 'yarn add hitlimit @hitlimit/nestjs' },
-      { label: 'bun', content: 'bun add hitlimit @hitlimit/nestjs' },
+      { label: 'npm', content: 'npm install @joint-ops/hitlimit' },
+      { label: 'pnpm', content: 'pnpm add @joint-ops/hitlimit' },
+      { label: 'yarn', content: 'yarn add @joint-ops/hitlimit' },
+      { label: 'bun', content: 'bun add @joint-ops/hitlimit' },
     ]}
   />
 
@@ -30,7 +30,7 @@ import Tabs from '../../../components/Tabs.astro';
   <div class="code-block">
     <div class="code-header"><span class="code-label">app.module.ts</span></div>
     <pre><code><span class="kw">import</span> {"{"} Module {"}"} <span class="kw">from</span> <span class="str">'@nestjs/common'</span>
-<span class="kw">import</span> {"{"} HitlimitModule {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/nestjs'</span>
+<span class="kw">import</span> {"{"} HitlimitModule {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
 
 @<span class="fn">Module</span>({"{"}
   imports: [
@@ -65,7 +65,7 @@ import Tabs from '../../../components/Tabs.astro';
 
   <div class="code-block">
     <div class="code-header"><span class="code-label">main.ts</span></div>
-    <pre><code><span class="kw">import</span> {"{"} HitlimitGuard {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/nestjs'</span>
+    <pre><code><span class="kw">import</span> {"{"} HitlimitGuard {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
 
 <span class="kw">async function</span> <span class="fn">bootstrap</span>() {"{"}
   <span class="kw">const</span> app = <span class="kw">await</span> NestFactory.<span class="fn">create</span>(AppModule)
@@ -84,7 +84,7 @@ import Tabs from '../../../components/Tabs.astro';
   <div class="code-block">
     <div class="code-header"><span class="code-label">users.controller.ts</span></div>
     <pre><code><span class="kw">import</span> {"{"} Controller, Get, Post {"}"} <span class="kw">from</span> <span class="str">'@nestjs/common'</span>
-<span class="kw">import</span> {"{"} RateLimit {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/nestjs'</span>
+<span class="kw">import</span> {"{"} RateLimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
 
 @<span class="fn">Controller</span>(<span class="str">'users'</span>)
 <span class="kw">export class</span> UsersController {"{"}
@@ -108,7 +108,7 @@ import Tabs from '../../../components/Tabs.astro';
   <p>Use the <code>@SkipRateLimit</code> decorator to bypass rate limiting:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} SkipRateLimit {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/nestjs'</span>
+    <pre><code><span class="kw">import</span> {"{"} SkipRateLimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
 
 @<span class="fn">Get</span>(<span class="str">'health'</span>)
 @<span class="fn">SkipRateLimit</span>()
@@ -137,7 +137,7 @@ import Tabs from '../../../components/Tabs.astro';
   <p>Configure a Redis store for distributed deployments:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/redis'</span>
+    <pre><code><span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
 
 HitlimitModule.<span class="fn">forRoot</span>({"{"}
   limit: <span class="num">100</span>,

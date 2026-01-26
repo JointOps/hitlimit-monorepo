@@ -8,11 +8,11 @@
     "setup:bun": "cd packages/hitlimit-bun && bun install",
 
     "build": "turbo run build",
-    "build:node": "turbo run build --filter=hitlimit --filter=@hitlimit/types",
+    "build:node": "turbo run build --filter=@joint-ops/hitlimit --filter=@joint-ops/hitlimit-types",
     "build:bun": "cd packages/hitlimit-bun && bun run build",
 
     "test": "./scripts/test-all.sh",
-    "test:node": "turbo run test --filter=hitlimit --filter=@hitlimit/types",
+    "test:node": "turbo run test --filter=@joint-ops/hitlimit --filter=@joint-ops/hitlimit-types",
     "test:bun": "cd packages/hitlimit-bun && bun test",
 
     "benchmark": "pnpm --filter hitlimit-benchmarks bench",

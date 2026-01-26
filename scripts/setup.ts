@@ -248,8 +248,8 @@ function buildPackages(): boolean {
   log.step('Building packages')
 
   // Build Node.js packages first
-  log.info('Building @hitlimit/types and hitlimit...')
-  if (!runCommand('pnpm turbo run build --filter=@hitlimit/types --filter=hitlimit', 'build Node.js packages')) {
+  log.info('Building @joint-ops/hitlimit-types and @joint-ops/hitlimit...')
+  if (!runCommand('pnpm turbo run build --filter=@joint-ops/hitlimit-types --filter=@joint-ops/hitlimit', 'build Node.js packages')) {
     return false
   }
 

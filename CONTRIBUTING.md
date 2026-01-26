@@ -44,7 +44,7 @@ You're all set. See the commands below for common development tasks.
 ```
 hitlimit-monorepo/
 ├── packages/
-│   ├── types/           # @hitlimit/types - Shared TypeScript types
+│   ├── types/           # @joint-ops/hitlimit-types - Shared TypeScript types
 │   ├── hitlimit/        # hitlimit - Node.js rate limiter
 │   └── hitlimit-bun/    # hitlimit-bun - Bun rate limiter
 ├── docs/                # Documentation site (Astro)
@@ -66,8 +66,8 @@ pnpm typecheck         # Run TypeScript type checking
 ### Node.js Packages Only
 
 ```bash
-pnpm test:node         # Test @hitlimit/types and hitlimit
-pnpm build:node        # Build @hitlimit/types and hitlimit
+pnpm test:node         # Test @joint-ops/hitlimit-types and hitlimit
+pnpm build:node        # Build @joint-ops/hitlimit-types and hitlimit
 ```
 
 ### Bun Package Only
@@ -97,7 +97,7 @@ pnpm benchmark:all     # Run all benchmarks
 
 This monorepo uses a **hybrid architecture**:
 
-- **Node.js packages** (`@hitlimit/types`, `hitlimit`, `docs`, `benchmarks`) use **pnpm**
+- **Node.js packages** (`@joint-ops/hitlimit-types`, `hitlimit`, `docs`, `benchmarks`) use **pnpm**
 - **Bun package** (`hitlimit-bun`) uses **bun** natively
 
 This allows each runtime to use its optimal tooling:

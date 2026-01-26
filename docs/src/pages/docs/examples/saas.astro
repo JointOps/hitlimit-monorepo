@@ -26,8 +26,8 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 
   <div class="code-block">
     <div class="code-header"><span class="code-label">src/middleware/rate-limit.ts</span></div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
-<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
 
 <span class="cm">// Tier configuration from your pricing page</span>
 <span class="kw">const</span> TIER_LIMITS = {"{"}
@@ -163,8 +163,8 @@ router.<span class="fn">post</span>(<span class="str">'/export'</span>, exportRa
     <div class="code-header"><span class="code-label">src/rate-limit/rate-limit.module.ts</span></div>
     <pre><code><span class="kw">import</span> {"{"} Module, Global {"}"} <span class="kw">from</span> <span class="str">'@nestjs/common'</span>
 <span class="kw">import</span> {"{"} ConfigService {"}"} <span class="kw">from</span> <span class="str">'@nestjs/config'</span>
-<span class="kw">import</span> {"{"} HitLimitModule {"}"} <span class="kw">from</span> <span class="str">'hitlimit/nest'</span>
-<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+<span class="kw">import</span> {"{"} HitLimitModule {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
 
 <span class="kw">@Global</span>()
 <span class="kw">@Module</span>({"{"}
@@ -190,7 +190,7 @@ router.<span class="fn">post</span>(<span class="str">'/export'</span>, exportRa
   <div class="code-block">
     <div class="code-header"><span class="code-label">src/projects/projects.controller.ts</span></div>
     <pre><code><span class="kw">import</span> {"{"} Controller, Get, Post, UseGuards {"}"} <span class="kw">from</span> <span class="str">'@nestjs/common'</span>
-<span class="kw">import</span> {"{"} HitLimitGuard, HitLimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit/nest'</span>
+<span class="kw">import</span> {"{"} HitLimitGuard, HitLimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
 
 <span class="kw">@Controller</span>(<span class="str">'projects'</span>)
 <span class="kw">@UseGuards</span>(HitLimitGuard) <span class="cm">// Apply global rate limit</span>

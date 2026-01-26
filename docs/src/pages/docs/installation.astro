@@ -16,10 +16,10 @@ import Tabs from '../../components/Tabs.astro';
 
   <Tabs
     tabs={[
-      { label: 'npm', content: 'npm install hitlimit' },
-      { label: 'pnpm', content: 'pnpm add hitlimit' },
-      { label: 'yarn', content: 'yarn add hitlimit' },
-      { label: 'bun', content: 'bun add hitlimit' },
+      { label: 'npm', content: 'npm install @joint-ops/hitlimit' },
+      { label: 'pnpm', content: 'pnpm add @joint-ops/hitlimit' },
+      { label: 'yarn', content: 'yarn add @joint-ops/hitlimit' },
+      { label: 'bun', content: 'bun add @joint-ops/hitlimit' },
     ]}
   />
 
@@ -29,7 +29,7 @@ import Tabs from '../../components/Tabs.astro';
 
   <Tabs
     tabs={[
-      { label: 'bun', content: 'bun add hitlimit-bun' },
+      { label: 'bun', content: 'bun add @joint-ops/hitlimit-bun' },
     ]}
   />
 
@@ -38,11 +38,12 @@ import Tabs from '../../components/Tabs.astro';
   <p>Install additional stores as needed:</p>
 
   <h3>Redis Store</h3>
+  <p>Install the <code>ioredis</code> peer dependency to use the Redis store:</p>
   <Tabs
     tabs={[
-      { label: 'npm', content: 'npm install @hitlimit/redis ioredis' },
-      { label: 'pnpm', content: 'pnpm add @hitlimit/redis ioredis' },
-      { label: 'yarn', content: 'yarn add @hitlimit/redis ioredis' },
+      { label: 'npm', content: 'npm install ioredis' },
+      { label: 'pnpm', content: 'pnpm add ioredis' },
+      { label: 'yarn', content: 'yarn add ioredis' },
     ]}
   />
 

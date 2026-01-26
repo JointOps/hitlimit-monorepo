@@ -1,15 +1,16 @@
-# hitlimit-bun
+# @joint-ops/hitlimit-bun
 
-[![npm version](https://img.shields.io/npm/v/hitlimit-bun.svg)](https://www.npmjs.com/package/hitlimit-bun)
-[![npm downloads](https://img.shields.io/npm/dm/hitlimit-bun.svg)](https://www.npmjs.com/package/hitlimit-bun)
+[![npm version](https://img.shields.io/npm/v/@joint-ops/hitlimit-bun.svg)](https://www.npmjs.com/package/@joint-ops/hitlimit-bun)
+[![npm downloads](https://img.shields.io/npm/dm/@joint-ops/hitlimit-bun.svg)](https://www.npmjs.com/package/@joint-ops/hitlimit-bun)
 [![GitHub](https://img.shields.io/github/license/JointOps/hitlimit-monorepo)](https://github.com/JointOps/hitlimit-monorepo)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-Native-black.svg)](https://bun.sh)
 
-> The fastest rate limiter for Bun - Native performance with bun:sqlite
+> The fastest rate limiter for Bun - Native bun:sqlite performance | Elysia rate limit plugin
 
-**hitlimit-bun** is a high-performance, Bun-native rate limiting library for Bun.serve and Elysia applications. Built specifically for Bun's runtime with native bun:sqlite for maximum performance.
+**hitlimit-bun** is a high-performance, Bun-native rate limiting library for Bun.serve and Elysia applications. Built specifically for Bun's runtime with native bun:sqlite for maximum performance. The only rate limiter designed from the ground up for Bun.
 
-**[Documentation](https://hitlimit.dev/docs/bun)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[npm](https://www.npmjs.com/package/hitlimit-bun)**
+**[Documentation](https://hitlimit.dev/docs/bun)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[npm](https://www.npmjs.com/package/@joint-ops/hitlimit-bun)**
 
 ## ⚡ Why hitlimit-bun?
 
@@ -56,7 +57,7 @@ Bun.serve({
 
 ```typescript
 import { Elysia } from 'elysia'
-import { hitlimit } from 'hitlimit-bun/elysia'
+import { hitlimit } from '@joint-ops/hitlimit-bun/elysia'
 
 new Elysia()
   .use(hitlimit({ limit: 100, window: '1m' }))
@@ -251,7 +252,7 @@ For simple use cases without persistence.
 
 ```typescript
 import { hitlimit } from '@joint-ops/hitlimit-bun'
-import { memoryStore } from 'hitlimit-bun/stores/memory'
+import { memoryStore } from '@joint-ops/hitlimit-bun/stores/memory'
 
 Bun.serve({
   fetch: hitlimit({
@@ -266,7 +267,7 @@ For distributed systems and multi-server deployments.
 
 ```typescript
 import { hitlimit } from '@joint-ops/hitlimit-bun'
-import { redisStore } from 'hitlimit-bun/stores/redis'
+import { redisStore } from '@joint-ops/hitlimit-bun/stores/redis'
 
 Bun.serve({
   fetch: hitlimit({
@@ -358,7 +359,7 @@ bun run benchmark:bun
 
 ```typescript
 import { Elysia } from 'elysia'
-import { hitlimit } from 'hitlimit-bun/elysia'
+import { hitlimit } from '@joint-ops/hitlimit-bun/elysia'
 
 new Elysia()
   .use(hitlimit({
@@ -377,7 +378,17 @@ new Elysia()
 
 ## Related Packages
 
-- [hitlimit](https://www.npmjs.com/package/hitlimit) - Node.js rate limiting for Express, NestJS
+- [@joint-ops/hitlimit](https://www.npmjs.com/package/@joint-ops/hitlimit) - Node.js rate limiting for Express, NestJS
+
+## Why Not Use Node.js Rate Limiters in Bun?
+
+Node.js rate limiters like express-rate-limit use better-sqlite3 which relies on N-API bindings. In Bun, this adds overhead and loses the performance benefits of Bun's native runtime.
+
+**hitlimit-bun** is built specifically for Bun:
+- Uses native `bun:sqlite` (2.7x faster than better-sqlite3)
+- No FFI overhead or Node.js polyfills
+- First-class Elysia framework support
+- Optimized for Bun.serve's request handling
 
 ## License
 
@@ -385,4 +396,4 @@ MIT - Use freely in personal and commercial projects.
 
 ## Keywords
 
-bun rate limit, bun rate limiter, bun middleware, elysia rate limit, elysia plugin, bun serve rate limiting, bun sqlite, bun native, api rate limiting, throttle requests, request throttling, bun api protection, ddos protection, brute force protection, redis rate limit, high performance rate limit, bun framework, elysia framework
+bun rate limit, bun rate limiter, bun middleware, bun api, bun server, bun serve, bun framework, bun native, bun sqlite, elysia rate limit, elysia plugin, elysia middleware, elysia throttle, elysia framework, api rate limiting, throttle requests, request throttling, bun api protection, ddos protection, brute force protection, login protection, redis rate limit, high performance rate limit, fast rate limiter, sliding window, fixed window, rate-limiter-flexible bun, express-rate-limit bun, bun http, bun backend, bun rest api

@@ -23,7 +23,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
       </div>
       <span class="code-filename">memory.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
@@ -51,7 +51,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
       </div>
       <span class="code-filename">sqlite.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit, bunSqliteStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, bunSqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
@@ -122,8 +122,8 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
       </div>
       <span class="code-filename">redis.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
-<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@hitlimit/redis'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
@@ -148,7 +148,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
       </div>
       <span class="code-filename">custom-store.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="kw">const</span> customStore: Store = {"{"}
   <span class="kw">async</span> <span class="fn">increment</span>(key: <span class="kw">string</span>, windowMs: <span class="kw">number</span>) {"{"}

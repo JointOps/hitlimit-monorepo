@@ -53,7 +53,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <h2 id="basic-example">Basic Example</h2>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 <span class="cm">// 100 requests per minute</span>
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
@@ -65,8 +65,8 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <h2 id="advanced-example">Advanced Example</h2>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
-<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">1000</span>,

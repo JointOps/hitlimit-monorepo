@@ -25,16 +25,16 @@ FAILED=0
 echo -e "${CYAN}=== Node.js Tests ===${NC}"
 echo ""
 
-echo "Testing @hitlimit/types..."
-if pnpm --filter @hitlimit/types test 2>/dev/null; then
-    echo -e "${GREEN}✓${NC} @hitlimit/types passed"
+echo "Testing @joint-ops/hitlimit-types..."
+if pnpm --filter @joint-ops/hitlimit-types test 2>/dev/null; then
+    echo -e "${GREEN}✓${NC} @joint-ops/hitlimit-types passed"
 else
     echo -e "  (No tests or passed)"
 fi
 echo ""
 
 echo "Testing hitlimit..."
-if pnpm --filter hitlimit test; then
+if pnpm --filter @joint-ops/hitlimit test; then
     echo -e "${GREEN}✓${NC} hitlimit passed"
 else
     echo -e "${RED}✗${NC} hitlimit failed"

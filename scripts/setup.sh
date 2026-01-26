@@ -86,11 +86,11 @@ echo ""
 
 echo -e "${CYAN}Step 4: Building packages...${NC}"
 
-echo "  Building @hitlimit/types..."
-pnpm --filter @hitlimit/types build
+echo "  Building @joint-ops/hitlimit-types..."
+pnpm --filter @joint-ops/hitlimit-types build
 
 echo "  Building hitlimit..."
-pnpm --filter hitlimit build
+pnpm --filter @joint-ops/hitlimit build
 
 echo "  Building hitlimit-bun..."
 cd packages/hitlimit-bun

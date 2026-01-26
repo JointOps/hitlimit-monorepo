@@ -1,12 +1,13 @@
 # hitlimit
 
-[![npm version](https://img.shields.io/npm/v/hitlimit.svg)](https://www.npmjs.com/package/hitlimit)
-[![npm version](https://img.shields.io/npm/v/hitlimit-bun.svg?label=hitlimit-bun)](https://www.npmjs.com/package/hitlimit-bun)
+[![npm version](https://img.shields.io/npm/v/@joint-ops/hitlimit.svg)](https://www.npmjs.com/package/@joint-ops/hitlimit)
+[![npm version](https://img.shields.io/npm/v/@joint-ops/hitlimit-bun.svg?label=hitlimit-bun)](https://www.npmjs.com/package/@joint-ops/hitlimit-bun)
 [![GitHub](https://img.shields.io/github/license/JointOps/hitlimit-monorepo)](https://github.com/JointOps/hitlimit-monorepo)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 
-> The fastest way to say no
+> The fastest rate limiter for Node.js & Bun | express-rate-limit alternative
 
-High-performance, framework-agnostic rate limiting for Node.js and Bun.
+High-performance, framework-agnostic rate limiting for Node.js and Bun. A faster, lighter alternative to express-rate-limit and rate-limiter-flexible.
 
 **[Documentation](https://hitlimit.dev)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)**
 
@@ -14,15 +15,15 @@ High-performance, framework-agnostic rate limiting for Node.js and Bun.
 
 | Package | Runtime | Default Store | Install |
 |---------|---------|---------------|---------|
-| [`hitlimit`](./packages/hitlimit) | Node.js | Memory | `npm i hitlimit` |
-| [`hitlimit-bun`](./packages/hitlimit-bun) | Bun | bun:sqlite | `bun add hitlimit-bun` |
+| [`@joint-ops/hitlimit`](./packages/hitlimit) | Node.js | Memory | `npm i @joint-ops/hitlimit` |
+| [`@joint-ops/hitlimit-bun`](./packages/hitlimit-bun) | Bun | bun:sqlite | `bun add @joint-ops/hitlimit-bun` |
 
 ## Quick Start
 
 ### Express
 
 ```javascript
-import { hitlimit } from 'hitlimit'
+import { hitlimit } from '@joint-ops/hitlimit'
 
 app.use(hitlimit()) // 100 req/min per IP
 ```
@@ -30,7 +31,7 @@ app.use(hitlimit()) // 100 req/min per IP
 ### Bun
 
 ```javascript
-import { hitlimit } from 'hitlimit-bun'
+import { hitlimit } from '@joint-ops/hitlimit-bun'
 
 Bun.serve({
   fetch: hitlimit({}, (req) => new Response('Hello!'))
@@ -40,7 +41,7 @@ Bun.serve({
 ### NestJS
 
 ```typescript
-import { HitLimitModule } from 'hitlimit/nest'
+import { HitLimitModule } from '@joint-ops/hitlimit/nest'
 
 @Module({
   imports: [HitLimitModule.register({ limit: 100, window: '1m' })]
@@ -52,7 +53,7 @@ export class AppModule {}
 
 ```typescript
 import { Elysia } from 'elysia'
-import { hitlimit } from 'hitlimit-bun/elysia'
+import { hitlimit } from '@joint-ops/hitlimit-bun/elysia'
 
 new Elysia()
   .use(hitlimit({ limit: 100, window: '1m' }))
@@ -115,7 +116,7 @@ hitlimit({
 ### Memory (default for hitlimit)
 
 ```javascript
-import { hitlimit } from 'hitlimit'
+import { hitlimit } from '@joint-ops/hitlimit'
 app.use(hitlimit()) // uses memory store
 ```
 
@@ -123,11 +124,11 @@ app.use(hitlimit()) // uses memory store
 
 ```javascript
 // Node.js (uses better-sqlite3)
-import { sqliteStore } from 'hitlimit/stores/sqlite'
+import { sqliteStore } from '@joint-ops/hitlimit/stores/sqlite'
 app.use(hitlimit({ store: sqliteStore({ path: './ratelimit.db' }) }))
 
 // Bun (uses bun:sqlite - DEFAULT)
-import { hitlimit } from 'hitlimit-bun'
+import { hitlimit } from '@joint-ops/hitlimit-bun'
 Bun.serve({ fetch: hitlimit({}, handler) }) // uses bun:sqlite by default
 ```
 
@@ -135,11 +136,11 @@ Bun.serve({ fetch: hitlimit({}, handler) }) // uses bun:sqlite by default
 
 ```javascript
 // Node.js
-import { redisStore } from 'hitlimit/stores/redis'
+import { redisStore } from '@joint-ops/hitlimit/stores/redis'
 app.use(hitlimit({ store: redisStore({ url: 'redis://localhost:6379' }) }))
 
 // Bun
-import { redisStore } from 'hitlimit-bun/stores/redis'
+import { redisStore } from '@joint-ops/hitlimit-bun/stores/redis'
 ```
 
 ## Default Response (429)

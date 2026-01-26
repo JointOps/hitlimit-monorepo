@@ -49,7 +49,7 @@ TYPES_VERSION=$(node -p "require('./packages/types/package.json').version")
 HITLIMIT_VERSION=$(node -p "require('./packages/hitlimit/package.json').version")
 HITLIMIT_BUN_VERSION=$(node -p "require('./packages/hitlimit-bun/package.json').version")
 
-echo "  @hitlimit/types:  $TYPES_VERSION"
+echo "  @joint-ops/hitlimit-types:  $TYPES_VERSION"
 echo "  hitlimit:         $HITLIMIT_VERSION"
 echo "  hitlimit-bun:     $HITLIMIT_BUN_VERSION"
 
@@ -67,8 +67,8 @@ echo ""
 
 echo -e "${CYAN}Step 3: Building packages...${NC}"
 
-pnpm --filter @hitlimit/types build
-pnpm --filter hitlimit build
+pnpm --filter @joint-ops/hitlimit-types build
+pnpm --filter @joint-ops/hitlimit build
 cd packages/hitlimit-bun && bun run build && cd ../..
 
 echo -e "  ${GREEN}✓${NC} Build successful"

@@ -35,7 +35,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <p>A simple in-memory store implementation:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 <span class="kw">export function</span> <span class="fn">myStore</span>(): Store {"{"}
   <span class="kw">const</span> data = <span class="kw">new</span> <span class="fn">Map</span>&lt;<span class="str">string</span>, {"{"} count: <span class="str">number</span>; resetAt: <span class="str">number</span> {"}"}&gt;()
@@ -67,7 +67,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <h2 id="using-custom-store">Using Your Store</h2>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 <span class="kw">import</span> {"{"} myStore {"}"} <span class="kw">from</span> <span class="str">'./my-store'</span>
 
 app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
@@ -82,7 +82,7 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
   <p>Example using a generic database client:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 <span class="kw">interface</span> DbStoreOptions {"{"}
   client: <span class="str">any</span>

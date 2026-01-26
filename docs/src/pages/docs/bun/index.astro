@@ -37,7 +37,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
       </div>
       <span class="code-filename">server.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
 
@@ -60,7 +60,7 @@ Bun.<span class="fn">serve</span>({"{"}
   <p>For Bun applications, use the optimized package:</p>
 
   <div class="code-block">
-    <pre><code>bun add hitlimit-bun</code></pre>
+    <pre><code>bun add @joint-ops/hitlimit-bun</code></pre>
   </div>
 
   <p>This package includes Bun-specific optimizations and native SQLite store support.</p>

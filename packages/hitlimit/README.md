@@ -1,15 +1,16 @@
-# hitlimit
+# @joint-ops/hitlimit
 
-[![npm version](https://img.shields.io/npm/v/hitlimit.svg)](https://www.npmjs.com/package/hitlimit)
-[![npm downloads](https://img.shields.io/npm/dm/hitlimit.svg)](https://www.npmjs.com/package/hitlimit)
+[![npm version](https://img.shields.io/npm/v/@joint-ops/hitlimit.svg)](https://www.npmjs.com/package/@joint-ops/hitlimit)
+[![npm downloads](https://img.shields.io/npm/dm/@joint-ops/hitlimit.svg)](https://www.npmjs.com/package/@joint-ops/hitlimit)
 [![GitHub](https://img.shields.io/github/license/JointOps/hitlimit-monorepo)](https://github.com/JointOps/hitlimit-monorepo)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![Bundle Size](https://img.shields.io/bundlephobia/minzip/@joint-ops/hitlimit)](https://bundlephobia.com/package/@joint-ops/hitlimit)
 
-> The fastest rate limiter for Node.js - Express, NestJS, and native HTTP
+> The fastest rate limiter for Node.js - Express, NestJS, and native HTTP | express-rate-limit alternative
 
-**hitlimit** is a high-performance rate limiting middleware for Node.js applications. Protect your APIs from abuse, prevent brute force attacks, and throttle requests with sub-millisecond overhead.
+**hitlimit** is a high-performance rate limiting middleware for Node.js applications. Protect your APIs from abuse, prevent brute force attacks, and throttle requests with sub-millisecond overhead. A faster, lighter alternative to express-rate-limit and rate-limiter-flexible.
 
-**[Documentation](https://hitlimit.dev)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[npm](https://www.npmjs.com/package/hitlimit)**
+**[Documentation](https://hitlimit.dev)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[npm](https://www.npmjs.com/package/@joint-ops/hitlimit)**
 
 ## Why hitlimit?
 
@@ -101,7 +102,7 @@ app.listen(3000)
 ```typescript
 import { Module } from '@nestjs/common'
 import { APP_GUARD } from '@nestjs/core'
-import { HitLimitModule, HitLimitGuard } from 'hitlimit/nest'
+import { HitLimitModule, HitLimitGuard } from '@joint-ops/hitlimit/nest'
 
 @Module({
   imports: [
@@ -124,7 +125,7 @@ export class AppModule {}
 
 ```javascript
 import http from 'node:http'
-import { createHitLimit } from 'hitlimit/node'
+import { createHitLimit } from '@joint-ops/hitlimit/node'
 
 const limiter = createHitLimit({ limit: 100, window: '1m' })
 
@@ -267,7 +268,7 @@ Best for distributed systems and multi-server deployments.
 
 ```javascript
 import { hitlimit } from '@joint-ops/hitlimit'
-import { redisStore } from 'hitlimit/stores/redis'
+import { redisStore } from '@joint-ops/hitlimit/stores/redis'
 
 app.use(hitlimit({
   store: redisStore({ url: 'redis://localhost:6379' })
@@ -280,7 +281,7 @@ Best for persistent rate limiting with local storage.
 
 ```javascript
 import { hitlimit } from '@joint-ops/hitlimit'
-import { sqliteStore } from 'hitlimit/stores/sqlite'
+import { sqliteStore } from '@joint-ops/hitlimit/stores/sqlite'
 
 app.use(hitlimit({
   store: sqliteStore({ path: './ratelimit.db' })
@@ -324,7 +325,7 @@ Apply different limits to specific routes:
 
 ```typescript
 import { Controller, Get, UseGuards } from '@nestjs/common'
-import { HitLimitGuard, HitLimit } from 'hitlimit/nest'
+import { HitLimitGuard, HitLimit } from '@joint-ops/hitlimit/nest'
 
 @Controller()
 @UseGuards(HitLimitGuard)
@@ -345,7 +346,46 @@ export class AppController {
 
 ## Related Packages
 
-- [hitlimit-bun](https://www.npmjs.com/package/hitlimit-bun) - Bun-native rate limiting with bun:sqlite
+- [@joint-ops/hitlimit-bun](https://www.npmjs.com/package/@joint-ops/hitlimit-bun) - Bun-native rate limiting with bun:sqlite
+
+## Migrating from Other Libraries
+
+### From express-rate-limit
+
+```javascript
+// Before (express-rate-limit)
+import rateLimit from 'express-rate-limit'
+app.use(rateLimit({ windowMs: 60000, max: 100 }))
+
+// After (hitlimit) - 2x faster, smaller bundle
+import { hitlimit } from '@joint-ops/hitlimit'
+app.use(hitlimit({ window: '1m', limit: 100 }))
+```
+
+### From rate-limiter-flexible
+
+```javascript
+// Before (rate-limiter-flexible)
+import { RateLimiterMemory } from 'rate-limiter-flexible'
+const limiter = new RateLimiterMemory({ points: 100, duration: 60 })
+
+// After (hitlimit) - simpler API, better DX
+import { hitlimit } from '@joint-ops/hitlimit'
+app.use(hitlimit({ limit: 100, window: '1m' }))
+```
+
+### From @nestjs/throttler
+
+```typescript
+// Before (@nestjs/throttler)
+@UseGuards(ThrottlerGuard)
+@Throttle({ default: { limit: 100, ttl: 60000 } })
+
+// After (hitlimit) - more flexible, better performance
+import { HitLimitGuard, HitLimit } from '@joint-ops/hitlimit/nest'
+@UseGuards(HitLimitGuard)
+@HitLimit({ limit: 100, window: '1m' })
+```
 
 ## License
 
@@ -353,4 +393,4 @@ MIT - Use freely in personal and commercial projects.
 
 ## Keywords
 
-rate limit, rate limiter, rate limiting, express rate limit, express middleware, nestjs rate limit, nestjs guard, nodejs rate limit, node rate limiter, api rate limiting, throttle requests, request throttling, api throttling, ddos protection, brute force protection, redis rate limit, memory rate limit, sliding window, fixed window, express-rate-limit alternative
+rate limit, rate limiter, rate limiting, express rate limit, express middleware, express-rate-limit, express-rate-limit alternative, nestjs rate limit, nestjs throttler, @nestjs/throttler alternative, nestjs guard, nodejs rate limit, node rate limiter, api rate limiting, throttle requests, request throttling, api throttling, ddos protection, brute force protection, redis rate limit, memory rate limit, sqlite rate limit, sliding window, fixed window, token bucket, leaky bucket, rate-limiter-flexible alternative, api security, request limiter, http rate limit, express slow down, api protection, login protection, authentication rate limit
