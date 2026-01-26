@@ -45,3 +45,4 @@ coverage/
 # Lock files (keep pnpm-lock.yaml and bun.lock)
 yarn.lock
 package-lock.json
+CLAUDE.md
