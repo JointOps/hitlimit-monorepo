@@ -125,6 +125,9 @@ jobs:
       - name: Install Bun dependencies
         run: cd packages/hitlimit-bun && bun install
 
+      - name: Build hitlimit-bun
+        run: cd packages/hitlimit-bun && bun run build
+
       # --- Publish @joint-ops/hitlimit-types ---
       - name: Publish @joint-ops/hitlimit-types
         id: publish_types
@@ -136,6 +139,17 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # --- Publish @joint-ops/hitlimit ---
+      - name: Update hitlimit dependency for npm
+        run: |
+          VERSION=${{ needs.validate.outputs.version }}
+          cd packages/hitlimit
+          node -e "
+            const fs = require('fs');
+            const pkg = require('./package.json');
+            pkg.dependencies['@joint-ops/hitlimit-types'] = '$VERSION';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
       - name: Publish @joint-ops/hitlimit
         id: publish_hitlimit
         run: |
