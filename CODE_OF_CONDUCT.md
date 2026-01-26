@@ -24,7 +24,7 @@ We as members, contributors, and leaders pledge to make participation in our com
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project team at [conduct@hitlimit.dev](mailto:conduct@hitlimit.dev). All complaints will be reviewed and investigated promptly and fairly.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project team at [conduct@jointops.dev](mailto:conduct@jointops.dev). All complaints will be reviewed and investigated promptly and fairly.
 
 ## Attribution
 

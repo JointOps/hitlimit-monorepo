@@ -15,7 +15,7 @@ We take security seriously. If you discover a security vulnerability, please rep
 
 ### How to Report
 
-1. **Email**: Send details to [security@hitlimit.dev](mailto:security@hitlimit.dev)
+1. **Email**: Send details to [security@jointops.dev](mailto:security@jointops.dev)
 2. **Subject**: Include "SECURITY" in the subject line
 3. **Include**:
    - Description of the vulnerability

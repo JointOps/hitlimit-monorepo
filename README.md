@@ -9,7 +9,7 @@
 
 High-performance, framework-agnostic rate limiting for Node.js and Bun. A faster, lighter alternative to express-rate-limit and rate-limiter-flexible.
 
-**[Documentation](https://hitlimit.dev)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)**
+**[Documentation](https://hitlimit.jointops.dev)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)**
 
 ## Packages
 

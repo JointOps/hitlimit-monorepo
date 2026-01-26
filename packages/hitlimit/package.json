@@ -1,6 +1,6 @@
 {
   "name": "@joint-ops/hitlimit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fast rate limiting middleware for Express, NestJS & Node.js - API throttling, brute force protection, request limiting",
   "author": {
     "name": "Shayan M Hussain",
@@ -8,7 +8,7 @@
     "url": "https://github.com/ShayanHussainSB"
   },
   "license": "MIT",
-  "homepage": "https://hitlimit.dev",
+  "homepage": "https://hitlimit.jointops.dev",
   "repository": {
     "type": "git",
     "url": "https://github.com/JointOps/hitlimit-monorepo",
@@ -21,6 +21,7 @@
     "rate-limit",
     "rate-limiter",
     "rate-limiting",
+    "ratelimit",
     "express",
     "express-rate-limit",
     "express-middleware",
@@ -29,6 +30,13 @@
     "nestjs-throttler",
     "nestjs-rate-limit",
     "nest-throttler",
+    "fastify",
+    "fastify-rate-limit",
+    "hono",
+    "hono-rate-limit",
+    "hono-middleware",
+    "koa",
+    "koa-rate-limit",
     "middleware",
     "throttle",
     "throttling",
@@ -56,7 +64,11 @@
     "express-slow-down",
     "api-security",
     "request-limiter",
-    "http-rate-limit"
+    "http-rate-limit",
+    "fast",
+    "lightweight",
+    "zero-dependency",
+    "esm"
   ],
   "type": "module",
   "main": "./dist/index.js",

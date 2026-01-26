@@ -1,6 +1,6 @@
 {
   "name": "@joint-ops/hitlimit-types",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Type definitions for hitlimit rate limiting library",
   "author": {
     "name": "Shayan M Hussain",
@@ -8,7 +8,7 @@
     "url": "https://github.com/ShayanHussainSB"
   },
   "license": "MIT",
-  "homepage": "https://hitlimit.dev",
+  "homepage": "https://hitlimit.jointops.dev",
   "repository": {
     "type": "git",
     "url": "https://github.com/JointOps/hitlimit-monorepo",

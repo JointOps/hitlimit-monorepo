@@ -1,6 +1,6 @@
 {
   "name": "@joint-ops/hitlimit-bun",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fast Bun-native rate limiting for Bun.serve & Elysia - API throttling with bun:sqlite, high performance request limiting",
   "author": {
     "name": "Shayan M Hussain",
@@ -8,7 +8,7 @@
     "url": "https://github.com/ShayanHussainSB"
   },
   "license": "MIT",
-  "homepage": "https://hitlimit.dev/docs/bun",
+  "homepage": "https://hitlimit.jointops.dev/docs/bun",
   "repository": {
     "type": "git",
     "url": "https://github.com/JointOps/hitlimit-monorepo",
@@ -21,6 +21,7 @@
     "rate-limit",
     "rate-limiter",
     "rate-limiting",
+    "ratelimit",
     "bun",
     "bun-rate-limit",
     "bun-sqlite",
@@ -28,11 +29,15 @@
     "bun-serve",
     "bun-server",
     "bun-native",
+    "bun-http",
     "elysia",
     "elysia-plugin",
     "elysia-rate-limit",
     "elysia-middleware",
     "elysia-throttle",
+    "hono",
+    "hono-rate-limit",
+    "hono-bun",
     "middleware",
     "throttle",
     "throttling",
@@ -50,6 +55,7 @@
     "typescript",
     "high-performance",
     "fast-rate-limiter",
+    "fastest",
     "sliding-window",
     "fixed-window",
     "rate-limiter-flexible",
@@ -57,7 +63,11 @@
     "request-limiter",
     "http-rate-limit",
     "bun-api",
-    "bun-framework"
+    "bun-framework",
+    "fast",
+    "lightweight",
+    "zero-dependency",
+    "esm"
   ],
   "type": "module",
   "main": "./dist/index.js",

@@ -10,7 +10,7 @@
 
 **hitlimit** is a high-performance rate limiting middleware for Node.js applications. Protect your APIs from abuse, prevent brute force attacks, and throttle requests with sub-millisecond overhead. A faster, lighter alternative to express-rate-limit and rate-limiter-flexible.
 
-**[Documentation](https://hitlimit.dev)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[npm](https://www.npmjs.com/package/@joint-ops/hitlimit)**
+**[Documentation](https://hitlimit.jointops.dev)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[npm](https://www.npmjs.com/package/@joint-ops/hitlimit)**
 
 ## Why hitlimit?
 

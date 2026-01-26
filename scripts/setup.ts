@@ -363,7 +363,7 @@ ${c.bold}Monorepo Structure:${c.reset}
   ${c.dim}docs/${c.reset}                Documentation site (Astro)
   ${c.dim}benchmarks/${c.reset}          Performance benchmarks
 
-${c.bold}Documentation:${c.reset} ${c.cyan}https://hitlimit.dev${c.reset}
+${c.bold}Documentation:${c.reset} ${c.cyan}https://hitlimit.jointops.dev${c.reset}
 
 ${c.dim}Happy coding! ${c.reset}
 `)

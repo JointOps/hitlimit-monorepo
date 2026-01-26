@@ -10,7 +10,7 @@
 
 **hitlimit-bun** is a high-performance, Bun-native rate limiting library for Bun.serve and Elysia applications. Built specifically for Bun's runtime with native bun:sqlite for maximum performance. The only rate limiter designed from the ground up for Bun.
 
-**[Documentation](https://hitlimit.dev/docs/bun)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[npm](https://www.npmjs.com/package/@joint-ops/hitlimit-bun)**
+**[Documentation](https://hitlimit.jointops.dev/docs/bun)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[npm](https://www.npmjs.com/package/@joint-ops/hitlimit-bun)**
 
 ## ⚡ Why hitlimit-bun?
 
