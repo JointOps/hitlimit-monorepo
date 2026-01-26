@@ -1,0 +1,260 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  NODE_VERSION: '20'
+  BUN_VERSION: 'latest'
+
+jobs:
+  # ============================================================
+  # VALIDATION
+  # ============================================================
+  validate:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          FILE_VERSION=$(cat VERSION | tr -d '\n')
+          echo "Tag version: $TAG_VERSION"
+          echo "File version: $FILE_VERSION"
+
+          if [ "$TAG_VERSION" != "$FILE_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match VERSION file ($FILE_VERSION)"
+            exit 1
+          fi
+
+          echo "version=$TAG_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Verify package versions
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+
+          for pkg in packages/types packages/hitlimit packages/hitlimit-bun; do
+            PKG_VERSION=$(node -p "require('./$pkg/package.json').version")
+            if [ "$PKG_VERSION" != "$VERSION" ]; then
+              echo "::error::$pkg version ($PKG_VERSION) does not match release version ($VERSION)"
+              exit 1
+            fi
+          done
+
+          echo "All package versions match: $VERSION"
+
+  # ============================================================
+  # TEST
+  # ============================================================
+  test:
+    name: Test Suite
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Bun dependencies
+        run: cd packages/hitlimit-bun && bun install
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Run Node.js tests
+        run: pnpm test:node
+
+      - name: Run Bun tests
+        run: pnpm test:bun
+
+  # ============================================================
+  # PUBLISH
+  # ============================================================
+  publish:
+    name: Publish to npm
+    needs: [validate, test]
+    runs-on: ubuntu-latest
+    outputs:
+      types_published: ${{ steps.publish_types.outputs.published }}
+      hitlimit_published: ${{ steps.publish_hitlimit.outputs.published }}
+      bun_published: ${{ steps.publish_bun.outputs.published }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Bun dependencies
+        run: cd packages/hitlimit-bun && bun install
+
+      - name: Build all packages
+        run: pnpm build
+
+      # --- Publish @hitlimit/types ---
+      - name: Publish @hitlimit/types
+        id: publish_types
+        run: |
+          cd packages/types
+          npm publish --access public
+          echo "published=true" >> $GITHUB_OUTPUT
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # --- Publish hitlimit ---
+      - name: Publish hitlimit
+        id: publish_hitlimit
+        run: |
+          cd packages/hitlimit
+          npm publish --access public
+          echo "published=true" >> $GITHUB_OUTPUT
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # --- Publish hitlimit-bun ---
+      - name: Update hitlimit-bun dependency for npm
+        run: |
+          VERSION=${{ needs.validate.outputs.version }}
+          cd packages/hitlimit-bun
+          node -e "
+            const fs = require('fs');
+            const pkg = require('./package.json');
+            pkg.dependencies['@hitlimit/types'] = '$VERSION';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Publish hitlimit-bun
+        id: publish_bun
+        run: |
+          cd packages/hitlimit-bun
+          npm publish --access public
+          echo "published=true" >> $GITHUB_OUTPUT
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # ============================================================
+  # ROLLBACK (on failure)
+  # ============================================================
+  rollback:
+    name: Rollback on Failure
+    needs: [validate, publish]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Rollback published packages
+        run: |
+          VERSION=${{ needs.validate.outputs.version }}
+
+          echo "Attempting rollback for version $VERSION..."
+
+          # Unpublish in reverse order
+          if [ "${{ needs.publish.outputs.bun_published }}" == "true" ]; then
+            echo "Unpublishing hitlimit-bun@$VERSION..."
+            npm unpublish hitlimit-bun@$VERSION --force || true
+          fi
+
+          if [ "${{ needs.publish.outputs.hitlimit_published }}" == "true" ]; then
+            echo "Unpublishing hitlimit@$VERSION..."
+            npm unpublish hitlimit@$VERSION --force || true
+          fi
+
+          if [ "${{ needs.publish.outputs.types_published }}" == "true" ]; then
+            echo "Unpublishing @hitlimit/types@$VERSION..."
+            npm unpublish @hitlimit/types@$VERSION --force || true
+          fi
+
+          echo "::error::Release failed and was rolled back. Please check the logs and try again."
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # ============================================================
+  # GITHUB RELEASE
+  # ============================================================
+  github-release:
+    name: Create GitHub Release
+    needs: [validate, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          VERSION=${{ needs.validate.outputs.version }}
+
+          # Get commits since last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [ -n "$LAST_TAG" ]; then
+            COMMITS=$(git log $LAST_TAG..HEAD --pretty=format:"- %s" --no-merges)
+          else
+            COMMITS=$(git log --pretty=format:"- %s" --no-merges -20)
+          fi
+
+          # Write changelog to file (handles multiline)
+          echo "$COMMITS" > /tmp/changelog.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: v${{ needs.validate.outputs.version }}
+          body_path: /tmp/changelog.txt
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================================
+  # TRIGGER DOCS DEPLOYMENT
+  # ============================================================
+  deploy-docs:
+    name: Trigger Docs Deployment
+    needs: [publish, github-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel deployment
+        run: |
+          echo "Docs will auto-deploy via Vercel GitHub integration"
+          echo "If manual trigger needed, add Vercel deploy hook here"

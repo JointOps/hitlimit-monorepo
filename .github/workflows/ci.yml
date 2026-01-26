@@ -135,3 +135,37 @@ jobs:
       - name: Typecheck hitlimit-bun
         working-directory: packages/hitlimit-bun
         run: bunx tsc --noEmit
+
+  # ============================================================
+  # Build docs (verify no build errors)
+  # ============================================================
+  build-docs:
+    name: Build Docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build documentation
+        run: pnpm docs:build
+
+      - name: Verify build output
+        run: |
+          if [ ! -d "docs/dist" ]; then
+            echo "::error::Docs build failed - dist directory not found"
+            exit 1
+          fi
+          PAGE_COUNT=$(find docs/dist -name "*.html" | wc -l)
+          echo "Built $PAGE_COUNT HTML pages"
