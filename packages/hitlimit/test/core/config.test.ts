@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { resolveConfig } from '../../src/core/config.js'
-import type { HitLimitStore } from '@hitlimit/types'
+import type { HitLimitStore } from '@joint-ops/hitlimit-types'
 
 const mockStore: HitLimitStore = {
   hit: () => ({ count: 1, resetAt: Date.now() + 60000 }),

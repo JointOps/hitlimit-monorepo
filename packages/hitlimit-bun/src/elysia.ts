@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import type { HitLimitOptions } from '@hitlimit/types'
+import type { HitLimitOptions } from '@joint-ops/hitlimit-types'
 import { resolveConfig } from './core/config.js'
 import { checkLimit } from './core/limiter.js'
 import { sqliteStore } from './stores/sqlite.js'

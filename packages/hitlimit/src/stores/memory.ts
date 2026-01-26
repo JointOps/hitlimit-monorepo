@@ -1,4 +1,4 @@
-import type { HitLimitStore, StoreResult } from '@hitlimit/types'
+import type { HitLimitStore, StoreResult } from '@joint-ops/hitlimit-types'
 
 interface Entry {
   count: number

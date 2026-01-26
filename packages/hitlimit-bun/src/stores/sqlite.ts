@@ -1,5 +1,5 @@
 import { Database } from 'bun:sqlite'
-import type { HitLimitStore, StoreResult } from '@hitlimit/types'
+import type { HitLimitStore, StoreResult } from '@joint-ops/hitlimit-types'
 
 export interface SqliteStoreOptions {
   path?: string

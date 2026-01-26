@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import type { Request, Response } from 'express'
-import type { HitLimitOptions, HitLimitStore, ResolvedConfig } from '@hitlimit/types'
+import type { HitLimitOptions, HitLimitStore, ResolvedConfig } from '@joint-ops/hitlimit-types'
 import { resolveConfig } from './core/config.js'
 import { checkLimit } from './core/limiter.js'
 import { memoryStore } from './stores/memory.js'

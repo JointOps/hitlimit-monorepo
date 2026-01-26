@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { memoryStore } from '../../src/stores/memory.js'
 import { sqliteStore } from '../../src/stores/sqlite.js'
-import type { HitLimitStore } from '@hitlimit/types'
+import type { HitLimitStore } from '@joint-ops/hitlimit-types'
 
 describe('Concurrent Access', () => {
   describe('Memory Store', () => {

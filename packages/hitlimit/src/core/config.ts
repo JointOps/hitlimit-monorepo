@@ -3,7 +3,7 @@ import type {
   HitLimitStore,
   KeyGenerator,
   ResolvedConfig
-} from '@hitlimit/types'
+} from '@joint-ops/hitlimit-types'
 import { parseWindow } from './utils.js'
 
 export function resolveConfig<TRequest>(

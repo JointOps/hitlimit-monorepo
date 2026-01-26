@@ -1,4 +1,4 @@
-import type { HitLimitStore, StoreResult } from '@hitlimit/types'
+import type { HitLimitStore, StoreResult } from '@joint-ops/hitlimit-types'
 import Database from 'better-sqlite3'
 
 export interface SqliteStoreOptions {

@@ -37,7 +37,7 @@
 ## Installation
 
 ```bash
-bun add hitlimit-bun
+bun add @joint-ops/hitlimit-bun
 ```
 
 ## Quick Start
@@ -45,7 +45,7 @@ bun add hitlimit-bun
 ### Bun.serve Rate Limiting
 
 ```typescript
-import { hitlimit } from 'hitlimit-bun'
+import { hitlimit } from '@joint-ops/hitlimit-bun'
 
 Bun.serve({
   fetch: hitlimit({}, (req) => new Response('Hello!'))
@@ -67,7 +67,7 @@ new Elysia()
 ### Using createHitLimit
 
 ```typescript
-import { createHitLimit } from 'hitlimit-bun'
+import { createHitLimit } from '@joint-ops/hitlimit-bun'
 
 const limiter = createHitLimit({ limit: 100, window: '1m' })
 
@@ -228,7 +228,7 @@ hitlimit({
 Uses Bun's native bun:sqlite for maximum performance. Default store.
 
 ```typescript
-import { hitlimit } from 'hitlimit-bun'
+import { hitlimit } from '@joint-ops/hitlimit-bun'
 
 // Default - uses bun:sqlite with in-memory database
 Bun.serve({
@@ -236,7 +236,7 @@ Bun.serve({
 })
 
 // Custom path for persistence
-import { sqliteStore } from 'hitlimit-bun'
+import { sqliteStore } from '@joint-ops/hitlimit-bun'
 
 Bun.serve({
   fetch: hitlimit({
@@ -250,7 +250,7 @@ Bun.serve({
 For simple use cases without persistence.
 
 ```typescript
-import { hitlimit } from 'hitlimit-bun'
+import { hitlimit } from '@joint-ops/hitlimit-bun'
 import { memoryStore } from 'hitlimit-bun/stores/memory'
 
 Bun.serve({
@@ -265,7 +265,7 @@ Bun.serve({
 For distributed systems and multi-server deployments.
 
 ```typescript
-import { hitlimit } from 'hitlimit-bun'
+import { hitlimit } from '@joint-ops/hitlimit-bun'
 import { redisStore } from 'hitlimit-bun/stores/redis'
 
 Bun.serve({

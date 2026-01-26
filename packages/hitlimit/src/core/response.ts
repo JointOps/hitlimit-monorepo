@@ -1,4 +1,4 @@
-import type { HitLimitInfo, ResponseConfig, ResponseFormatter } from '@hitlimit/types'
+import type { HitLimitInfo, ResponseConfig, ResponseFormatter } from '@joint-ops/hitlimit-types'
 
 export function buildBody(
   response: ResponseConfig | ResponseFormatter,

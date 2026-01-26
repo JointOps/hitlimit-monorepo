@@ -66,7 +66,7 @@ fi
 
 echo ""
 echo -e "${YELLOW}About to release:${NC}"
-echo "   - @hitlimit/types@$VERSION"
+echo "   - @joint-ops/hitlimit-types@$VERSION"
 echo "   - hitlimit@$VERSION"
 echo "   - hitlimit-bun@$VERSION"
 echo ""
@@ -86,7 +86,7 @@ echo ""
 echo -e "${CYAN}Publishing packages...${NC}"
 echo ""
 
-echo "Publishing @hitlimit/types..."
+echo "Publishing @joint-ops/hitlimit-types..."
 cd packages/types
 npm publish --access public
 cd ../..
@@ -97,11 +97,11 @@ npm publish --access public
 cd ../..
 
 echo "Publishing hitlimit-bun..."
-# Temporarily update @hitlimit/types dependency to version number for npm
+# Temporarily update @joint-ops/hitlimit-types dependency to version number for npm
 node -e "
 const fs = require('fs');
 const pkg = require('./packages/hitlimit-bun/package.json');
-pkg.dependencies['@hitlimit/types'] = '$VERSION';
+pkg.dependencies['@joint-ops/hitlimit-types'] = '$VERSION';
 fs.writeFileSync('./packages/hitlimit-bun/package.json', JSON.stringify(pkg, null, 2) + '\n');
 "
 cd packages/hitlimit-bun
@@ -111,7 +111,7 @@ cd ../..
 node -e "
 const fs = require('fs');
 const pkg = require('./packages/hitlimit-bun/package.json');
-pkg.dependencies['@hitlimit/types'] = 'file:../types';
+pkg.dependencies['@joint-ops/hitlimit-types'] = 'file:../types';
 fs.writeFileSync('./packages/hitlimit-bun/package.json', JSON.stringify(pkg, null, 2) + '\n');
 "
 
@@ -135,7 +135,7 @@ echo -e "${GREEN}Release v$VERSION complete!${NC}"
 echo -e "${GREEN}============================================================${NC}"
 echo ""
 echo "Published:"
-echo "  - https://www.npmjs.com/package/@hitlimit/types"
+echo "  - https://www.npmjs.com/package/@joint-ops/hitlimit-types"
 echo "  - https://www.npmjs.com/package/hitlimit"
 echo "  - https://www.npmjs.com/package/hitlimit-bun"
 echo ""

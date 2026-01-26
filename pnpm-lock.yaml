@@ -56,7 +56,7 @@ importers:
 
   packages/hitlimit:
     dependencies:
-      '@hitlimit/types':
+      '@joint-ops/hitlimit-types':
         specifier: workspace:*
         version: link:../types
     devDependencies:

@@ -22,14 +22,14 @@ const pkg = require('./packages/types/package.json');
 pkg.version = '$VERSION';
 fs.writeFileSync('./packages/types/package.json', JSON.stringify(pkg, null, 2) + '\n');
 "
-echo "  @hitlimit/types"
+echo "  @joint-ops/hitlimit-types"
 
 node -e "
 const fs = require('fs');
 const pkg = require('./packages/hitlimit/package.json');
 pkg.version = '$VERSION';
-if (pkg.dependencies && pkg.dependencies['@hitlimit/types']) {
-  pkg.dependencies['@hitlimit/types'] = 'workspace:*';
+if (pkg.dependencies && pkg.dependencies['@joint-ops/hitlimit-types']) {
+  pkg.dependencies['@joint-ops/hitlimit-types'] = 'workspace:*';
 }
 fs.writeFileSync('./packages/hitlimit/package.json', JSON.stringify(pkg, null, 2) + '\n');
 "

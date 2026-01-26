@@ -1,4 +1,4 @@
-import type { HitLimitLogger } from '@hitlimit/types'
+import type { HitLimitLogger } from '@joint-ops/hitlimit-types'
 
 export function consoleLogger(): HitLimitLogger {
   return {

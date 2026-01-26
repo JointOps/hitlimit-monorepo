@@ -1,6 +1,6 @@
-# @hitlimit/types
+# @joint-ops/hitlimit-types
 
-[![npm version](https://img.shields.io/npm/v/@hitlimit/types.svg)](https://www.npmjs.com/package/@hitlimit/types)
+[![npm version](https://img.shields.io/npm/v/@joint-ops/hitlimit-types.svg)](https://www.npmjs.com/package/@joint-ops/hitlimit-types)
 [![GitHub](https://img.shields.io/github/license/JointOps/hitlimit-monorepo)](https://github.com/JointOps/hitlimit-monorepo)
 
 > TypeScript type definitions for hitlimit rate limiting libraries
@@ -29,10 +29,10 @@ import type {
   RateLimitResult,
   Store,
   TierConfig
-} from 'hitlimit'
+} from '@joint-ops/hitlimit'
 
 // Or from hitlimit-bun
-import type { HitLimitConfig, Store } from 'hitlimit-bun'
+import type { HitLimitConfig, Store } from '@joint-ops/hitlimit-bun'
 ```
 
 ## Available Types

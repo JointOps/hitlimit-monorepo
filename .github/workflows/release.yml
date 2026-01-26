@@ -125,8 +125,8 @@ jobs:
       - name: Build all packages
         run: pnpm build
 
-      # --- Publish @hitlimit/types ---
-      - name: Publish @hitlimit/types
+      # --- Publish @joint-ops/hitlimit-types ---
+      - name: Publish @joint-ops/hitlimit-types
         id: publish_types
         run: |
           cd packages/types
@@ -135,8 +135,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # --- Publish hitlimit ---
-      - name: Publish hitlimit
+      # --- Publish @joint-ops/hitlimit ---
+      - name: Publish @joint-ops/hitlimit
         id: publish_hitlimit
         run: |
           cd packages/hitlimit
@@ -145,7 +145,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # --- Publish hitlimit-bun ---
+      # --- Publish @joint-ops/hitlimit-bun ---
       - name: Update hitlimit-bun dependency for npm
         run: |
           VERSION=${{ needs.validate.outputs.version }}
@@ -153,11 +153,11 @@ jobs:
           node -e "
             const fs = require('fs');
             const pkg = require('./package.json');
-            pkg.dependencies['@hitlimit/types'] = '$VERSION';
+            pkg.dependencies['@joint-ops/hitlimit-types'] = '$VERSION';
             fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
           "
 
-      - name: Publish hitlimit-bun
+      - name: Publish @joint-ops/hitlimit-bun
         id: publish_bun
         run: |
           cd packages/hitlimit-bun
@@ -188,18 +188,18 @@ jobs:
 
           # Unpublish in reverse order
           if [ "${{ needs.publish.outputs.bun_published }}" == "true" ]; then
-            echo "Unpublishing hitlimit-bun@$VERSION..."
-            npm unpublish hitlimit-bun@$VERSION --force || true
+            echo "Unpublishing @joint-ops/hitlimit-bun@$VERSION..."
+            npm unpublish @joint-ops/hitlimit-bun@$VERSION --force || true
           fi
 
           if [ "${{ needs.publish.outputs.hitlimit_published }}" == "true" ]; then
-            echo "Unpublishing hitlimit@$VERSION..."
-            npm unpublish hitlimit@$VERSION --force || true
+            echo "Unpublishing @joint-ops/hitlimit@$VERSION..."
+            npm unpublish @joint-ops/hitlimit@$VERSION --force || true
           fi
 
           if [ "${{ needs.publish.outputs.types_published }}" == "true" ]; then
-            echo "Unpublishing @hitlimit/types@$VERSION..."
-            npm unpublish @hitlimit/types@$VERSION --force || true
+            echo "Unpublishing @joint-ops/hitlimit-types@$VERSION..."
+            npm unpublish @joint-ops/hitlimit-types@$VERSION --force || true
           fi
 
           echo "::error::Release failed and was rolled back. Please check the logs and try again."

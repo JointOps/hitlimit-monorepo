@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
 import { memoryStore } from '../../src/stores/memory'
-import type { HitLimitStore } from '@hitlimit/types'
+import type { HitLimitStore } from '@joint-ops/hitlimit-types'
 
 describe('MemoryStore', () => {
   let store: HitLimitStore

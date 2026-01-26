@@ -1,8 +1,8 @@
 {
-  "name": "hitlimit",
+  "name": "@joint-ops/hitlimit",
   "version": "1.0.0",
   "description": "Fast rate limiting middleware for Express, NestJS & Node.js - API throttling, brute force protection, request limiting",
-  "author": "hitlimit",
+  "author": "JointOps",
   "license": "MIT",
   "homepage": "https://hitlimit.dev",
   "repository": {
@@ -83,7 +83,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@hitlimit/types": "workspace:*"
+    "@joint-ops/hitlimit-types": "workspace:*"
   },
   "peerDependencies": {
     "@nestjs/common": ">=8.0.0",

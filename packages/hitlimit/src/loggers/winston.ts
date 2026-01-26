@@ -1,5 +1,5 @@
 import type { Logger as WinstonLogger } from 'winston'
-import type { HitLimitLogger } from '@hitlimit/types'
+import type { HitLimitLogger } from '@joint-ops/hitlimit-types'
 
 export function winstonLogger(winston: WinstonLogger): HitLimitLogger {
   return {

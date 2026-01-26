@@ -39,10 +39,10 @@ jobs:
         run: pnpm install
 
       - name: Build Node.js packages
-        run: pnpm turbo run build --filter=@hitlimit/types --filter=hitlimit
+        run: pnpm turbo run build --filter=@joint-ops/hitlimit-types --filter=hitlimit
 
       - name: Test Node.js packages
-        run: pnpm turbo run test --filter=@hitlimit/types --filter=hitlimit
+        run: pnpm turbo run test --filter=@joint-ops/hitlimit-types --filter=hitlimit
         env:
           REDIS_URL: redis://localhost:6379
 
@@ -69,7 +69,7 @@ jobs:
         with:
           bun-version: ${{ matrix.bun-version }}
 
-      # Need pnpm/node to build @hitlimit/types dependency
+      # Need pnpm/node to build @joint-ops/hitlimit-types dependency
       - uses: pnpm/action-setup@v2
         with:
           version: 9
@@ -82,8 +82,8 @@ jobs:
       - name: Install Node.js dependencies (for types)
         run: pnpm install
 
-      - name: Build @hitlimit/types
-        run: pnpm turbo run build --filter=@hitlimit/types
+      - name: Build @joint-ops/hitlimit-types
+        run: pnpm turbo run build --filter=@joint-ops/hitlimit-types
 
       - name: Install Bun dependencies
         working-directory: packages/hitlimit-bun
@@ -130,7 +130,7 @@ jobs:
         run: bun install
 
       - name: Build and typecheck all
-        run: pnpm turbo run build --filter=@hitlimit/types --filter=hitlimit
+        run: pnpm turbo run build --filter=@joint-ops/hitlimit-types --filter=hitlimit
 
       - name: Typecheck hitlimit-bun
         working-directory: packages/hitlimit-bun

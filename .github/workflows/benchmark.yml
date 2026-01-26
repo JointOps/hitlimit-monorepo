@@ -73,8 +73,8 @@ jobs:
       - name: Install Node.js dependencies
         run: pnpm install
 
-      - name: Build @hitlimit/types
-        run: pnpm turbo run build --filter=@hitlimit/types
+      - name: Build @joint-ops/hitlimit-types
+        run: pnpm turbo run build --filter=@joint-ops/hitlimit-types
 
       # Build hitlimit-bun with bun
       - name: Install Bun dependencies

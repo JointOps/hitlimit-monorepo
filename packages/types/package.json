@@ -1,8 +1,8 @@
 {
-  "name": "@hitlimit/types",
+  "name": "@joint-ops/hitlimit-types",
   "version": "1.0.0",
   "description": "Type definitions for hitlimit rate limiting library",
-  "author": "hitlimit",
+  "author": "JointOps",
   "license": "MIT",
   "homepage": "https://hitlimit.dev",
   "repository": {

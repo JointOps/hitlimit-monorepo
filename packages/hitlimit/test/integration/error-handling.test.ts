@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import express, { type Application } from 'express'
 import request from 'supertest'
 import { hitlimit } from '../../src/index.js'
-import type { HitLimitStore } from '@hitlimit/types'
+import type { HitLimitStore } from '@joint-ops/hitlimit-types'
 
 describe('Error Handling', () => {
   let app: Application

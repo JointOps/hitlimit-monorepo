@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { checkLimit } from '../../src/core/limiter.js'
-import type { ResolvedConfig, HitLimitStore } from '@hitlimit/types'
+import type { ResolvedConfig, HitLimitStore } from '@joint-ops/hitlimit-types'
 
 const createMockStore = (count: number, resetAt: number): HitLimitStore => ({
   hit: vi.fn().mockReturnValue({ count, resetAt }),

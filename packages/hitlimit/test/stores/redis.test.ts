@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest'
 import { redisStore } from '../../src/stores/redis.js'
-import type { HitLimitStore } from '@hitlimit/types'
+import type { HitLimitStore } from '@joint-ops/hitlimit-types'
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 

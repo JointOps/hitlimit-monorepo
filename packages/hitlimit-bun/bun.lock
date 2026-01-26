@@ -4,7 +4,7 @@
     "": {
       "name": "hitlimit-bun",
       "dependencies": {
-        "@hitlimit/types": "file:../types",
+        "@joint-ops/hitlimit-types": "file:../types",
       },
       "devDependencies": {
         "@sinclair/typebox": "^0.34.48",
@@ -26,9 +26,9 @@
   "packages": {
     "@borewit/text-codec": ["@borewit/text-codec@0.2.1", "", {}, "sha512-k7vvKPbf7J2fZ5klGRD9AeKfUvojuZIQ3BT5u7Jfv+puwXkUBUT5PVyMDfJZpy30CBDXGMgw7fguK/lpOMBvgw=="],
 
-    "@hitlimit/types": ["@hitlimit/types@file:../types", { "devDependencies": { "typescript": "^5.3.0" } }],
-
     "@ioredis/commands": ["@ioredis/commands@1.5.0", "", {}, "sha512-eUgLqrMf8nJkZxT24JvVRrQya1vZkQh8BBeYNwGDqa5I0VUi8ACx7uFvAaLxintokpTenkK6DASvo/bvNbBGow=="],
+
+    "@joint-ops/hitlimit-types": ["@joint-ops/hitlimit-types@file:../types", { "devDependencies": { "typescript": "^5.3.0" } }],
 
     "@sinclair/typebox": ["@sinclair/typebox@0.34.48", "", {}, "sha512-kKJTNuK3AQOrgjjotVxMrCn1sUJwM76wMszfq1kdU4uYVJjvEWuFQ6HgvLt4Xz3fSmZlTOxJ/Ie13KnIcWQXFA=="],
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { buildBody } from '../../src/core/response.js'
-import type { HitLimitInfo } from '@hitlimit/types'
+import type { HitLimitInfo } from '@joint-ops/hitlimit-types'
 
 const baseInfo: HitLimitInfo = {
   limit: 100,

@@ -1,10 +1,10 @@
-import type { HitLimitOptions } from '@hitlimit/types'
+import type { HitLimitOptions } from '@joint-ops/hitlimit-types'
 import { resolveConfig } from './core/config.js'
 import { checkLimit } from './core/limiter.js'
 import { sqliteStore } from './stores/sqlite.js'
 
-export type { HitLimitOptions, HitLimitInfo, HitLimitResult, HitLimitStore, StoreResult, TierConfig, HeadersConfig, ResolvedConfig, KeyGenerator, TierResolver, SkipFunction, StoreErrorHandler, ResponseFormatter, ResponseConfig } from '@hitlimit/types'
-export { DEFAULT_LIMIT, DEFAULT_WINDOW, DEFAULT_WINDOW_MS, DEFAULT_MESSAGE } from '@hitlimit/types'
+export type { HitLimitOptions, HitLimitInfo, HitLimitResult, HitLimitStore, StoreResult, TierConfig, HeadersConfig, ResolvedConfig, KeyGenerator, TierResolver, SkipFunction, StoreErrorHandler, ResponseFormatter, ResponseConfig } from '@joint-ops/hitlimit-types'
+export { DEFAULT_LIMIT, DEFAULT_WINDOW, DEFAULT_WINDOW_MS, DEFAULT_MESSAGE } from '@joint-ops/hitlimit-types'
 export { sqliteStore } from './stores/sqlite.js'
 
 export interface BunHitLimitOptions extends HitLimitOptions<Request> {

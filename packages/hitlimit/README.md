@@ -66,11 +66,11 @@ pnpm benchmark
 ## Installation
 
 ```bash
-npm install hitlimit
+npm install @joint-ops/hitlimit
 # or
-pnpm add hitlimit
+pnpm add @joint-ops/hitlimit
 # or
-yarn add hitlimit
+yarn add @joint-ops/hitlimit
 ```
 
 ## Quick Start
@@ -79,7 +79,7 @@ yarn add hitlimit
 
 ```javascript
 import express from 'express'
-import { hitlimit } from 'hitlimit'
+import { hitlimit } from '@joint-ops/hitlimit'
 
 const app = express()
 
@@ -256,7 +256,7 @@ hitlimit({
 Best for single-server deployments. Fast and zero-config.
 
 ```javascript
-import { hitlimit } from 'hitlimit'
+import { hitlimit } from '@joint-ops/hitlimit'
 
 app.use(hitlimit()) // Uses memory store by default
 ```
@@ -266,7 +266,7 @@ app.use(hitlimit()) // Uses memory store by default
 Best for distributed systems and multi-server deployments.
 
 ```javascript
-import { hitlimit } from 'hitlimit'
+import { hitlimit } from '@joint-ops/hitlimit'
 import { redisStore } from 'hitlimit/stores/redis'
 
 app.use(hitlimit({
@@ -279,7 +279,7 @@ app.use(hitlimit({
 Best for persistent rate limiting with local storage.
 
 ```javascript
-import { hitlimit } from 'hitlimit'
+import { hitlimit } from '@joint-ops/hitlimit'
 import { sqliteStore } from 'hitlimit/stores/sqlite'
 
 app.use(hitlimit({

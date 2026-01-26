@@ -1,4 +1,4 @@
-import type { HitLimitInfo, HeadersConfig } from '@hitlimit/types'
+import type { HitLimitInfo, HeadersConfig } from '@joint-ops/hitlimit-types'
 
 export function buildHeaders(
   info: HitLimitInfo,

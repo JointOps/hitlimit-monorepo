@@ -1,10 +1,10 @@
 import type { IncomingMessage } from 'http'
-import type { HitLimitOptions, HitLimitResult } from '@hitlimit/types'
+import type { HitLimitOptions, HitLimitResult } from '@joint-ops/hitlimit-types'
 import { resolveConfig } from './core/config.js'
 import { checkLimit } from './core/limiter.js'
 import { memoryStore } from './stores/memory.js'
 
-export type { HitLimitOptions, HitLimitInfo, HitLimitResult, HitLimitStore, StoreResult } from '@hitlimit/types'
+export type { HitLimitOptions, HitLimitInfo, HitLimitResult, HitLimitStore, StoreResult } from '@joint-ops/hitlimit-types'
 export { memoryStore } from './stores/memory.js'
 
 function getDefaultKey(req: IncomingMessage): string {

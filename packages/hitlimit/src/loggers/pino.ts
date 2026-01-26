@@ -1,5 +1,5 @@
 import type { Logger as PinoLogger } from 'pino'
-import type { HitLimitLogger } from '@hitlimit/types'
+import type { HitLimitLogger } from '@joint-ops/hitlimit-types'
 
 export function pinoLogger(pino: PinoLogger): HitLimitLogger {
   const child = pino.child({ component: 'hitlimit' })

@@ -3,7 +3,7 @@ import express, { type Application } from 'express'
 import request from 'supertest'
 import { hitlimit } from '../../src/index.js'
 import { consoleLogger } from '../../src/loggers/console.js'
-import type { HitLimitLogger } from '@hitlimit/types'
+import type { HitLimitLogger } from '@joint-ops/hitlimit-types'
 
 describe('Logger Integration', () => {
   let app: Application

@@ -1,8 +1,8 @@
 {
-  "name": "hitlimit-bun",
+  "name": "@joint-ops/hitlimit-bun",
   "version": "1.0.0",
   "description": "Fast Bun-native rate limiting for Bun.serve & Elysia - API throttling with bun:sqlite, high performance request limiting",
-  "author": "hitlimit",
+  "author": "JointOps",
   "license": "MIT",
   "homepage": "https://hitlimit.dev/docs/bun",
   "repository": {
@@ -72,7 +72,7 @@
     "test:watch": "bun test --watch"
   },
   "dependencies": {
-    "@hitlimit/types": "file:../types"
+    "@joint-ops/hitlimit-types": "file:../types"
   },
   "peerDependencies": {
     "elysia": ">=1.0.0",

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { sqliteStore } from '../../src/stores/sqlite.js'
-import type { HitLimitStore } from '@hitlimit/types'
+import type { HitLimitStore } from '@joint-ops/hitlimit-types'
 
 describe('SqliteStore', () => {
   let store: HitLimitStore

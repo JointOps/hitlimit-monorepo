@@ -1,4 +1,4 @@
-import type { HitLimitInfo, HitLimitResult, ResolvedConfig } from '@hitlimit/types'
+import type { HitLimitInfo, HitLimitResult, ResolvedConfig } from '@joint-ops/hitlimit-types'
 import { parseWindow, hashKey } from './utils.js'
 import { buildHeaders } from './headers.js'
 import { buildBody } from './response.js'
