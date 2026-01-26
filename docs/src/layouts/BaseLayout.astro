@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import SpeedInsights from '@vercel/speed-insights/astro';
 
 interface Props {
   title?: string;
@@ -97,6 +98,7 @@ const ogImage = `${siteUrl}/og-image.png`;
     </main>
 
     <Footer />
+    <SpeedInsights />
   </body>
 </html>
 
