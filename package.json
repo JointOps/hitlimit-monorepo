@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "docs"
+    "docs",
+    "benchmarks"
   ],
   "scripts": {
     "build": "turbo run build",
@@ -12,7 +13,12 @@
     "test:bun": "turbo run test --filter=hitlimit-bun",
     "clean": "turbo run clean",
     "typecheck": "turbo run typecheck",
-    "publish:all": "pnpm -r publish --access public"
+    "publish:all": "pnpm -r publish --access public",
+    "benchmark": "pnpm --filter hitlimit-benchmarks bench",
+    "benchmark:memory": "pnpm --filter hitlimit-benchmarks bench:memory",
+    "benchmark:sqlite": "pnpm --filter hitlimit-benchmarks bench:sqlite",
+    "benchmark:redis": "pnpm --filter hitlimit-benchmarks bench:redis",
+    "benchmark:bun": "pnpm --filter hitlimit-benchmarks bench:bun"
   },
   "devDependencies": {
     "@sinclair/typebox": "^0.34.48",

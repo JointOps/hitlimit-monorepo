@@ -1,0 +1,343 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout
+  title="E-commerce Rate Limiting - hitlimit | Cart, Checkout & API Protection"
+  description="Protect your e-commerce platform from abuse. Rate limiting for cart operations, checkout, inventory checks, and product APIs with Redis for high availability."
+  keywords="ecommerce rate limit, cart rate limiting, checkout protection, inventory api rate limit, product api throttling, shopping cart abuse prevention"
+>
+  <h1>E-commerce Rate Limiting</h1>
+
+  <p>
+    E-commerce platforms face unique challenges: cart manipulation, checkout abuse, inventory scraping,
+    and flash sale bots. This example shows how to implement comprehensive rate limiting that protects
+    your business without blocking legitimate customers.
+  </p>
+
+  <h2 id="scenario">Scenario</h2>
+
+  <ul>
+    <li><strong>Add to cart:</strong> 30 items per minute (prevent cart stuffing)</li>
+    <li><strong>Checkout initiation:</strong> 5 per hour (prevent checkout bombing)</li>
+    <li><strong>Coupon validation:</strong> 10 per minute (prevent brute forcing)</li>
+    <li><strong>Inventory check:</strong> 60 per minute (prevent stock scraping)</li>
+    <li><strong>Product search:</strong> 30 per minute (prevent catalog scraping)</li>
+    <li><strong>Flash sale endpoints:</strong> Special burst limits</li>
+  </ul>
+
+  <h2 id="implementation">Implementation</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/ecommerce-limits.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"})
+
+<span class="cm">// Cart operations - prevent stuffing and manipulation</span>
+<span class="kw">export const</span> addToCartLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">30</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => {"{"}
+    <span class="cm">// Use session ID for guests, user ID for logged in</span>
+    <span class="kw">return</span> req.user?.id || req.sessionID
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'CART_RATE_LIMITED'</span>,
+    message: <span class="str">'Too many items added. Please wait a moment.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Checkout - strict limits to prevent abuse</span>
+<span class="kw">export const</span> checkoutLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">5</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => {"{"}
+    <span class="cm">// Combine user/session with IP for extra protection</span>
+    <span class="kw">const</span> userId = req.user?.id || req.sessionID
+    <span class="kw">return</span> <span class="str">`checkout:</span>${"{"} userId {"}"}:<span class="str">`</span> + req.ip
+  {"}"},
+  response: (info) => ({"{"}
+    error: <span class="str">'CHECKOUT_RATE_LIMITED'</span>,
+    message: <span class="str">'Too many checkout attempts. Please try again later.'</span>,
+    retryAfter: info.resetIn
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span> <span class="cm">// Fail closed for checkout</span>
+{"}"})
+
+<span class="cm">// Coupon validation - prevent brute forcing</span>
+<span class="kw">export const</span> couponLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">10</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => req.user?.id || req.ip,
+  response: () => ({"{"}
+    error: <span class="str">'COUPON_RATE_LIMITED'</span>,
+    message: <span class="str">'Too many coupon attempts. Please slow down.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Inventory check - prevent stock monitoring bots</span>
+<span class="kw">export const</span> inventoryLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">60</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => req.ip,
+  response: () => ({"{"}
+    error: <span class="str">'INVENTORY_RATE_LIMITED'</span>,
+    message: <span class="str">'Too many requests. Please try again shortly.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Product search - prevent catalog scraping</span>
+<span class="kw">export const</span> searchLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">30</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => req.user?.id || req.ip,
+  response: () => ({"{"}
+    error: <span class="str">'SEARCH_RATE_LIMITED'</span>,
+    message: <span class="str">'Too many searches. Please wait a moment.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Flash sale - allow burst but strict overall limit</span>
+<span class="kw">export const</span> flashSaleLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">3</span>,
+  window: <span class="str">'10s'</span>,
+  key: (req) => {"{"}
+    <span class="cm">// Strict per-user for flash sales</span>
+    <span class="kw">const</span> userId = req.user?.id
+    <span class="kw">if</span> (!userId) <span class="kw">return</span> <span class="str">'guest:'</span> + req.ip
+    <span class="kw">return</span> <span class="str">`flash:</span>${"{"} userId {"}"}<span class="str">`</span>
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'FLASH_SALE_LIMIT'</span>,
+    message: <span class="str">'Please wait before trying again.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="routes">Route Configuration</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/routes/shop.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} Router {"}"} <span class="kw">from</span> <span class="str">'express'</span>
+<span class="kw">import</span> * <span class="kw">as</span> limits <span class="kw">from</span> <span class="str">'../middleware/ecommerce-limits'</span>
+
+<span class="kw">const</span> router = <span class="fn">Router</span>()
+
+<span class="cm">// Cart operations</span>
+router.<span class="fn">post</span>(<span class="str">'/cart/add'</span>, limits.addToCartLimit, cartController.add)
+router.<span class="fn">post</span>(<span class="str">'/cart/update'</span>, limits.addToCartLimit, cartController.update)
+
+<span class="cm">// Checkout flow</span>
+router.<span class="fn">post</span>(<span class="str">'/checkout/start'</span>, limits.checkoutLimit, checkoutController.start)
+router.<span class="fn">post</span>(<span class="str">'/checkout/complete'</span>, limits.checkoutLimit, checkoutController.complete)
+
+<span class="cm">// Coupons</span>
+router.<span class="fn">post</span>(<span class="str">'/coupon/validate'</span>, limits.couponLimit, couponController.validate)
+
+<span class="cm">// Product APIs</span>
+router.<span class="fn">get</span>(<span class="str">'/products/search'</span>, limits.searchLimit, productController.search)
+router.<span class="fn">get</span>(<span class="str">'/products/:id/stock'</span>, limits.inventoryLimit, productController.checkStock)
+
+<span class="cm">// Flash sales (special strict limits)</span>
+router.<span class="fn">post</span>(<span class="str">'/flash-sale/:id/buy'</span>, limits.flashSaleLimit, flashSaleController.purchase)
+
+<span class="kw">export default</span> router</code></pre>
+  </div>
+
+  <h2 id="flash-sales">Flash Sale Strategy</h2>
+
+  <div class="info-box">
+    <h4>Handling High-Demand Events</h4>
+    <p>
+      Flash sales and limited drops require special handling. The key is to allow legitimate users
+      a fair chance while blocking automated purchases.
+    </p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/flash-sale-protection.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"}
+  url: process.env.REDIS_URL,
+  keyPrefix: <span class="str">'flash:'</span>
+{"}"})
+
+<span class="cm">// Per-sale limits (one purchase per user per sale)</span>
+<span class="kw">export const</span> createSaleLimit = (saleId: <span class="type">string</span>) => <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">1</span>,
+  window: <span class="str">'24h'</span>, <span class="cm">// Sale duration</span>
+  key: (req) => {"{"}
+    <span class="kw">const</span> userId = req.user?.id
+    <span class="kw">if</span> (!userId) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'Login required for flash sales'</span>)
+    <span class="kw">return</span> <span class="str">`sale:</span>${"{"} saleId {"}"}:<span class="str">user:</span>${"{"} userId {"}"}<span class="str">`</span>
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'ALREADY_PURCHASED'</span>,
+    message: <span class="str">'You have already purchased from this flash sale.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Global request rate (prevent DDoS during high-traffic sales)</span>
+<span class="kw">export const</span> globalFlashLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1s'</span>,
+  key: () => <span class="str">'global:flash'</span>, <span class="cm">// Single key for all requests</span>
+  response: () => ({"{"}
+    error: <span class="str">'HIGH_DEMAND'</span>,
+    message: <span class="str">'High demand - please refresh and try again.'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="bot-protection">Bot Protection Patterns</h2>
+
+  <p>Common attack patterns and how to mitigate them:</p>
+
+  <div class="pattern-grid">
+    <div class="pattern-card">
+      <h4>Cart Stuffing</h4>
+      <p>Bots add all inventory to carts to deny stock to real users.</p>
+      <p class="mitigation"><strong>Mitigation:</strong> Cart item limits + cart expiration + per-session rate limits</p>
+    </div>
+
+    <div class="pattern-card">
+      <h4>Price Scraping</h4>
+      <p>Competitors scrape your product catalog for pricing intelligence.</p>
+      <p class="mitigation"><strong>Mitigation:</strong> Search rate limits + require authentication for bulk access</p>
+    </div>
+
+    <div class="pattern-card">
+      <h4>Checkout Bombing</h4>
+      <p>Repeated checkout attempts to find valid coupon codes or test stolen cards.</p>
+      <p class="mitigation"><strong>Mitigation:</strong> Strict checkout limits + coupon validation limits + fail closed</p>
+    </div>
+
+    <div class="pattern-card">
+      <h4>Inventory Monitoring</h4>
+      <p>Bots monitor stock levels to snipe restocks.</p>
+      <p class="mitigation"><strong>Mitigation:</strong> Rate limit inventory APIs + add random delays</p>
+    </div>
+  </div>
+
+  <h2 id="best-practices">E-commerce Best Practices</h2>
+
+  <ul>
+    <li><strong>Use Redis:</strong> In-memory stores won't survive restarts - you need persistent rate limiting for checkout protection</li>
+    <li><strong>Fail closed on checkout:</strong> If rate limiting is unavailable, reject checkouts rather than allowing unlimited attempts</li>
+    <li><strong>Track by multiple identifiers:</strong> Combine user ID, session, and IP to catch sophisticated attackers</li>
+    <li><strong>Shorter windows for flash sales:</strong> Use 10s or 30s windows during high-demand events</li>
+    <li><strong>Return retry-after headers:</strong> Help legitimate users know when they can try again</li>
+  </ul>
+
+</DocsLayout>
+
+<style>
+  .info-box {
+    margin: 1.5rem 0;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+  .info-box h4 {
+    margin: 0 0 0.5rem 0;
+    color: #3b82f6;
+    font-size: 1rem;
+  }
+
+  .info-box p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .pattern-card {
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+  }
+
+  .pattern-card h4 {
+    margin: 0 0 0.5rem 0;
+    color: white;
+    font-size: 1rem;
+  }
+
+  .pattern-card p {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .pattern-card .mitigation {
+    margin: 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border);
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+  }
+
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+
+  .code-header {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+
+  .code-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .code-block pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: #71717a; }
+  .type { color: #66d9ef; }
+</style>

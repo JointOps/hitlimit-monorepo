@@ -1,0 +1,337 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout
+  title="Cinema Booking Rate Limiting - hitlimit | Seat Selection & Ticket Purchase"
+  description="Protect cinema booking systems from bots and scalpers. Rate limiting for seat selection, ticket purchase, and high-demand movie releases."
+  keywords="cinema booking rate limit, ticket scalper protection, seat selection rate limit, movie booking api, ticket purchase throttling, premiere booking protection"
+>
+  <h1>Cinema Booking Rate Limiting</h1>
+
+  <p>
+    Cinema booking systems face intense pressure during popular movie releases.
+    Bots and scalpers try to grab premium seats, while legitimate customers struggle to complete purchases.
+    This example shows how to implement fair rate limiting for ticket booking.
+  </p>
+
+  <h2 id="scenario">Scenario</h2>
+
+  <ul>
+    <li><strong>Seat availability check:</strong> 30 per minute (prevent scraping)</li>
+    <li><strong>Seat hold/reserve:</strong> 5 per 10 minutes (prevent hoarding)</li>
+    <li><strong>Ticket purchase:</strong> 3 per hour (prevent bulk buying)</li>
+    <li><strong>Showtime search:</strong> 60 per minute (allow browsing)</li>
+    <li><strong>Premiere bookings:</strong> Special stricter limits</li>
+  </ul>
+
+  <h2 id="implementation">Implementation</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/cinema-limits.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"}
+  url: process.env.REDIS_URL,
+  keyPrefix: <span class="str">'cinema:rl:'</span>
+{"}"})
+
+<span class="cm">// Showtime search - allow normal browsing</span>
+<span class="kw">export const</span> showtimeSearchLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">60</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => req.user?.id || req.ip,
+  response: () => ({"{"}
+    error: <span class="str">'SEARCH_RATE_LIMITED'</span>,
+    message: <span class="str">'Too many searches. Please wait a moment.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Seat availability - prevent real-time scraping</span>
+<span class="kw">export const</span> seatCheckLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">30</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => {"{"}
+    <span class="kw">const</span> showingId = req.params.showingId
+    <span class="kw">return</span> <span class="str">`seats:</span>${"{"} req.user?.id || req.ip {"}"}:<span class="str"></span>${"{"} showingId {"}"}<span class="str">`</span>
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'SEAT_CHECK_LIMITED'</span>,
+    message: <span class="str">'Please slow down. Seats update every few seconds.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Seat reservation (hold) - prevent hoarding</span>
+<span class="kw">export const</span> seatHoldLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">5</span>,
+  window: <span class="str">'10m'</span>,
+  key: (req) => {"{"}
+    <span class="cm">// Combine user and IP to catch multi-account abuse</span>
+    <span class="kw">return</span> <span class="str">`hold:</span>${"{"} req.user?.id || <span class="str">'guest'</span> {"}"}:<span class="str"></span>${"{"} req.ip {"}"}<span class="str">`</span>
+  {"}"},
+  response: (info) => ({"{"}
+    error: <span class="str">'SEAT_HOLD_LIMITED'</span>,
+    message: <span class="str">`You can only hold seats </span>${"{"} info.limit {"}"}<span class="str"> times per 10 minutes. Try again in </span>${"{"} Math.<span class="fn">ceil</span>(info.resetIn / <span class="num">60</span>) {"}"}<span class="str"> minutes.`</span>,
+    retryAfter: info.resetIn
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})
+
+<span class="cm">// Ticket purchase - strict limit</span>
+<span class="kw">export const</span> purchaseLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">3</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => {"{"}
+    <span class="cm">// Track by user, IP, and payment method</span>
+    <span class="kw">const</span> userId = req.user?.id || <span class="str">'guest'</span>
+    <span class="kw">return</span> <span class="str">`purchase:</span>${"{"} userId {"}"}:<span class="str"></span>${"{"} req.ip {"}"}<span class="str">`</span>
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'PURCHASE_RATE_LIMITED'</span>,
+    message: <span class="str">'Purchase limit reached. Please try again later.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span> <span class="cm">// Critical - always fail closed</span>
+{"}"})
+
+<span class="cm">// Per-showing ticket limit (max tickets per person per showing)</span>
+<span class="kw">export const</span> perShowingLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">10</span>, <span class="cm">// Max 10 tickets per person per showing</span>
+  window: <span class="str">'7d'</span>,
+  key: (req) => {"{"}
+    <span class="kw">const</span> showingId = req.body.showingId
+    <span class="kw">return</span> <span class="str">`showing:</span>${"{"} req.user?.id {"}"}:<span class="str"></span>${"{"} showingId {"}"}<span class="str">`</span>
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'TICKET_LIMIT'</span>,
+    message: <span class="str">'Maximum ticket limit reached for this showing.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="routes">Route Configuration</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/routes/booking.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} Router {"}"} <span class="kw">from</span> <span class="str">'express'</span>
+<span class="kw">import</span> * <span class="kw">as</span> limits <span class="kw">from</span> <span class="str">'../middleware/cinema-limits'</span>
+
+<span class="kw">const</span> router = <span class="fn">Router</span>()
+
+<span class="cm">// Browsing (public)</span>
+router.<span class="fn">get</span>(<span class="str">'/movies'</span>, movieController.list)
+router.<span class="fn">get</span>(<span class="str">'/movies/:id/showtimes'</span>, limits.showtimeSearchLimit, showtimeController.list)
+
+<span class="cm">// Seat selection</span>
+router.<span class="fn">get</span>(<span class="str">'/showings/:showingId/seats'</span>, limits.seatCheckLimit, seatController.getAvailable)
+router.<span class="fn">post</span>(<span class="str">'/showings/:showingId/hold'</span>, limits.seatHoldLimit, seatController.hold)
+router.<span class="fn">delete</span>(<span class="str">'/showings/:showingId/hold'</span>, seatController.release)
+
+<span class="cm">// Purchase (strict)</span>
+router.<span class="fn">post</span>(<span class="str">'/purchase'</span>,
+  limits.purchaseLimit,
+  limits.perShowingLimit,
+  purchaseController.complete
+)
+
+<span class="kw">export default</span> router</code></pre>
+  </div>
+
+  <h2 id="premiere">Premiere & High-Demand Handling</h2>
+
+  <div class="info-box">
+    <h4>Opening Night Strategy</h4>
+    <p>
+      Major releases like Marvel premieres or Star Wars openings require special handling.
+      Apply stricter limits during high-demand periods to ensure fair access.
+    </p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/premiere-limits.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"})
+
+<span class="cm">// Check if showing is a premiere (first 3 days)</span>
+<span class="kw">const</span> <span class="fn">isPremiere</span> = <span class="kw">async</span> (showingId: <span class="type">string</span>): <span class="type">Promise</span><<span class="type">boolean</span>> => {"{"}
+  <span class="kw">const</span> showing = <span class="kw">await</span> db.showings.<span class="fn">findById</span>(showingId)
+  <span class="kw">const</span> movie = <span class="kw">await</span> db.movies.<span class="fn">findById</span>(showing.movieId)
+  <span class="kw">const</span> releaseDate = <span class="kw">new</span> <span class="fn">Date</span>(movie.releaseDate)
+  <span class="kw">const</span> daysSinceRelease = (Date.<span class="fn">now</span>() - releaseDate.<span class="fn">getTime</span>()) / (<span class="num">1000</span> * <span class="num">60</span> * <span class="num">60</span> * <span class="num">24</span>)
+  <span class="kw">return</span> daysSinceRelease < <span class="num">3</span>
+{"}"}
+
+<span class="cm">// Stricter limits for premiere showings</span>
+<span class="kw">export const</span> premiereSeatHold = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">2</span>, <span class="cm">// Only 2 holds per 10 min during premieres</span>
+  window: <span class="str">'10m'</span>,
+  key: (req) => <span class="str">`premiere:hold:</span>${"{"} req.user?.id || req.ip {"}"}<span class="str">`</span>,
+  skip: <span class="kw">async</span> (req) => {"{"}
+    <span class="cm">// Only apply to premiere showings</span>
+    <span class="kw">return</span> !(<span class="kw">await</span> <span class="fn">isPremiere</span>(req.params.showingId))
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'PREMIERE_LIMIT'</span>,
+    message: <span class="str">'High demand - limited holds during premiere period.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})
+
+<span class="cm">// Stricter purchase limits for premieres</span>
+<span class="kw">export const</span> premierePurchase = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">1</span>, <span class="cm">// Only 1 purchase per 30 min during premieres</span>
+  window: <span class="str">'30m'</span>,
+  key: (req) => <span class="str">`premiere:purchase:</span>${"{"} req.user?.id || req.ip {"}"}<span class="str">`</span>,
+  skip: <span class="kw">async</span> (req) => {"{"}
+    <span class="kw">return</span> !(<span class="kw">await</span> <span class="fn">isPremiere</span>(req.body.showingId))
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'PREMIERE_PURCHASE_LIMIT'</span>,
+    message: <span class="str">'High demand - please wait before purchasing more tickets.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})
+
+<span class="cm">// Limit tickets per premiere showing</span>
+<span class="kw">export const</span> premiereTicketLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">4</span>, <span class="cm">// Max 4 tickets during premiere</span>
+  window: <span class="str">'7d'</span>,
+  key: (req) => <span class="str">`premiere:tickets:</span>${"{"} req.user?.id {"}"}:<span class="str"></span>${"{"} req.body.showingId {"}"}<span class="str">`</span>,
+  skip: <span class="kw">async</span> (req) => {"{"}
+    <span class="kw">return</span> !(<span class="kw">await</span> <span class="fn">isPremiere</span>(req.body.showingId))
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'PREMIERE_TICKET_LIMIT'</span>,
+    message: <span class="str">'Maximum 4 tickets per person during premiere period.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="queue">Virtual Queue Pattern</h2>
+
+  <p>
+    For extremely high-demand releases, implement a virtual queue instead of just rate limiting.
+    Rate limiting controls access to the queue itself.
+  </p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/queue-limits.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"})
+
+<span class="cm">// Queue entry - one entry per user</span>
+<span class="kw">export const</span> queueEntryLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">1</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => <span class="str">`queue:entry:</span>${"{"} req.user.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'ALREADY_IN_QUEUE'</span>,
+    message: <span class="str">'You are already in the queue.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})
+
+<span class="cm">// Queue position check - prevent hammering</span>
+<span class="kw">export const</span> queueCheckLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">10</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => <span class="str">`queue:check:</span>${"{"} req.user.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'QUEUE_CHECK_LIMITED'</span>,
+    message: <span class="str">'Position updates automatically. Please wait.'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="best-practices">Cinema Booking Best Practices</h2>
+
+  <ul>
+    <li><strong>Combine user + IP:</strong> Catch multi-account abuse by keying on both identifiers</li>
+    <li><strong>Per-showing limits:</strong> Prevent bulk buying for specific showtimes</li>
+    <li><strong>Dynamic premiere detection:</strong> Automatically apply stricter limits for new releases</li>
+    <li><strong>Seat hold timeouts:</strong> Combine rate limiting with short hold expiration (5-10 min)</li>
+    <li><strong>Virtual queues for mega-releases:</strong> Rate limiting alone won't handle viral demand</li>
+    <li><strong>Always fail closed:</strong> For purchases and holds, reject if rate limiting unavailable</li>
+  </ul>
+
+</DocsLayout>
+
+<style>
+  .info-box {
+    margin: 1.5rem 0;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+  .info-box h4 {
+    margin: 0 0 0.5rem 0;
+    color: #3b82f6;
+    font-size: 1rem;
+  }
+
+  .info-box p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+
+  .code-header {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+
+  .code-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .code-block pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: #71717a; }
+  .type { color: #66d9ef; }
+</style>

@@ -1,0 +1,261 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout
+  title="Authentication Rate Limiting - hitlimit | Login & Brute Force Protection"
+  description="Protect login endpoints, 2FA, and password reset from brute force attacks. Production-ready auth rate limiting with Redis for Express and NestJS."
+  keywords="login rate limit, brute force protection, 2fa rate limit, password reset rate limit, auth rate limiting, express login protection"
+>
+  <h1>Authentication Rate Limiting</h1>
+
+  <p>
+    Protecting authentication endpoints is critical. This example shows how to implement
+    layered rate limiting that prevents both credential stuffing and account takeover attacks.
+  </p>
+
+  <h2 id="scenario">Scenario</h2>
+
+  <ul>
+    <li><strong>Login:</strong> 5 attempts per 15 minutes (per email + IP)</li>
+    <li><strong>Login (IP-only):</strong> 20 attempts per 15 minutes (catches distributed attacks)</li>
+    <li><strong>Registration:</strong> 3 accounts per hour (per IP)</li>
+    <li><strong>Password reset:</strong> 3 requests per hour (prevents enumeration)</li>
+    <li><strong>2FA verification:</strong> 5 attempts per 15 minutes (with lockout)</li>
+  </ul>
+
+  <h2 id="implementation">Implementation</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/auth-rate-limits.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"}
+  url: process.env.REDIS_URL,
+  keyPrefix: <span class="str">'auth:ratelimit:'</span>
+{"}"})
+
+<span class="cm">// Login - strict per email AND per IP</span>
+<span class="kw">export const</span> loginLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">5</span>,
+  window: <span class="str">'15m'</span>,
+  key: (req) => {"{"}
+    <span class="kw">const</span> email = req.body.email?.<span class="fn">toLowerCase</span>()
+    <span class="kw">const</span> ip = req.ip
+    <span class="cm">// Rate limit both independently</span>
+    <span class="cm">// This prevents credential stuffing (by IP) AND account takeover (by email)</span>
+    <span class="kw">return</span> <span class="str">`login:</span>${"{"}email{"}"}<span class="str">:</span>${"{"}ip{"}"}<span class="str">`</span>
+  {"}"},
+  response: (info) => ({"{"}
+    error: <span class="str">'LOGIN_RATE_LIMITED'</span>,
+    message: <span class="str">`Too many login attempts. Please try again in </span>${"{"}Math.<span class="fn">ceil</span>(info.resetIn / <span class="num">60</span>){"}"}<span class="str"> minutes.`</span>,
+    resetIn: info.resetIn
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span> <span class="cm">// Security-critical, always fail closed</span>
+{"}"})
+
+<span class="cm">// Additional IP-only rate limit (catches distributed attacks)</span>
+<span class="kw">export const</span> loginIpLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">20</span>,
+  window: <span class="str">'15m'</span>,
+  key: (req) => <span class="str">`login:ip:</span>${"{"}req.ip{"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'IP_RATE_LIMITED'</span>,
+    message: <span class="str">'Too many requests from your IP address.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})
+
+<span class="cm">// Registration - moderate (prevent spam accounts)</span>
+<span class="kw">export const</span> registrationLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">3</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => req.ip,
+  response: () => ({"{"}
+    error: <span class="str">'REGISTRATION_LIMIT'</span>,
+    message: <span class="str">'Too many registration attempts. Please try again later.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})
+
+<span class="cm">// Password reset request - strict (prevent enumeration + spam)</span>
+<span class="kw">export const</span> passwordResetLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">3</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => {"{"}
+    <span class="kw">const</span> email = req.body.email?.<span class="fn">toLowerCase</span>()
+    <span class="kw">return</span> <span class="str">`password-reset:</span>${"{"}email{"}"}<span class="str">:</span>${"{"}req.ip{"}"}<span class="str">`</span>
+  {"}"},
+  response: () => ({"{"}
+    <span class="cm">// Intentionally vague to prevent enumeration</span>
+    message: <span class="str">'If an account exists with that email, a reset link has been sent.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})
+
+<span class="cm">// 2FA verification - strict with lockout</span>
+<span class="kw">export const</span> twoFactorLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">5</span>,
+  window: <span class="str">'15m'</span>,
+  key: (req) => {"{"}
+    <span class="kw">const</span> userId = req.session?.userId
+    <span class="kw">return</span> <span class="str">`2fa:</span>${"{"}userId{"}"}<span class="str">:</span>${"{"}req.ip{"}"}<span class="str">`</span>
+  {"}"},
+  response: (info) => ({"{"}
+    error: <span class="str">'2FA_RATE_LIMITED'</span>,
+    message: <span class="str">'Too many verification attempts. Your account has been temporarily locked.'</span>,
+    lockoutMinutes: Math.<span class="fn">ceil</span>(info.resetIn / <span class="num">60</span>)
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})
+
+<span class="cm">// Token refresh - moderate (legitimate users refresh often)</span>
+<span class="kw">export const</span> tokenRefreshLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">30</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => req.user?.id || req.ip
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="usage">Usage in Routes</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/routes/auth.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} Router {"}"} <span class="kw">from</span> <span class="str">'express'</span>
+<span class="kw">import</span> * <span class="kw">as</span> limits <span class="kw">from</span> <span class="str">'../middleware/auth-rate-limits'</span>
+
+<span class="kw">const</span> router = <span class="fn">Router</span>()
+
+<span class="cm">// Login (very strict - check IP first, then email+IP)</span>
+router.<span class="fn">post</span>(<span class="str">'/login'</span>,
+  limits.loginIpLimit,  <span class="cm">// Check IP first</span>
+  limits.loginLimit,    <span class="cm">// Then check email+IP</span>
+  authController.login
+)
+
+<span class="cm">// Registration (strict)</span>
+router.<span class="fn">post</span>(<span class="str">'/register'</span>, limits.registrationLimit, authController.register)
+
+<span class="cm">// Password reset (strict)</span>
+router.<span class="fn">post</span>(<span class="str">'/password/forgot'</span>, limits.passwordResetLimit, authController.forgotPassword)
+router.<span class="fn">post</span>(<span class="str">'/password/reset'</span>, limits.passwordResetLimit, authController.resetPassword)
+
+<span class="cm">// 2FA (strict)</span>
+router.<span class="fn">post</span>(<span class="str">'/2fa/verify'</span>, limits.twoFactorLimit, authController.verify2FA)
+router.<span class="fn">post</span>(<span class="str">'/2fa/setup'</span>, limits.twoFactorLimit, authController.setup2FA)
+
+<span class="cm">// Token refresh (moderate)</span>
+router.<span class="fn">post</span>(<span class="str">'/token/refresh'</span>, limits.tokenRefreshLimit, authController.refreshToken)
+
+<span class="kw">export default</span> router</code></pre>
+  </div>
+
+  <h2 id="security">Security Considerations</h2>
+
+  <div class="warning-box">
+    <h4>Always Fail Closed for Auth</h4>
+    <p>
+      Authentication endpoints should <strong>always</strong> use <code>onStoreError: () => 'deny'</code>.
+      If your rate limit store is down, it's safer to reject logins than to allow unlimited attempts.
+    </p>
+  </div>
+
+  <h3>Layered Protection</h3>
+
+  <p>The login endpoint uses two rate limiters:</p>
+
+  <ol>
+    <li><strong>IP-only limit (20/15min):</strong> Catches attackers trying different emails from same IP (credential stuffing)</li>
+    <li><strong>Email+IP limit (5/15min):</strong> Catches attackers targeting specific accounts (account takeover)</li>
+  </ol>
+
+  <p>This layered approach provides protection against multiple attack vectors.</p>
+
+  <h3>Vague Error Messages</h3>
+
+  <p>
+    For password reset, the response is intentionally vague: "If an account exists..."
+    This prevents attackers from using rate limiting behavior to enumerate valid emails.
+  </p>
+
+  <h2 id="why">Why These Limits?</h2>
+
+  <ul>
+    <li><strong>5 login attempts:</strong> Generous for typos, strict against brute force</li>
+    <li><strong>15 minute window:</strong> Long enough to deter automated attacks</li>
+    <li><strong>20 IP limit:</strong> Catches distributed attacks without blocking office networks</li>
+    <li><strong>3 registrations/hour:</strong> Prevents spam accounts while allowing legitimate sign-ups</li>
+    <li><strong>5 2FA attempts:</strong> Allows human error but prevents brute forcing 6-digit codes</li>
+  </ul>
+
+</DocsLayout>
+
+<style>
+  .warning-box {
+    margin: 1.5rem 0;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  .warning-box h4 {
+    margin: 0 0 0.5rem 0;
+    color: #ef4444;
+    font-size: 1rem;
+  }
+
+  .warning-box p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+
+  .code-header {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+
+  .code-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .code-block pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: #71717a; }
+</style>

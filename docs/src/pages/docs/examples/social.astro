@@ -1,0 +1,331 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout
+  title="Social Platform Rate Limiting - hitlimit | Posts, Follows & Engagement"
+  description="Protect social features from spam and abuse. Rate limiting for posts, comments, follows, likes, and direct messages with anti-spam patterns."
+  keywords="social media rate limit, post rate limiting, follow spam protection, comment throttling, dm rate limit, engagement spam prevention"
+>
+  <h1>Social Platform Rate Limiting</h1>
+
+  <p>
+    Social platforms are prime targets for spam, bots, and coordinated inauthentic behavior.
+    This example shows how to implement rate limiting that stops abuse while keeping the
+    platform enjoyable for real users.
+  </p>
+
+  <h2 id="scenario">Scenario</h2>
+
+  <ul>
+    <li><strong>Posts:</strong> 10 per hour (prevents spam posting)</li>
+    <li><strong>Comments:</strong> 30 per hour (allows engagement, stops flooding)</li>
+    <li><strong>Likes:</strong> 100 per hour (generous but prevents mass-liking bots)</li>
+    <li><strong>Follows:</strong> 50 per hour (prevents follow/unfollow spam)</li>
+    <li><strong>Direct messages:</strong> 20 per hour to new users (anti-spam)</li>
+    <li><strong>Profile views:</strong> 100 per hour (prevents stalking/scraping)</li>
+  </ul>
+
+  <h2 id="implementation">Implementation</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/social-limits.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"}
+  url: process.env.REDIS_URL,
+  keyPrefix: <span class="str">'social:rl:'</span>
+{"}"})
+
+<span class="cm">// Posts - moderate limit with verification bonus</span>
+<span class="kw">export const</span> postLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: (req) => {"{"}
+    <span class="cm">// Verified accounts get higher limits</span>
+    <span class="kw">if</span> (req.user?.verified) <span class="kw">return</span> <span class="num">50</span>
+    <span class="kw">if</span> (req.user?.premium) <span class="kw">return</span> <span class="num">25</span>
+    <span class="kw">return</span> <span class="num">10</span>
+  {"}"},
+  window: <span class="str">'1h'</span>,
+  key: (req) => <span class="str">`post:</span>${"{"} req.user.id {"}"}<span class="str">`</span>,
+  response: (info) => ({"{"}
+    error: <span class="str">'POST_RATE_LIMITED'</span>,
+    message: <span class="str">`You've reached your posting limit. Try again in </span>${"{"} Math.<span class="fn">ceil</span>(info.resetIn / <span class="num">60</span>) {"}"}<span class="str"> minutes.`</span>,
+    remaining: info.remaining,
+    resetIn: info.resetIn
+  {"}"})
+{"}"})
+
+<span class="cm">// Comments - higher limit for engagement</span>
+<span class="kw">export const</span> commentLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">30</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => <span class="str">`comment:</span>${"{"} req.user.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'COMMENT_RATE_LIMITED'</span>,
+    message: <span class="str">'Slow down! You\'re commenting too fast.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Likes - generous but limited</span>
+<span class="kw">export const</span> likeLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => <span class="str">`like:</span>${"{"} req.user.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'LIKE_RATE_LIMITED'</span>,
+    message: <span class="str">'You\'ve liked a lot of content! Take a break.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Follow/unfollow - prevent follow spam</span>
+<span class="kw">export const</span> followLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">50</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => <span class="str">`follow:</span>${"{"} req.user.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'FOLLOW_RATE_LIMITED'</span>,
+    message: <span class="str">'You\'re following too fast. Please slow down.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Direct messages - stricter for new conversations</span>
+<span class="kw">export const</span> dmLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">20</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => {"{"}
+    <span class="cm">// Different limits for new vs existing conversations</span>
+    <span class="kw">const</span> isNewConversation = !req.body.existingThread
+    <span class="kw">if</span> (isNewConversation) {"{"}
+      <span class="kw">return</span> <span class="str">`dm:new:</span>${"{"} req.user.id {"}"}<span class="str">`</span>
+    {"}"}
+    <span class="kw">return</span> <span class="str">`dm:existing:</span>${"{"} req.user.id {"}"}<span class="str">`</span>
+  {"}"},
+  limit: (req) => {"{"}
+    <span class="cm">// Stricter for new conversations (spam prevention)</span>
+    <span class="kw">return</span> req.body.existingThread ? <span class="num">100</span> : <span class="num">20</span>
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'DM_RATE_LIMITED'</span>,
+    message: <span class="str">'You\'ve sent too many messages. Please wait.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Profile views - prevent scraping/stalking</span>
+<span class="kw">export const</span> profileViewLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => <span class="str">`profile-view:</span>${"{"} req.user?.id || req.ip {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'PROFILE_VIEW_LIMITED'</span>,
+    message: <span class="str">'Slow down. You\'re viewing profiles too quickly.'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="routes">Route Configuration</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/routes/social.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} Router {"}"} <span class="kw">from</span> <span class="str">'express'</span>
+<span class="kw">import</span> {"{"} requireAuth {"}"} <span class="kw">from</span> <span class="str">'../middleware/auth'</span>
+<span class="kw">import</span> * <span class="kw">as</span> limits <span class="kw">from</span> <span class="str">'../middleware/social-limits'</span>
+
+<span class="kw">const</span> router = <span class="fn">Router</span>()
+
+<span class="cm">// All social actions require authentication</span>
+router.<span class="fn">use</span>(requireAuth)
+
+<span class="cm">// Content creation</span>
+router.<span class="fn">post</span>(<span class="str">'/posts'</span>, limits.postLimit, postController.create)
+router.<span class="fn">post</span>(<span class="str">'/posts/:id/comments'</span>, limits.commentLimit, commentController.create)
+
+<span class="cm">// Engagement</span>
+router.<span class="fn">post</span>(<span class="str">'/posts/:id/like'</span>, limits.likeLimit, likeController.toggle)
+router.<span class="fn">post</span>(<span class="str">'/comments/:id/like'</span>, limits.likeLimit, likeController.toggle)
+
+<span class="cm">// Following</span>
+router.<span class="fn">post</span>(<span class="str">'/users/:id/follow'</span>, limits.followLimit, followController.follow)
+router.<span class="fn">delete</span>(<span class="str">'/users/:id/follow'</span>, limits.followLimit, followController.unfollow)
+
+<span class="cm">// Messaging</span>
+router.<span class="fn">post</span>(<span class="str">'/messages'</span>, limits.dmLimit, messageController.send)
+
+<span class="cm">// Profile viewing</span>
+router.<span class="fn">get</span>(<span class="str">'/users/:id'</span>, limits.profileViewLimit, userController.getProfile)
+
+<span class="kw">export default</span> router</code></pre>
+  </div>
+
+  <h2 id="anti-spam">Anti-Spam Patterns</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/anti-spam.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"})
+
+<span class="cm">// Prevent duplicate content spam</span>
+<span class="kw">export const</span> duplicateContentLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">1</span>,
+  window: <span class="str">'5m'</span>,
+  key: (req) => {"{"}
+    <span class="cm">// Hash the content to detect duplicates</span>
+    <span class="kw">const</span> contentHash = <span class="fn">hashContent</span>(req.body.content)
+    <span class="kw">return</span> <span class="str">`dup:</span>${"{"} req.user.id {"}"}:<span class="str"></span>${"{"} contentHash {"}"}<span class="str">`</span>
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'DUPLICATE_CONTENT'</span>,
+    message: <span class="str">'You already posted this. Please wait before posting similar content.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Rate limit @mentions to prevent spam tagging</span>
+<span class="kw">export const</span> mentionLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">20</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => <span class="str">`mentions:</span>${"{"} req.user.id {"}"}<span class="str">`</span>,
+  skip: (req) => {"{"}
+    <span class="cm">// Count mentions in content</span>
+    <span class="kw">const</span> mentions = (req.body.content.<span class="fn">match</span>(/@\w+/g) || []).length
+    <span class="kw">return</span> mentions === <span class="num">0</span>
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'MENTION_RATE_LIMITED'</span>,
+    message: <span class="str">'You\'re mentioning too many people. Please slow down.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Hashtag spam prevention</span>
+<span class="kw">export const</span> hashtagLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">50</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => <span class="str">`hashtags:</span>${"{"} req.user.id {"}"}<span class="str">`</span>,
+  skip: (req) => {"{"}
+    <span class="kw">const</span> hashtags = (req.body.content.<span class="fn">match</span>(/#\w+/g) || []).length
+    <span class="kw">return</span> hashtags <= <span class="num">5</span> <span class="cm">// Allow up to 5 hashtags per post</span>
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'HASHTAG_SPAM'</span>,
+    message: <span class="str">'Too many hashtags. Please use fewer hashtags in your posts.'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="trust-tiers">Trust-Based Limits</h2>
+
+  <p>
+    Established users with good standing should have more freedom than new accounts.
+    Implement trust tiers based on account age and behavior.
+  </p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/trust-tiers.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"})
+
+<span class="kw">type</span> <span class="type">TrustLevel</span> = <span class="str">'new'</span> | <span class="str">'basic'</span> | <span class="str">'trusted'</span> | <span class="str">'verified'</span>
+
+<span class="kw">const</span> <span class="fn">getTrustLevel</span> = (user: <span class="type">User</span>): <span class="type">TrustLevel</span> => {"{"}
+  <span class="kw">if</span> (user.verified) <span class="kw">return</span> <span class="str">'verified'</span>
+
+  <span class="kw">const</span> accountAge = Date.<span class="fn">now</span>() - <span class="kw">new</span> <span class="fn">Date</span>(user.createdAt).<span class="fn">getTime</span>()
+  <span class="kw">const</span> daysSinceCreation = accountAge / (<span class="num">1000</span> * <span class="num">60</span> * <span class="num">60</span> * <span class="num">24</span>)
+
+  <span class="kw">if</span> (daysSinceCreation < <span class="num">7</span>) <span class="kw">return</span> <span class="str">'new'</span>
+  <span class="kw">if</span> (daysSinceCreation < <span class="num">30</span>) <span class="kw">return</span> <span class="str">'basic'</span>
+  <span class="kw">return</span> <span class="str">'trusted'</span>
+{"}"}
+
+<span class="kw">const</span> limits: <span class="type">Record</span><<span class="type">TrustLevel</span>, <span class="type">number</span>> = {"{"}
+  new: <span class="num">5</span>,       <span class="cm">// Very strict for new accounts</span>
+  basic: <span class="num">15</span>,    <span class="cm">// Building trust</span>
+  trusted: <span class="num">30</span>,  <span class="cm">// Established users</span>
+  verified: <span class="num">100</span> <span class="cm">// Verified accounts</span>
+{"}"}
+
+<span class="kw">export const</span> tieredPostLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: (req) => limits[<span class="fn">getTrustLevel</span>(req.user)],
+  window: <span class="str">'1h'</span>,
+  key: (req) => <span class="str">`post:</span>${"{"} req.user.id {"}"}<span class="str">`</span>,
+  response: (info, req) => {"{"}
+    <span class="kw">const</span> trust = <span class="fn">getTrustLevel</span>(req.user)
+    <span class="kw">return</span> {"{"}
+      error: <span class="str">'POST_RATE_LIMITED'</span>,
+      message: <span class="str">`Posting limit reached. </span>${"{"} trust === <span class="str">'new'</span> ? <span class="str">'New accounts have lower limits.'</span> : <span class="str">''</span> {"}"}<span class="str">`</span>,
+      trustLevel: trust,
+      limit: limits[trust]
+    {"}"}
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="best-practices">Social Platform Best Practices</h2>
+
+  <ul>
+    <li><strong>Graduated limits:</strong> New accounts should have stricter limits that relax over time</li>
+    <li><strong>Verified user bonuses:</strong> Reward trusted users with higher limits</li>
+    <li><strong>Separate new vs existing DMs:</strong> Starting conversations with strangers is a spam vector</li>
+    <li><strong>Content deduplication:</strong> Detect and limit identical or near-identical posts</li>
+    <li><strong>Action-specific limits:</strong> Different actions need different thresholds</li>
+    <li><strong>Consider follow/unfollow cycles:</strong> Rate limit both actions together to prevent gaming</li>
+  </ul>
+
+</DocsLayout>
+
+<style>
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+
+  .code-header {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+
+  .code-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .code-block pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: #71717a; }
+  .type { color: #66d9ef; }
+</style>

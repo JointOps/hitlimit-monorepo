@@ -1,0 +1,353 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout
+  title="Gaming Backend Rate Limiting - hitlimit | Matchmaking, Actions & Anti-Cheat"
+  description="Protect game servers from exploitation. Rate limiting for matchmaking, in-game actions, leaderboards, and reward systems with anti-cheat patterns."
+  keywords="game server rate limit, matchmaking rate limiting, anti-cheat rate limit, leaderboard protection, game api throttling, action spam prevention"
+>
+  <h1>Gaming Backend Rate Limiting</h1>
+
+  <p>
+    Gaming backends face unique challenges: action spam, leaderboard manipulation, matchmaking abuse,
+    and reward exploitation. This example shows how to implement rate limiting that maintains fair play
+    while keeping games responsive.
+  </p>
+
+  <h2 id="scenario">Scenario</h2>
+
+  <ul>
+    <li><strong>Matchmaking:</strong> 10 requests per minute (prevent queue spam)</li>
+    <li><strong>Game actions:</strong> 60 per second (fast but bounded)</li>
+    <li><strong>Chat messages:</strong> 5 per 10 seconds (prevent spam)</li>
+    <li><strong>Leaderboard submissions:</strong> 1 per game (prevent score inflation)</li>
+    <li><strong>Reward claims:</strong> Strict per-item limits (prevent exploitation)</li>
+    <li><strong>Friend requests:</strong> 20 per hour (prevent spam)</li>
+  </ul>
+
+  <h2 id="implementation">Implementation</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/gaming-limits.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"}
+  url: process.env.REDIS_URL,
+  keyPrefix: <span class="str">'game:rl:'</span>
+{"}"})
+
+<span class="cm">// Matchmaking - prevent queue spam and manipulation</span>
+<span class="kw">export const</span> matchmakingLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">10</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => <span class="str">`mm:</span>${"{"} req.player.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'MATCHMAKING_COOLDOWN'</span>,
+    message: <span class="str">'Please wait before searching for another match.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// In-game actions - high frequency but bounded</span>
+<span class="kw">export const</span> gameActionLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">60</span>,
+  window: <span class="str">'1s'</span>,
+  key: (req) => <span class="str">`action:</span>${"{"} req.player.id {"}"}:<span class="str"></span>${"{"} req.body.gameId {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'ACTION_RATE_LIMITED'</span>,
+    message: <span class="str">'Too many actions. Possible automation detected.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// In-game chat - prevent spam</span>
+<span class="kw">export const</span> gameChatLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">5</span>,
+  window: <span class="str">'10s'</span>,
+  key: (req) => <span class="str">`chat:</span>${"{"} req.player.id {"}"}:<span class="str"></span>${"{"} req.body.gameId {"}"}<span class="str">`</span>,
+  response: (info) => ({"{"}
+    error: <span class="str">'CHAT_COOLDOWN'</span>,
+    message: <span class="str">'Slow down! Chat again in a moment.'</span>,
+    cooldown: info.resetIn
+  {"}"})
+{"}"})
+
+<span class="cm">// Leaderboard submission - one per game session</span>
+<span class="kw">export const</span> leaderboardLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">1</span>,
+  window: <span class="str">'1h'</span>, <span class="cm">// Per game session</span>
+  key: (req) => {"{"}
+    <span class="kw">const</span> gameSessionId = req.body.sessionId
+    <span class="kw">return</span> <span class="str">`leaderboard:</span>${"{"} req.player.id {"}"}:<span class="str"></span>${"{"} gameSessionId {"}"}<span class="str">`</span>
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'SCORE_ALREADY_SUBMITTED'</span>,
+    message: <span class="str">'Score already submitted for this game.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span> <span class="cm">// Critical - prevent duplicate submissions</span>
+{"}"})
+
+<span class="cm">// Daily reward claims - once per day</span>
+<span class="kw">export const</span> dailyRewardLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">1</span>,
+  window: <span class="str">'24h'</span>,
+  key: (req) => <span class="str">`daily:</span>${"{"} req.player.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'REWARD_CLAIMED'</span>,
+    message: <span class="str">'Daily reward already claimed. Come back tomorrow!'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})
+
+<span class="cm">// Friend requests - prevent spam</span>
+<span class="kw">export const</span> friendRequestLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">20</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => <span class="str">`friend:</span>${"{"} req.player.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'FRIEND_REQUEST_LIMITED'</span>,
+    message: <span class="str">'Too many friend requests. Please wait.'</span>
+  {"}"})
+{"}"})
+
+<span class="cm">// Gift sending - prevent exploitation</span>
+<span class="kw">export const</span> giftLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">5</span>,
+  window: <span class="str">'24h'</span>,
+  key: (req) => <span class="str">`gift:</span>${"{"} req.player.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'GIFT_LIMIT_REACHED'</span>,
+    message: <span class="str">'Daily gift limit reached.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="routes">Route Configuration</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/routes/game.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} Router {"}"} <span class="kw">from</span> <span class="str">'express'</span>
+<span class="kw">import</span> {"{"} requirePlayer {"}"} <span class="kw">from</span> <span class="str">'../middleware/auth'</span>
+<span class="kw">import</span> * <span class="kw">as</span> limits <span class="kw">from</span> <span class="str">'../middleware/gaming-limits'</span>
+
+<span class="kw">const</span> router = <span class="fn">Router</span>()
+
+router.<span class="fn">use</span>(requirePlayer)
+
+<span class="cm">// Matchmaking</span>
+router.<span class="fn">post</span>(<span class="str">'/matchmaking/join'</span>, limits.matchmakingLimit, matchController.join)
+router.<span class="fn">post</span>(<span class="str">'/matchmaking/cancel'</span>, matchController.cancel)
+
+<span class="cm">// In-game (WebSocket alternative for HTTP)</span>
+router.<span class="fn">post</span>(<span class="str">'/games/:id/action'</span>, limits.gameActionLimit, gameController.action)
+router.<span class="fn">post</span>(<span class="str">'/games/:id/chat'</span>, limits.gameChatLimit, gameController.chat)
+
+<span class="cm">// Leaderboards</span>
+router.<span class="fn">post</span>(<span class="str">'/leaderboard/submit'</span>, limits.leaderboardLimit, leaderboardController.submit)
+router.<span class="fn">get</span>(<span class="str">'/leaderboard/:type'</span>, leaderboardController.get)
+
+<span class="cm">// Rewards</span>
+router.<span class="fn">post</span>(<span class="str">'/rewards/daily'</span>, limits.dailyRewardLimit, rewardController.claimDaily)
+
+<span class="cm">// Social</span>
+router.<span class="fn">post</span>(<span class="str">'/friends/request'</span>, limits.friendRequestLimit, friendController.sendRequest)
+router.<span class="fn">post</span>(<span class="str">'/gifts/send'</span>, limits.giftLimit, giftController.send)
+
+<span class="kw">export default</span> router</code></pre>
+  </div>
+
+  <h2 id="anti-cheat">Anti-Cheat Patterns</h2>
+
+  <div class="warning-box">
+    <h4>Rate Limiting is Not Anti-Cheat</h4>
+    <p>
+      Rate limiting complements but does not replace proper anti-cheat systems.
+      Use it alongside server-side validation, replay analysis, and behavioral detection.
+    </p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/anti-exploit.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"})
+
+<span class="cm">// Detect impossible action speeds</span>
+<span class="kw">export const</span> humanActionLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">10</span>,
+  window: <span class="str">'100ms'</span>, <span class="cm">// 10 actions per 100ms = impossible for humans</span>
+  key: (req) => <span class="str">`human:</span>${"{"} req.player.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'SUSPICIOUS_ACTIVITY'</span>,
+    message: <span class="str">'Unusual activity detected.'</span>,
+    <span class="cm">// Flag for review but don't reveal detection</span>
+    _internal: {"{"} flag: <span class="str">'possible_automation'</span> {"}"}
+  {"}"})
+{"}"})
+
+<span class="cm">// Prevent rapid-fire purchases (exploit prevention)</span>
+<span class="kw">export const</span> purchaseLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">1</span>,
+  window: <span class="str">'1s'</span>,
+  key: (req) => <span class="str">`purchase:</span>${"{"} req.player.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'PURCHASE_COOLDOWN'</span>,
+    message: <span class="str">'Please wait before making another purchase.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span> <span class="cm">// Critical for economy</span>
+{"}"})
+
+<span class="cm">// Limit score submissions per time period (catch grinding exploits)</span>
+<span class="kw">export const</span> scoreSubmissionLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => <span class="str">`scores:</span>${"{"} req.player.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'SCORE_LIMIT'</span>,
+    message: <span class="str">'Maximum games per hour reached. Take a break!'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="economy">Economy Protection</h2>
+
+  <p>
+    Virtual economies are vulnerable to duplication exploits and rapid transactions.
+    Use strict rate limiting with fail-closed behavior.
+  </p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/economy-limits.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"})
+
+<span class="cm">// Currency transactions - strict limits</span>
+<span class="kw">export const</span> currencyTransactionLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">10</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => <span class="str">`currency:</span>${"{"} req.player.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'TRANSACTION_LIMIT'</span>,
+    message: <span class="str">'Too many transactions. Please wait.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span> <span class="cm">// CRITICAL: Always fail closed</span>
+{"}"})
+
+<span class="cm">// Item trades - prevent rapid trading (laundering)</span>
+<span class="kw">export const</span> tradeLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">5</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => <span class="str">`trade:</span>${"{"} req.player.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'TRADE_LIMIT'</span>,
+    message: <span class="str">'Trade limit reached. Please try again later.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})
+
+<span class="cm">// Loot box opening - prevent rapid exploitation</span>
+<span class="kw">export const</span> lootBoxLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">50</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => <span class="str">`lootbox:</span>${"{"} req.player.id {"}"}<span class="str">`</span>,
+  response: () => ({"{"}
+    error: <span class="str">'LOOTBOX_LIMIT'</span>,
+    message: <span class="str">'Hourly limit reached. Pace yourself!'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="best-practices">Gaming Best Practices</h2>
+
+  <ul>
+    <li><strong>Always fail closed for economy:</strong> Currency, items, and rewards must use <code>onStoreError: () => 'deny'</code></li>
+    <li><strong>Sub-second windows for action detection:</strong> Use 100ms windows to catch automation</li>
+    <li><strong>Per-game-session keys:</strong> Prevent score re-submission by keying on session ID</li>
+    <li><strong>Separate limits per action type:</strong> Chat, movement, abilities need different thresholds</li>
+    <li><strong>Log rate limit hits:</strong> They can indicate cheating attempts</li>
+    <li><strong>Don't reveal detection:</strong> Use generic messages to avoid helping cheaters</li>
+  </ul>
+
+</DocsLayout>
+
+<style>
+  .warning-box {
+    margin: 1.5rem 0;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  .warning-box h4 {
+    margin: 0 0 0.5rem 0;
+    color: #ef4444;
+    font-size: 1rem;
+  }
+
+  .warning-box p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+
+  .code-header {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+
+  .code-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .code-block pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: #71717a; }
+  .type { color: #66d9ef; }
+</style>

@@ -1,0 +1,271 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout
+  title="SaaS API Rate Limiting - hitlimit | Tiered Limits by Subscription"
+  description="Production-ready rate limiting for SaaS applications. Implement tiered limits by subscription (free/pro/enterprise), per-workspace limits, and custom responses."
+  keywords="saas rate limit, api tier limits, subscription rate limiting, per workspace rate limit, express rate limit saas, nestjs rate limit saas"
+>
+  <h1>SaaS API Rate Limiting</h1>
+
+  <p>
+    A complete example for a project management tool like Linear or Asana with tiered rate limits
+    based on subscription plans.
+  </p>
+
+  <h2 id="scenario">Scenario</h2>
+
+  <ul>
+    <li><strong>Free tier:</strong> 100 API requests/hour</li>
+    <li><strong>Pro tier:</strong> 5,000 API requests/hour</li>
+    <li><strong>Enterprise:</strong> Unlimited</li>
+  </ul>
+
+  <h2 id="implementation">Implementation</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/middleware/rate-limit.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="cm">// Tier configuration from your pricing page</span>
+<span class="kw">const</span> TIER_LIMITS = {"{"}
+  free: {"{"} limit: <span class="num">100</span>, window: <span class="str">'1h'</span> {"}"},
+  pro: {"{"} limit: <span class="num">5000</span>, window: <span class="str">'1h'</span> {"}"},
+  enterprise: {"{"} limit: <span class="num">Infinity</span> {"}"}
+{"}"} <span class="kw">as const</span>
+
+<span class="kw">export const</span> apiRateLimit = <span class="fn">hitlimit</span>({"{"}
+  store: <span class="fn">redisStore</span>({"{"}
+    url: process.env.REDIS_URL,
+    keyPrefix: <span class="str">'ratelimit:api:'</span>
+  {"}"}),
+
+  tiers: TIER_LIMITS,
+
+  <span class="cm">// Get tier from authenticated user</span>
+  tier: (req) => {"{"}
+    <span class="kw">const</span> user = req.user <span class="cm">// From auth middleware</span>
+    <span class="kw">if</span> (!user) <span class="kw">return</span> <span class="str">'free'</span>
+    <span class="kw">return</span> user.subscription?.tier || <span class="str">'free'</span>
+  {"}"},
+
+  <span class="cm">// Rate limit by workspace, not individual user</span>
+  key: (req) => {"{"}
+    <span class="kw">const</span> user = req.user
+    <span class="kw">if</span> (!user) <span class="kw">return</span> req.ip
+    <span class="kw">return</span> <span class="str">`workspace:</span>${"{"}user.workspaceId{"}"}<span class="str">`</span>
+  {"}"},
+
+  <span class="cm">// Custom response matching your API style</span>
+  response: (info) => ({"{"}
+    error: {"{"}
+      code: <span class="str">'RATE_LIMITED'</span>,
+      message: <span class="str">'API rate limit exceeded'</span>,
+      details: {"{"}
+        limit: info.limit,
+        remaining: info.remaining,
+        resetAt: <span class="kw">new</span> <span class="fn">Date</span>(info.resetAt).<span class="fn">toISOString</span>(),
+        upgradeUrl: info.limit {"<"} <span class="num">5000</span>
+          ? <span class="str">'https://yourapp.com/pricing'</span>
+          : <span class="kw">undefined</span>
+      {"}"}
+    {"}"}
+  {"}"}),
+
+  <span class="cm">// Fail open for non-critical endpoints</span>
+  onStoreError: (error, req) => {"{"}
+    console.<span class="fn">error</span>(<span class="str">'Rate limit store error:'</span>, error)
+
+    <span class="cm">// Critical endpoints fail closed</span>
+    <span class="kw">if</span> (req.path.<span class="fn">includes</span>(<span class="str">'/billing'</span>) || req.path.<span class="fn">includes</span>(<span class="str">'/admin'</span>)) {"{"}
+      <span class="kw">return</span> <span class="str">'deny'</span>
+    {"}"}
+
+    <span class="cm">// Non-critical fail open</span>
+    <span class="kw">return</span> <span class="str">'allow'</span>
+  {"}"},
+
+  <span class="cm">// Skip rate limiting for webhooks and health checks</span>
+  skip: (req) => {"{"}
+    <span class="kw">if</span> (req.path === <span class="str">'/health'</span>) <span class="kw">return</span> <span class="kw">true</span>
+    <span class="kw">if</span> (req.path.<span class="fn">startsWith</span>(<span class="str">'/webhooks/'</span>)) <span class="kw">return</span> <span class="kw">true</span>
+    <span class="kw">if</span> (req.headers[<span class="str">'x-internal-service'</span>] === process.env.INTERNAL_SECRET) {"{"}
+      <span class="kw">return</span> <span class="kw">true</span>
+    {"}"}
+    <span class="kw">return</span> <span class="kw">false</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="stricter-limits">Stricter Limits for Expensive Operations</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Search Rate Limit</span></div>
+    <pre><code><span class="cm">// Stricter limit for expensive operations</span>
+<span class="kw">export const</span> searchRateLimit = <span class="fn">hitlimit</span>({"{"}
+  store: <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"}),
+  limit: <span class="num">30</span>,
+  window: <span class="str">'1m'</span>,
+  key: (req) => req.user?.id || req.ip,
+  response: () => ({"{"}
+    error: {"{"}
+      code: <span class="str">'SEARCH_RATE_LIMITED'</span>,
+      message: <span class="str">'Too many search requests. Please wait a moment.'</span>
+    {"}"}
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Export Rate Limit</span></div>
+    <pre><code><span class="cm">// Very strict limit for exports (expensive operation)</span>
+<span class="kw">export const</span> exportRateLimit = <span class="fn">hitlimit</span>({"{"}
+  store: <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"}),
+  limit: <span class="num">5</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => req.user?.workspaceId || req.ip
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="usage">Usage in Routes</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/routes/api.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} Router {"}"} <span class="kw">from</span> <span class="str">'express'</span>
+<span class="kw">import</span> {"{"} apiRateLimit, searchRateLimit, exportRateLimit {"}"} <span class="kw">from</span> <span class="str">'../middleware/rate-limit'</span>
+
+<span class="kw">const</span> router = <span class="fn">Router</span>()
+
+<span class="cm">// Apply base API rate limit to all routes</span>
+router.<span class="fn">use</span>(apiRateLimit)
+
+<span class="cm">// Standard CRUD operations</span>
+router.<span class="fn">get</span>(<span class="str">'/projects'</span>, projectController.list)
+router.<span class="fn">post</span>(<span class="str">'/projects'</span>, projectController.create)
+router.<span class="fn">get</span>(<span class="str">'/projects/:id'</span>, projectController.get)
+router.<span class="fn">patch</span>(<span class="str">'/projects/:id'</span>, projectController.update)
+router.<span class="fn">delete</span>(<span class="str">'/projects/:id'</span>, projectController.delete)
+
+<span class="cm">// Search has stricter limits (expensive operation)</span>
+router.<span class="fn">get</span>(<span class="str">'/search'</span>, searchRateLimit, searchController.search)
+
+<span class="cm">// Export has very strict limits</span>
+router.<span class="fn">post</span>(<span class="str">'/export'</span>, exportRateLimit, exportController.export)
+
+<span class="kw">export default</span> router</code></pre>
+  </div>
+
+  <h2 id="nestjs">NestJS Version</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/rate-limit/rate-limit.module.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} Module, Global {"}"} <span class="kw">from</span> <span class="str">'@nestjs/common'</span>
+<span class="kw">import</span> {"{"} ConfigService {"}"} <span class="kw">from</span> <span class="str">'@nestjs/config'</span>
+<span class="kw">import</span> {"{"} HitLimitModule {"}"} <span class="kw">from</span> <span class="str">'hitlimit/nest'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'hitlimit/stores/redis'</span>
+
+<span class="kw">@Global</span>()
+<span class="kw">@Module</span>({"{"}
+  imports: [
+    HitLimitModule.<span class="fn">registerAsync</span>({"{"}
+      useFactory: (config: ConfigService) => ({"{"}
+        store: <span class="fn">redisStore</span>({"{"} url: config.<span class="fn">get</span>(<span class="str">'REDIS_URL'</span>) {"}"}),
+        tiers: {"{"}
+          free: {"{"} limit: <span class="num">100</span>, window: <span class="str">'1h'</span> {"}"},
+          pro: {"{"} limit: <span class="num">5000</span>, window: <span class="str">'1h'</span> {"}"},
+          enterprise: {"{"} limit: <span class="num">Infinity</span> {"}"}
+        {"}"},
+        tier: (req) => req.user?.subscription?.tier || <span class="str">'free'</span>,
+        key: (req) => req.user?.workspaceId || req.ip
+      {"}"}),
+      inject: [ConfigService]
+    {"}"})
+  ]
+{"}"})
+<span class="kw">export class</span> RateLimitModule {"{}"}</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/projects/projects.controller.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} Controller, Get, Post, UseGuards {"}"} <span class="kw">from</span> <span class="str">'@nestjs/common'</span>
+<span class="kw">import</span> {"{"} HitLimitGuard, HitLimit {"}"} <span class="kw">from</span> <span class="str">'hitlimit/nest'</span>
+
+<span class="kw">@Controller</span>(<span class="str">'projects'</span>)
+<span class="kw">@UseGuards</span>(HitLimitGuard) <span class="cm">// Apply global rate limit</span>
+<span class="kw">export class</span> ProjectsController {"{"}
+
+  <span class="kw">@Get</span>()
+  <span class="fn">list</span>() {"{"}
+    <span class="kw">return</span> <span class="kw">this</span>.projectsService.<span class="fn">findAll</span>()
+  {"}"}
+
+  <span class="kw">@Get</span>(<span class="str">'search'</span>)
+  <span class="kw">@HitLimit</span>({"{"} limit: <span class="num">30</span>, window: <span class="str">'1m'</span> {"}"}) <span class="cm">// Stricter for search</span>
+  <span class="fn">search</span>(<span class="kw">@Query</span>(<span class="str">'q'</span>) query: string) {"{"}
+    <span class="kw">return</span> <span class="kw">this</span>.projectsService.<span class="fn">search</span>(query)
+  {"}"}
+
+  <span class="kw">@Post</span>(<span class="str">'export'</span>)
+  <span class="kw">@HitLimit</span>({"{"} limit: <span class="num">5</span>, window: <span class="str">'1h'</span> {"}"}) <span class="cm">// Very strict for exports</span>
+  <span class="fn">export</span>(<span class="kw">@Body</span>() dto: ExportDto) {"{"}
+    <span class="kw">return</span> <span class="kw">this</span>.exportService.<span class="fn">export</span>(dto)
+  {"}"}
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="why">Why These Limits?</h2>
+
+  <ul>
+    <li><strong>100/hour for free tier:</strong> Enough for basic integrations, but encourages upgrade for heavy use</li>
+    <li><strong>5,000/hour for pro:</strong> ~83 req/min - sufficient for most SaaS integrations</li>
+    <li><strong>Per-workspace:</strong> Prevents one power user from exhausting team's quota</li>
+    <li><strong>Search at 30/min:</strong> Search is expensive; prevents abuse while allowing normal use</li>
+    <li><strong>Export at 5/hour:</strong> Exports are very expensive; prevents bulk data scraping</li>
+  </ul>
+
+</DocsLayout>
+
+<style>
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+
+  .code-header {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+
+  .code-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .code-block pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: #71717a; }
+</style>
