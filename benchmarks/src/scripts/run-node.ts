@@ -167,8 +167,26 @@ const competitors: Competitor[] = [
           }
         }
         if (store === 'redis') {
-          // Redis requires a running server - skip for now
-          return null
+          const { default: Redis } = await import('ioredis')
+          const { redisStore } = await import('../../../packages/hitlimit/dist/stores/redis.js')
+          const { hitlimit } = await import('../../../packages/hitlimit/dist/index.js')
+          // Test connection first
+          const testRedis = new Redis({ host: 'localhost', port: 6379, maxRetriesPerRequest: 1, lazyConnect: true })
+          await testRedis.connect()
+          await testRedis.ping()
+          await testRedis.quit()
+          // Create store
+          const storeInstance = redisStore({ url: 'redis://localhost:6379', keyPrefix: 'bench:hitlimit:' })
+          return {
+            fn: hitlimit({ limit: 1_000_000, window: '1m', store: storeInstance }),
+            cleanup: async () => {
+              const cleanupRedis = new Redis({ host: 'localhost', port: 6379 })
+              const keys = await cleanupRedis.keys('bench:hitlimit:*')
+              if (keys.length > 0) await cleanupRedis.del(...keys)
+              await cleanupRedis.quit()
+              await storeInstance.shutdown?.()
+            }
+          }
         }
       } catch (e: any) {
         console.log(`      Setup failed: ${e.message}`)
@@ -220,8 +238,33 @@ const competitors: Competitor[] = [
           }
         }
         if (store === 'redis') {
-          // Redis requires a running server - skip for now
-          return null
+          const { default: Redis } = await import('ioredis')
+          const { RateLimiterRedis } = await import('rate-limiter-flexible')
+          // Test connection first
+          const redis = new Redis({ host: 'localhost', port: 6379, maxRetriesPerRequest: 1, lazyConnect: true })
+          await redis.connect()
+          await redis.ping()
+          const limiter = new RateLimiterRedis({
+            storeClient: redis,
+            points: 1_000_000,
+            duration: 60,
+            keyPrefix: 'bench:rlf:'
+          })
+          return {
+            fn: async (req: any, res: any, next: () => void) => {
+              try {
+                await limiter.consume(req.ip)
+                next()
+              } catch {
+                res.status(429)
+              }
+            },
+            cleanup: async () => {
+              const keys = await redis.keys('bench:rlf:*')
+              if (keys.length > 0) await redis.del(...keys)
+              await redis.quit()
+            }
+          }
         }
       } catch {
         return null

@@ -136,8 +136,25 @@ const competitors: Competitor[] = [
           }
         }
         if (store === 'redis') {
-          // Redis requires a running server - skip for now
-          return null
+          const { default: Redis } = await import('ioredis')
+          const { redisStore } = await import('../../../packages/hitlimit-bun/dist/stores/redis.js')
+          // Test connection first
+          const testRedis = new Redis({ host: 'localhost', port: 6379, maxRetriesPerRequest: 1, lazyConnect: true })
+          await testRedis.connect()
+          await testRedis.ping()
+          await testRedis.quit()
+          // Create store
+          const storeInstance = redisStore({ url: 'redis://localhost:6379', keyPrefix: 'bench:bun:' })
+          return {
+            hit: (key: string) => storeInstance.hit(key, 60000, 1_000_000),
+            cleanup: async () => {
+              const cleanupRedis = new Redis({ host: 'localhost', port: 6379 })
+              const keys = await cleanupRedis.keys('bench:bun:*')
+              if (keys.length > 0) await cleanupRedis.del(...keys)
+              await cleanupRedis.quit()
+              await storeInstance.shutdown?.()
+            }
+          }
         }
       } catch (e: any) {
         console.log(`      Setup failed: ${e.message}`)
@@ -159,7 +176,7 @@ async function runBenchmark(
   console.log(`      Warming up...`)
   for (let i = 0; i < options.warmupIterations; i++) {
     const key = scenario.generateKey(i)
-    hit(key)
+    await hit(key)
   }
 
   // Force GC
@@ -175,7 +192,7 @@ async function runBenchmark(
       const key = scenario.generateKey(i)
 
       const start = Bun.nanoseconds()
-      hit(key)
+      await hit(key)
       const end = Bun.nanoseconds()
 
       allLatencies.push(end - start)
@@ -349,7 +366,7 @@ Platform: ${process.platform} ${process.arch}
 
           console.log(`    ${formatOps(result.opsPerSec)} ops/sec, avg: ${formatLatency(result.avgLatencyNs)}`)
 
-          if (cleanup) cleanup()
+          if (cleanup) await cleanup()
         } catch (error: any) {
           console.log(`    Error: ${error.message}`)
         }
