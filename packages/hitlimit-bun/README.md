@@ -326,6 +326,8 @@ hitlimit-bun is optimized for Bun's runtime with native performance:
 | **Bun.serve** | 105,000 req/s | 12% |
 | **Elysia** | 115,000 req/s | 11% |
 
+> **Note:** Benchmark results vary by hardware and environment. Run your own benchmarks to see results on your specific setup.
+
 ### Why bun:sqlite is So Fast
 
 ```

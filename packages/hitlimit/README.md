@@ -44,6 +44,8 @@ hitlimit is designed for speed. Here's how it performs:
 | rate-limiter-flexible | 1,630,000 | ~155KB |
 | express-rate-limit | 1,220,000 | ~66KB |
 
+> **Note:** Benchmark results vary by hardware and environment. Run your own benchmarks to see results on your specific setup.
+
 ### HTTP Overhead
 
 | Framework | Without Limiter | With hitlimit | Overhead |
