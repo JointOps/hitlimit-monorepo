@@ -17,23 +17,23 @@
 **hitlimit-bun uses Bun's native SQLite** - no FFI overhead, no Node.js polyfills.
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│                                                                │
-│  bun:sqlite         ████████████████████████████  95,000 ops/s │
-│  better-sqlite3     ██████████░░░░░░░░░░░░░░░░░░  35,000 ops/s │
-│                                                                │
-│  bun:sqlite is 2.7x faster because it's truly native           │
-│                                                                │
-└────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  bun:sqlite         ████████████████████████████  520,000 ops/s │
+│  better-sqlite3     ██████████████████░░░░░░░░░░  400,000 ops/s │
+│                                                                 │
+│  bun:sqlite is 30% faster with zero FFI overhead                │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 - **Bun Native** - Built specifically for Bun's runtime, not a Node.js port
-- **2.7x Faster SQLite** - Native bun:sqlite vs Node.js better-sqlite3
-- **95,000+ ops/sec** - With bun:sqlite persistence
+- **7.2M ops/sec** - Memory store performance
+- **520K ops/sec** - With bun:sqlite persistence
 - **Zero Config** - Works out of the box with sensible defaults
 - **Elysia Plugin** - First-class Elysia framework integration
 - **TypeScript First** - Full type safety and IntelliSense support
-- **Tiny Footprint** - ~15KB bundled, zero runtime dependencies
+- **Tiny Footprint** - ~23KB total, zero runtime dependencies
 
 ## Installation
 

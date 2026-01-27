@@ -9,83 +9,82 @@ Reproducible benchmarks for hitlimit rate limiting library.
 pnpm install
 pnpm build
 
-# Run all Node.js benchmarks
-pnpm benchmark
+# Run Node.js benchmarks
+cd benchmarks
+npx tsx src/scripts/run-node.ts
 
 # Run Bun benchmarks
-pnpm benchmark:bun
+bun src/scripts/run-bun.ts
 ```
 
 ## Test Environment
 
-Benchmarks are designed to run on:
-- **Node.js**: v18, v20, v22
+- **Node.js**: v18, v20, v22, v24
 - **Bun**: v1.0+
 - **Redis**: 7.x (optional)
+- **Machine**: Apple M2 (ARM64)
 
 ## Methodology
 
-- Each benchmark runs 3 times, median reported
-- Warmup: 1,000 requests before measurement
-- Test: 100,000 requests (10,000 for Redis due to network)
-- Single-threaded to measure raw library performance
-- Memory measured before and after via `process.memoryUsage()`
+- Each benchmark runs 5 times, median reported
+- Warmup: 1,000 iterations before measurement
+- Test: 50,000 iterations per run
+- Three scenarios: single-ip, multi-ip-1k, multi-ip-10k
+- Memory measured via `process.memoryUsage()`
 
-## Expected Results
+## Latest Results
 
 ### Node.js (hitlimit)
 
-| Store | Ops/sec | Avg Latency | Use Case |
-|-------|---------|-------------|----------|
-| Memory | 400,000+ | 0.002ms | Single server, no persistence |
-| SQLite (:memory:) | 35,000+ | 0.025ms | Single server, persistence |
-| SQLite (file) | 25,000+ | 0.035ms | Single server, disk persistence |
-| Redis (local) | 12,000+ | 0.08ms | Multiple servers |
+| Store | Scenario | Ops/sec | Avg Latency |
+|-------|----------|---------|-------------|
+| **Memory** | single-ip | 3.13M | 319ns |
+| **Memory** | 10k IPs | 2.32M | 431ns |
+| **SQLite** | single-ip | 472K | 2.12μs |
+| **SQLite** | 10k IPs | 393K | 2.54μs |
+| **Redis** | single-ip | 6.7K | 149μs |
+| **Redis** | 10k IPs | 6.5K | 153μs |
 
 ### Bun (hitlimit-bun)
 
-| Store | Ops/sec | Avg Latency | Notes |
-|-------|---------|-------------|-------|
-| bun:sqlite | 95,000+ | 0.01ms | Native, no FFI overhead |
-| Memory | 500,000+ | 0.001ms | Fastest option |
+| Store | Scenario | Ops/sec | Avg Latency |
+|-------|----------|---------|-------------|
+| **Memory** | single-ip | 7.21M | 139ns |
+| **Memory** | 10k IPs | 6.10M | 164ns |
+| **bun:sqlite** | single-ip | 520K | 1.92μs |
+| **bun:sqlite** | 10k IPs | 387K | 2.59μs |
+| **Redis** | single-ip | 6.9K | 146μs |
+| **Redis** | 10k IPs | 5.4K | 187μs |
 
-## Running Individual Benchmarks
+### Comparison with Competitors (Memory Store, 10K IPs)
+
+| Library | Ops/sec | vs Fastest |
+|---------|---------|------------|
+| **hitlimit** | **2.32M** | **fastest** |
+| rate-limiter-flexible | 1.63M | 70% |
+| express-rate-limit | 1.22M | 53% |
+
+> Note: For single-IP scenarios, rate-limiter-flexible is slightly faster (3.34M vs 3.13M).
+
+## Redis Setup
 
 ```bash
-# Memory store only
-pnpm benchmark:memory
-
-# SQLite store only
-pnpm benchmark:sqlite
-
-# Redis store only (requires Redis running)
+# Start Redis for benchmarks
 docker run -p 6379:6379 redis:7-alpine
-pnpm benchmark:redis
 
-# Bun stores
-pnpm benchmark:bun
+# Or use docker-compose from monorepo root
+docker compose up -d redis
 ```
 
 ## Results
 
-Results are saved to `benchmarks/results/latest.json` after each run.
+Results are saved to `benchmarks/results/`:
+- `node-latest.json` / `node-latest.md` - Node.js results
+- `bun-latest.json` / `bun-latest.md` - Bun results
 
-## HTTP Throughput Benchmarks
+## Key Insights
 
-To measure full HTTP stack overhead:
-
-```bash
-# Install autocannon
-npm install -g autocannon
-
-# Start your server with hitlimit
-node your-server.js
-
-# Run HTTP benchmark
-autocannon -c 100 -d 10 http://localhost:3000
-```
-
-Expected overhead with hitlimit:
-- Express + Memory: ~7%
-- Express + SQLite: ~16%
-- Bun.serve + bun:sqlite: ~12%
+1. **Memory Store**: hitlimit is 42% faster than rate-limiter-flexible with many unique IPs
+2. **SQLite Store**: Only hitlimit offers built-in SQLite (400K+ ops/sec)
+3. **Redis Store**: Network-bound (~150μs latency), all libraries perform similarly
+4. **Bun Runtime**: 2-3x faster than Node.js for memory operations
