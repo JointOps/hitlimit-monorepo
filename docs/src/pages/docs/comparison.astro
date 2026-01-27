@@ -57,11 +57,11 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
           <td>Yes</td>
         </tr>
         <tr>
-          <td>Memory Store</td>
-          <td class="highlight-col good">400k ops/s</td>
-          <td>180k ops/s</td>
-          <td>250k ops/s</td>
-          <td>150k ops/s</td>
+          <td>Memory Store (high-traffic)</td>
+          <td class="highlight-col good">2.3M ops/s</td>
+          <td>1.2M ops/s</td>
+          <td>1.6M ops/s</td>
+          <td>N/A</td>
         </tr>
         <tr>
           <td>SQLite Store</td>
@@ -133,7 +133,7 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
   <div class="comparison-box">
     <h3>Choose hitlimit if you need:</h3>
     <ul>
-      <li>Better performance (2.2x faster memory store)</li>
+      <li>Better high-traffic performance (2x faster with many unique IPs)</li>
       <li>Built-in SQLite support for persistence</li>
       <li>Human-readable time windows (<code>'1m'</code> vs <code>60000</code>)</li>
       <li>NestJS native support without wrappers</li>
@@ -210,7 +210,6 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
   <div class="comparison-box">
     <h3>Choose hitlimit if you need:</h3>
     <ul>
-      <li>Better performance (2.6x faster)</li>
       <li>Built-in SQLite and Redis stores</li>
       <li>Use same library across Express, NestJS, and Bun</li>
       <li>Human-readable time windows</li>
@@ -257,40 +256,36 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
 
   <h2 id="performance">Performance Comparison</h2>
 
-  <p>All benchmarks run on the same hardware with identical methodology.</p>
+  <p>High-traffic scenario (10,000 unique IPs) - where hitlimit excels.</p>
 
   <div class="benchmark-comparison">
     <div class="benchmark-item">
       <div class="benchmark-bar hitlimit" style="width: 100%;"></div>
       <div class="benchmark-info">
         <span class="benchmark-name">hitlimit</span>
-        <span class="benchmark-value">400,000 ops/s</span>
+        <span class="benchmark-value">2.32M ops/s</span>
       </div>
     </div>
     <div class="benchmark-item">
-      <div class="benchmark-bar other" style="width: 62%;"></div>
+      <div class="benchmark-bar other" style="width: 70%;"></div>
       <div class="benchmark-info">
         <span class="benchmark-name">rate-limiter-flexible</span>
-        <span class="benchmark-value">250,000 ops/s</span>
+        <span class="benchmark-value">1.63M ops/s</span>
       </div>
     </div>
     <div class="benchmark-item">
-      <div class="benchmark-bar other" style="width: 45%;"></div>
+      <div class="benchmark-bar other" style="width: 53%;"></div>
       <div class="benchmark-info">
         <span class="benchmark-name">express-rate-limit</span>
-        <span class="benchmark-value">180,000 ops/s</span>
-      </div>
-    </div>
-    <div class="benchmark-item">
-      <div class="benchmark-bar other" style="width: 37%;"></div>
-      <div class="benchmark-info">
-        <span class="benchmark-name">@nestjs/throttler</span>
-        <span class="benchmark-value">150,000 ops/s</span>
+        <span class="benchmark-value">1.22M ops/s</span>
       </div>
     </div>
   </div>
 
-  <p class="benchmark-note">Memory store benchmark, higher is better. <a href="/docs/benchmarks">See full benchmarks</a></p>
+  <p class="benchmark-note">
+    Memory store, 10k unique keys. For single-IP scenarios, rate-limiter-flexible is slightly faster (3.34M vs 3.13M).
+    <a href="/docs/benchmarks">See full benchmarks</a>
+  </p>
 
   <h2 id="when-to-use">When to Use Each</h2>
 
