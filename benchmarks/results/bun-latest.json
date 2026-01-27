@@ -1,0 +1,66 @@
+{
+  "metadata": {
+    "bunVersion": "1.3.1",
+    "platform": "darwin arm64",
+    "date": "2026-01-26T23:47:01.095Z"
+  },
+  "results": [
+    {
+      "name": "hitlimit-bun (memory)",
+      "scenario": "single-ip",
+      "runtime": "bun",
+      "store": "memory",
+      "iterations": 30000,
+      "runs": 3,
+      "totalMs": 3.747383,
+      "opsPerSec": 8005587,
+      "avgLatencyNs": 124.91276666666667,
+      "p50LatencyNs": 83,
+      "p95LatencyNs": 125,
+      "p99LatencyNs": 250,
+      "minLatencyNs": 41,
+      "maxLatencyNs": 526917,
+      "stdDev": 3193.7808281967336,
+      "marginOfError": 36.14103232948418,
+      "memoryUsedMB": 0
+    },
+    {
+      "name": "hitlimit-bun (memory)",
+      "scenario": "multi-ip-1k",
+      "runtime": "bun",
+      "store": "memory",
+      "iterations": 30000,
+      "runs": 3,
+      "totalMs": 3.276097,
+      "opsPerSec": 9157238,
+      "avgLatencyNs": 109.20323333333333,
+      "p50LatencyNs": 84,
+      "p95LatencyNs": 166,
+      "p99LatencyNs": 209,
+      "minLatencyNs": 41,
+      "maxLatencyNs": 102666,
+      "stdDev": 633.0203571209581,
+      "marginOfError": 7.163299682291444,
+      "memoryUsedMB": 0
+    },
+    {
+      "name": "hitlimit-bun (memory)",
+      "scenario": "multi-ip-10k",
+      "runtime": "bun",
+      "store": "memory",
+      "iterations": 30000,
+      "runs": 3,
+      "totalMs": 3.554879,
+      "opsPerSec": 8439106,
+      "avgLatencyNs": 118.49596666666666,
+      "p50LatencyNs": 84,
+      "p95LatencyNs": 167,
+      "p99LatencyNs": 333,
+      "minLatencyNs": 41,
+      "maxLatencyNs": 198292,
+      "stdDev": 1219.0850843906392,
+      "marginOfError": 13.795246392104666,
+      "memoryUsedMB": 0
+    }
+  ]
+}
