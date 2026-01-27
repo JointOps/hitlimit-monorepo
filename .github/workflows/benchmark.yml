@@ -86,7 +86,7 @@ jobs:
         run: bun run build
 
       - name: Run Bun Store Benchmarks
-        run: bun benchmarks/bun/index.ts
+        run: bun benchmarks/src/scripts/run-bun.ts
         env:
           REDIS_URL: redis://localhost:6379
 
