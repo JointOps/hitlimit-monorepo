@@ -311,13 +311,13 @@ Retry-After: 42
 
 hitlimit-bun is optimized for Bun's runtime with native performance:
 
-### Store Benchmarks (Bun 1.0)
+### Store Benchmarks (Bun 1.3)
 
 | Store | Operations/sec | vs Node.js |
 |-------|----------------|------------|
-| **Memory** | 500,000+ | +25% faster |
-| **bun:sqlite** | 95,000+ | **+171% faster** 🔥 |
-| **Redis** | 15,000+ | +25% faster |
+| **Memory** | 7,210,000+ | +130% faster |
+| **bun:sqlite** | 520,000+ | **+10% faster** 🔥 |
+| **Redis** | 6,900+ | +3% faster |
 
 ### HTTP Throughput
 

@@ -32,9 +32,9 @@ hitlimit is designed for speed. Here's how it performs:
 
 | Store | Operations/sec | Avg Latency | Use Case |
 |-------|----------------|-------------|----------|
-| **Memory** | 400,000+ | 0.002ms | Single instance, no persistence |
-| **SQLite** | 35,000+ | 0.025ms | Single instance, persistence needed |
-| **Redis** | 12,000+ | 0.08ms | Multi-instance, distributed |
+| **Memory** | 2,320,000+ | 0.43μs | Single instance, no persistence |
+| **SQLite** | 393,000+ | 2.54μs | Single instance, persistence needed |
+| **Redis** | 6,500+ | 153μs | Multi-instance, distributed |
 
 ### vs Competitors
 
