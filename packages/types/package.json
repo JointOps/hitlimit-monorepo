@@ -1,6 +1,6 @@
 {
   "name": "@joint-ops/hitlimit-types",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Type definitions for hitlimit rate limiting library",
   "author": {
     "name": "Shayan M Hussain",
