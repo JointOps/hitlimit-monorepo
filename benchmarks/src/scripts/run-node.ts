@@ -211,7 +211,7 @@ Platform: ${process.platform} ${process.arch}
           competitor.name,
           scenario,
           fn,
-          { iterations: 10_000, warmupIterations: 1_000, runs: 3 }
+          { iterations: 50_000, warmupIterations: 5_000, runs: 5 }
         )
         results.push(result)
 

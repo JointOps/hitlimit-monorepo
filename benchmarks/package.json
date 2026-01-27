@@ -4,17 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "bench": "tsx stores/index.ts",
-    "bench:memory": "tsx stores/memory.bench.ts",
-    "bench:sqlite": "tsx stores/sqlite.bench.ts",
-    "bench:redis": "tsx stores/redis.bench.ts",
-    "bench:bun": "bun run stores/bun-sqlite.bench.ts",
-    "bench:all": "pnpm bench && pnpm bench:bun",
-    "bench:node:full": "tsx src/scripts/run-node.ts",
-    "bench:bun:full": "bun src/scripts/run-bun.ts",
-    "bench:compare": "pnpm bench:node:full && pnpm bench:bun:full",
-    "check-regression": "tsx src/scripts/check-regression.ts",
-    "report": "tsx src/utils/reporter.ts"
+    "bench": "tsx src/scripts/run-node.ts",
+    "bench:node": "tsx src/scripts/run-node.ts",
+    "bench:bun": "bun src/scripts/run-bun.ts",
+    "bench:all": "pnpm bench:node && pnpm bench:bun",
+    "check-regression": "tsx src/scripts/check-regression.ts"
   },
   "dependencies": {
     "express-rate-limit": "^7.5.0",
