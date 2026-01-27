@@ -14,7 +14,7 @@ const features = [
   { name: 'Standard headers', hitlimit: 'Both', expressRL: 'Draft-8', rateFlexible: false, nestThrottler: false },
   { name: 'Async key functions', hitlimit: true, expressRL: true, rateFlexible: true, nestThrottler: false },
   { name: 'TypeScript', hitlimit: 'Full', expressRL: true, rateFlexible: true, nestThrottler: true },
-  { name: 'Bundle size', hitlimit: '~5KB', expressRL: '~15KB', rateFlexible: '~45KB', nestThrottler: '~20KB', highlight: true },
+  { name: 'Bundle size', hitlimit: '~7KB', expressRL: '~66KB', rateFlexible: '~155KB', nestThrottler: '~22KB', highlight: true },
 ];
 
 function renderValue(val: boolean | string) {
@@ -45,7 +45,7 @@ function renderValue(val: boolean | string) {
         <span class="text-[var(--color-accent-secondary)] font-semibold">Built-in</span> tiered limits for SaaS
       </div>
       <div class="px-4 py-2 rounded-full border border-green-500/30 bg-green-500/5 text-sm">
-        <span class="text-green-400 font-semibold">5x smaller</span> than alternatives
+        <span class="text-green-400 font-semibold">22x smaller</span> than rate-limiter-flexible
       </div>
     </div>
 

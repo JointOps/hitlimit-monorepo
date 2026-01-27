@@ -33,7 +33,7 @@
 - **Zero Config** - Works out of the box with sensible defaults
 - **Elysia Plugin** - First-class Elysia framework integration
 - **TypeScript First** - Full type safety and IntelliSense support
-- **Tiny Footprint** - Only ~5KB minified, no bloat
+- **Tiny Footprint** - ~15KB bundled, zero runtime dependencies
 
 ## Installation
 
