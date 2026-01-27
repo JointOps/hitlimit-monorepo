@@ -261,6 +261,13 @@ bun src/scripts/run-bun.ts       # Bun</code></pre>
 
   <p>Results saved to <code>benchmarks/results/</code></p>
 
+  <div class="callout note">
+    <strong>Note:</strong> Benchmark results vary by hardware and environment.
+    Independent tests on different machines have shown hitlimit performing 27-51% faster than express-rate-limit
+    and 3-9x faster than rate-limiter-flexible across all scenarios.
+    Run your own benchmarks to see results on your specific setup.
+  </div>
+
 </DocsLayout>
 
 <style>
@@ -366,6 +373,11 @@ bun src/scripts/run-bun.ts       # Bun</code></pre>
     border-radius: 0.75rem;
     border-left: 4px solid var(--color-accent);
     background: rgba(0, 229, 255, 0.05);
+  }
+
+  .callout.note {
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.05);
   }
 
   .code-block {

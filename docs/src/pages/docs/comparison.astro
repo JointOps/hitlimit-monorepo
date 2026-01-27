@@ -287,7 +287,89 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
     <a href="/docs/benchmarks">See full benchmarks</a>
   </p>
 
+  <h2 id="genuine-advantages">Why hitlimit?</h2>
+
+  <p>Key advantages that set hitlimit apart:</p>
+
+  <div class="advantages-grid">
+    <div class="advantage">
+      <div class="advantage-icon">⏱️</div>
+      <h4>Human-readable time windows</h4>
+      <p><code>'15m'</code> instead of <code>900000</code> milliseconds</p>
+    </div>
+    <div class="advantage">
+      <div class="advantage-icon">📊</div>
+      <h4>Built-in tiered limits</h4>
+      <p>Free/Pro/Enterprise tiers without manual routing</p>
+    </div>
+    <div class="advantage">
+      <div class="advantage-icon">🛡️</div>
+      <h4>Per-request error handling</h4>
+      <p><code>onStoreError</code> callback for granular control</p>
+    </div>
+    <div class="advantage">
+      <div class="advantage-icon">📦</div>
+      <h4>Smallest bundle</h4>
+      <p>~7KB core with zero runtime dependencies</p>
+    </div>
+    <div class="advantage">
+      <div class="advantage-icon">🔋</div>
+      <h4>Native Bun support</h4>
+      <p>bun:sqlite as default store for persistence</p>
+    </div>
+    <div class="advantage">
+      <div class="advantage-icon">🔧</div>
+      <h4>Multi-framework</h4>
+      <p>Same API across Express, NestJS, Bun, Elysia</p>
+    </div>
+  </div>
+
   <h2 id="when-to-use">When to Use Each</h2>
+
+  <div class="use-case-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Use Case</th>
+          <th>Recommendation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>New Express/Node.js project</td>
+          <td class="good">hitlimit - Fast, clean API</td>
+        </tr>
+        <tr>
+          <td>New Bun project</td>
+          <td class="good">hitlimit-bun - Native bun:sqlite support</td>
+        </tr>
+        <tr>
+          <td>SaaS with tiered limits</td>
+          <td class="good">hitlimit - Built-in tier support</td>
+        </tr>
+        <tr>
+          <td>Bundle size matters</td>
+          <td class="good">hitlimit - Smallest option (~7KB)</td>
+        </tr>
+        <tr>
+          <td>Need Redis clustering</td>
+          <td>rate-limiter-flexible - More mature Redis support</td>
+        </tr>
+        <tr>
+          <td>PostgreSQL/MySQL/MongoDB backend</td>
+          <td>rate-limiter-flexible - More database options</td>
+        </tr>
+        <tr>
+          <td>Deep NestJS decorators</td>
+          <td>@nestjs/throttler - Official Nest module</td>
+        </tr>
+        <tr>
+          <td>Maximum community support</td>
+          <td>express-rate-limit - 3M+ weekly downloads</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="use-case-grid">
     <div class="use-case">
@@ -531,5 +613,50 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
   .use-case li {
     margin: 0.5rem 0;
     font-size: 0.875rem;
+  }
+
+  .advantages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .advantage {
+    padding: 1.25rem;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+  }
+
+  .advantage-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .advantage h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: var(--color-text-primary);
+  }
+
+  .advantage p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  .use-case-table {
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+
+  .use-case-table table {
+    width: 100%;
+  }
+
+  .use-case-table td.good {
+    color: #22c55e;
+    font-weight: 500;
   }
 </style>
