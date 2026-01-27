@@ -1,40 +1,61 @@
-# Benchmark Results
+# Node.js Benchmark Results
 
-**Generated:** 2026-01-26T23:56:41.972Z
-**Node.js:** v24.4.1  
+**Generated:** 2026-01-27T00:13:02.468Z
+**Node.js:** v24.4.1
 **Platform:** darwin arm64
 
+## Store Support Matrix
 
----
+| Library | Memory | SQLite | Redis |
+|---------|--------|--------|-------|
+| hitlimit | ✓ | ✓ | ✓ |
+| express-rate-limit | ✓ | ✗ | ✗ |
+| rate-limiter-flexible | ✓ | ✗ | ✓ |
 
-## single-ip
+## Memory Store
 
-| Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
-|---------|---------|-----|-----|-----|-----|------------|
-| rate-limiter-flexible | 3.37M | 297ns | 250ns | 334ns | 1.25us | 1st |
-| hitlimit | 2.95M | 339ns | 292ns | 375ns | 500ns | 87% |
-| hitlimit (tiered) | 2.27M | 440ns | 417ns | 500ns | 584ns | 67% |
-| express-rate-limit | 1.35M | 740ns | 667ns | 792ns | 1.13us | 40% |
-
-## multi-ip-1k
+### single-ip
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| rate-limiter-flexible | 2.61M | 382ns | 375ns | 500ns | 667ns | 1st |
-| hitlimit | 2.52M | 397ns | 375ns | 500ns | 666ns | 96% |
-| hitlimit (tiered) | 1.98M | 506ns | 500ns | 583ns | 792ns | 76% |
-| express-rate-limit | 1.25M | 803ns | 709ns | 958ns | 1.33us | 48% |
+| rate-limiter-flexible | 3.38M | 296ns | 291ns | 334ns | 458ns | **fastest** |
+| hitlimit | 2.99M | 335ns | 333ns | 375ns | 459ns | 88% |
+| express-rate-limit | 1.28M | 784ns | 667ns | 833ns | 1.33us | 38% |
 
-## multi-ip-10k
+### multi-ip-1k
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| hitlimit | 2.57M | 389ns | 375ns | 542ns | 750ns | 1st |
-| rate-limiter-flexible | 1.98M | 506ns | 458ns | 750ns | 959ns | 77% |
-| hitlimit (tiered) | 1.94M | 514ns | 458ns | 709ns | 917ns | 76% |
-| express-rate-limit | 1.23M | 814ns | 750ns | 1.00us | 1.25us | 48% |
+| rate-limiter-flexible | 2.55M | 392ns | 375ns | 541ns | 750ns | **fastest** |
+| hitlimit | 2.42M | 412ns | 375ns | 542ns | 1.13us | 95% |
+| express-rate-limit | 1.27M | 789ns | 750ns | 917ns | 1.29us | 50% |
 
-## Summary
+### multi-ip-10k
 
-- hitlimit wins 4/6 comparisons
-- Average memory usage: 7.25 MB
+| Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
+|---------|---------|-----|-----|-----|-----|------------|
+| hitlimit | 2.34M | 427ns | 375ns | 583ns | 792ns | **fastest** |
+| rate-limiter-flexible | 1.83M | 545ns | 500ns | 833ns | 1.04us | 78% |
+| express-rate-limit | 1.04M | 961ns | 875ns | 1.33us | 1.83us | 45% |
+
+
+## Sqlite Store
+
+### single-ip
+
+| Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
+|---------|---------|-----|-----|-----|-----|------------|
+| hitlimit | 469.2K | 2.13us | 2.08us | 2.21us | 2.42us | **fastest** |
+
+### multi-ip-1k
+
+| Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
+|---------|---------|-----|-----|-----|-----|------------|
+| hitlimit | 406.3K | 2.46us | 2.42us | 2.58us | 2.83us | **fastest** |
+
+### multi-ip-10k
+
+| Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
+|---------|---------|-----|-----|-----|-----|------------|
+| hitlimit | 386.0K | 2.59us | 2.50us | 2.75us | 3.21us | **fastest** |
+
