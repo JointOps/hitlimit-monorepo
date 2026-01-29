@@ -1,0 +1,67 @@
+# hitlimit
+
+> A high-performance rate limiting library for Node.js and Bun. Sub-millisecond
+> latency, built-in tiered limits for SaaS, SQLite/Redis/Memory stores.
+
+Key features:
+- 2-7M ops/sec with memory store
+- Human-readable time windows ('1h' not 900000ms)
+- Built-in Free/Pro/Enterprise tier support
+- Works with Express, NestJS, Bun, Elysia
+
+## Quick Start
+- [Installation](https://hitlimit.jointops.dev/docs/installation/): Install via npm or bun
+- [Quick Start Guide](https://hitlimit.jointops.dev/docs/quick-start/): Get started in 2 minutes
+- [Configuration Options](https://hitlimit.jointops.dev/docs/configuration/options/): All configuration options
+
+## Core Concepts
+- [Tiered Rate Limiting](https://hitlimit.jointops.dev/docs/configuration/tiered/): Built-in SaaS tier support
+- [Time Windows](https://hitlimit.jointops.dev/docs/configuration/window/): Human-readable durations
+- [Custom Keys](https://hitlimit.jointops.dev/docs/configuration/custom-key/): Identify users by IP, API key, etc.
+- [Skip Conditions](https://hitlimit.jointops.dev/docs/configuration/skip/): Bypass rate limiting conditionally
+- [Custom Responses](https://hitlimit.jointops.dev/docs/configuration/custom-response/): Customize 429 responses
+- [Response Headers](https://hitlimit.jointops.dev/docs/configuration/headers/): Rate limit headers
+
+## Storage Backends
+- [Stores Overview](https://hitlimit.jointops.dev/docs/stores/overview/): Choosing the right store
+- [Memory Store](https://hitlimit.jointops.dev/docs/stores/memory/): Default in-memory store
+- [SQLite Store](https://hitlimit.jointops.dev/docs/stores/sqlite/): Persistent storage
+- [Redis Store](https://hitlimit.jointops.dev/docs/stores/redis/): Distributed rate limiting
+- [Custom Store](https://hitlimit.jointops.dev/docs/stores/custom/): Build your own store
+
+## Framework Adapters
+- [Express](https://hitlimit.jointops.dev/docs/adapters/express/): Express.js middleware
+- [NestJS](https://hitlimit.jointops.dev/docs/adapters/nestjs/): NestJS guard integration
+- [Node.js HTTP](https://hitlimit.jointops.dev/docs/adapters/node/): Native Node.js http module
+
+## Bun Runtime
+- [Bun Overview](https://hitlimit.jointops.dev/docs/bun/): Native Bun support
+- [Bun Installation](https://hitlimit.jointops.dev/docs/bun/installation/): Install hitlimit-bun
+- [Bun Quick Start](https://hitlimit.jointops.dev/docs/bun/quick-start/): Get started with Bun
+- [Bun.serve](https://hitlimit.jointops.dev/docs/bun/bun-serve/): Bun.serve integration
+- [Elysia](https://hitlimit.jointops.dev/docs/bun/elysia/): Elysia framework plugin
+- [Bun Stores](https://hitlimit.jointops.dev/docs/bun/stores/): bun:sqlite as default
+- [Bun Performance](https://hitlimit.jointops.dev/docs/bun/performance/): 7M+ ops/sec benchmarks
+
+## Comparisons
+- [Benchmarks](https://hitlimit.jointops.dev/docs/benchmarks/): Performance comparisons
+- [vs Competitors](https://hitlimit.jointops.dev/docs/comparison/): Comparison with express-rate-limit, rate-limiter-flexible
+
+## Production
+- [Production Guide](https://hitlimit.jointops.dev/docs/guides/production/): Production deployment tips
+- [Scaling](https://hitlimit.jointops.dev/docs/guides/scaling/): Scaling rate limiting
+- [Monitoring](https://hitlimit.jointops.dev/docs/guides/monitoring/): Observability and metrics
+- [Testing](https://hitlimit.jointops.dev/docs/guides/testing/): Testing rate limiters
+
+## Examples
+- [Authentication](https://hitlimit.jointops.dev/docs/examples/auth/): Login and auth protection
+- [SaaS](https://hitlimit.jointops.dev/docs/examples/saas/): Multi-tenant SaaS apps
+- [E-commerce](https://hitlimit.jointops.dev/docs/examples/ecommerce/): Shopping cart and checkout
+- [Social](https://hitlimit.jointops.dev/docs/examples/social/): Social media apps
+- [Gaming](https://hitlimit.jointops.dev/docs/examples/gaming/): Game servers
+- [Cinema](https://hitlimit.jointops.dev/docs/examples/cinema/): Ticket booking systems
+
+## Optional
+- [API Reference - hitlimit](https://hitlimit.jointops.dev/docs/api/hitlimit/): Complete API documentation
+- [API Reference - Stores](https://hitlimit.jointops.dev/docs/api/stores/): Store API reference
+- [API Reference - Types](https://hitlimit.jointops.dev/docs/api/types/): TypeScript types

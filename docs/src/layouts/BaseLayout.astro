@@ -33,6 +33,9 @@ const ogImage = `${siteUrl}/og-image.png`;
     <meta name="robots" content="index, follow" />
     <meta name="googlebot" content="index, follow" />
     <meta name="theme-color" content="#00e5ff" />
+    <!-- Preconnect hints for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://github.com" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
@@ -79,9 +82,23 @@ const ogImage = `${siteUrl}/og-image.png`;
       "author": {
         "@type": "Organization",
         "name": "JointOps",
-        "url": "https://jointops.dev"
+        "url": "https://github.com/JointOps"
       },
       "keywords": keywords
+    })} />
+
+    <!-- Organization Schema for AI search visibility -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "JointOps",
+      "url": "https://github.com/JointOps",
+      "logo": `${siteUrl}/favicon-96x96.png`,
+      "sameAs": [
+        "https://github.com/JointOps/hitlimit-monorepo",
+        "https://www.npmjs.com/package/@joint-ops/hitlimit",
+        "https://www.npmjs.com/package/@joint-ops/hitlimit-bun"
+      ]
     })} />
   </head>
   <body class="min-h-screen flex flex-col">

@@ -1,5 +1,61 @@
 ---
 import DocsLayout from '../../layouts/DocsLayout.astro';
+
+// FAQPage schema for AI search visibility
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How fast is hitlimit compared to express-rate-limit?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "hitlimit achieves 2.32M ops/sec vs 1.22M for express-rate-limit in high-traffic scenarios (10k unique IPs), making it nearly 2x faster. For single-IP scenarios, performance is comparable."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the bundle size of hitlimit?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "hitlimit is approximately 7KB minified, making it the smallest among major rate limiters. Compare to express-rate-limit (~66KB) and rate-limiter-flexible (~155KB)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does hitlimit support Redis?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, hitlimit has built-in Redis support for distributed rate limiting. It also supports Memory and SQLite stores out of the box."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use hitlimit with Bun?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, hitlimit provides native Bun support through the @joint-ops/hitlimit-bun package, which uses bun:sqlite as the default store for optimal performance."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What frameworks does hitlimit support?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "hitlimit supports Express, NestJS, Bun.serve, and Elysia. The same API works across all frameworks for consistency."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does hitlimit support tiered rate limits for SaaS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, hitlimit has built-in support for tiered rate limits (Free/Pro/Enterprise). You can define different limits per tier in just 8 lines of code, compared to 25+ lines with competitors."
+      }
+    }
+  ]
+};
 ---
 
 <DocsLayout
@@ -7,6 +63,9 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
   description="Compare hitlimit with express-rate-limit, rate-limiter-flexible, and @nestjs/throttler. Feature comparison, performance benchmarks, and migration guides."
   keywords="hitlimit vs express-rate-limit, best rate limiter nodejs, rate-limiter-flexible alternative, nestjs throttler comparison, fastest rate limiter, rate limit comparison, express rate limit alternative, bun rate limiter"
 >
+  <!-- FAQPage Schema for AI Search -->
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
   <h1>Rate Limiter Comparison</h1>
 
   <p>

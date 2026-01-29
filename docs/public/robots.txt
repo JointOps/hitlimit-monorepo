@@ -2,5 +2,39 @@
 User-agent: *
 Allow: /
 
+# AI Crawlers - Explicitly allowed for AI search visibility
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
 # Sitemap
 Sitemap: https://hitlimit.jointops.dev/sitemap-index.xml
+
+# LLMs.txt - AI-friendly site structure
+# See: https://hitlimit.jointops.dev/llms.txt
