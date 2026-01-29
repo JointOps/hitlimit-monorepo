@@ -143,6 +143,17 @@ export const navigation: NavSection[] = [
     icon: 'activity',
     items: [
       { label: 'Performance Results', href: '/docs/benchmarks' },
+      { label: 'Comparison Overview', href: '/docs/comparison' },
+    ],
+  },
+  {
+    title: 'Compare',
+    icon: 'layers',
+    items: [
+      { label: 'All Comparisons', href: '/compare' },
+      { label: 'vs express-rate-limit', href: '/compare/express-rate-limit' },
+      { label: 'vs rate-limiter-flexible', href: '/compare/rate-limiter-flexible' },
+      { label: 'vs @nestjs/throttler', href: '/compare/nestjs-throttler' },
     ],
   },
 ];

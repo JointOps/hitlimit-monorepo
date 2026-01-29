@@ -1,0 +1,905 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is hitlimit smaller than rate-limiter-flexible?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, hitlimit is ~7KB while rate-limiter-flexible is ~155KB - that's 22x smaller. hitlimit has zero dependencies while rate-limiter-flexible has several."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does hitlimit compare to rate-limiter-flexible in performance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For single-IP scenarios, rate-limiter-flexible is slightly faster (3.34M vs 3.13M ops/sec). However, hitlimit is 42% faster in high-traffic scenarios with many unique IPs (2.32M vs 1.63M ops/sec)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does hitlimit support all the stores that rate-limiter-flexible has?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "hitlimit has built-in Memory, SQLite, and Redis stores. rate-limiter-flexible additionally supports PostgreSQL, MySQL, MongoDB, and cluster modes. Choose rate-limiter-flexible if you need those specific backends."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When should I choose hitlimit over rate-limiter-flexible?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Choose hitlimit for smaller bundle size, native TypeScript, built-in tiered limits, Bun support, or simpler API. Choose rate-limiter-flexible for PostgreSQL/MySQL/MongoDB backends or cluster mode support."
+      }
+    }
+  ]
+};
+
+// Code examples as raw strings to avoid JSX parsing issues
+const codeRateLimiterBasic = `<span class="kw">import</span> { RateLimiterMemory } <span class="kw">from</span> <span class="str">'rate-limiter-flexible'</span>
+
+<span class="kw">const</span> limiter = <span class="kw">new</span> <span class="fn">RateLimiterMemory</span>({
+  points: <span class="num">100</span>,      <span class="cm">// limit</span>
+  duration: <span class="num">60</span>,     <span class="cm">// seconds</span>
+})
+
+<span class="cm">// Must handle manually in each route</span>
+app.<span class="fn">get</span>(<span class="str">'/api'</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">try</span> {
+    <span class="kw">await</span> limiter.<span class="fn">consume</span>(req.ip)
+    <span class="cm">// Handle request...</span>
+  } <span class="kw">catch</span> (e) {
+    res.<span class="fn">status</span>(<span class="num">429</span>).<span class="fn">send</span>(<span class="str">'Too many requests'</span>)
+  }
+})`;
+
+const codeHitlimitBasic = `<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>  <span class="cm">// Human-readable!</span>
+})
+
+<span class="cm">// Works as middleware - automatic!</span>
+app.<span class="fn">use</span>(limiter)`;
+
+const codeRateLimiterTiered = `<span class="cm">// Need to create multiple limiters</span>
+<span class="kw">const</span> freeLimiter = <span class="kw">new</span> <span class="fn">RateLimiterMemory</span>({
+  points: <span class="num">100</span>, duration: <span class="num">60</span>
+})
+<span class="kw">const</span> proLimiter = <span class="kw">new</span> <span class="fn">RateLimiterMemory</span>({
+  points: <span class="num">1000</span>, duration: <span class="num">60</span>
+})
+<span class="kw">const</span> enterpriseLimiter = <span class="kw">new</span> <span class="fn">RateLimiterMemory</span>({
+  points: <span class="num">10000</span>, duration: <span class="num">60</span>
+})
+
+<span class="cm">// Then route manually based on user tier</span>
+app.<span class="fn">use</span>(<span class="kw">async</span> (req, res, next) => {
+  <span class="kw">const</span> tier = <span class="fn">getUserTier</span>(req)
+  <span class="kw">const</span> limiter = tier === <span class="str">'enterprise'</span>
+    ? enterpriseLimiter
+    : tier === <span class="str">'pro'</span>
+      ? proLimiter
+      : freeLimiter
+  <span class="kw">try</span> {
+    <span class="kw">await</span> limiter.<span class="fn">consume</span>(req.ip)
+    <span class="fn">next</span>()
+  } <span class="kw">catch</span> (e) {
+    res.<span class="fn">status</span>(<span class="num">429</span>).<span class="fn">send</span>(<span class="str">'Too many requests'</span>)
+  }
+})`;
+
+const codeHitlimitTiered = `<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({
+  window: <span class="str">'1m'</span>,
+  tiers: {
+    free:       { limit: <span class="num">100</span> },
+    pro:        { limit: <span class="num">1000</span> },
+    enterprise: { limit: <span class="num">10000</span> }
+  },
+  getTier: (req) => <span class="fn">getUserTier</span>(req)
+})
+
+app.<span class="fn">use</span>(limiter) <span class="cm">// That's it!</span>`;
+
+const codeMigrationBefore = `<span class="kw">import</span> { RateLimiterMemory } <span class="kw">from</span> <span class="str">'rate-limiter-flexible'</span>
+
+<span class="kw">const</span> rateLimiter = <span class="kw">new</span> <span class="fn">RateLimiterMemory</span>({
+  points: <span class="num">100</span>,
+  duration: <span class="num">60</span>,
+  keyPrefix: <span class="str">'api'</span>
+})
+
+<span class="kw">const</span> middleware = <span class="kw">async</span> (req, res, next) => {
+  <span class="kw">try</span> {
+    <span class="kw">await</span> rateLimiter.<span class="fn">consume</span>(req.ip)
+    <span class="fn">next</span>()
+  } <span class="kw">catch</span> (rejRes) {
+    res.<span class="fn">status</span>(<span class="num">429</span>).<span class="fn">json</span>({
+      message: <span class="str">'Too Many Requests'</span>,
+      retryAfter: Math.<span class="fn">round</span>(rejRes.msBeforeNext / <span class="num">1000</span>)
+    })
+  }
+}
+
+app.<span class="fn">use</span>(middleware)`;
+
+const codeMigrationAfter = `<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  prefix: <span class="str">'api'</span>
+})
+
+app.<span class="fn">use</span>(limiter) <span class="cm">// Headers and 429 handled automatically</span>`;
+---
+
+<DocsLayout
+  title="hitlimit vs rate-limiter-flexible - 22x Smaller Alternative (2026)"
+  description="Compare hitlimit and rate-limiter-flexible. hitlimit is 22x smaller (~7KB vs ~155KB), has native TypeScript, and built-in tiered limits. Feature comparison and migration guide."
+  keywords="rate-limiter-flexible alternative, hitlimit vs rate-limiter-flexible, nodejs rate limiter comparison, lightweight rate limiter, rate limiter flexible replacement, smallest rate limiter npm"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+  <h1>hitlimit vs rate-limiter-flexible</h1>
+
+  <p class="lead">
+    Looking for a <strong>rate-limiter-flexible alternative</strong>? hitlimit offers a 22x smaller bundle
+    with native TypeScript, built-in tiered limits, and excellent performance for most use cases.
+  </p>
+
+  <div class="comparison-hero">
+    <div class="comparison-card winner">
+      <div class="card-badge">Lightweight</div>
+      <h3>hitlimit</h3>
+      <div class="stat">~7KB</div>
+      <ul>
+        <li>Zero dependencies</li>
+        <li>Native TypeScript</li>
+        <li>Built-in tiered limits</li>
+        <li>Human-readable windows</li>
+        <li>Bun + Elysia native</li>
+      </ul>
+      <a href="/docs/quick-start" class="cta-btn primary">Get Started</a>
+    </div>
+    <div class="vs">VS</div>
+    <div class="comparison-card">
+      <h3>rate-limiter-flexible</h3>
+      <div class="stat">~155KB</div>
+      <ul>
+        <li>Multiple dependencies</li>
+        <li>Types via @types</li>
+        <li>More store options</li>
+        <li>Cluster support</li>
+        <li>Block duration feature</li>
+      </ul>
+      <a href="https://www.npmjs.com/package/rate-limiter-flexible" target="_blank" rel="noopener noreferrer" class="cta-btn secondary">View on npm</a>
+    </div>
+  </div>
+
+  <h2 id="bundle-size">Bundle Size Comparison</h2>
+
+  <p>
+    hitlimit is <strong>22x smaller</strong> than rate-limiter-flexible. This matters for
+    serverless functions, edge deployments, and cold start times.
+  </p>
+
+  <div class="size-comparison">
+    <div class="size-item hitlimit">
+      <div class="size-bar" style="width: 4.5%;"></div>
+      <div class="size-info">
+        <span class="size-name">hitlimit</span>
+        <span class="size-value">~7KB</span>
+      </div>
+    </div>
+    <div class="size-item">
+      <div class="size-bar" style="width: 100%;"></div>
+      <div class="size-info">
+        <span class="size-name">rate-limiter-flexible</span>
+        <span class="size-value">~155KB</span>
+      </div>
+    </div>
+  </div>
+
+  <h2 id="performance">Performance Comparison</h2>
+
+  <p>
+    Performance depends on the scenario. For high-traffic APIs with many unique IPs,
+    hitlimit is <strong>42% faster</strong>. For single-IP scenarios, rate-limiter-flexible has a slight edge.
+  </p>
+
+  <h3>High-Traffic Scenario (10,000 unique IPs)</h3>
+
+  <div class="benchmark-visual">
+    <div class="benchmark-row">
+      <div class="benchmark-label">hitlimit</div>
+      <div class="benchmark-bar-container">
+        <div class="benchmark-bar hitlimit" style="width: 100%;"></div>
+        <span class="benchmark-value">2.32M ops/sec</span>
+      </div>
+    </div>
+    <div class="benchmark-row">
+      <div class="benchmark-label">rate-limiter-flexible</div>
+      <div class="benchmark-bar-container">
+        <div class="benchmark-bar other" style="width: 70%;"></div>
+        <span class="benchmark-value">1.63M ops/sec</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Single-IP Scenario</h3>
+
+  <div class="benchmark-visual">
+    <div class="benchmark-row">
+      <div class="benchmark-label">rate-limiter-flexible</div>
+      <div class="benchmark-bar-container">
+        <div class="benchmark-bar other" style="width: 100%;"></div>
+        <span class="benchmark-value">3.34M ops/sec</span>
+      </div>
+    </div>
+    <div class="benchmark-row">
+      <div class="benchmark-label">hitlimit</div>
+      <div class="benchmark-bar-container">
+        <div class="benchmark-bar hitlimit" style="width: 94%;"></div>
+        <span class="benchmark-value">3.13M ops/sec</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="benchmark-note">
+    Memory store benchmarks. <a href="/docs/benchmarks">View full benchmarks</a>
+  </p>
+
+  <h2 id="code-comparison">Code Comparison</h2>
+
+  <h3>Basic Rate Limiting</h3>
+
+  <div class="code-comparison">
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-label">rate-limiter-flexible</span>
+      </div>
+      <pre><code set:html={codeRateLimiterBasic}></code></pre>
+    </div>
+
+    <div class="code-block winner">
+      <div class="code-header">
+        <span class="code-label">hitlimit</span>
+        <span class="badge">Simpler</span>
+      </div>
+      <pre><code set:html={codeHitlimitBasic}></code></pre>
+    </div>
+  </div>
+
+  <h3>Tiered Rate Limits (SaaS)</h3>
+
+  <div class="code-comparison">
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-label">rate-limiter-flexible</span>
+      </div>
+      <pre><code set:html={codeRateLimiterTiered}></code></pre>
+    </div>
+
+    <div class="code-block winner">
+      <div class="code-header">
+        <span class="code-label">hitlimit</span>
+        <span class="badge">Built-in</span>
+      </div>
+      <pre><code set:html={codeHitlimitTiered}></code></pre>
+    </div>
+  </div>
+
+  <h2 id="feature-comparison">Feature Comparison</h2>
+
+  <div class="feature-table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th class="highlight">hitlimit</th>
+          <th>rate-limiter-flexible</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bundle Size</td>
+          <td class="highlight good">~7KB</td>
+          <td>~155KB</td>
+        </tr>
+        <tr>
+          <td>Dependencies</td>
+          <td class="highlight good">0</td>
+          <td>Multiple</td>
+        </tr>
+        <tr>
+          <td>TypeScript</td>
+          <td class="highlight good">Native</td>
+          <td>@types package</td>
+        </tr>
+        <tr>
+          <td>Time Windows</td>
+          <td class="highlight good">'1m', '1h', '1d'</td>
+          <td>Seconds only</td>
+        </tr>
+        <tr>
+          <td>Tiered Limits</td>
+          <td class="highlight good">Built-in</td>
+          <td>Manual setup</td>
+        </tr>
+        <tr>
+          <td>Memory Store</td>
+          <td class="highlight">Built-in</td>
+          <td>Built-in</td>
+        </tr>
+        <tr>
+          <td>Redis Store</td>
+          <td class="highlight">Built-in</td>
+          <td>Built-in</td>
+        </tr>
+        <tr>
+          <td>SQLite Store</td>
+          <td class="highlight good">Built-in</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>PostgreSQL Store</td>
+          <td>No</td>
+          <td class="good">Built-in</td>
+        </tr>
+        <tr>
+          <td>MySQL Store</td>
+          <td>No</td>
+          <td class="good">Built-in</td>
+        </tr>
+        <tr>
+          <td>MongoDB Store</td>
+          <td>No</td>
+          <td class="good">Built-in</td>
+        </tr>
+        <tr>
+          <td>Cluster Mode</td>
+          <td>Via Redis</td>
+          <td class="good">Built-in</td>
+        </tr>
+        <tr>
+          <td>Insurance Limiter</td>
+          <td>Via onStoreError</td>
+          <td class="good">Built-in</td>
+        </tr>
+        <tr>
+          <td>Block Duration</td>
+          <td>No</td>
+          <td class="good">Built-in</td>
+        </tr>
+        <tr>
+          <td>Bun Support</td>
+          <td class="highlight good">Native package</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>Elysia Support</td>
+          <td class="highlight good">Native</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>Express Middleware</td>
+          <td class="highlight good">Built-in</td>
+          <td>Express wrapper</td>
+        </tr>
+        <tr>
+          <td>High-Traffic Perf</td>
+          <td class="highlight good">2.32M ops/s</td>
+          <td>1.63M ops/s</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="when-to-choose">When to Choose Each</h2>
+
+  <div class="choice-grid">
+    <div class="choice-card recommended">
+      <h3>Choose hitlimit if:</h3>
+      <ul>
+        <li>Bundle size matters (serverless, edge)</li>
+        <li>You want native TypeScript support</li>
+        <li>You need built-in tiered rate limits</li>
+        <li>You prefer human-readable time windows</li>
+        <li>You use Bun or Elysia</li>
+        <li>You want simpler API as middleware</li>
+        <li>Memory, SQLite, or Redis stores are enough</li>
+        <li>High-traffic performance is priority</li>
+      </ul>
+    </div>
+    <div class="choice-card">
+      <h3>Choose rate-limiter-flexible if:</h3>
+      <ul>
+        <li>You need PostgreSQL, MySQL, or MongoDB</li>
+        <li>You need built-in cluster mode</li>
+        <li>You need insurance/fallback limiters</li>
+        <li>You need block duration after exceeding limit</li>
+        <li>You need point consumption tracking</li>
+        <li>Single-IP performance is critical</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 id="migration">Migration from rate-limiter-flexible</h2>
+
+  <h3>Step 1: Install hitlimit</h3>
+
+  <div class="code-block">
+    <pre><code>npm install @joint-ops/hitlimit</code></pre>
+  </div>
+
+  <h3>Step 2: Replace imports and config</h3>
+
+  <div class="migration-table">
+    <table>
+      <thead>
+        <tr>
+          <th>rate-limiter-flexible</th>
+          <th>hitlimit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>points: 100</code></td>
+          <td><code>limit: 100</code></td>
+        </tr>
+        <tr>
+          <td><code>duration: 60</code> (seconds)</td>
+          <td><code>window: '1m'</code></td>
+        </tr>
+        <tr>
+          <td><code>duration: 3600</code></td>
+          <td><code>window: '1h'</code></td>
+        </tr>
+        <tr>
+          <td><code>RateLimiterMemory</code></td>
+          <td><code>hitlimit(&#123; store: 'memory' &#125;)</code></td>
+        </tr>
+        <tr>
+          <td><code>RateLimiterRedis</code></td>
+          <td><code>hitlimit(&#123; store: 'redis' &#125;)</code></td>
+        </tr>
+        <tr>
+          <td><code>keyPrefix: 'rl'</code></td>
+          <td><code>prefix: 'rl'</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Before and After Example</h3>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Before (rate-limiter-flexible)</span></div>
+    <pre><code set:html={codeMigrationBefore}></code></pre>
+  </div>
+
+  <div class="code-block winner">
+    <div class="code-header">
+      <span class="code-label">After (hitlimit)</span>
+      <span class="badge">Cleaner</span>
+    </div>
+    <pre><code set:html={codeMigrationAfter}></code></pre>
+  </div>
+
+  <h2 id="get-started">Ready to Switch?</h2>
+
+  <div class="cta-box">
+    <p>Get started with hitlimit in under 2 minutes:</p>
+    <div class="code-block">
+      <pre><code>npm install @joint-ops/hitlimit</code></pre>
+    </div>
+    <div class="cta-buttons">
+      <a href="/docs/quick-start" class="cta-btn primary">Quick Start Guide</a>
+      <a href="/docs/configuration/tiered" class="cta-btn secondary">Tiered Limits Guide</a>
+    </div>
+  </div>
+
+  <h2 id="related">Related Comparisons</h2>
+
+  <ul>
+    <li><a href="/compare/express-rate-limit">hitlimit vs express-rate-limit</a></li>
+    <li><a href="/compare/nestjs-throttler">hitlimit vs @nestjs/throttler</a></li>
+    <li><a href="/docs/comparison">Full comparison table</a></li>
+    <li><a href="/docs/benchmarks">Detailed benchmarks</a></li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .lead {
+    font-size: 1.2rem;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+    margin-bottom: 2rem;
+  }
+
+  .comparison-hero {
+    display: flex;
+    align-items: stretch;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .comparison-card {
+    flex: 1;
+    min-width: 250px;
+    max-width: 350px;
+    padding: 2rem;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    position: relative;
+  }
+
+  .comparison-card.winner {
+    border-color: var(--color-accent);
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.08), transparent);
+  }
+
+  .card-badge {
+    position: absolute;
+    top: -0.75rem;
+    right: 1rem;
+    padding: 0.25rem 0.75rem;
+    background: var(--color-accent);
+    color: black;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 1rem;
+  }
+
+  .comparison-card h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+  }
+
+  .comparison-card .stat {
+    font-size: 2.5rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    margin-bottom: 1.5rem;
+  }
+
+  .comparison-card ul {
+    margin: 0 0 1.5rem 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .comparison-card li {
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .comparison-card li::before {
+    content: '\2713';
+    color: var(--color-accent);
+  }
+
+  .vs {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+  }
+
+  .cta-btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    width: 100%;
+    transition: all 0.2s;
+  }
+
+  .cta-btn.primary {
+    background: var(--color-accent);
+    color: black;
+  }
+
+  .cta-btn.primary:hover {
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+  }
+
+  .cta-btn.secondary {
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+  }
+
+  .cta-btn.secondary:hover {
+    background: var(--color-bg-elevated);
+  }
+
+  .benchmark-visual {
+    margin: 1.5rem 0;
+  }
+
+  .benchmark-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .benchmark-label {
+    width: 180px;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+  }
+
+  .benchmark-bar-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .benchmark-bar {
+    height: 2rem;
+    border-radius: 0.5rem;
+    transition: width 0.5s ease;
+  }
+
+  .benchmark-bar.hitlimit {
+    background: linear-gradient(90deg, var(--color-accent), #00b4d8);
+  }
+
+  .benchmark-bar.other {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+  }
+
+  .benchmark-value {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  .benchmark-note {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin-top: 1rem;
+  }
+
+  .size-comparison {
+    margin: 1.5rem 0;
+  }
+
+  .size-item {
+    margin: 1rem 0;
+  }
+
+  .size-item .size-bar {
+    height: 1.5rem;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .size-item.hitlimit .size-bar {
+    background: linear-gradient(90deg, var(--color-accent), #00b4d8);
+    border: none;
+  }
+
+  .size-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+  }
+
+  .size-name {
+    color: var(--color-text-secondary);
+  }
+
+  .size-value {
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+  }
+
+  .code-comparison {
+    display: grid;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  @media (min-width: 768px) {
+    .code-comparison {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .code-block {
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+
+  .code-block.winner {
+    border-color: var(--color-accent);
+  }
+
+  .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+
+  .code-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    background: var(--color-accent);
+    color: black;
+    border-radius: 0.25rem;
+    font-weight: 600;
+  }
+
+  .code-block pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  :global(.kw) { color: #c792ea; }
+  :global(.str) { color: #a6e22e; }
+  :global(.num) { color: #fd971f; }
+  :global(.fn) { color: #66d9ef; }
+  :global(.cm) { color: #71717a; }
+
+  .feature-table-wrapper {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    font-size: 0.875rem;
+  }
+
+  th, td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  th {
+    background: var(--color-bg-surface);
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .highlight {
+    background: rgba(0, 229, 255, 0.05);
+  }
+
+  .good {
+    color: #22c55e;
+    font-weight: 600;
+  }
+
+  .migration-table {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+
+  .migration-table code {
+    font-size: 0.85rem;
+  }
+
+  .choice-grid {
+    display: grid;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  @media (min-width: 768px) {
+    .choice-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .choice-card {
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+  }
+
+  .choice-card.recommended {
+    border-color: var(--color-accent);
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), transparent);
+  }
+
+  .choice-card h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: var(--color-text-muted);
+  }
+
+  .choice-card ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+
+  .choice-card li {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+  }
+
+  .cta-box {
+    margin: 2rem 0;
+    padding: 2rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(168, 85, 247, 0.05));
+    border: 1px solid var(--color-border);
+    text-align: center;
+  }
+
+  .cta-box p {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  .cta-buttons .cta-btn {
+    width: auto;
+    min-width: 180px;
+  }
+</style>

@@ -1,0 +1,123 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="404 - Page Not Found | hitlimit"
+  description="The page you're looking for doesn't exist. Find rate limiting documentation, guides, and API references for hitlimit."
+>
+  <section class="min-h-[70vh] flex items-center justify-center px-4">
+    <div class="text-center max-w-2xl mx-auto">
+      <!-- 404 Icon -->
+      <div class="mb-8 animate-bounce-slow">
+        <div class="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-[var(--color-accent)]/20 to-[var(--color-accent-secondary)]/20 border border-[var(--color-border)]">
+          <svg class="w-16 h-16 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <h1 class="text-6xl sm:text-8xl font-black tracking-tight mb-4">
+        <span class="gradient-text">429</span>
+        <span class="text-[var(--color-text-muted)] text-4xl sm:text-5xl block mt-2">Just kidding, it's 404</span>
+      </h1>
+
+      <p class="text-xl text-[var(--color-text-secondary)] mb-8">
+        Looks like this page hit its limit. The page you're looking for doesn't exist or has been moved.
+      </p>
+
+      <!-- Quick Links -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+        <a
+          href="/"
+          class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-secondary)] text-black font-semibold text-lg transition-all duration-300 hover:shadow-[0_0_40px_rgba(0,229,255,0.5)] hover:-translate-y-1 flex items-center justify-center gap-2"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Go Home
+        </a>
+        <a
+          href="/docs/quick-start"
+          class="w-full sm:w-auto px-8 py-4 rounded-xl border border-[var(--color-border)] text-white font-semibold text-lg transition-all duration-300 hover:bg-white/5 hover:border-[var(--color-border-hover)] flex items-center justify-center gap-2"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Read Docs
+        </a>
+      </div>
+
+      <!-- Popular Pages -->
+      <div class="text-left p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)]">
+        <h2 class="text-lg font-semibold text-white mb-4">Popular Pages</h2>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <li>
+            <a href="/docs" class="flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
+              <svg class="w-4 h-4 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Documentation
+            </a>
+          </li>
+          <li>
+            <a href="/docs/installation" class="flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
+              <svg class="w-4 h-4 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Installation
+            </a>
+          </li>
+          <li>
+            <a href="/docs/configuration/options" class="flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
+              <svg class="w-4 h-4 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Configuration
+            </a>
+          </li>
+          <li>
+            <a href="/docs/api/hitlimit" class="flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
+              <svg class="w-4 h-4 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              API Reference
+            </a>
+          </li>
+          <li>
+            <a href="/docs/adapters/express" class="flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
+              <svg class="w-4 h-4 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Express Adapter
+            </a>
+          </li>
+          <li>
+            <a href="/docs/benchmarks" class="flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
+              <svg class="w-4 h-4 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Benchmarks
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  @keyframes bounce-slow {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-bounce-slow {
+    animation: bounce-slow 3s ease-in-out infinite;
+  }
+</style>
