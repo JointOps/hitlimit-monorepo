@@ -186,11 +186,12 @@ Rate limit by IP address, user ID, API key, or any custom identifier.
 hitlimit({
   key: (req) => {
     // By API key
-    if (req.headers['x-api-key']) return req.headers['x-api-key']
+    const apiKey = req.headers['x-api-key']
+    if (apiKey) return String(apiKey)
     // By user ID
     if (req.user?.id) return `user:${req.user.id}`
     // Fallback to IP
-    return req.ip
+    return req.ip || 'unknown'
   }
 })
 ```
@@ -218,7 +219,7 @@ hitlimit({
   window: '1m',            // Time window: 30s, 15m, 1h, 1d (default: '1m')
 
   // Custom key extraction
-  key: (req) => req.ip,
+  key: (req) => req.ip || 'unknown',
 
   // Tiered rate limits
   tiers: {
