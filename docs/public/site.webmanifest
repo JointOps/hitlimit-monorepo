@@ -1,6 +1,9 @@
 {
-  "name": "hitlimit",
+  "name": "hitlimit - Rate Limiting for Node.js & Bun",
   "short_name": "hitlimit",
+  "description": "The fastest rate limiting library for Node.js and Bun. Sub-millisecond performance, memory/SQLite/Redis stores.",
+  "start_url": "/",
+  "id": "/",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -13,9 +16,16 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
     }
   ],
   "theme_color": "#00e5ff",
   "background_color": "#0a0a0a",
-  "display": "standalone"
+  "display": "standalone",
+  "scope": "/",
+  "categories": ["developer tools", "utilities"]
 }

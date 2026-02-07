@@ -9,16 +9,19 @@ interface Props {
   description?: string;
   keywords?: string;
   canonical?: string;
+  ogType?: string;
 }
+
+const siteUrl = 'https://hitlimit.jointops.dev';
 
 const {
   title = 'hitlimit - The Fastest Rate Limiter for Node.js, Bun, Express & NestJS | express-rate-limit alternative',
   description = 'Lightning-fast rate limiting middleware for Node.js, Bun, Express, NestJS, and Elysia. A faster, lighter alternative to express-rate-limit and rate-limiter-flexible. Sub-millisecond performance, memory/SQLite/Redis stores, zero config.',
   keywords = 'rate limit, rate limiter, rate limiting, express rate limit, express-rate-limit, express-rate-limit alternative, rate-limiter-flexible, rate-limiter-flexible alternative, express middleware, nestjs rate limit, nestjs throttler, @nestjs/throttler, bun rate limit, bun rate limiter, elysia rate limit, elysia plugin, nodejs rate limiter, node rate limit, api rate limiting, throttle requests, request throttling, ddos protection, brute force protection, login protection, redis rate limit, sqlite rate limit, api throttling, request limiting, npm rate limit, sliding window, fixed window, token bucket, api security, request limiter',
-  canonical = 'https://hitlimit.jointops.dev'
+  canonical = `${siteUrl}${Astro.url.pathname}`,
+  ogType = 'website'
 } = Astro.props;
 
-const siteUrl = 'https://hitlimit.jointops.dev';
 const ogImage = `${siteUrl}/og-image.png`;
 ---
 
@@ -41,15 +44,20 @@ const ogImage = `${siteUrl}/og-image.png`;
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="canonical" href={canonical} />
     <title>{title}</title>
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="3344" />
+    <meta property="og:image:height" content="1924" />
+    <meta property="og:image:alt" content="hitlimit - The fastest rate limiting library for Node.js and Bun" />
     <meta property="og:site_name" content="hitlimit" />
     <meta property="og:locale" content="en_US" />
 
@@ -59,6 +67,7 @@ const ogImage = `${siteUrl}/og-image.png`;
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content="hitlimit - The fastest rate limiting library for Node.js and Bun" />
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify({
@@ -93,7 +102,7 @@ const ogImage = `${siteUrl}/og-image.png`;
       "@type": "Organization",
       "name": "JointOps",
       "url": "https://jointops.dev",
-      "logo": `${siteUrl}/favicon-96x96.png`,
+      "logo": `${siteUrl}/og-image.png`,
       "sameAs": [
         "https://github.com/JointOps/hitlimit-monorepo",
         "https://www.npmjs.com/package/@joint-ops/hitlimit",
