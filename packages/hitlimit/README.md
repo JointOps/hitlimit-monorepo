@@ -132,8 +132,12 @@ import { createHitLimit } from '@joint-ops/hitlimit/node'
 const limiter = createHitLimit({ limit: 100, window: '1m' })
 
 const server = http.createServer(async (req, res) => {
-  const result = await limiter(req, res)
-  if (!result.allowed) return // Already sent 429
+  const result = await limiter.check(req)
+  if (!result.allowed) {
+    res.writeHead(429, { 'Content-Type': 'application/json', ...result.headers })
+    res.end(JSON.stringify(result.body))
+    return
+  }
 
   res.writeHead(200)
   res.end('Hello!')

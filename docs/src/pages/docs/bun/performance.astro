@@ -89,7 +89,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 
   <div class="code-block">
     <pre><code><span class="cm">// Prefer this for single-instance deployments</span>
-<span class="kw">const</span> store = <span class="fn">bunSqliteStore</span>({"{"} path: <span class="str">'./rate-limits.db'</span> {"}"})
+<span class="kw">const</span> store = <span class="fn">sqliteStore</span>({"{"} path: <span class="str">'./rate-limits.db'</span> {"}"})
 
 <span class="cm">// Use Redis only for distributed deployments</span>
 <span class="cm">// const store = redisStore({"{"} url: '...' {"}"})</span></code></pre>
@@ -100,28 +100,13 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <p>WAL mode is enabled by default and provides better concurrent read/write performance:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">const</span> store = <span class="fn">bunSqliteStore</span>({"{"}
-  path: <span class="str">'./rate-limits.db'</span>,
-  walMode: <span class="kw">true</span>  <span class="cm">// Default</span>
-{"}"})</code></pre>
+    <pre><code><span class="kw">const</span> store = <span class="fn">sqliteStore</span>({"{"}
+  path: <span class="str">'./rate-limits.db'</span>
+{"}"})
+<span class="cm">// WAL mode is enabled by default for better concurrent performance</span></code></pre>
   </div>
 
-  <h3 id="tip-3">3. Tune Cleanup Interval</h3>
-
-  <p>Adjust cleanup frequency based on your traffic patterns:</p>
-
-  <div class="code-block">
-    <pre><code><span class="kw">const</span> store = <span class="fn">bunSqliteStore</span>({"{"}
-  path: <span class="str">'./rate-limits.db'</span>,
-  <span class="cm">// High traffic: less frequent cleanup</span>
-  cleanupInterval: <span class="num">120000</span>,  <span class="cm">// 2 minutes</span>
-
-  <span class="cm">// Low traffic: more frequent cleanup</span>
-  <span class="cm">// cleanupInterval: 30000,  // 30 seconds</span>
-{"}"})</code></pre>
-  </div>
-
-  <h3 id="tip-4">4. Use Efficient Key Functions</h3>
+  <h3 id="tip-3">3. Use Efficient Key Functions</h3>
 
   <p>Keep key extraction fast and avoid expensive operations:</p>
 
@@ -139,7 +124,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 <span class="cm">// key: async (req) => await lookupUser(req)  // Don't do this</span></code></pre>
   </div>
 
-  <h3 id="tip-5">5. Batch Rate Limit Checks</h3>
+  <h3 id="tip-4">4. Batch Rate Limit Checks</h3>
 
   <p>For batch APIs, check rate limits once per batch:</p>
 
@@ -199,38 +184,25 @@ bun run bench:compare</code></pre>
       </div>
       <span class="code-filename">production.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit, bunSqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, sqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
-<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">1000</span>,
-  window: <span class="str">'1m'</span>,
-  store: <span class="fn">bunSqliteStore</span>({"{"}
-    path: <span class="str">'./data/rate-limits.db'</span>,
-    walMode: <span class="kw">true</span>,
-    cleanupInterval: <span class="num">60000</span>
-  {"}"}),
-  <span class="cm">// Fail open on errors (don't block requests)</span>
-  failOpen: <span class="kw">true</span>,
-  <span class="cm">// Skip rate limiting for health checks</span>
-  <span class="fn">skip</span>(req) {"{"}
-    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">URL</span>(req.url).pathname === <span class="str">'/health'</span>
-  {"}"}
-{"}"})</code></pre>
-  </div>
-
-  <h2 id="monitoring">Monitoring</h2>
-
-  <p>Monitor rate limiter performance:</p>
-
-  <div class="code-block">
-    <pre><code><span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">100</span>,
-  window: <span class="str">'1m'</span>,
-  <span class="fn">onRateLimited</span>(key, req) {"{"}
-    <span class="cm">// Log or send metrics</span>
-    console.<span class="fn">log</span>(<span class="str">`Rate limited: ${"{"}key{"}"}`</span>)
-    metrics.<span class="fn">increment</span>(<span class="str">'rate_limit_exceeded'</span>)
-  {"}"}
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  fetch: <span class="fn">hitlimit</span>({"{"}
+    limit: <span class="num">1000</span>,
+    window: <span class="str">'1m'</span>,
+    store: <span class="fn">sqliteStore</span>({"{"}
+      path: <span class="str">'./data/rate-limits.db'</span>
+    {"}"}),
+    <span class="cm">// Fail open on store errors (don't block requests)</span>
+    <span class="fn">onStoreError</span>() {"{"} <span class="kw">return</span> <span class="str">'allow'</span> {"}"},
+    <span class="cm">// Skip rate limiting for health checks</span>
+    <span class="fn">skip</span>(req) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">URL</span>(req.url).pathname === <span class="str">'/health'</span>
+    {"}"}
+  {"}"}, (req) => {"{"}
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'OK'</span>)
+  {"}"})
 {"}"})</code></pre>
   </div>
 

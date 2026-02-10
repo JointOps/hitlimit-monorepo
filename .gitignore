@@ -46,3 +46,4 @@ coverage/
 yarn.lock
 package-lock.json
 CLAUDE.md
+plan.md

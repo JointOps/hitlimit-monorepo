@@ -67,6 +67,39 @@ describe('Elysia Plugin', () => {
     expect(allowed.status).toBe(200)
   })
 
+  it('supports multiple instances with different limits per group', async () => {
+    app = new Elysia()
+      .group('/strict', app =>
+        app.use(hitlimit({ limit: 1, window: '1m', store: memoryStore(), name: 'strict' }))
+          .get('/test', () => 'strict')
+      )
+      .group('/loose', app =>
+        app.use(hitlimit({ limit: 100, window: '1m', store: memoryStore(), name: 'loose' }))
+          .get('/test', () => 'loose')
+      )
+      .listen(0)
+
+    // Exhaust strict limit
+    await fetch(`http://localhost:${app.server!.port}/strict/test`)
+    const blocked = await fetch(`http://localhost:${app.server!.port}/strict/test`)
+    expect(blocked.status).toBe(429)
+
+    // Loose should still work independently
+    const allowed = await fetch(`http://localhost:${app.server!.port}/loose/test`)
+    expect(allowed.status).toBe(200)
+  })
+
+  it('auto-generates unique names when name not provided', async () => {
+    app = new Elysia()
+      .use(hitlimit({ limit: 5, window: '1m', store: memoryStore() }))
+      .use(hitlimit({ limit: 10, window: '1m', store: memoryStore() }))
+      .get('/', () => 'OK')
+      .listen(0)
+
+    const res = await fetch(`http://localhost:${app.server!.port}`)
+    expect(res.status).toBe(200)
+  })
+
   it('supports tiered limits', async () => {
     app = new Elysia()
       .use(hitlimit({

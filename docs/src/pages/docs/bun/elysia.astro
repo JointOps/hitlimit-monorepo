@@ -19,7 +19,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <p>Install hitlimit-bun alongside Elysia:</p>
 
   <div class="code-block">
-    <pre><code>bun add elysia hitlimit-bun</code></pre>
+    <pre><code>bun add @joint-ops/hitlimit-bun elysia</code></pre>
   </div>
 
   <h2 id="basic-usage">Basic Usage</h2>
@@ -36,10 +36,10 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
       <span class="code-filename">app.ts</span>
     </div>
     <pre><code><span class="kw">import</span> {"{"} Elysia {"}"} <span class="kw">from</span> <span class="str">'elysia'</span>
-<span class="kw">import</span> {"{"} hitlimitPlugin {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/elysia'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/elysia'</span>
 
 <span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
-  .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"}
+  .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
     limit: <span class="num">100</span>,
     window: <span class="str">'1m'</span>
   {"}"}))
@@ -52,7 +52,7 @@ console.<span class="fn">log</span>(<span class="str">'Server running on port 30
 
   <h2 id="route-specific">Route-Specific Limits</h2>
 
-  <p>Apply different limits to specific routes using guards:</p>
+  <p>Apply different limits to specific route groups using the <code>name</code> option. Each instance needs a unique name so Elysia registers them separately:</p>
 
   <div class="code-block">
     <div class="code-header">
@@ -64,11 +64,11 @@ console.<span class="fn">log</span>(<span class="str">'Server running on port 30
       <span class="code-filename">routes.ts</span>
     </div>
     <pre><code><span class="kw">import</span> {"{"} Elysia {"}"} <span class="kw">from</span> <span class="str">'elysia'</span>
-<span class="kw">import</span> {"{"} hitlimitPlugin {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/elysia'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/elysia'</span>
 
 <span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
   <span class="cm">// Global rate limit</span>
-  .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"}))
+  .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span>, name: <span class="str">'global'</span> {"}"}))
 
   <span class="cm">// Public routes</span>
   .<span class="fn">get</span>(<span class="str">'/'</span>, () => <span class="str">'Welcome'</span>)
@@ -76,7 +76,7 @@ console.<span class="fn">log</span>(<span class="str">'Server running on port 30
   <span class="cm">// Stricter limit for auth routes</span>
   .<span class="fn">group</span>(<span class="str">'/auth'</span>, (app) =>
     app
-      .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"} limit: <span class="num">5</span>, window: <span class="str">'15m'</span>, name: <span class="str">'auth'</span> {"}"}))
+      .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"} limit: <span class="num">5</span>, window: <span class="str">'15m'</span>, name: <span class="str">'auth'</span> {"}"}))
       .<span class="fn">post</span>(<span class="str">'/login'</span>, ({"{"} body {"}"}) => <span class="str">'Login'</span>)
       .<span class="fn">post</span>(<span class="str">'/register'</span>, ({"{"} body {"}"}) => <span class="str">'Register'</span>)
   )
@@ -84,7 +84,7 @@ console.<span class="fn">log</span>(<span class="str">'Server running on port 30
   <span class="cm">// Higher limit for API routes</span>
   .<span class="fn">group</span>(<span class="str">'/api'</span>, (app) =>
     app
-      .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"} limit: <span class="num">1000</span>, window: <span class="str">'1m'</span>, name: <span class="str">'api'</span> {"}"}))
+      .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"} limit: <span class="num">1000</span>, window: <span class="str">'1m'</span>, name: <span class="str">'api'</span> {"}"}))
       .<span class="fn">get</span>(<span class="str">'/users'</span>, () => [])
       .<span class="fn">get</span>(<span class="str">'/posts'</span>, () => [])
   )
@@ -105,12 +105,12 @@ console.<span class="fn">log</span>(<span class="str">'Server running on port 30
       <span class="code-filename">custom-key.ts</span>
     </div>
     <pre><code><span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
-  .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"}
+  .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
     limit: <span class="num">100</span>,
     window: <span class="str">'1m'</span>,
-    <span class="fn">key</span>({"{"} request, headers {"}"}) {"{"}
-      <span class="cm">// Rate limit by API key</span>
-      <span class="kw">return</span> headers[<span class="str">'x-api-key'</span>] || <span class="fn">getClientIP</span>(request)
+    <span class="fn">key</span>({"{"} request {"}"}) {"{"}
+      <span class="cm">// Rate limit by API key header</span>
+      <span class="kw">return</span> request.headers.<span class="fn">get</span>(<span class="str">'x-api-key'</span>) || <span class="str">'anonymous'</span>
     {"}"}
   {"}"}))
   .<span class="fn">get</span>(<span class="str">'/api'</span>, () => <span class="str">'Protected'</span>)</code></pre>
@@ -130,18 +130,12 @@ console.<span class="fn">log</span>(<span class="str">'Server running on port 30
       <span class="code-filename">custom-response.ts</span>
     </div>
     <pre><code><span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
-  .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"}
+  .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
     limit: <span class="num">100</span>,
     window: <span class="str">'1m'</span>,
-    <span class="fn">onRateLimited</span>({"{"} set, reset {"}"}) {"{"}
-      set.status = <span class="num">429</span>
-      set.headers[<span class="str">'Retry-After'</span>] = String(reset)
-
-      <span class="kw">return</span> {"{"}
-        error: <span class="str">'Too many requests'</span>,
-        message: <span class="str">'Please slow down'</span>,
-        retryAfter: reset
-      {"}"}
+    response: {"{"}
+      error: <span class="str">'Too many requests'</span>,
+      message: <span class="str">'Please slow down'</span>
     {"}"}
   {"}"}))
   .<span class="fn">get</span>(<span class="str">'/'</span>, () => <span class="str">'Hello'</span>)</code></pre>
@@ -161,13 +155,14 @@ console.<span class="fn">log</span>(<span class="str">'Server running on port 30
       <span class="code-filename">stores.ts</span>
     </div>
     <pre><code><span class="kw">import</span> {"{"} Elysia {"}"} <span class="kw">from</span> <span class="str">'elysia'</span>
-<span class="kw">import</span> {"{"} hitlimitPlugin, bunSqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/elysia'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/elysia'</span>
+<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
-  .<span class="fn">use</span>(<span class="fn">hitlimitPlugin</span>({"{"}
+  .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
     limit: <span class="num">100</span>,
     window: <span class="str">'1m'</span>,
-    store: <span class="fn">bunSqliteStore</span>({"{"}
+    store: <span class="fn">sqliteStore</span>({"{"}
       path: <span class="str">'./rate-limits.db'</span>
     {"}"})
   {"}"}))
@@ -189,12 +184,17 @@ console.<span class="fn">log</span>(<span class="str">'Server running on port 30
       <tr>
         <td><code>limit</code></td>
         <td><code>number</code></td>
-        <td>Maximum requests per window</td>
+        <td>Maximum requests per window (default: 100)</td>
       </tr>
       <tr>
         <td><code>window</code></td>
         <td><code>string</code></td>
-        <td>Time window (e.g., '1m', '1h')</td>
+        <td>Time window (e.g., '1m', '1h') (default: '1m')</td>
+      </tr>
+      <tr>
+        <td><code>name</code></td>
+        <td><code>string</code></td>
+        <td>Unique plugin name for multiple instances (auto-generated if omitted)</td>
       </tr>
       <tr>
         <td><code>key</code></td>
@@ -207,14 +207,24 @@ console.<span class="fn">log</span>(<span class="str">'Server running on port 30
         <td>Storage backend (memory, sqlite, redis)</td>
       </tr>
       <tr>
-        <td><code>name</code></td>
-        <td><code>string</code></td>
-        <td>Unique name for scoped limiters</td>
+        <td><code>response</code></td>
+        <td><code>object | function</code></td>
+        <td>Custom 429 response body</td>
       </tr>
       <tr>
-        <td><code>onRateLimited</code></td>
+        <td><code>skip</code></td>
         <td><code>function</code></td>
-        <td>Custom handler when rate limited</td>
+        <td>Function to skip rate limiting for certain requests</td>
+      </tr>
+      <tr>
+        <td><code>tiers</code></td>
+        <td><code>object</code></td>
+        <td>Tiered rate limit configurations</td>
+      </tr>
+      <tr>
+        <td><code>tier</code></td>
+        <td><code>function</code></td>
+        <td>Function to resolve which tier a request belongs to</td>
       </tr>
     </tbody>
   </table>

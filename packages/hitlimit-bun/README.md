@@ -73,14 +73,11 @@ import { createHitLimit } from '@joint-ops/hitlimit-bun'
 const limiter = createHitLimit({ limit: 100, window: '1m' })
 
 Bun.serve({
-  async fetch(req) {
-    const result = await limiter(req)
-    if (!result.allowed) {
-      return new Response(JSON.stringify(result.body), {
-        status: 429,
-        headers: result.headers
-      })
-    }
+  async fetch(req, server) {
+    // Returns a 429 Response if blocked, or null if allowed
+    const blocked = await limiter.check(req, server)
+    if (blocked) return blocked
+
     return new Response('Hello!')
   }
 })
@@ -106,17 +103,15 @@ Prevent brute force attacks on login endpoints.
 const authLimiter = createHitLimit({ limit: 5, window: '15m' })
 
 Bun.serve({
-  async fetch(req) {
+  async fetch(req, server) {
     const url = new URL(req.url)
 
     if (url.pathname.startsWith('/auth')) {
-      const result = await authLimiter(req)
-      if (!result.allowed) {
-        return new Response('Too many attempts', { status: 429 })
-      }
+      const blocked = await authLimiter.check(req, server)
+      if (blocked) return blocked
     }
 
-    return handler(req)
+    return handler(req, server)
   }
 })
 ```
@@ -153,19 +148,19 @@ Apply different limits to different route groups in Elysia.
 ```typescript
 new Elysia()
   // Global limit
-  .use(hitlimit({ limit: 100, window: '1m' }))
+  .use(hitlimit({ limit: 100, window: '1m', name: 'global' }))
 
   // Stricter limit for auth
   .group('/auth', (app) =>
     app
-      .use(hitlimit({ limit: 5, window: '15m' }))
+      .use(hitlimit({ limit: 5, window: '15m', name: 'auth' }))
       .post('/login', handler)
   )
 
   // Higher limit for API
   .group('/api', (app) =>
     app
-      .use(hitlimit({ limit: 1000, window: '1m' }))
+      .use(hitlimit({ limit: 1000, window: '1m', name: 'api' }))
       .get('/data', handler)
   )
   .listen(3000)

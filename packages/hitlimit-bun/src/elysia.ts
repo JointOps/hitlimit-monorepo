@@ -6,18 +6,22 @@ import { sqliteStore } from './stores/sqlite.js'
 
 export interface ElysiaHitLimitOptions extends HitLimitOptions<{ request: Request }> {
   sqlitePath?: string
+  name?: string
 }
+
+let instanceCounter = 0
 
 function getDefaultKey(_ctx: { request: Request }): string {
   return 'unknown'
 }
 
 export function hitlimit(options: ElysiaHitLimitOptions = {}) {
+  const pluginName = options.name ?? `hitlimit-${instanceCounter++}`
   const store = options.store ?? sqliteStore({ path: options.sqlitePath })
   const config = resolveConfig(options, store, getDefaultKey)
 
-  return new Elysia({ name: 'hitlimit' })
-    .onBeforeHandle({ as: 'global' }, async ({ request, set }) => {
+  return new Elysia({ name: pluginName })
+    .onBeforeHandle({ as: 'scoped' }, async ({ request, set }) => {
       const ctx = { request }
 
       if (config.skip) {
