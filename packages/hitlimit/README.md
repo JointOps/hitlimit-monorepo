@@ -404,6 +404,18 @@ import { hitlimit } from '@joint-ops/hitlimit'
 app.use(hitlimit({ limit: 100, window: '1m' }))
 ```
 
+### From @fastify/rate-limit
+
+```typescript
+// Before (@fastify/rate-limit)
+import rateLimit from '@fastify/rate-limit'
+await app.register(rateLimit, { max: 100, timeWindow: '1 minute' })
+
+// After (hitlimit) - tiered limits, SQLite, multi-framework
+import { hitlimit } from '@joint-ops/hitlimit/fastify'
+await app.register(hitlimit, { limit: 100, window: '1m' })
+```
+
 ### From @nestjs/throttler
 
 ```typescript
