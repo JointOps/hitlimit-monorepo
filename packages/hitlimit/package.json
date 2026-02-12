@@ -1,7 +1,7 @@
 {
   "name": "@joint-ops/hitlimit",
-  "version": "1.0.4",
-  "description": "Fast rate limiting middleware for Express, NestJS & Node.js - API throttling, brute force protection, request limiting",
+  "version": "1.0.5",
+  "description": "Fast rate limiting middleware for Express, Fastify, NestJS & Node.js - API throttling, brute force protection, request limiting",
   "author": {
     "name": "Shayan M Hussain",
     "email": "shayanhussain48@gmail.com",
@@ -32,6 +32,8 @@
     "nest-throttler",
     "fastify",
     "fastify-rate-limit",
+    "fastify-plugin",
+    "fastify-middleware",
     "hono",
     "hono-rate-limit",
     "hono-middleware",
@@ -87,6 +89,14 @@
       "types": "./dist/node.d.ts",
       "import": "./dist/node.js"
     },
+    "./fastify": {
+      "types": "./dist/fastify.d.ts",
+      "import": "./dist/fastify.js"
+    },
+    "./stores/memory": {
+      "types": "./dist/stores/memory.d.ts",
+      "import": "./dist/stores/memory.js"
+    },
     "./stores/sqlite": {
       "types": "./dist/stores/sqlite.d.ts",
       "import": "./dist/stores/sqlite.js"
@@ -124,6 +134,8 @@
   "peerDependencies": {
     "@nestjs/common": ">=8.0.0",
     "@nestjs/core": ">=8.0.0",
+    "fastify": ">=4.0.0",
+    "fastify-plugin": ">=4.0.0",
     "better-sqlite3": ">=9.0.0",
     "ioredis": ">=5.0.0",
     "pino": ">=8.0.0",
@@ -134,6 +146,12 @@
       "optional": true
     },
     "@nestjs/core": {
+      "optional": true
+    },
+    "fastify": {
+      "optional": true
+    },
+    "fastify-plugin": {
       "optional": true
     },
     "better-sqlite3": {
@@ -160,6 +178,8 @@
     "@types/supertest": "^6.0.0",
     "better-sqlite3": "^11.0.0",
     "express": "^4.18.0",
+    "fastify": "^5.7.4",
+    "fastify-plugin": "^5.1.0",
     "ioredis": "^5.3.0",
     "pino": "^10.3.0",
     "reflect-metadata": "^0.2.0",
