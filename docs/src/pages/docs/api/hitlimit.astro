@@ -48,7 +48,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 
   <h2 id="returns">Return Value</h2>
 
-  <p>Returns a middleware function compatible with Express, Hono, and other frameworks.</p>
+  <p>Returns a middleware function compatible with Express, Fastify, Hono, and other frameworks.</p>
 
   <div class="code-block">
     <pre><code><span class="kw">type</span> Middleware = (req: Request, res: Response, next: NextFunction) => <span class="kw">void</span></code></pre>
@@ -61,6 +61,20 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 
 <span class="cm">// 100 requests per minute</span>
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="fastify-example">Fastify Example</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> Fastify <span class="kw">from</span> <span class="str">'fastify'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/fastify'</span>
+
+<span class="kw">const</span> app = <span class="fn">Fastify</span>()
+
+<span class="kw">await</span> app.<span class="fn">register</span>(hitlimit, {"{"}
   limit: <span class="num">100</span>,
   window: <span class="str">'1m'</span>
 {"}"})</code></pre>
