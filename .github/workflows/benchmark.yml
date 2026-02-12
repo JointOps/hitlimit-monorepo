@@ -1,11 +1,16 @@
 name: Benchmarks
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      iterations:
+        description: 'Iterations per run (default: 50000)'
+        required: false
+        default: '50000'
+      runs:
+        description: 'Number of runs (default: 5)'
+        required: false
+        default: '5'
 
 jobs:
   benchmark-node:
