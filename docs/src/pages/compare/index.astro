@@ -4,8 +4,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 <BaseLayout
   title="Rate Limiter Comparison - hitlimit vs Alternatives (2026)"
-  description="Compare hitlimit with express-rate-limit, rate-limiter-flexible, and @nestjs/throttler. See benchmarks, features, and migration guides."
-  keywords="rate limiter comparison, express-rate-limit alternative, rate-limiter-flexible alternative, nestjs throttler alternative, best nodejs rate limiter, fastest rate limiter"
+  description="Compare hitlimit with express-rate-limit, @fastify/rate-limit, rate-limiter-flexible, and @nestjs/throttler. See benchmarks, features, and migration guides."
+  keywords="rate limiter comparison, express-rate-limit alternative, @fastify/rate-limit alternative, fastify rate limit alternative, rate-limiter-flexible alternative, nestjs throttler alternative, best nodejs rate limiter, fastest rate limiter"
 >
   <section class="py-20 px-4">
     <div class="max-w-4xl mx-auto">
@@ -124,6 +124,40 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
             </svg>
           </div>
         </a>
+        <!-- @fastify/rate-limit -->
+        <a href="/docs/comparison#vs-fastify-rate-limit" class="comparison-card group">
+          <div class="card-content">
+            <div class="card-header">
+              <h2 class="text-xl font-semibold group-hover:text-[var(--color-accent)] transition-colors">
+                hitlimit vs @fastify/rate-limit
+              </h2>
+              <span class="badge">Fastify Official</span>
+            </div>
+            <p class="text-[var(--color-text-secondary)] mb-4">
+              The official Fastify rate limiter plugin.
+              hitlimit offers built-in tiered limits, SQLite store, and works across all frameworks.
+            </p>
+            <div class="stats-row">
+              <div class="stat">
+                <span class="stat-value good">2x</span>
+                <span class="stat-label">Smaller</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value good">Built-in</span>
+                <span class="stat-label">Tiered Limits</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value">~7KB</span>
+                <span class="stat-label">vs ~15KB</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-arrow">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </a>
       </div>
 
       <!-- Quick Summary -->
@@ -151,6 +185,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
                 <td>~66KB</td>
                 <td>1.22M ops/s</td>
                 <td>Memory only</td>
+              </tr>
+              <tr>
+                <td>@fastify/rate-limit</td>
+                <td>~15KB</td>
+                <td>N/A</td>
+                <td>Memory, Redis</td>
               </tr>
               <tr>
                 <td>rate-limiter-flexible</td>
