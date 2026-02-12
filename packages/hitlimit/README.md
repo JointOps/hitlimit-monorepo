@@ -6,7 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![Bundle Size](https://img.shields.io/bundlephobia/minzip/@joint-ops/hitlimit)](https://bundlephobia.com/package/@joint-ops/hitlimit)
 
-> The fastest rate limiter for Node.js - Express, NestJS, and native HTTP | express-rate-limit alternative
+> The fastest rate limiter for Node.js - Express, Fastify, NestJS, and native HTTP | express-rate-limit alternative
 
 **hitlimit** is a high-performance rate limiting middleware for Node.js applications. Protect your APIs from abuse, prevent brute force attacks, and throttle requests with sub-millisecond overhead. A faster, lighter alternative to express-rate-limit and rate-limiter-flexible.
 
@@ -76,6 +76,12 @@ pnpm add @joint-ops/hitlimit
 yarn add @joint-ops/hitlimit
 ```
 
+For Fastify, also install peer dependencies:
+
+```bash
+npm install fastify fastify-plugin
+```
+
 ## Quick Start
 
 ### Express Rate Limiting
@@ -97,6 +103,23 @@ app.use(hitlimit({
 
 app.get('/api', (req, res) => res.json({ status: 'ok' }))
 app.listen(3000)
+```
+
+### Fastify Rate Limiting
+
+```typescript
+import Fastify from 'fastify'
+import { hitlimit } from '@joint-ops/hitlimit/fastify'
+
+const app = Fastify()
+
+await app.register(hitlimit, {
+  limit: 100,
+  window: '1m'
+})
+
+app.get('/api', () => ({ status: 'ok' }))
+await app.listen({ port: 3000 })
 ```
 
 ### NestJS Rate Limiting
@@ -400,4 +423,4 @@ MIT - Use freely in personal and commercial projects.
 
 ## Keywords
 
-rate limit, rate limiter, rate limiting, express rate limit, express middleware, express-rate-limit, express-rate-limit alternative, nestjs rate limit, nestjs throttler, @nestjs/throttler alternative, nestjs guard, nodejs rate limit, node rate limiter, api rate limiting, throttle requests, request throttling, api throttling, ddos protection, brute force protection, redis rate limit, memory rate limit, sqlite rate limit, sliding window, fixed window, token bucket, leaky bucket, rate-limiter-flexible alternative, api security, request limiter, http rate limit, express slow down, api protection, login protection, authentication rate limit
+rate limit, rate limiter, rate limiting, express rate limit, express middleware, express-rate-limit, express-rate-limit alternative, fastify rate limit, fastify plugin, fastify-rate-limit alternative, nestjs rate limit, nestjs throttler, @nestjs/throttler alternative, nestjs guard, nodejs rate limit, node rate limiter, api rate limiting, throttle requests, request throttling, api throttling, ddos protection, brute force protection, redis rate limit, memory rate limit, sqlite rate limit, sliding window, fixed window, token bucket, leaky bucket, rate-limiter-flexible alternative, api security, request limiter, http rate limit, express slow down, api protection, login protection, authentication rate limit
