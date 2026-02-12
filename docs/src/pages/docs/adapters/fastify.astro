@@ -132,6 +132,69 @@ app.<span class="fn">register</span>(<span class="kw">async</span> (scope) => {"
 {"}"})</code></pre>
   </div>
 
+  <h2 id="migrating">Migrating from @fastify/rate-limit</h2>
+
+  <p>Switching from <code>@fastify/rate-limit</code> to hitlimit is straightforward. Both use Fastify's plugin system.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Before (@fastify/rate-limit)</span></div>
+    <pre><code><span class="kw">import</span> rateLimit <span class="kw">from</span> <span class="str">'@fastify/rate-limit'</span>
+
+<span class="kw">await</span> app.<span class="fn">register</span>(rateLimit, {"{"}
+  max: <span class="num">100</span>,
+  timeWindow: <span class="str">'1 minute'</span>
+{"}"})</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">After (hitlimit)</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/fastify'</span>
+
+<span class="kw">await</span> app.<span class="fn">register</span>(hitlimit, {"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+{"}"})</code></pre>
+  </div>
+
+  <div class="migration-table">
+    <table>
+      <thead>
+        <tr>
+          <th>@fastify/rate-limit</th>
+          <th>hitlimit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>max: 100</code></td>
+          <td><code>limit: 100</code></td>
+        </tr>
+        <tr>
+          <td><code>timeWindow: '1 minute'</code></td>
+          <td><code>window: '1m'</code></td>
+        </tr>
+        <tr>
+          <td><code>keyGenerator: (req) => ...</code></td>
+          <td><code>key: (req) => ...</code></td>
+        </tr>
+        <tr>
+          <td><code>errorResponseBuilder: (req, ctx) => ...</code></td>
+          <td><code>response: (info) => ...</code></td>
+        </tr>
+        <tr>
+          <td>No built-in tiered limits</td>
+          <td><code>tiers: {"{"} free: ..., pro: ... {"}"}</code></td>
+        </tr>
+        <tr>
+          <td>No built-in SQLite store</td>
+          <td><code>store: sqliteStore()</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>See the <a href="/docs/comparison#vs-fastify-rate-limit">full comparison</a> for more details.</p>
+
   <h2 id="next-steps">Next Steps</h2>
 
   <ul>
@@ -148,4 +211,10 @@ app.<span class="fn">register</span>(<span class="kw">async</span> (scope) => {"
   .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
   .code-block code { background: none !important; border: none !important; padding: 0 !important; }
   .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+  .migration-table { margin: 1.5rem 0; overflow-x: auto; }
+  .migration-table table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; font-size: 0.875rem; }
+  .migration-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-weight: 600; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .migration-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .migration-table tr:last-child td { border-bottom: none; }
+  .migration-table code { background: var(--color-bg-elevated); color: var(--color-accent); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; }
 </style>

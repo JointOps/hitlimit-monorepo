@@ -59,9 +59,9 @@ const faqSchema = {
 ---
 
 <DocsLayout
-  title="hitlimit vs express-rate-limit vs rate-limiter-flexible | Comparison Guide"
-  description="Compare hitlimit with express-rate-limit, rate-limiter-flexible, and @nestjs/throttler. Feature comparison, performance benchmarks, and migration guides."
-  keywords="hitlimit vs express-rate-limit, best rate limiter nodejs, rate-limiter-flexible alternative, nestjs throttler comparison, fastest rate limiter, rate limit comparison, express rate limit alternative, bun rate limiter"
+  title="hitlimit vs express-rate-limit vs @fastify/rate-limit vs rate-limiter-flexible | Comparison Guide"
+  description="Compare hitlimit with express-rate-limit, @fastify/rate-limit, rate-limiter-flexible, and @nestjs/throttler. Feature comparison, performance benchmarks, and migration guides."
+  keywords="hitlimit vs express-rate-limit, hitlimit vs fastify rate limit, best rate limiter nodejs, rate-limiter-flexible alternative, nestjs throttler comparison, fastest rate limiter, rate limit comparison, express rate limit alternative, fastify rate limit alternative, bun rate limiter"
 >
   <!-- FAQPage Schema for AI Search -->
   <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
@@ -82,6 +82,7 @@ const faqSchema = {
           <th>Feature</th>
           <th class="highlight-col">hitlimit</th>
           <th>express-rate-limit</th>
+          <th>@fastify/rate-limit</th>
           <th>rate-limiter-flexible</th>
           <th>@nestjs/throttler</th>
         </tr>
@@ -91,6 +92,7 @@ const faqSchema = {
           <td>Bundle Size</td>
           <td class="highlight-col good">~7KB</td>
           <td>~66KB</td>
+          <td>~15KB</td>
           <td>~155KB</td>
           <td>~22KB</td>
         </tr>
@@ -98,6 +100,7 @@ const faqSchema = {
           <td>Zero Dependencies</td>
           <td class="highlight-col good">Yes</td>
           <td>No</td>
+          <td>No (3 deps)</td>
           <td>No</td>
           <td>No</td>
         </tr>
@@ -105,6 +108,7 @@ const faqSchema = {
           <td>TypeScript</td>
           <td class="highlight-col good">Native</td>
           <td>@types</td>
+          <td>Native</td>
           <td>@types</td>
           <td>Native</td>
         </tr>
@@ -114,11 +118,13 @@ const faqSchema = {
           <td>Yes</td>
           <td>Yes</td>
           <td>Yes</td>
+          <td>Yes</td>
         </tr>
         <tr>
           <td>Memory Store (high-traffic)</td>
           <td class="highlight-col good">2.3M ops/s</td>
           <td>1.2M ops/s</td>
+          <td>N/A</td>
           <td>1.6M ops/s</td>
           <td>N/A</td>
         </tr>
@@ -128,11 +134,13 @@ const faqSchema = {
           <td>External</td>
           <td>No</td>
           <td>No</td>
+          <td>No</td>
         </tr>
         <tr>
           <td>Redis Store</td>
           <td class="highlight-col">Built-in</td>
           <td>External</td>
+          <td>Built-in</td>
           <td>Built-in</td>
           <td>External</td>
         </tr>
@@ -142,11 +150,13 @@ const faqSchema = {
           <td>No</td>
           <td>No</td>
           <td>No</td>
+          <td>No</td>
         </tr>
         <tr>
           <td>Express</td>
           <td class="highlight-col good">Yes</td>
           <td>Yes</td>
+          <td>No</td>
           <td>Yes</td>
           <td>Via adapter</td>
         </tr>
@@ -154,6 +164,7 @@ const faqSchema = {
           <td>Fastify</td>
           <td class="highlight-col good">Native</td>
           <td>No</td>
+          <td class="good">Native</td>
           <td>Yes</td>
           <td>No</td>
         </tr>
@@ -161,6 +172,7 @@ const faqSchema = {
           <td>NestJS</td>
           <td class="highlight-col good">Native</td>
           <td>Via wrapper</td>
+          <td>No</td>
           <td>Yes</td>
           <td>Native</td>
         </tr>
@@ -170,11 +182,13 @@ const faqSchema = {
           <td>No</td>
           <td>No</td>
           <td>No</td>
+          <td>No</td>
         </tr>
         <tr>
           <td>Human-readable Windows</td>
           <td class="highlight-col good">'1m', '1h'</td>
           <td>ms only</td>
+          <td>'1 minute'</td>
           <td>seconds</td>
           <td>seconds</td>
         </tr>
@@ -182,6 +196,7 @@ const faqSchema = {
           <td>Tiered Limits</td>
           <td class="highlight-col good">Built-in</td>
           <td>Manual</td>
+          <td>Via dynamic max</td>
           <td>Manual</td>
           <td>Manual</td>
         </tr>
@@ -320,6 +335,55 @@ const faqSchema = {
 {"}"})</code></pre>
   </div>
 
+  <h2 id="vs-fastify-rate-limit">hitlimit vs @fastify/rate-limit</h2>
+
+  <p>
+    <strong>@fastify/rate-limit</strong> is the official Fastify rate limiter plugin maintained by the Fastify team.
+    It's the default choice for Fastify-only projects.
+  </p>
+
+  <div class="comparison-box">
+    <h3>Choose hitlimit if you need:</h3>
+    <ul>
+      <li>Built-in tiered rate limits (Free/Pro/Enterprise tiers in 8 lines)</li>
+      <li>Per-request error handling (<code>onStoreError</code> callback)</li>
+      <li>Built-in SQLite store for persistence without Redis</li>
+      <li>Same library across Express, Fastify, NestJS, and Bun</li>
+      <li>Zero runtime dependencies (~7KB vs ~15KB)</li>
+      <li>Bun runtime support</li>
+    </ul>
+
+    <h3>Choose @fastify/rate-limit if you need:</h3>
+    <ul>
+      <li>Official Fastify team maintenance and support</li>
+      <li>Ban threshold for repeat offenders</li>
+      <li>IP allowList built-in</li>
+      <li>Fastify-only project (tighter integration)</li>
+    </ul>
+  </div>
+
+  <h3>Migration from @fastify/rate-limit</h3>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Before (@fastify/rate-limit)</span></div>
+    <pre><code><span class="kw">import</span> rateLimit <span class="kw">from</span> <span class="str">'@fastify/rate-limit'</span>
+
+<span class="kw">await</span> app.<span class="fn">register</span>(rateLimit, {"{"}
+  max: <span class="num">100</span>,
+  timeWindow: <span class="str">'1 minute'</span>
+{"}"})</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">After (hitlimit)</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/fastify'</span>
+
+<span class="kw">await</span> app.<span class="fn">register</span>(hitlimit, {"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+{"}"})</code></pre>
+  </div>
+
   <h2 id="performance">Performance Comparison</h2>
 
   <p>High-traffic scenario (10,000 unique IPs) - where hitlimit excels.</p>
@@ -416,6 +480,14 @@ const faqSchema = {
         <tr>
           <td>Bundle size matters</td>
           <td class="good">hitlimit - Smallest option (~7KB)</td>
+        </tr>
+        <tr>
+          <td>New Fastify project</td>
+          <td class="good">hitlimit - Tiered limits + multi-framework</td>
+        </tr>
+        <tr>
+          <td>Fastify-only, need ban/allowList</td>
+          <td>@fastify/rate-limit - Official plugin, tighter integration</td>
         </tr>
         <tr>
           <td>Need Redis clustering</td>

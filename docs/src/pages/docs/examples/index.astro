@@ -4,8 +4,8 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 
 <DocsLayout
   title="Real-World Examples - hitlimit | Production Rate Limiting Patterns"
-  description="Production-ready rate limiting examples for SaaS, e-commerce, authentication, social platforms, and gaming backends. Copy-paste code for Express, NestJS, Bun, and Elysia."
-  keywords="rate limit examples, express rate limit example, nestjs rate limit example, api rate limiting patterns, production rate limiting, saas rate limit, ecommerce rate limit"
+  description="Production-ready rate limiting examples for SaaS, e-commerce, authentication, social platforms, and gaming backends. Copy-paste code for Express, Fastify, NestJS, Bun, and Elysia."
+  keywords="rate limit examples, express rate limit example, fastify rate limit example, fastify rate limiter example, nestjs rate limit example, api rate limiting patterns, production rate limiting, saas rate limit, ecommerce rate limit"
 >
   <h1>Real-World Examples</h1>
 
@@ -23,6 +23,13 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
     <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 app.<span class="fn">use</span>(<span class="fn">hitlimit</span>()) <span class="cm">// 100 requests per minute per IP</span></code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Fastify - One Liner</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/fastify'</span>
+
+<span class="kw">await</span> app.<span class="fn">register</span>(hitlimit, {"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"}) <span class="cm">// 100 req/min per IP</span></code></pre>
   </div>
 
   <div class="code-block">
