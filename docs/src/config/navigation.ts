@@ -50,6 +50,7 @@ export const navigation: NavSection[] = [
     icon: 'plug',
     items: [
       { label: 'Express.js', href: '/docs/adapters/express' },
+      { label: 'Fastify', href: '/docs/adapters/fastify' },
       { label: 'NestJS', href: '/docs/adapters/nestjs' },
       { label: 'Node.js HTTP', href: '/docs/adapters/node' },
     ],
