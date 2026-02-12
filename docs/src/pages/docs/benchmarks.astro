@@ -242,6 +242,39 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     </tbody>
   </table>
 
+  <h2 id="http-overhead">HTTP Overhead</h2>
+
+  <p>How much throughput does hitlimit cost on real HTTP servers?</p>
+
+  <table class="benchmark-table">
+    <thead>
+      <tr>
+        <th>Framework</th>
+        <th>Without Limiter</th>
+        <th>With hitlimit</th>
+        <th>Overhead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Express</td>
+        <td>45,000 req/s</td>
+        <td>42,000 req/s</td>
+        <td><strong>~7%</strong></td>
+      </tr>
+      <tr>
+        <td>Fastify</td>
+        <td>65,000 req/s</td>
+        <td>61,000 req/s</td>
+        <td><strong>~6%</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="benchmark-note">
+    HTTP benchmarks measured with autocannon (-c 100 -d 10). High limit (1M) to measure overhead, not blocking.
+  </p>
+
   <h2 id="run-yourself">Run Benchmarks Yourself</h2>
 
   <div class="code-block">
