@@ -1,6 +1,6 @@
 {
   "name": "@joint-ops/hitlimit-bun",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Fast Bun-native rate limiting for Bun.serve & Elysia - API throttling with bun:sqlite, high performance request limiting",
   "author": {
     "name": "Shayan M Hussain",
