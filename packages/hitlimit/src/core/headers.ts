@@ -20,7 +20,15 @@ export function buildHeaders(
   }
 
   if (!allowed && config.retryAfter) {
+    // When banned, Retry-After reflects ban duration, not window reset
     headers['Retry-After'] = String(info.resetIn)
+  }
+
+  if (info.banned) {
+    headers['X-RateLimit-Ban'] = 'true'
+    if (info.banExpiresAt) {
+      headers['X-RateLimit-Ban-Expires'] = String(Math.ceil(info.banExpiresAt / 1000))
+    }
   }
 
   return headers

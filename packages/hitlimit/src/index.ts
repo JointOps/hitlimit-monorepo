@@ -1,12 +1,13 @@
 import type { Request, Response, NextFunction } from 'express'
 import type { HitLimitOptions, HitLimitInfo, ResponseConfig, ResponseFormatter } from '@joint-ops/hitlimit-types'
 import { resolveConfig } from './core/config.js'
+import { checkLimit } from './core/limiter.js'
 import { memoryStore } from './stores/memory.js'
 
-export type { HitLimitOptions, HitLimitInfo, HitLimitResult, HitLimitStore, StoreResult, TierConfig, HeadersConfig, ResolvedConfig, KeyGenerator, TierResolver, SkipFunction, StoreErrorHandler, ResponseFormatter, ResponseConfig } from '@joint-ops/hitlimit-types'
+export type { HitLimitOptions, HitLimitInfo, HitLimitResult, HitLimitStore, StoreResult, TierConfig, HeadersConfig, ResolvedConfig, KeyGenerator, TierResolver, SkipFunction, StoreErrorHandler, ResponseFormatter, ResponseConfig, BanConfig, GroupIdResolver } from '@joint-ops/hitlimit-types'
 export { DEFAULT_LIMIT, DEFAULT_WINDOW, DEFAULT_WINDOW_MS, DEFAULT_MESSAGE } from '@joint-ops/hitlimit-types'
 export { memoryStore } from './stores/memory.js'
-export { checkLimit } from './core/limiter.js'
+export { checkLimit }
 
 function getDefaultKey(req: Request): string {
   return req.ip || req.socket?.remoteAddress || 'unknown'
@@ -30,6 +31,8 @@ export function hitlimit(options: HitLimitOptions<Request> = {}) {
   // Pre-compute flags
   const hasSkip = !!config.skip
   const hasTiers = !!(config.tier && config.tiers)
+  const hasBan = !!config.ban
+  const hasGroup = !!config.group
   const standardHeaders = config.headers.standard
   const legacyHeaders = config.headers.legacy
   const retryAfterHeader = config.headers.retryAfter
@@ -37,8 +40,8 @@ export function hitlimit(options: HitLimitOptions<Request> = {}) {
   const windowMs = config.windowMs
   const responseConfig = config.response
 
-  // Fast path: no skip, no tiers (most common case ~80%)
-  if (!hasSkip && !hasTiers) {
+  // Fast path: no skip, no tiers, no ban, no group (most common case)
+  if (!hasSkip && !hasTiers && !hasBan && !hasGroup) {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
         const key = await config.key(req)
@@ -82,7 +85,7 @@ export function hitlimit(options: HitLimitOptions<Request> = {}) {
     }
   }
 
-  // Full path: with skip and/or tiers
+  // Full path: with skip, tiers, ban, or group — delegates to core checkLimit
   return async (req: Request, res: Response, next: NextFunction) => {
     if (hasSkip) {
       const shouldSkip = await config.skip!(req)
@@ -92,51 +95,14 @@ export function hitlimit(options: HitLimitOptions<Request> = {}) {
     }
 
     try {
-      const key = await config.key(req)
+      const result = await checkLimit(config, req)
 
-      let effectiveLimit = limit
-      let effectiveWindowMs = windowMs
-      let tierName: string | undefined
-
-      if (hasTiers) {
-        tierName = await config.tier!(req)
-        const tierConfig = config.tiers![tierName]
-        if (tierConfig) {
-          effectiveLimit = tierConfig.limit
-          if (tierConfig.window) {
-            effectiveWindowMs = parseWindow(tierConfig.window)
-          }
-        }
+      for (const [key, value] of Object.entries(result.headers)) {
+        res.setHeader(key, value)
       }
 
-      if (effectiveLimit === Infinity) {
-        return next()
-      }
-
-      const result = await config.store.hit(key, effectiveWindowMs, effectiveLimit)
-      const allowed = result.count <= effectiveLimit
-      const remaining = Math.max(0, effectiveLimit - result.count)
-      const resetIn = Math.ceil((result.resetAt - Date.now()) / 1000)
-
-      if (standardHeaders) {
-        res.setHeader('RateLimit-Limit', effectiveLimit)
-        res.setHeader('RateLimit-Remaining', remaining)
-        res.setHeader('RateLimit-Reset', resetIn)
-      }
-      if (legacyHeaders) {
-        res.setHeader('X-RateLimit-Limit', effectiveLimit)
-        res.setHeader('X-RateLimit-Remaining', remaining)
-        res.setHeader('X-RateLimit-Reset', Math.ceil(result.resetAt / 1000))
-      }
-
-      if (!allowed) {
-        if (retryAfterHeader) {
-          res.setHeader('Retry-After', resetIn)
-        }
-        const body = buildResponseBody(responseConfig, {
-          limit: effectiveLimit, remaining: 0, resetIn, resetAt: result.resetAt, key, tier: tierName
-        })
-        res.status(429).json(body)
+      if (!result.allowed) {
+        res.status(429).json(result.body)
         return
       }
 
@@ -149,24 +115,5 @@ export function hitlimit(options: HitLimitOptions<Request> = {}) {
       }
       next()
     }
-  }
-}
-
-function parseWindow(window: string | number): number {
-  if (typeof window === 'number') return window
-
-  const match = window.match(/^(\d+)(ms|s|m|h|d)$/)
-  if (!match) return 60000
-
-  const value = parseInt(match[1], 10)
-  const unit = match[2]
-
-  switch (unit) {
-    case 'ms': return value
-    case 's': return value * 1000
-    case 'm': return value * 60 * 1000
-    case 'h': return value * 60 * 60 * 1000
-    case 'd': return value * 24 * 60 * 60 * 1000
-    default: return 60000
   }
 }
