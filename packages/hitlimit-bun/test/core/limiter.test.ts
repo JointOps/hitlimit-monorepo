@@ -1,5 +1,5 @@
 import { describe, it, expect, mock } from 'bun:test'
-import { checkLimit } from '../../src/core/limiter'
+import { checkLimit, checkLimitFast } from '../../src/core/limiter'
 import type { ResolvedConfig, HitLimitStore } from '@joint-ops/hitlimit-types'
 
 const createMockStore = (count: number, resetAt: number): HitLimitStore => ({
@@ -15,6 +15,8 @@ const createConfig = (overrides: Partial<ResolvedConfig<any>> = {}): ResolvedCon
   headers: { standard: true, legacy: true, retryAfter: true },
   store: createMockStore(1, Date.now() + 60000),
   onStoreError: () => 'allow',
+  ban: null,
+  group: null,
   ...overrides
 })
 
@@ -203,5 +205,240 @@ describe('checkLimit', () => {
     const result = await checkLimit(config, {})
 
     expect(result.allowed).toBe(false)
+  })
+
+  describe('ban support', () => {
+    it('blocks banned users before hitting store', async () => {
+      const store: HitLimitStore = {
+        hit: mock(() => ({ count: 1, resetAt: Date.now() + 60000 })),
+        reset: mock(() => {}),
+        isBanned: mock(() => true),
+        ban: mock(() => {}),
+        recordViolation: mock(() => 1)
+      }
+      const config = createConfig({
+        store,
+        ban: { threshold: 3, durationMs: 3600000 }
+      })
+
+      const result = await checkLimit(config, {})
+
+      expect(result.allowed).toBe(false)
+      expect(result.info.banned).toBe(true)
+      expect(result.info.banExpiresAt).toBeDefined()
+      expect(result.headers['X-RateLimit-Ban']).toBe('true')
+      expect(store.hit).not.toHaveBeenCalled()
+    })
+
+    it('records violation on rate limit exceeded', async () => {
+      const recordViolation = mock(() => 1)
+      const store: HitLimitStore = {
+        hit: mock(() => ({ count: 11, resetAt: Date.now() + 60000 })),
+        reset: mock(() => {}),
+        isBanned: mock(() => false),
+        ban: mock(() => {}),
+        recordViolation
+      }
+      const config = createConfig({
+        limit: 10,
+        store,
+        ban: { threshold: 3, durationMs: 3600000 }
+      })
+
+      const result = await checkLimit(config, {})
+
+      expect(result.allowed).toBe(false)
+      expect(recordViolation).toHaveBeenCalled()
+      expect(result.info.violations).toBe(1)
+    })
+
+    it('bans user after threshold violations', async () => {
+      const banFn = mock(() => {})
+      const store: HitLimitStore = {
+        hit: mock(() => ({ count: 11, resetAt: Date.now() + 60000 })),
+        reset: mock(() => {}),
+        isBanned: mock(() => false),
+        ban: banFn,
+        recordViolation: mock(() => 3)
+      }
+      const config = createConfig({
+        limit: 10,
+        store,
+        ban: { threshold: 3, durationMs: 3600000 }
+      })
+
+      const result = await checkLimit(config, {})
+
+      expect(banFn).toHaveBeenCalledWith('test-key', 3600000)
+      expect(result.info.banned).toBe(true)
+    })
+
+    it('does not ban when violations under threshold', async () => {
+      const banFn = mock(() => {})
+      const store: HitLimitStore = {
+        hit: mock(() => ({ count: 11, resetAt: Date.now() + 60000 })),
+        reset: mock(() => {}),
+        isBanned: mock(() => false),
+        ban: banFn,
+        recordViolation: mock(() => 2)
+      }
+      const config = createConfig({
+        limit: 10,
+        store,
+        ban: { threshold: 3, durationMs: 3600000 }
+      })
+
+      await checkLimit(config, {})
+
+      expect(banFn).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('group support', () => {
+    it('prefixes key with static group', async () => {
+      const store: HitLimitStore = {
+        hit: mock(() => ({ count: 1, resetAt: Date.now() + 60000 })),
+        reset: mock(() => {})
+      }
+      const config = createConfig({
+        store,
+        group: 'api'
+      })
+
+      const result = await checkLimit(config, {})
+
+      expect(store.hit).toHaveBeenCalledWith('group:api:test-key', 60000, 100)
+      expect(result.info.group).toBe('api')
+    })
+
+    it('prefixes key with dynamic group', async () => {
+      const store: HitLimitStore = {
+        hit: mock(() => ({ count: 1, resetAt: Date.now() + 60000 })),
+        reset: mock(() => {})
+      }
+      const config = createConfig({
+        store,
+        group: (req: any) => req.tenant
+      })
+
+      const result = await checkLimit(config, { tenant: 'acme' })
+
+      expect(store.hit).toHaveBeenCalledWith('group:acme:test-key', 60000, 100)
+      expect(result.info.group).toBe('acme')
+    })
+
+    it('does not prefix key when group is null', async () => {
+      const store: HitLimitStore = {
+        hit: mock(() => ({ count: 1, resetAt: Date.now() + 60000 })),
+        reset: mock(() => {})
+      }
+      const config = createConfig({
+        store,
+        group: null
+      })
+
+      await checkLimit(config, {})
+
+      expect(store.hit).toHaveBeenCalledWith('test-key', 60000, 100)
+    })
+  })
+})
+
+describe('checkLimitFast', () => {
+  it('allows request when under limit', async () => {
+    const config = createConfig({
+      store: createMockStore(1, Date.now() + 60000)
+    })
+
+    const result = await checkLimitFast(config, {})
+
+    expect(result.allowed).toBe(true)
+    expect(result.remaining).toBe(99)
+    expect(result.limit).toBe(100)
+  })
+
+  it('blocks request when at limit', async () => {
+    const config = createConfig({
+      limit: 10,
+      store: createMockStore(11, Date.now() + 60000)
+    })
+
+    const result = await checkLimitFast(config, {})
+
+    expect(result.allowed).toBe(false)
+    expect(result.remaining).toBe(0)
+    expect(result.limit).toBe(10)
+  })
+
+  it('handles Infinity limit', async () => {
+    const config = createConfig({
+      limit: Infinity
+    })
+
+    const result = await checkLimitFast(config, {})
+
+    expect(result.allowed).toBe(true)
+    expect(result.remaining).toBe(Infinity)
+    expect(result.limit).toBe(Infinity)
+  })
+
+  it('blocks banned users before hitting store', async () => {
+    const store: HitLimitStore = {
+      ...createMockStore(1, Date.now() + 60000),
+      isBanned: mock(() => true),
+      ban: mock(() => {}),
+      recordViolation: mock(() => 1)
+    }
+
+    const config = createConfig({
+      store,
+      ban: { threshold: 2, durationMs: 3600000 }
+    })
+
+    const result = await checkLimitFast(config, {})
+
+    expect(result.allowed).toBe(false)
+    expect(result.remaining).toBe(0)
+    expect(store.hit).not.toHaveBeenCalled()
+  })
+
+  it('records violations when limit exceeded', async () => {
+    const store: HitLimitStore = {
+      ...createMockStore(11, Date.now() + 60000),
+      isBanned: mock(() => false),
+      ban: mock(() => {}),
+      recordViolation: mock(() => 1)
+    }
+
+    const config = createConfig({
+      limit: 10,
+      store,
+      ban: { threshold: 2, durationMs: 3600000 }
+    })
+
+    const result = await checkLimitFast(config, {})
+
+    expect(result.allowed).toBe(false)
+    expect(store.recordViolation).toHaveBeenCalledWith('test-key', 3600000)
+  })
+
+  it('bans user after threshold violations', async () => {
+    const store: HitLimitStore = {
+      ...createMockStore(11, Date.now() + 60000),
+      isBanned: mock(() => false),
+      ban: mock(() => {}),
+      recordViolation: mock(() => 2)
+    }
+
+    const config = createConfig({
+      limit: 10,
+      store,
+      ban: { threshold: 2, durationMs: 3600000 }
+    })
+
+    await checkLimitFast(config, {})
+
+    expect(store.recordViolation).toHaveBeenCalledWith('test-key', 3600000)
+    expect(store.ban).toHaveBeenCalledWith('test-key', 3600000)
   })
 })

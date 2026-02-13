@@ -1,34 +1,53 @@
-import { describe, it, expect, afterEach, beforeAll } from 'bun:test'
-import { hitlimit } from '../../src/index'
-import { memoryStore } from '../../src/stores/memory'
-import { redisStore } from '../../src/stores/redis'
+import { describe, it, expect, afterEach, beforeAll } from 'vitest'
+import express, { type Application } from 'express'
+import http from 'http'
+import { hitlimit } from '../../src/index.js'
+import { memoryStore } from '../../src/stores/memory.js'
+import { redisStore } from '../../src/stores/redis.js'
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 
-async function fetchWithTimeout(url: string, timeout = 5000): Promise<Response> {
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeout)
-  try {
-    return await fetch(url, { signal: controller.signal })
-  } finally {
-    clearTimeout(timeoutId)
-  }
+interface FetchResponse {
+  status: number
+  body: string
 }
 
-async function runBatchedLoad(url: string, totalRequests: number, batchSize: number) {
+async function fetchWithTimeout(url: string, timeout = 5000): Promise<FetchResponse> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      req.destroy()
+      reject(new Error('Request timeout'))
+    }, timeout)
+
+    const req = http.get(url, (res) => {
+      let body = ''
+      res.on('data', chunk => body += chunk)
+      res.on('end', () => {
+        clearTimeout(timer)
+        resolve({ status: res.statusCode!, body })
+      })
+    })
+
+    req.on('error', (err) => {
+      clearTimeout(timer)
+      reject(err)
+    })
+  })
+}
+
+async function runBatchedLoad(baseUrl: string, totalRequests: number, batchSize: number) {
   const batches = Math.ceil(totalRequests / batchSize)
-  const results: Response[] = []
+  const results: FetchResponse[] = []
   const latencies: number[] = []
   let errors = 0
 
   for (let i = 0; i < batches; i++) {
-    const batchStart = performance.now()
     const currentBatchSize = Math.min(batchSize, totalRequests - i * batchSize)
 
     const promises = Array.from({ length: currentBatchSize }, async () => {
       try {
         const reqStart = performance.now()
-        const res = await fetchWithTimeout(url)
+        const res = await fetchWithTimeout(baseUrl)
         latencies.push(performance.now() - reqStart)
         return res
       } catch (err) {
@@ -38,7 +57,7 @@ async function runBatchedLoad(url: string, totalRequests: number, batchSize: num
     })
 
     const batchResults = await Promise.all(promises)
-    results.push(...batchResults.filter((r): r is Response => r !== null))
+    results.push(...batchResults.filter((r): r is FetchResponse => r !== null))
   }
 
   const avgLatency = latencies.length > 0
@@ -49,7 +68,9 @@ async function runBatchedLoad(url: string, totalRequests: number, batchSize: num
 }
 
 describe('Performance', () => {
-  let server: ReturnType<typeof Bun.serve>
+  let app: Application
+  let server: http.Server
+  let port: number
   let isRedisAvailable = false
 
   beforeAll(async () => {
@@ -72,43 +93,40 @@ describe('Performance', () => {
 
   afterEach(async () => {
     if (server) {
-      server.stop()
-      // Wait longer for connections to close after heavy load
-      await new Promise(resolve => setTimeout(resolve, 200))
-      server = undefined as any
+      await new Promise<void>((resolve) => {
+        server.close(() => {
+          // Wait longer for connections to close after heavy load
+          setTimeout(resolve, 200)
+        })
+      })
     }
   })
 
   it('handles sustained load with memory store (no errors)', async () => {
-    server = Bun.serve({
-      port: 0,
-      fetch: hitlimit(
-        {
-          limit: 100000,
-          window: '1m',
-          store: memoryStore(),
-          key: (req) => {
-            // Distribute across multiple keys to simulate real traffic
-            const url = new URL(req.url)
-            return url.searchParams.get('id') || 'default'
-          }
-        },
-        () => new Response('OK')
-      )
-    })
+    app = express()
+    app.use(hitlimit({
+      limit: 100000,
+      window: '1m',
+      store: memoryStore(),
+      key: (req) => {
+        // Distribute across multiple keys to simulate real traffic
+        return req.query.id as string || 'default'
+      }
+    }))
+    app.get('/', (_req, res) => res.send('OK'))
 
-    const url = `http://localhost:${server.port}`
+    await new Promise<void>((resolve) => {
+      server = app.listen(0, () => resolve())
+    })
+    port = (server.address() as { port: number }).port
+    const url = `http://localhost:${port}/?id=user-1`
 
     // Warmup: ensure server is ready
     await fetchWithTimeout(url)
     await new Promise(resolve => setTimeout(resolve, 50))
 
     // Test: 10k requests in batches of 50 (200 batches)
-    const { results, errors, avgLatency } = await runBatchedLoad(
-      url + '?id=user-1',
-      10000,
-      50
-    )
+    const { results, errors, avgLatency } = await runBatchedLoad(url, 10000, 50)
 
     // Assertions: zero errors, all successful
     expect(errors).toBe(0)
@@ -120,33 +138,28 @@ describe('Performance', () => {
   }, { timeout: 15000 })
 
   it('handles sustained load with sqlite store (no errors)', async () => {
-    server = Bun.serve({
-      port: 0,
-      fetch: hitlimit(
-        {
-          limit: 100000,
-          window: '1m',
-          key: (req) => {
-            const url = new URL(req.url)
-            return url.searchParams.get('id') || 'default'
-          }
-        },
-        () => new Response('OK')
-      )
-    })
+    app = express()
+    app.use(hitlimit({
+      limit: 100000,
+      window: '1m',
+      key: (req) => {
+        return req.query.id as string || 'default'
+      }
+    }))
+    app.get('/', (_req, res) => res.send('OK'))
 
-    const url = `http://localhost:${server.port}`
+    await new Promise<void>((resolve) => {
+      server = app.listen(0, () => resolve())
+    })
+    port = (server.address() as { port: number }).port
+    const url = `http://localhost:${port}/?id=user-2`
 
     // Warmup
     await fetchWithTimeout(url)
     await new Promise(resolve => setTimeout(resolve, 50))
 
     // Test: 10k requests in batches of 50
-    const { results, errors, avgLatency } = await runBatchedLoad(
-      url + '?id=user-2',
-      10000,
-      50
-    )
+    const { results, errors, avgLatency } = await runBatchedLoad(url, 10000, 50)
 
     // Assertions
     expect(errors).toBe(0)
@@ -168,34 +181,29 @@ describe('Performance', () => {
       keyPrefix: `hitlimit:perf:${Date.now()}:`
     })
 
-    server = Bun.serve({
-      port: 0,
-      fetch: hitlimit(
-        {
-          limit: 100000,
-          window: '1m',
-          store,
-          key: (req) => {
-            const url = new URL(req.url)
-            return url.searchParams.get('id') || 'default'
-          }
-        },
-        () => new Response('OK')
-      )
-    })
+    app = express()
+    app.use(hitlimit({
+      limit: 100000,
+      window: '1m',
+      store,
+      key: (req) => {
+        return req.query.id as string || 'default'
+      }
+    }))
+    app.get('/', (_req, res) => res.send('OK'))
 
-    const url = `http://localhost:${server.port}`
+    await new Promise<void>((resolve) => {
+      server = app.listen(0, () => resolve())
+    })
+    port = (server.address() as { port: number }).port
+    const url = `http://localhost:${port}/?id=user-3`
 
     // Warmup
     await fetchWithTimeout(url)
     await new Promise(resolve => setTimeout(resolve, 50))
 
     // Test: 10k requests in batches of 50
-    const { results, errors, avgLatency } = await runBatchedLoad(
-      url + '?id=user-3',
-      10000,
-      50
-    )
+    const { results, errors, avgLatency } = await runBatchedLoad(url, 10000, 50)
 
     // Assertions
     expect(errors).toBe(0)
@@ -211,24 +219,25 @@ describe('Performance', () => {
 
   it('correctly enforces rate limits under load', async () => {
     const limit = 100
-    server = Bun.serve({
-      port: 0,
-      fetch: hitlimit(
-        {
-          limit,
-          window: '1m',
-          store: memoryStore(),
-          key: () => 'rate-limit-test'
-        },
-        () => new Response('OK')
-      )
-    })
 
-    const url = `http://localhost:${server.port}`
+    app = express()
+    app.use(hitlimit({
+      limit,
+      window: '1m',
+      store: memoryStore(),
+      key: () => 'rate-limit-test'
+    }))
+    app.get('/', (_req, res) => res.send('OK'))
+
+    await new Promise<void>((resolve) => {
+      server = app.listen(0, () => resolve())
+    })
+    port = (server.address() as { port: number }).port
+    const url = `http://localhost:${port}`
 
     // Send limit + 50 requests rapidly (in batches of 25)
     const totalRequests = limit + 50
-    const results: Response[] = []
+    const results: FetchResponse[] = []
 
     for (let i = 0; i < Math.ceil(totalRequests / 25); i++) {
       const batchSize = Math.min(25, totalRequests - i * 25)
@@ -250,37 +259,36 @@ describe('Performance', () => {
   }, { timeout: 10000 })
 
   it('handles multi-key load distribution', async () => {
-    const keysCount = 50  // Reduced from 100
-    const requestsPerKey = 40  // Reduced from 50
-    const keyBatchSize = 10  // Process 10 keys in parallel
+    const keysCount = 50
+    const requestsPerKey = 40
+    const keyBatchSize = 10 // Process 10 keys in parallel
 
-    server = Bun.serve({
-      port: 0,
-      fetch: hitlimit(
-        {
-          limit: 1000,
-          window: '1m',
-          store: memoryStore(),
-          key: (req) => {
-            const url = new URL(req.url)
-            return url.searchParams.get('key') || 'default'
-          }
-        },
-        () => new Response('OK')
-      )
+    app = express()
+    app.use(hitlimit({
+      limit: 1000,
+      window: '1m',
+      store: memoryStore(),
+      key: (req) => {
+        return req.query.key as string || 'default'
+      }
+    }))
+    app.get('/', (_req, res) => res.send('OK'))
+
+    await new Promise<void>((resolve) => {
+      server = app.listen(0, () => resolve())
     })
-
-    const url = `http://localhost:${server.port}`
+    port = (server.address() as { port: number }).port
+    const baseUrl = `http://localhost:${port}`
 
     // Send requests distributed across keys, processing multiple keys in parallel
-    const results: Response[] = []
+    const results: FetchResponse[] = []
 
     for (let batchStart = 0; batchStart < keysCount; batchStart += keyBatchSize) {
       const batchEnd = Math.min(batchStart + keyBatchSize, keysCount)
       const keyBatches = []
 
       for (let keyId = batchStart; keyId < batchEnd; keyId++) {
-        const keyUrl = `${url}?key=user-${keyId}`
+        const keyUrl = `${baseUrl}/?key=user-${keyId}`
         keyBatches.push(
           Promise.all(
             Array.from({ length: requestsPerKey }, () => fetchWithTimeout(keyUrl))

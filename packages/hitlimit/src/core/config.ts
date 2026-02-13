@@ -25,6 +25,10 @@ export function resolveConfig<TRequest>(
     },
     store: options.store ?? defaultStore,
     onStoreError: options.onStoreError ?? (() => 'allow'),
-    skip: options.skip
+    skip: options.skip,
+    ban: options.ban
+      ? { threshold: options.ban.threshold, durationMs: parseWindow(options.ban.duration) }
+      : null,
+    group: options.group ?? null
   }
 }

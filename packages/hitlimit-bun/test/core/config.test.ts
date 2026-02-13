@@ -105,4 +105,35 @@ describe('resolveConfig', () => {
       message: 'Whoa there! Rate limit exceeded.'
     })
   })
+
+  it('resolves ban config', () => {
+    const config = resolveConfig({ ban: { threshold: 5, duration: '1h' } }, mockStore, defaultKey)
+
+    expect(config.ban).toEqual({ threshold: 5, durationMs: 3600000 })
+  })
+
+  it('ban is null when not configured', () => {
+    const config = resolveConfig({}, mockStore, defaultKey)
+
+    expect(config.ban).toBeNull()
+  })
+
+  it('preserves group string', () => {
+    const config = resolveConfig({ group: 'api' }, mockStore, defaultKey)
+
+    expect(config.group).toBe('api')
+  })
+
+  it('preserves group function', () => {
+    const groupFn = () => 'dynamic'
+    const config = resolveConfig({ group: groupFn }, mockStore, defaultKey)
+
+    expect(config.group).toBe(groupFn)
+  })
+
+  it('group is null when not configured', () => {
+    const config = resolveConfig({}, mockStore, defaultKey)
+
+    expect(config.group).toBeNull()
+  })
 })

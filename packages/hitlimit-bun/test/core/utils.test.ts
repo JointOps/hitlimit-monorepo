@@ -27,6 +27,34 @@ describe('parseWindow', () => {
     expect(parseWindow(60000)).toBe(60000)
   })
 
+  it('handles zero values', () => {
+    expect(parseWindow(0)).toBe(0)
+    expect(parseWindow('0s')).toBe(0)
+    expect(parseWindow('0m')).toBe(0)
+  })
+
+  it('handles large values', () => {
+    expect(parseWindow(2147483647)).toBe(2147483647)
+    expect(parseWindow('999999s')).toBe(999999000)
+    expect(parseWindow('365d')).toBe(31536000000)
+  })
+
+  it('handles decimal in number passthrough', () => {
+    expect(parseWindow(1500.5)).toBe(1500.5)
+    expect(parseWindow(60000.99)).toBe(60000.99)
+  })
+
+  it('passes through negative numbers', () => {
+    expect(parseWindow(-100)).toBe(-100)
+    expect(parseWindow(-5000)).toBe(-5000)
+  })
+
+  it('handles leading zeros', () => {
+    expect(parseWindow('01s')).toBe(1000)
+    expect(parseWindow('005m')).toBe(300000)
+    expect(parseWindow('0010h')).toBe(36000000)
+  })
+
   it('throws on invalid format', () => {
     expect(() => parseWindow('invalid')).toThrow()
     expect(() => parseWindow('10x')).toThrow()

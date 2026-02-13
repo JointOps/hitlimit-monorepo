@@ -15,6 +15,8 @@ const createConfig = (overrides: Partial<ResolvedConfig<any>> = {}): ResolvedCon
   headers: { standard: true, legacy: true, retryAfter: true },
   store: createMockStore(1, Date.now() + 60000),
   onStoreError: () => 'allow',
+  ban: null,
+  group: null,
   ...overrides
 })
 
@@ -151,5 +153,215 @@ describe('checkLimit', () => {
     await checkLimit(config, {})
 
     expect(store.hit).toHaveBeenCalledWith(expect.any(String), 3600000, 100)
+  })
+
+  it('uses default limit when tier not found', async () => {
+    const config = createConfig({
+      limit: 100,
+      tiers: { free: { limit: 10 }, pro: { limit: 100 } },
+      tier: () => 'enterprise',
+      store: createMockStore(1, Date.now() + 60000)
+    })
+
+    const result = await checkLimit(config, {})
+
+    expect(result.info.limit).toBe(100)
+    expect(result.info.tier).toBe('enterprise')
+  })
+
+  it('includes body only when blocked', async () => {
+    const allowedConfig = createConfig({
+      store: createMockStore(1, Date.now() + 60000)
+    })
+    const blockedConfig = createConfig({
+      limit: 5,
+      store: createMockStore(6, Date.now() + 60000)
+    })
+
+    const allowedResult = await checkLimit(allowedConfig, {})
+    const blockedResult = await checkLimit(blockedConfig, {})
+
+    expect(allowedResult.body).toEqual({})
+    expect(blockedResult.body).toHaveProperty('hitlimit')
+    expect(blockedResult.body).toHaveProperty('message')
+  })
+
+  it('handles exact limit boundary', async () => {
+    const config = createConfig({
+      limit: 10,
+      store: createMockStore(10, Date.now() + 60000)
+    })
+
+    const result = await checkLimit(config, {})
+
+    expect(result.allowed).toBe(true)
+    expect(result.info.remaining).toBe(0)
+  })
+
+  it('blocks at limit + 1', async () => {
+    const config = createConfig({
+      limit: 10,
+      store: createMockStore(11, Date.now() + 60000)
+    })
+
+    const result = await checkLimit(config, {})
+
+    expect(result.allowed).toBe(false)
+    expect(result.info.remaining).toBe(0)
+  })
+
+  describe('ban support', () => {
+    it('blocks banned users before hitting store', async () => {
+      const store: HitLimitStore = {
+        hit: vi.fn().mockReturnValue({ count: 1, resetAt: Date.now() + 60000 }),
+        reset: vi.fn(),
+        isBanned: vi.fn().mockReturnValue(true),
+        ban: vi.fn(),
+        recordViolation: vi.fn()
+      }
+      const config = createConfig({
+        store,
+        ban: { threshold: 3, durationMs: 3600000 }
+      })
+
+      const result = await checkLimit(config, {})
+
+      expect(result.allowed).toBe(false)
+      expect(result.info.banned).toBe(true)
+      expect(result.info.banExpiresAt).toBeDefined()
+      expect(result.headers['X-RateLimit-Ban']).toBe('true')
+      expect(store.hit).not.toHaveBeenCalled()
+    })
+
+    it('records violation on rate limit exceeded', async () => {
+      const recordViolation = vi.fn().mockReturnValue(1)
+      const store: HitLimitStore = {
+        hit: vi.fn().mockReturnValue({ count: 11, resetAt: Date.now() + 60000 }),
+        reset: vi.fn(),
+        isBanned: vi.fn().mockReturnValue(false),
+        ban: vi.fn(),
+        recordViolation
+      }
+      const config = createConfig({
+        limit: 10,
+        store,
+        ban: { threshold: 3, durationMs: 3600000 }
+      })
+
+      const result = await checkLimit(config, {})
+
+      expect(result.allowed).toBe(false)
+      expect(recordViolation).toHaveBeenCalled()
+      expect(result.info.violations).toBe(1)
+    })
+
+    it('bans user after threshold violations', async () => {
+      const banFn = vi.fn()
+      const store: HitLimitStore = {
+        hit: vi.fn().mockReturnValue({ count: 11, resetAt: Date.now() + 60000 }),
+        reset: vi.fn(),
+        isBanned: vi.fn().mockReturnValue(false),
+        ban: banFn,
+        recordViolation: vi.fn().mockReturnValue(3)
+      }
+      const config = createConfig({
+        limit: 10,
+        store,
+        ban: { threshold: 3, durationMs: 3600000 }
+      })
+
+      const result = await checkLimit(config, {})
+
+      expect(banFn).toHaveBeenCalledWith('test-key', 3600000)
+      expect(result.info.banned).toBe(true)
+    })
+
+    it('does not ban when violations under threshold', async () => {
+      const banFn = vi.fn()
+      const store: HitLimitStore = {
+        hit: vi.fn().mockReturnValue({ count: 11, resetAt: Date.now() + 60000 }),
+        reset: vi.fn(),
+        isBanned: vi.fn().mockReturnValue(false),
+        ban: banFn,
+        recordViolation: vi.fn().mockReturnValue(2)
+      }
+      const config = createConfig({
+        limit: 10,
+        store,
+        ban: { threshold: 3, durationMs: 3600000 }
+      })
+
+      await checkLimit(config, {})
+
+      expect(banFn).not.toHaveBeenCalled()
+    })
+
+    it('skips ban logic when ban not configured', async () => {
+      const store: HitLimitStore = {
+        hit: vi.fn().mockReturnValue({ count: 11, resetAt: Date.now() + 60000 }),
+        reset: vi.fn(),
+        isBanned: vi.fn(),
+        recordViolation: vi.fn()
+      }
+      const config = createConfig({
+        limit: 10,
+        store,
+        ban: null
+      })
+
+      await checkLimit(config, {})
+
+      expect(store.isBanned).not.toHaveBeenCalled()
+      expect(store.recordViolation).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('group support', () => {
+    it('prefixes key with static group', async () => {
+      const store: HitLimitStore = {
+        hit: vi.fn().mockReturnValue({ count: 1, resetAt: Date.now() + 60000 }),
+        reset: vi.fn()
+      }
+      const config = createConfig({
+        store,
+        group: 'api'
+      })
+
+      const result = await checkLimit(config, {})
+
+      expect(store.hit).toHaveBeenCalledWith('group:api:test-key', 60000, 100)
+      expect(result.info.group).toBe('api')
+    })
+
+    it('prefixes key with dynamic group', async () => {
+      const store: HitLimitStore = {
+        hit: vi.fn().mockReturnValue({ count: 1, resetAt: Date.now() + 60000 }),
+        reset: vi.fn()
+      }
+      const config = createConfig({
+        store,
+        group: (req: any) => req.tenant
+      })
+
+      const result = await checkLimit(config, { tenant: 'acme' })
+
+      expect(store.hit).toHaveBeenCalledWith('group:acme:test-key', 60000, 100)
+      expect(result.info.group).toBe('acme')
+    })
+
+    it('does not prefix key when group is null', async () => {
+      const store: HitLimitStore = {
+        hit: vi.fn().mockReturnValue({ count: 1, resetAt: Date.now() + 60000 }),
+        reset: vi.fn()
+      }
+      const config = createConfig({
+        store,
+        group: null
+      })
+
+      await checkLimit(config, {})
+
+      expect(store.hit).toHaveBeenCalledWith('test-key', 60000, 100)
+    })
   })
 })

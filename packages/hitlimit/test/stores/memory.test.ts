@@ -71,4 +71,54 @@ describe('MemoryStore', () => {
     const result = store.hit('key1', 60000, 100)
     expect(result.count).toBe(1)
   })
+
+  describe('ban methods', () => {
+    it('isBanned returns false by default', () => {
+      expect(store.isBanned!('key1')).toBe(false)
+    })
+
+    it('ban + isBanned works', () => {
+      store.ban!('key1', 60000)
+      expect(store.isBanned!('key1')).toBe(true)
+    })
+
+    it('ban expires', async () => {
+      store.ban!('key1', 100)
+      expect(store.isBanned!('key1')).toBe(true)
+
+      await new Promise(resolve => setTimeout(resolve, 150))
+
+      expect(store.isBanned!('key1')).toBe(false)
+    })
+
+    it('reset clears ban', () => {
+      store.ban!('key1', 60000)
+      store.reset('key1')
+      expect(store.isBanned!('key1')).toBe(false)
+    })
+  })
+
+  describe('violation methods', () => {
+    it('recordViolation increments count', () => {
+      expect(store.recordViolation!('key1', 60000)).toBe(1)
+      expect(store.recordViolation!('key1', 60000)).toBe(2)
+      expect(store.recordViolation!('key1', 60000)).toBe(3)
+    })
+
+    it('violation window resets after expiry', async () => {
+      store.recordViolation!('key1', 100)
+      store.recordViolation!('key1', 100)
+
+      await new Promise(resolve => setTimeout(resolve, 150))
+
+      expect(store.recordViolation!('key1', 100)).toBe(1)
+    })
+
+    it('reset clears violations', () => {
+      store.recordViolation!('key1', 60000)
+      store.recordViolation!('key1', 60000)
+      store.reset('key1')
+      expect(store.recordViolation!('key1', 60000)).toBe(1)
+    })
+  })
 })

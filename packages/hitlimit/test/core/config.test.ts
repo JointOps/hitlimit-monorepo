@@ -29,6 +29,19 @@ describe('resolveConfig', () => {
     expect(config.windowMs).toBe(900000)
   })
 
+  it('handles numeric window values', () => {
+    const config = resolveConfig({ window: 120000 }, mockStore, defaultKey)
+
+    expect(config.windowMs).toBe(120000)
+  })
+
+  it('handles all window formats', () => {
+    expect(resolveConfig({ window: '30s' }, mockStore, defaultKey).windowMs).toBe(30000)
+    expect(resolveConfig({ window: '5m' }, mockStore, defaultKey).windowMs).toBe(300000)
+    expect(resolveConfig({ window: '2h' }, mockStore, defaultKey).windowMs).toBe(7200000)
+    expect(resolveConfig({ window: '1d' }, mockStore, defaultKey).windowMs).toBe(86400000)
+  })
+
   it('uses custom key function', () => {
     const customKey = () => 'custom-key'
     const config = resolveConfig({ key: customKey }, mockStore, defaultKey)
@@ -84,5 +97,36 @@ describe('resolveConfig', () => {
     const config = resolveConfig({ skip }, mockStore, defaultKey)
 
     expect(config.skip).toBe(skip)
+  })
+
+  it('resolves ban config', () => {
+    const config = resolveConfig({ ban: { threshold: 5, duration: '1h' } }, mockStore, defaultKey)
+
+    expect(config.ban).toEqual({ threshold: 5, durationMs: 3600000 })
+  })
+
+  it('ban is null when not configured', () => {
+    const config = resolveConfig({}, mockStore, defaultKey)
+
+    expect(config.ban).toBeNull()
+  })
+
+  it('preserves group string', () => {
+    const config = resolveConfig({ group: 'api' }, mockStore, defaultKey)
+
+    expect(config.group).toBe('api')
+  })
+
+  it('preserves group function', () => {
+    const groupFn = () => 'dynamic'
+    const config = resolveConfig({ group: groupFn }, mockStore, defaultKey)
+
+    expect(config.group).toBe(groupFn)
+  })
+
+  it('group is null when not configured', () => {
+    const config = resolveConfig({}, mockStore, defaultKey)
+
+    expect(config.group).toBeNull()
   })
 })

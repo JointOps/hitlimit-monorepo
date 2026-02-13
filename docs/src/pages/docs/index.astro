@@ -105,18 +105,18 @@ app.<span class="fn">listen</span>(<span class="num">3000</span>)</code></pre>
       <tbody>
         <tr>
           <td><strong>Memory</strong></td>
-          <td class="highlight">200K req/s</td>
-          <td>0.1ms</td>
+          <td class="highlight">2.5M ops/s</td>
+          <td>0.3μs (p95: 0.4μs)</td>
         </tr>
         <tr>
           <td><strong>SQLite</strong></td>
-          <td class="highlight">180K req/s</td>
-          <td>0.15ms</td>
+          <td class="highlight">400K ops/s</td>
+          <td>2.5μs (p95: 2.7μs)</td>
         </tr>
         <tr>
           <td><strong>Redis</strong></td>
-          <td class="highlight">95K req/s</td>
-          <td>0.45ms</td>
+          <td class="highlight">6.7K ops/s</td>
+          <td>150μs (network-bound)</td>
         </tr>
       </tbody>
     </table>

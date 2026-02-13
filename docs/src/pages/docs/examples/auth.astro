@@ -195,6 +195,34 @@ router.<span class="fn">post</span>(<span class="str">'/token/refresh'</span>, l
     <li><strong>5 2FA attempts:</strong> Allows human error but prevents brute forcing 6-digit codes</li>
   </ul>
 
+  <h2 id="auto-ban">Auto-Ban Repeat Offenders</h2>
+
+  <p>For enhanced protection, automatically ban IPs that violate rate limits repeatedly:</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Login with Auto-Ban</span></div>
+    <pre><code><span class="kw">export const</span> loginWithBan = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">5</span>,
+  window: <span class="str">'5m'</span>,
+  key: (req) => <span class="str">`login:</span>${"{"}req.body.email{"}"}<span class="str">:</span>${"{"}req.ip{"}"}<span class="str">`</span>,
+  ban: {"{"}
+    threshold: <span class="num">3</span>,      <span class="cm">// Ban after 3 rate limit violations</span>
+    duration: <span class="str">'30m'</span>    <span class="cm">// Ban for 30 minutes</span>
+  {"}"},
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})
+
+<span class="cm">// Usage</span>
+app.<span class="fn">post</span>(<span class="str">'/login'</span>, loginWithBan, authController.login)</code></pre>
+  </div>
+
+  <p>
+    This creates a two-tier defense: normal users who exceed the limit wait for the rate limit window to reset,
+    but attackers who repeatedly trigger rate limits get banned for longer periods. During a ban, all requests
+    return 429 immediately without hitting your authentication logic.
+  </p>
+
 </DocsLayout>
 
 <style>

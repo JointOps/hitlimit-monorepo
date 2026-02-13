@@ -1,3 +1,10 @@
+export interface BanConfig {
+  /** Number of rate limit violations before triggering a ban */
+  threshold: number
+  /** How long the ban lasts. Human-readable string ('1h', '30m') or milliseconds */
+  duration: string | number
+}
+
 export interface HitLimitOptions<TRequest = any> {
   limit?: number
   window?: string | number
@@ -10,6 +17,10 @@ export interface HitLimitOptions<TRequest = any> {
   onStoreError?: StoreErrorHandler<TRequest>
   skip?: SkipFunction<TRequest>
   logger?: HitLimitLogger
+  /** Ban configuration. IPs that exceed the rate limit `threshold` times get banned for `duration`. */
+  ban?: BanConfig
+  /** Group identifier for shared rate limits. Static string or function that resolves per-request. */
+  group?: string | GroupIdResolver<TRequest>
 }
 
 export interface TierConfig {
@@ -24,6 +35,14 @@ export interface HitLimitInfo {
   resetAt: number
   key: string
   tier?: string
+  /** Whether this key is currently banned */
+  banned?: boolean
+  /** When the ban expires (ms timestamp), if banned */
+  banExpiresAt?: number
+  /** Current violation count in the current window */
+  violations?: number
+  /** Group ID if using grouped limits */
+  group?: string
 }
 
 export interface HitLimitResult {
@@ -33,10 +52,24 @@ export interface HitLimitResult {
   body: Record<string, any>
 }
 
+export interface FastResult {
+  allowed: boolean
+  limit: number
+  remaining: number
+  resetIn: number
+  resetAt: number
+}
+
 export interface HitLimitStore {
   hit(key: string, windowMs: number, limit: number): Promise<StoreResult> | StoreResult
   reset(key: string): Promise<void> | void
   shutdown?(): Promise<void> | void
+  /** Check if a key is currently banned. Returns false if ban is not supported. */
+  isBanned?(key: string): Promise<boolean> | boolean
+  /** Ban a key for the given duration in milliseconds. */
+  ban?(key: string, durationMs: number): Promise<void> | void
+  /** Record a violation and return the current violation count within the window. */
+  recordViolation?(key: string, windowMs: number): Promise<number> | number
 }
 
 export interface StoreResult {
@@ -97,11 +130,14 @@ export interface ResolvedConfig<TRequest = any> {
   onStoreError: StoreErrorHandler<TRequest>
   skip?: SkipFunction<TRequest>
   logger?: HitLimitLogger
+  ban: { threshold: number; durationMs: number } | null
+  group: string | GroupIdResolver<TRequest> | null
 }
 
 export type KeyGenerator<TRequest = any> = (req: TRequest) => string | Promise<string>
 export type TierResolver<TRequest = any> = (req: TRequest) => string | Promise<string>
 export type SkipFunction<TRequest = any> = (req: TRequest) => boolean | Promise<boolean>
+export type GroupIdResolver<TRequest = any> = (req: TRequest) => string | Promise<string>
 export type StoreErrorHandler<TRequest = any> = (error: Error, req: TRequest) => 'allow' | 'deny' | Promise<'allow' | 'deny'>
 export type ResponseFormatter = (info: HitLimitInfo) => Record<string, any>
 export type ResponseConfig = Record<string, any>

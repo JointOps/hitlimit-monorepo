@@ -86,15 +86,15 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <tbody>
       <tr class="winner">
         <td>rate-limiter-flexible</td>
-        <td>3.34M</td>
+        <td>3.24M</td>
         <td>300ns</td>
         <td><strong>fastest</strong></td>
       </tr>
       <tr>
         <td>hitlimit</td>
-        <td>3.13M</td>
+        <td>3.14M</td>
         <td>319ns</td>
-        <td>94%</td>
+        <td>97%</td>
       </tr>
       <tr>
         <td>express-rate-limit</td>
@@ -120,28 +120,28 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <tbody>
       <tr class="winner hitlimit-win">
         <td><strong>hitlimit</strong></td>
-        <td><strong>2.32M</strong></td>
-        <td>431ns</td>
+        <td><strong>2.45M</strong></td>
+        <td>408ns</td>
         <td><strong>fastest</strong></td>
       </tr>
       <tr>
         <td>rate-limiter-flexible</td>
-        <td>1.63M</td>
-        <td>614ns</td>
-        <td>70%</td>
+        <td>1.84M</td>
+        <td>543ns</td>
+        <td>75%</td>
       </tr>
       <tr>
         <td>express-rate-limit</td>
-        <td>1.22M</td>
-        <td>818ns</td>
-        <td>53%</td>
+        <td>1.21M</td>
+        <td>825ns</td>
+        <td>49%</td>
       </tr>
     </tbody>
   </table>
 
   <div class="callout">
     <strong>Key Insight:</strong> hitlimit uses setTimeout-based cleanup which scales better with many unique keys.
-    For high-traffic APIs, hitlimit is 42% faster than rate-limiter-flexible.
+    For high-traffic APIs, hitlimit is 33% faster than rate-limiter-flexible.
   </div>
 
   <h2 id="sqlite-store">SQLite Store</h2>
@@ -152,7 +152,7 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <div class="benchmark-header">SQLite Store (Node.js)</div>
     <div class="benchmark-stats">
       <div class="stat">
-        <span class="stat-value">400K</span>
+        <span class="stat-value">390-462K</span>
         <span class="stat-label">ops/sec</span>
       </div>
       <div class="stat">
