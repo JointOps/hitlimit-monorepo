@@ -6,118 +6,271 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   title="404 - Page Not Found | hitlimit"
   description="The page you're looking for doesn't exist. Find rate limiting documentation, guides, and API references for hitlimit."
 >
-  <section class="min-h-[70vh] flex items-center justify-center px-4">
-    <div class="text-center max-w-2xl mx-auto">
-      <!-- 404 Icon -->
-      <div class="mb-8 animate-bounce-slow">
-        <div class="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-[var(--color-accent)]/20 to-[var(--color-accent-secondary)]/20 border border-[var(--color-border)]">
-          <svg class="w-16 h-16 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+  <section class="error-page">
+    <div class="error-container">
+      <!-- Animated 429 → 404 -->
+      <div class="error-code-wrapper">
+        <div class="error-code">
+          <span class="gradient-text">429</span>
+        </div>
+        <div class="error-subtitle joke">
+          Just kidding, it's actually <strong>404</strong>
         </div>
       </div>
 
-      <!-- Error Message -->
-      <h1 class="text-6xl sm:text-8xl font-black tracking-tight mb-4">
-        <span class="gradient-text">429</span>
-        <span class="text-[var(--color-text-muted)] text-4xl sm:text-5xl block mt-2">Just kidding, it's 404</span>
-      </h1>
-
-      <p class="text-xl text-[var(--color-text-secondary)] mb-8">
-        Looks like this page hit its limit. The page you're looking for doesn't exist or has been moved.
+      <!-- Description -->
+      <p class="error-description">
+        Looks like this page doesn't exist or has been moved.<br/>
+        Let's get you back on track.
       </p>
 
-      <!-- Quick Links -->
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-        <a
-          href="/"
-          class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-secondary)] text-black font-semibold text-lg transition-all duration-300 hover:shadow-[0_0_40px_rgba(0,229,255,0.5)] hover:-translate-y-1 flex items-center justify-center gap-2"
-        >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <a href="/" class="btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 22V12h6v10" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           Go Home
         </a>
-        <a
-          href="/docs/quick-start"
-          class="w-full sm:w-auto px-8 py-4 rounded-xl border border-[var(--color-border)] text-white font-semibold text-lg transition-all duration-300 hover:bg-white/5 hover:border-[var(--color-border-hover)] flex items-center justify-center gap-2"
-        >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="/docs" class="btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Read Docs
+          Documentation
         </a>
       </div>
 
-      <!-- Popular Pages -->
-      <div class="text-left p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)]">
-        <h2 class="text-lg font-semibold text-white mb-4">Popular Pages</h2>
-        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <li>
-            <a href="/docs" class="flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
-              <svg class="w-4 h-4 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Documentation
-            </a>
-          </li>
-          <li>
-            <a href="/docs/installation" class="flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
-              <svg class="w-4 h-4 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Installation
-            </a>
-          </li>
-          <li>
-            <a href="/docs/configuration/options" class="flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
-              <svg class="w-4 h-4 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Configuration
-            </a>
-          </li>
-          <li>
-            <a href="/docs/api/hitlimit" class="flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
-              <svg class="w-4 h-4 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              API Reference
-            </a>
-          </li>
-          <li>
-            <a href="/docs/adapters/express" class="flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
-              <svg class="w-4 h-4 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Express Adapter
-            </a>
-          </li>
-          <li>
-            <a href="/docs/benchmarks" class="flex items-center gap-2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
-              <svg class="w-4 h-4 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Benchmarks
-            </a>
-          </li>
-        </ul>
+      <!-- Quick Links -->
+      <div class="quick-links">
+        <h3>Popular Pages</h3>
+        <div class="links-grid">
+          <a href="/docs/quick-start">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Quick Start
+          </a>
+          <a href="/docs/installation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Installation
+          </a>
+          <a href="/docs/adapters/express">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Express
+          </a>
+          <a href="/docs/adapters/fastify">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Fastify
+          </a>
+          <a href="/docs/benchmarks">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Benchmarks
+          </a>
+          <a href="/docs/examples">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Examples
+          </a>
+        </div>
       </div>
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  @keyframes bounce-slow {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
+  .error-page {
+    min-height: 75vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    padding-top: 5rem; /* Account for fixed navbar */
+  }
+
+  .error-container {
+    max-width: 48rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .error-code-wrapper {
+    margin-bottom: 2rem;
+  }
+
+  .error-code {
+    font-size: 8rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .error-code {
+      font-size: 5rem;
     }
   }
 
-  .animate-bounce-slow {
-    animation: bounce-slow 3s ease-in-out infinite;
+  .error-subtitle {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    letter-spacing: -0.02em;
+  }
+
+  .error-subtitle.joke {
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+
+  .error-subtitle.joke strong {
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  @media (max-width: 640px) {
+    .error-subtitle {
+      font-size: 1.25rem;
+    }
+  }
+
+  .error-description {
+    font-size: 1.125rem;
+    line-height: 1.75;
+    color: var(--color-text-muted);
+    margin: 0 auto 2.5rem;
+    max-width: 32rem;
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 3rem;
+  }
+
+  @media (min-width: 640px) {
+    .action-buttons {
+      flex-direction: row;
+      justify-content: center;
+    }
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 1rem 2rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1.125rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    width: 100%;
+    justify-content: center;
+  }
+
+  @media (min-width: 640px) {
+    .btn-primary,
+    .btn-secondary {
+      width: auto;
+    }
+  }
+
+  .btn-primary svg,
+  .btn-secondary svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary));
+    color: #000;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+  }
+
+  .btn-secondary {
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: var(--color-bg-elevated);
+    border-color: var(--color-border-hover);
+  }
+
+  .quick-links {
+    margin-top: 3rem;
+    padding: 2rem;
+    border-radius: 1.25rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+  }
+
+  .quick-links h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: white;
+    margin: 0 0 1.5rem 0;
+    text-align: left;
+  }
+
+  .links-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .links-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .links-grid a {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.875rem 1rem;
+    border-radius: 0.625rem;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .links-grid a:hover {
+    color: white;
+    border-color: var(--color-accent);
+    background: rgba(0, 229, 255, 0.05);
+    transform: translateY(-2px);
+  }
+
+  .links-grid a svg {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    color: var(--color-accent);
   }
 </style>

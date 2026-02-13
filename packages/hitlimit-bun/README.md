@@ -33,6 +33,8 @@
 - **Zero Config** - Works out of the box with sensible defaults
 - **Elysia Plugin** - First-class Elysia framework integration
 - **TypeScript First** - Full type safety and IntelliSense support
+- **Auto-Ban** - Automatically ban repeat offenders after threshold violations
+- **Shared Limits** - Group rate limits via groupId for teams/tenants
 - **Tiny Footprint** - ~23KB total, zero runtime dependencies
 
 ## Installation

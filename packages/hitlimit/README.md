@@ -22,6 +22,8 @@
 - **TypeScript First** - Full type safety and IntelliSense support
 - **Flexible Keys** - Rate limit by IP, user ID, API key, or custom logic
 - **Tiered Limits** - Different limits for free/pro/enterprise users
+- **Auto-Ban** - Automatically ban repeat offenders after threshold violations
+- **Shared Limits** - Group rate limits via groupId for teams/tenants
 - **Standard Headers** - RFC-compliant RateLimit-* and X-RateLimit-* headers
 
 ## Performance
@@ -222,6 +224,37 @@ hitlimit({
   }
 })
 ```
+
+### Auto-Ban Repeat Offenders
+
+Automatically ban IPs that violate rate limits repeatedly.
+
+```javascript
+hitlimit({
+  limit: 100,
+  window: '1m',
+  ban: {
+    threshold: 5,      // Ban after 5 violations
+    duration: '15m'    // Ban for 15 minutes
+  }
+})
+```
+
+When a client exceeds the rate limit 5 times, they'll be banned for 15 minutes. During the ban, all requests return 429 immediately.
+
+### Shared Rate Limits (Group)
+
+Share rate limits across multiple clients using a group identifier.
+
+```javascript
+hitlimit({
+  limit: 10000,
+  window: '1h',
+  group: (req) => req.user.teamId  // Share limit across team
+})
+```
+
+All requests with the same team ID share the same rate limit counter. Perfect for team-based SaaS quotas.
 
 ### Skip Certain Requests
 

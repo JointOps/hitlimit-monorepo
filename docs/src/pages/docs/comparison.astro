@@ -122,10 +122,10 @@ const faqSchema = {
         </tr>
         <tr>
           <td>Memory Store (high-traffic)</td>
-          <td class="highlight-col good">2.3M ops/s</td>
-          <td>1.2M ops/s</td>
+          <td class="highlight-col good">2.45M ops/s</td>
+          <td>1.21M ops/s</td>
           <td>N/A</td>
-          <td>1.6M ops/s</td>
+          <td>1.84M ops/s</td>
           <td>N/A</td>
         </tr>
         <tr>
@@ -345,6 +345,8 @@ const faqSchema = {
   <div class="comparison-box">
     <h3>Choose hitlimit if you need:</h3>
     <ul>
+      <li>Auto-ban after threshold violations (new!)</li>
+      <li>Shared rate limits via groupId (new!)</li>
       <li>Built-in tiered rate limits (Free/Pro/Enterprise tiers in 8 lines)</li>
       <li>Per-request error handling (<code>onStoreError</code> callback)</li>
       <li>Built-in SQLite store for persistence without Redis</li>
@@ -356,7 +358,6 @@ const faqSchema = {
     <h3>Choose @fastify/rate-limit if you need:</h3>
     <ul>
       <li>Official Fastify team maintenance and support</li>
-      <li>Ban threshold for repeat offenders</li>
       <li>IP allowList built-in</li>
       <li>Fastify-only project (tighter integration)</li>
     </ul>
@@ -393,27 +394,27 @@ const faqSchema = {
       <div class="benchmark-bar hitlimit" style="width: 100%;"></div>
       <div class="benchmark-info">
         <span class="benchmark-name">hitlimit</span>
-        <span class="benchmark-value">2.32M ops/s</span>
+        <span class="benchmark-value">2.45M ops/s</span>
       </div>
     </div>
     <div class="benchmark-item">
-      <div class="benchmark-bar other" style="width: 70%;"></div>
+      <div class="benchmark-bar other" style="width: 75%;"></div>
       <div class="benchmark-info">
         <span class="benchmark-name">rate-limiter-flexible</span>
-        <span class="benchmark-value">1.63M ops/s</span>
+        <span class="benchmark-value">1.84M ops/s</span>
       </div>
     </div>
     <div class="benchmark-item">
-      <div class="benchmark-bar other" style="width: 53%;"></div>
+      <div class="benchmark-bar other" style="width: 49%;"></div>
       <div class="benchmark-info">
         <span class="benchmark-name">express-rate-limit</span>
-        <span class="benchmark-value">1.22M ops/s</span>
+        <span class="benchmark-value">1.21M ops/s</span>
       </div>
     </div>
   </div>
 
   <p class="benchmark-note">
-    Memory store, 10k unique keys. For single-IP scenarios, rate-limiter-flexible is slightly faster (3.34M vs 3.13M).
+    Memory store, 10k unique keys. For single-IP scenarios, rate-limiter-flexible is slightly faster (3.24M vs 3.14M).
     <a href="/docs/benchmarks">See full benchmarks</a>
   </p>
 
@@ -486,7 +487,7 @@ const faqSchema = {
           <td class="good">hitlimit - Tiered limits + multi-framework</td>
         </tr>
         <tr>
-          <td>Fastify-only, need ban/allowList</td>
+          <td>Fastify-only, need allowList</td>
           <td>@fastify/rate-limit - Official plugin, tighter integration</td>
         </tr>
         <tr>

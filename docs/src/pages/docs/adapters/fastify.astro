@@ -195,6 +195,44 @@ app.<span class="fn">register</span>(<span class="kw">async</span> (scope) => {"
 
   <p>See the <a href="/docs/comparison#vs-fastify-rate-limit">full comparison</a> for more details.</p>
 
+  <h2 id="advanced">Advanced: Ban + Group Features</h2>
+
+  <p>hitlimit supports auto-banning repeat offenders and shared rate limits across groups.</p>
+
+  <h3>Auto-Ban After Threshold Violations</h3>
+
+  <p>Automatically ban IPs that violate rate limits repeatedly:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">await</span> app.<span class="fn">register</span>(hitlimit, {"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  ban: {"{"}
+    threshold: <span class="num">5</span>,      <span class="cm">// Ban after 5 violations</span>
+    duration: <span class="str">'15m'</span>    <span class="cm">// Ban lasts 15 minutes</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <p>When a client exceeds the rate limit 5 times within the tracking window, they'll be banned for 15 minutes. During the ban, all requests return 429 immediately.</p>
+
+  <h3>Shared Rate Limits via GroupId</h3>
+
+  <p>Share rate limits across multiple clients using a group identifier:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">await</span> app.<span class="fn">register</span>(hitlimit, {"{"}
+  limit: <span class="num">1000</span>,
+  window: <span class="str">'1h'</span>,
+  group: (request) => {"{"}
+    <span class="cm">// Share limit across user's team</span>
+    <span class="kw">return</span> request.user?.teamId || request.user?.tier || <span class="str">'free'</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <p>All requests with the same group ID share the same rate limit counter. Perfect for team-based limits in SaaS applications.</p>
+
   <h2 id="next-steps">Next Steps</h2>
 
   <ul>
