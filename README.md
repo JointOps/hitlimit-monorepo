@@ -9,7 +9,7 @@
 
 High-performance, framework-agnostic rate limiting for Node.js and Bun. A faster, lighter alternative to express-rate-limit and rate-limiter-flexible.
 
-**[Documentation](https://hitlimit.jointops.dev)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)**
+**[Documentation](https://hitlimit.jointops.dev)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[Discussions](https://github.com/JointOps/hitlimit-monorepo/discussions)**
 
 ## Packages
 
@@ -59,6 +59,12 @@ new Elysia()
   .use(hitlimit({ limit: 100, window: '1m' }))
   .listen(3000)
 ```
+
+## Community
+
+- 💬 **[Discussions](https://github.com/JointOps/hitlimit-monorepo/discussions)** - Ask questions, share ideas, show off your projects
+- 🐛 **[Issues](https://github.com/JointOps/hitlimit-monorepo/issues)** - Report bugs and request features
+- 📖 **[Documentation](https://hitlimit.jointops.dev)** - Comprehensive guides and API reference
 
 ## Features
 

@@ -1,0 +1,107 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the information below to help us fix it.
+
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      description: Which package are you using?
+      options:
+        - "@joint-ops/hitlimit (Node.js)"
+        - "@joint-ops/hitlimit-bun (Bun)"
+        - "Documentation"
+        - "Other"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version are you using?
+      placeholder: "e.g., 1.0.6"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the bug
+      placeholder: What happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Install package
+        2. Configure with ...
+        3. Send request to ...
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: I expected...
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Code Example
+      description: Minimal code to reproduce the issue
+      render: typescript
+      placeholder: |
+        import { hitlimit } from '@joint-ops/hitlimit'
+
+        app.use(hitlimit({ limit: 100, window: '1m' }))
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Your environment details
+      placeholder: |
+        - OS: macOS 13.0
+        - Node.js: 20.10.0
+        - Bun: 1.3.6 (if using hitlimit-bun)
+        - Framework: Express 4.18.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs
+      description: Any error messages or logs
+      render: shell
+      placeholder: Paste error logs here
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context about the problem
+      placeholder: Add any other context here
+    validations:
+      required: false
