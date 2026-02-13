@@ -39,6 +39,58 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
     </tbody>
   </table>
 
+  <h2 id="ban-options">Ban Options</h2>
+
+  <p>Automatically ban clients that repeatedly exceed rate limits. After the configured number of violations, the client is blocked for the ban duration without consuming store hits.</p>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>ban.threshold</code></td><td>number</td><td>-</td><td>Number of rate limit violations before triggering a ban</td></tr>
+      <tr><td><code>ban.duration</code></td><td>string | number</td><td>-</td><td>How long the ban lasts (e.g., '1h', '30m', or milliseconds)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">10</span>,
+  window: <span class="str">'1m'</span>,
+  ban: {"{"}
+    threshold: <span class="num">5</span>,   <span class="cmt">// Ban after 5 violations</span>
+    duration: <span class="str">'1h'</span>    <span class="cmt">// Ban lasts 1 hour</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <p>When a client is banned, the response includes <code>X-RateLimit-Ban: true</code> and <code>X-RateLimit-Ban-Expires</code> headers, plus <code>banned: true</code> in the response body.</p>
+
+  <h2 id="group-options">Group Options</h2>
+
+  <p>Group multiple clients under a shared rate limit key prefix. Useful for per-API-key limits, per-tenant throttling, or per-organization quotas.</p>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>group</code></td><td>string | function</td><td>undefined</td><td>Static group name or function returning a group ID per request</td></tr>
+    </tbody>
+  </table>
+
+  <div class="code-block">
+    <pre><code><span class="cmt">// Static group — all keys prefixed with "api:"</span>
+<span class="fn">hitlimit</span>({"{"} group: <span class="str">'api'</span>, limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
+
+<span class="cmt">// Dynamic group — per API key</span>
+<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">1000</span>,
+  window: <span class="str">'1h'</span>,
+  group: (req) => req.headers[<span class="str">'x-api-key'</span>] || <span class="str">'anonymous'</span>
+{"}"})</code></pre>
+  </div>
+
   <h2 id="example">Full Example</h2>
 
   <div class="code-block">
@@ -50,7 +102,9 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   skip: (req) => req.path === <span class="str">'/health'</span>,
   headers: <span class="kw">true</span>,
   statusCode: <span class="num">429</span>,
-  response: {"{"} error: <span class="str">'Too many requests'</span> {"}"}
+  response: {"{"} error: <span class="str">'Too many requests'</span> {"}"},
+  ban: {"{"} threshold: <span class="num">5</span>, duration: <span class="str">'1h'</span> {"}"},
+  group: (req) => req.headers[<span class="str">'x-api-key'</span>] || <span class="str">'default'</span>
 {"}"})</code></pre>
   </div>
 </DocsLayout>
@@ -64,5 +118,5 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
   .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
   .code-block code { background: none !important; border: none !important; padding: 0 !important; }
-  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cmt { color: #75715e; }
 </style>
