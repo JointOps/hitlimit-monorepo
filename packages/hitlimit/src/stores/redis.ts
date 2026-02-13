@@ -9,10 +9,14 @@ export interface RedisStoreOptions {
 class RedisStore implements HitLimitStore {
   private redis: Redis
   private prefix: string
+  private banPrefix: string
+  private violationPrefix: string
 
   constructor(options: RedisStoreOptions = {}) {
     this.redis = new Redis(options.url ?? 'redis://localhost:6379')
     this.prefix = options.keyPrefix ?? 'hitlimit:'
+    this.banPrefix = (options.keyPrefix ?? 'hitlimit:') + 'ban:'
+    this.violationPrefix = (options.keyPrefix ?? 'hitlimit:') + 'violations:'
   }
 
   async hit(key: string, windowMs: number, _limit: number): Promise<StoreResult> {
@@ -38,8 +42,30 @@ class RedisStore implements HitLimitStore {
     return { count, resetAt }
   }
 
+  async isBanned(key: string): Promise<boolean> {
+    const result = await this.redis.exists(this.banPrefix + key)
+    return result === 1
+  }
+
+  async ban(key: string, durationMs: number): Promise<void> {
+    await this.redis.set(this.banPrefix + key, '1', 'PX', durationMs)
+  }
+
+  async recordViolation(key: string, windowMs: number): Promise<number> {
+    const redisKey = this.violationPrefix + key
+    const count = await this.redis.incr(redisKey)
+    if (count === 1) {
+      await this.redis.pexpire(redisKey, windowMs)
+    }
+    return count
+  }
+
   async reset(key: string): Promise<void> {
-    await this.redis.del(this.prefix + key)
+    await this.redis.del(
+      this.prefix + key,
+      this.banPrefix + key,
+      this.violationPrefix + key
+    )
   }
 
   async shutdown(): Promise<void> {
