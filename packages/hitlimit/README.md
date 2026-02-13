@@ -14,7 +14,7 @@
 
 ## Why hitlimit?
 
-- **Blazing Fast** - 400,000+ ops/sec with memory store, ~7% HTTP overhead
+- **Blazing Fast** - 2,450,000+ ops/sec with memory store (multi-IP scenarios), ~7% HTTP overhead
 - **Zero Config** - Works out of the box with sensible defaults
 - **Tiny Footprint** - Only ~7KB core, zero runtime dependencies
 - **Framework Agnostic** - Express, NestJS, Fastify, native HTTP
@@ -32,17 +32,17 @@ hitlimit is designed for speed. Here's how it performs:
 
 | Store | Operations/sec | Avg Latency | Use Case |
 |-------|----------------|-------------|----------|
-| **Memory** | 2,320,000+ | 0.43μs | Single instance, no persistence |
-| **SQLite** | 393,000+ | 2.54μs | Single instance, persistence needed |
+| **Memory** | 2,450,000+ | 0.41μs | Single instance, no persistence (multi-IP scenarios) |
+| **SQLite** | 390,000+ | 2.56μs | Single instance, persistence needed (multi-IP scenarios) |
 | **Redis** | 6,500+ | 153μs | Multi-instance, distributed |
 
 ### vs Competitors
 
 | Library | Memory 10K IPs (ops/s) | Bundle Size |
 |---------|------------------------|-------------|
-| **hitlimit** | **2,320,000** | **~7KB** |
-| rate-limiter-flexible | 1,630,000 | ~155KB |
-| express-rate-limit | 1,220,000 | ~66KB |
+| **hitlimit** | **2,450,000** | **~7KB** |
+| rate-limiter-flexible | 1,840,000 | ~155KB |
+| express-rate-limit | 1,210,000 | ~66KB |
 
 > **Note:** Benchmark results vary by hardware and environment. Run your own benchmarks to see results on your specific setup.
 
@@ -237,6 +237,39 @@ hitlimit({
 })
 ```
 
+### Auto-Ban Repeat Offenders
+
+Automatically ban clients that repeatedly exceed rate limits.
+
+```javascript
+hitlimit({
+  limit: 10,
+  window: '1m',
+  ban: {
+    threshold: 5,  // Ban after 5 violations
+    duration: '1h' // Ban lasts 1 hour
+  }
+})
+```
+
+Banned clients receive `X-RateLimit-Ban: true` header and `banned: true` in the response body.
+
+### Grouped / Shared Limits
+
+Rate limit by organization, API key, or any shared identifier.
+
+```javascript
+// Per-API-key rate limiting
+hitlimit({
+  limit: 1000,
+  window: '1h',
+  group: (req) => req.headers['x-api-key'] || 'anonymous'
+})
+
+// Static group prefix
+hitlimit({ group: 'api', limit: 100, window: '1m' })
+```
+
 ## Configuration Options
 
 ```javascript
@@ -276,7 +309,16 @@ hitlimit({
   skip: (req) => req.path === '/health',
 
   // Error handling
-  onStoreError: (error, req) => 'allow' // or 'deny'
+  onStoreError: (error, req) => 'allow', // or 'deny'
+
+  // Ban repeat offenders
+  ban: {
+    threshold: 5,    // violations before ban
+    duration: '1h'   // ban duration
+  },
+
+  // Group/shared limits
+  group: (req) => req.headers['x-api-key'] || 'default'
 })
 ```
 

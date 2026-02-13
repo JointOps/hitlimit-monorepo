@@ -19,17 +19,17 @@
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                 │
-│  bun:sqlite         ████████████████████████████  520,000 ops/s │
-│  better-sqlite3     ██████████████████░░░░░░░░░░  400,000 ops/s │
+│  bun:sqlite         ████████████████████████░░░  386,000 ops/s  │
+│  better-sqlite3     ████████████████████████░░░  400,000 ops/s* │
 │                                                                 │
-│  bun:sqlite is 30% faster with zero FFI overhead                │
+│  *estimated - bun:sqlite has zero FFI overhead                  │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 - **Bun Native** - Built specifically for Bun's runtime, not a Node.js port
-- **7.2M ops/sec** - Memory store performance
-- **520K ops/sec** - With bun:sqlite persistence
+- **6.1M ops/sec** - Memory store (multi-IP scenarios)
+- **386K ops/sec** - With bun:sqlite (multi-IP scenarios)
 - **Zero Config** - Works out of the box with sensible defaults
 - **Elysia Plugin** - First-class Elysia framework integration
 - **TypeScript First** - Full type safety and IntelliSense support
@@ -141,6 +141,36 @@ hitlimit({
 }, handler)
 ```
 
+### Auto-Ban Repeat Offenders
+
+Automatically ban clients that repeatedly exceed rate limits.
+
+```typescript
+hitlimit({
+  limit: 10,
+  window: '1m',
+  ban: {
+    threshold: 5,  // Ban after 5 violations
+    duration: '1h' // Ban lasts 1 hour
+  }
+}, handler)
+```
+
+Banned clients receive `X-RateLimit-Ban: true` header and `banned: true` in the response body.
+
+### Grouped / Shared Limits
+
+Rate limit by organization, API key, or any shared identifier.
+
+```typescript
+// Per-API-key rate limiting
+hitlimit({
+  limit: 1000,
+  window: '1h',
+  group: (req) => req.headers.get('x-api-key') || 'anonymous'
+}, handler)
+```
+
 ### Elysia Route-Specific Limits
 
 Apply different limits to different route groups in Elysia.
@@ -213,7 +243,16 @@ hitlimit({
   onStoreError: (error, req) => {
     console.error('Store error:', error)
     return 'allow' // or 'deny'
-  }
+  },
+
+  // Ban repeat offenders
+  ban: {
+    threshold: 5,    // violations before ban
+    duration: '1h'   // ban duration
+  },
+
+  // Group/shared limits
+  group: (req) => req.headers.get('x-api-key') || 'default'
 }, handler)
 ```
 
