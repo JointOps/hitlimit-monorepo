@@ -1,11 +1,12 @@
 import type { HitLimitOptions } from '@joint-ops/hitlimit-types'
 import { resolveConfig } from './core/config.js'
+import { checkLimit } from './core/limiter.js'
 import { sqliteStore } from './stores/sqlite.js'
 
-export type { HitLimitOptions, HitLimitInfo, HitLimitResult, HitLimitStore, StoreResult, TierConfig, HeadersConfig, ResolvedConfig, KeyGenerator, TierResolver, SkipFunction, StoreErrorHandler, ResponseFormatter, ResponseConfig } from '@joint-ops/hitlimit-types'
+export type { HitLimitOptions, HitLimitInfo, HitLimitResult, HitLimitStore, StoreResult, TierConfig, HeadersConfig, ResolvedConfig, KeyGenerator, TierResolver, SkipFunction, StoreErrorHandler, ResponseFormatter, ResponseConfig, BanConfig, GroupIdResolver } from '@joint-ops/hitlimit-types'
 export { DEFAULT_LIMIT, DEFAULT_WINDOW, DEFAULT_WINDOW_MS, DEFAULT_MESSAGE } from '@joint-ops/hitlimit-types'
 export { sqliteStore } from './stores/sqlite.js'
-export { checkLimit } from './core/limiter.js'
+export { checkLimit }
 
 export interface BunHitLimitOptions extends HitLimitOptions<Request> {
   sqlitePath?: string
@@ -23,12 +24,21 @@ export function hitlimit(
   options: BunHitLimitOptions,
   handler: FetchHandler
 ): (req: Request, server: BunServer) => Response | Promise<Response> {
+  // Closure-scoped server reference for default key resolution in checkLimit
+  let activeServer: BunServer
+
+  const defaultKey = (req: Request) => {
+    return activeServer?.requestIP(req)?.address || 'unknown'
+  }
+
   const store = options.store ?? sqliteStore({ path: options.sqlitePath })
-  const config = resolveConfig(options, store, () => 'unknown')
+  const config = resolveConfig(options, store, options.key ?? defaultKey)
 
   // Pre-compute flags
   const hasSkip = !!config.skip
   const hasTiers = !!(config.tier && config.tiers)
+  const hasBan = !!config.ban
+  const hasGroup = !!config.group
   const standardHeaders = config.headers.standard
   const legacyHeaders = config.headers.legacy
   const retryAfterHeader = config.headers.retryAfter
@@ -40,8 +50,8 @@ export function hitlimit(
   // Pre-create blocked response JSON
   const blockedBody = JSON.stringify(response)
 
-  // Fast path: no skip, no tiers
-  if (!hasSkip && !hasTiers) {
+  // Fast path: no skip, no tiers, no ban, no group (most common case)
+  if (!hasSkip && !hasTiers && !hasBan && !hasGroup) {
     return async (req: Request, server: BunServer) => {
       try {
         const key = customKey ? await customKey(req) : getDefaultKey(req, server)
@@ -109,8 +119,10 @@ export function hitlimit(
     }
   }
 
-  // Full path: with skip and/or tiers
+  // Full path: with skip, tiers, ban, or group — delegates to core checkLimit
   return async (req: Request, server: BunServer) => {
+    activeServer = server
+
     if (hasSkip) {
       const shouldSkip = await config.skip!(req)
       if (shouldSkip) {
@@ -119,68 +131,24 @@ export function hitlimit(
     }
 
     try {
-      const key = customKey ? await customKey(req) : getDefaultKey(req, server)
+      const result = await checkLimit(config, req)
 
-      let effectiveLimit = limit
-      let effectiveWindowMs = windowMs
-
-      if (hasTiers) {
-        const tierName = await config.tier!(req)
-        const tierConfig = config.tiers![tierName]
-        if (tierConfig) {
-          effectiveLimit = tierConfig.limit
-          if (tierConfig.window) {
-            effectiveWindowMs = parseWindow(tierConfig.window)
-          }
-        }
-      }
-
-      if (effectiveLimit === Infinity) {
-        return handler(req, server)
-      }
-
-      const result = await store.hit(key, effectiveWindowMs, effectiveLimit)
-      const allowed = result.count <= effectiveLimit
-
-      if (!allowed) {
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-        const resetIn = Math.ceil((result.resetAt - Date.now()) / 1000)
-
-        if (standardHeaders) {
-          headers['RateLimit-Limit'] = String(effectiveLimit)
-          headers['RateLimit-Remaining'] = '0'
-          headers['RateLimit-Reset'] = String(resetIn)
-        }
-        if (legacyHeaders) {
-          headers['X-RateLimit-Limit'] = String(effectiveLimit)
-          headers['X-RateLimit-Remaining'] = '0'
-          headers['X-RateLimit-Reset'] = String(Math.ceil(result.resetAt / 1000))
-        }
-        if (retryAfterHeader) {
-          headers['Retry-After'] = String(resetIn)
-        }
-
-        return new Response(blockedBody, { status: 429, headers })
+      if (!result.allowed) {
+        return new Response(JSON.stringify(result.body), {
+          status: 429,
+          headers: { 'Content-Type': 'application/json', ...result.headers }
+        })
       }
 
       const res = await handler(req, server)
 
-      if (standardHeaders || legacyHeaders) {
-        const resetIn = Math.ceil((result.resetAt - Date.now()) / 1000)
-        const remaining = Math.max(0, effectiveLimit - result.count)
+      // Add rate limit headers to allowed response
+      const headerEntries = Object.entries(result.headers)
+      if (headerEntries.length > 0) {
         const newHeaders = new Headers(res.headers)
-
-        if (standardHeaders) {
-          newHeaders.set('RateLimit-Limit', String(effectiveLimit))
-          newHeaders.set('RateLimit-Remaining', String(remaining))
-          newHeaders.set('RateLimit-Reset', String(resetIn))
+        for (const [key, value] of headerEntries) {
+          newHeaders.set(key, value)
         }
-        if (legacyHeaders) {
-          newHeaders.set('X-RateLimit-Limit', String(effectiveLimit))
-          newHeaders.set('X-RateLimit-Remaining', String(remaining))
-          newHeaders.set('X-RateLimit-Reset', String(Math.ceil(result.resetAt / 1000)))
-        }
-
         return new Response(res.body, {
           status: res.status,
           statusText: res.statusText,
@@ -208,72 +176,34 @@ export interface HitLimiter {
 }
 
 export function createHitLimit(options: BunHitLimitOptions = {}): HitLimiter {
-  const store = options.store ?? sqliteStore({ path: options.sqlitePath })
-  const config = resolveConfig(options, store, () => 'unknown')
+  let activeServer: BunServer
 
-  const hasSkip = !!config.skip
-  const hasTiers = !!(config.tier && config.tiers)
-  const standardHeaders = config.headers.standard
-  const legacyHeaders = config.headers.legacy
-  const retryAfterHeader = config.headers.retryAfter
-  const limit = config.limit
-  const windowMs = config.windowMs
-  const response = config.response
-  const customKey = options.key
-  const blockedBody = JSON.stringify(response)
+  const defaultKey = (req: Request) => {
+    return activeServer?.requestIP(req)?.address || 'unknown'
+  }
+
+  const store = options.store ?? sqliteStore({ path: options.sqlitePath })
+  const config = resolveConfig(options, store, options.key ?? defaultKey)
 
   return {
     async check(req: Request, server: BunServer): Promise<Response | null> {
-      if (hasSkip) {
-        const shouldSkip = await config.skip!(req)
+      activeServer = server
+
+      if (config.skip) {
+        const shouldSkip = await config.skip(req)
         if (shouldSkip) {
           return null
         }
       }
 
       try {
-        const key = customKey ? await customKey(req) : getDefaultKey(req, server)
+        const result = await checkLimit(config, req)
 
-        let effectiveLimit = limit
-        let effectiveWindowMs = windowMs
-
-        if (hasTiers) {
-          const tierName = await config.tier!(req)
-          const tierConfig = config.tiers![tierName]
-          if (tierConfig) {
-            effectiveLimit = tierConfig.limit
-            if (tierConfig.window) {
-              effectiveWindowMs = parseWindow(tierConfig.window)
-            }
-          }
-        }
-
-        if (effectiveLimit === Infinity) {
-          return null
-        }
-
-        const result = await store.hit(key, effectiveWindowMs, effectiveLimit)
-        const allowed = result.count <= effectiveLimit
-
-        if (!allowed) {
-          const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-          const resetIn = Math.ceil((result.resetAt - Date.now()) / 1000)
-
-          if (standardHeaders) {
-            headers['RateLimit-Limit'] = String(effectiveLimit)
-            headers['RateLimit-Remaining'] = '0'
-            headers['RateLimit-Reset'] = String(resetIn)
-          }
-          if (legacyHeaders) {
-            headers['X-RateLimit-Limit'] = String(effectiveLimit)
-            headers['X-RateLimit-Remaining'] = '0'
-            headers['X-RateLimit-Reset'] = String(Math.ceil(result.resetAt / 1000))
-          }
-          if (retryAfterHeader) {
-            headers['Retry-After'] = String(resetIn)
-          }
-
-          return new Response(blockedBody, { status: 429, headers })
+        if (!result.allowed) {
+          return new Response(JSON.stringify(result.body), {
+            status: 429,
+            headers: { 'Content-Type': 'application/json', ...result.headers }
+          })
         }
 
         return null
@@ -292,24 +222,5 @@ export function createHitLimit(options: BunHitLimitOptions = {}): HitLimiter {
     reset(key: string) {
       return store.reset(key)
     }
-  }
-}
-
-function parseWindow(window: string | number): number {
-  if (typeof window === 'number') return window
-
-  const match = window.match(/^(\d+)(ms|s|m|h|d)$/)
-  if (!match) return 60000
-
-  const value = parseInt(match[1], 10)
-  const unit = match[2]
-
-  switch (unit) {
-    case 'ms': return value
-    case 's': return value * 1000
-    case 'm': return value * 60 * 1000
-    case 'h': return value * 60 * 60 * 1000
-    case 'd': return value * 24 * 60 * 60 * 1000
-    default: return 60000
   }
 }
