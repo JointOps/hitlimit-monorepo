@@ -43,7 +43,7 @@ const faqSchema = {
       "name": "What frameworks does hitlimit support?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "hitlimit supports Express, Fastify, NestJS, Bun.serve, and Elysia. The same API works across all frameworks for consistency."
+        "text": "hitlimit supports Express, Fastify, Hono, NestJS, Bun.serve, and Elysia. The same API works across all frameworks for consistency."
       }
     },
     {
@@ -192,6 +192,15 @@ const faqSchema = {
         </tr>
         <tr>
           <td>Elysia</td>
+          <td class="highlight-col good">Native</td>
+          <td>No</td>
+          <td>No</td>
+          <td>No</td>
+          <td>No</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td>Hono</td>
           <td class="highlight-col good">Native</td>
           <td>No</td>
           <td>No</td>
@@ -565,6 +574,70 @@ const faqSchema = {
     </div>
   </div>
 
+  <h2 id="vs-hono-rate-limiter">hitlimit vs hono-rate-limiter</h2>
+
+  <p>
+    <strong>hono-rate-limiter</strong> is a community-maintained rate limiter for the Hono framework (rhinobase/hono-rate-limiter).
+    Currently at v0.5.x, it's an early-stage project inspired by express-rate-limit.
+  </p>
+
+  <div class="comparison-box">
+    <h3>Choose hitlimit if you need:</h3>
+    <ul>
+      <li><strong>Smaller bundle</strong> - ~7KB vs ~88.5KB (12x smaller)</li>
+      <li><strong>Human-readable time windows</strong> - <code>'1m'</code> vs milliseconds (<code>60000</code>)</li>
+      <li><strong>Built-in tiered limits</strong> - Free/Pro/Enterprise tiers without manual routing</li>
+      <li><strong>Per-request error handling</strong> - <code>onStoreError</code> callback for granular control</li>
+      <li><strong>Built-in SQLite store</strong> - Persistence without Redis setup</li>
+      <li><strong>Built-in Redis store</strong> - No separate package required</li>
+      <li><strong>Bun-native package</strong> - Uses bun:sqlite for 6M+ ops/sec performance</li>
+      <li><strong>Multi-framework support</strong> - Same API for Hono, Express, Fastify, NestJS</li>
+      <li><strong>Zero runtime dependencies</strong> - Smaller, more secure</li>
+    </ul>
+
+    <h3>Choose hono-rate-limiter if you need:</h3>
+    <ul>
+      <li>Community-driven development with open governance</li>
+      <li>Cloudflare KV store support (via separate package)</li>
+      <li>Familiar express-rate-limit-like API</li>
+    </ul>
+  </div>
+
+  <h3>Migration from hono-rate-limiter</h3>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Before (hono-rate-limiter)</span></div>
+    <pre><code><span class="kw">import</span> {"{"} rateLimiter {"}"} <span class="kw">from</span> <span class="str">'hono-rate-limiter'</span>
+
+app.<span class="fn">use</span>(<span class="fn">rateLimiter</span>({"{"}
+  windowMs: <span class="num">60000</span>, <span class="cm">// milliseconds</span>
+  limit: <span class="num">100</span>,
+  keyGenerator: (c) => c.req.<span class="fn">header</span>(<span class="str">'x-api-key'</span>)
+{"}"}))</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">After (hitlimit - Node.js)</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/hono'</span>
+
+app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+  window: <span class="str">'1m'</span>, <span class="cm">// human-readable!</span>
+  limit: <span class="num">100</span>,
+  key: (c) => c.req.<span class="fn">header</span>(<span class="str">'x-api-key'</span>) || <span class="str">'anonymous'</span>
+{"}"}))</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">After (hitlimit - Bun)</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/hono'</span>
+
+app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+  window: <span class="str">'1m'</span>,
+  limit: <span class="num">100</span>,
+  key: (c) => c.req.<span class="fn">header</span>(<span class="str">'x-api-key'</span>) || <span class="str">'anonymous'</span>
+{"}"}))</code></pre>
+  </div>
+
   <h2 id="next-steps">Get Started</h2>
 
   <p>Ready to try hitlimit?</p>
@@ -575,6 +648,7 @@ const faqSchema = {
 
   <ul>
     <li><a href="/docs/quick-start">Quick Start Guide</a></li>
+    <li><a href="/docs/adapters/hono">Hono Adapter Documentation</a></li>
     <li><a href="/docs/benchmarks">Full Benchmarks</a></li>
     <li><a href="/docs/configuration/options">Configuration Options</a></li>
   </ul>
