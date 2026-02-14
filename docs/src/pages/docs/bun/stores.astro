@@ -3,20 +3,20 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 ---
 
 <DocsLayout
-  title="Bun Rate Limit Stores - hitlimit-bun | bun:sqlite, Memory, Redis"
-  description="Storage backends for Bun rate limiting. Native bun:sqlite store with WAL mode, memory store, and Redis for distributed deployments. Store comparison and configuration."
-  keywords="bun sqlite rate limit, bun:sqlite store, bun memory store, bun redis rate limit, hitlimit-bun stores, bun rate limit storage, wal mode sqlite, native bun sqlite"
+  title="Bun Rate Limit Stores - hitlimit-bun | Memory, bun:sqlite, Redis"
+  description="Storage backends for Bun rate limiting. Memory-first design (6.10M ops/sec), optional native bun:sqlite (387K ops/sec), and Redis for distributed deployments. Store comparison and configuration."
+  keywords="bun memory store, bun rate limit storage, bun sqlite rate limit, bun:sqlite store, bun redis rate limit, hitlimit-bun stores, wal mode sqlite, native bun sqlite, high performance rate limit"
 >
   <h1>Bun Stores</h1>
 
   <p>
-    hitlimit-bun provides optimized storage backends that take advantage of Bun's native capabilities.
-    The native SQLite store is particularly powerful, offering persistence with exceptional performance.
+    hitlimit-bun is <strong>memory-first by default</strong> with 6.10M ops/sec performance.
+    Optional persistence available with native bun:sqlite (387K ops/sec) or Redis (5.4K ops/sec) when you need it.
   </p>
 
-  <h2 id="memory-store">Memory Store</h2>
+  <h2 id="memory-store">Memory Store (Default)</h2>
 
-  <p>The default store, ideal for single-instance deployments:</p>
+  <p><strong>Default since v1.1.0.</strong> Ideal for single-instance deployments with maximum performance:</p>
 
   <div class="code-block">
     <div class="code-header">
