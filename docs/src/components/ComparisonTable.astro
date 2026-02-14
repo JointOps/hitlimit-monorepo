@@ -6,6 +6,8 @@ const features = [
   { name: 'Bun native support', hitlimit: 'bun:sqlite', expressRL: false, rateFlexible: false, nestThrottler: false, highlight: true },
   { name: 'Express adapter', hitlimit: true, expressRL: true, rateFlexible: 'DIY', nestThrottler: false },
   { name: 'NestJS adapter', hitlimit: true, expressRL: false, rateFlexible: 'DIY', nestThrottler: true },
+  { name: 'Hono adapter', hitlimit: true, expressRL: false, rateFlexible: false, nestThrottler: false, highlight: true },
+  { name: 'Fastify adapter', hitlimit: true, expressRL: false, rateFlexible: false, nestThrottler: false },
   { name: 'Elysia adapter', hitlimit: true, expressRL: false, rateFlexible: false, nestThrottler: false, highlight: true },
   { name: 'SQLite store', hitlimit: true, expressRL: false, rateFlexible: true, nestThrottler: false },
   { name: 'Redis store', hitlimit: true, expressRL: 'External', rateFlexible: true, nestThrottler: 'External' },
@@ -46,6 +48,9 @@ function renderValue(val: boolean | string) {
       </div>
       <div class="px-4 py-2 rounded-full border border-green-500/30 bg-green-500/5 text-sm">
         <span class="text-green-400 font-semibold">22x smaller</span> than rate-limiter-flexible
+      </div>
+      <div class="px-4 py-2 rounded-full border border-yellow-500/30 bg-yellow-500/5 text-sm">
+        <span class="text-yellow-400 font-semibold">New</span> Hono adapter for Node.js & Bun
       </div>
     </div>
 

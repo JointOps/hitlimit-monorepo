@@ -61,10 +61,7 @@ const faqSchema = {
 <DocsLayout
   title="hitlimit vs express-rate-limit vs @fastify/rate-limit vs rate-limiter-flexible | Comparison Guide"
   description="Compare hitlimit with express-rate-limit, @fastify/rate-limit, rate-limiter-flexible, and @nestjs/throttler. Feature comparison, performance benchmarks, and migration guides."
-  keywords="hitlimit vs express-rate-limit, hitlimit vs fastify rate limit, best rate limiter nodejs, rate-limiter-flexible alternative, nestjs throttler comparison, fastest rate limiter, rate limit comparison, express rate limit alternative, fastify rate limit alternative, bun rate limiter"
-  title="hitlimit vs express-rate-limit vs @fastify/rate-limit vs rate-limiter-flexible | Comparison Guide"
-  description="Compare hitlimit with express-rate-limit, @fastify/rate-limit, rate-limiter-flexible, and @nestjs/throttler. Feature comparison, performance benchmarks, and migration guides."
-  keywords="hitlimit vs express-rate-limit, hitlimit vs fastify rate limit, best rate limiter nodejs, rate-limiter-flexible alternative, nestjs throttler comparison, fastest rate limiter, rate limit comparison, express rate limit alternative, fastify rate limit alternative, bun rate limiter"
+  keywords="hitlimit vs express-rate-limit, hitlimit vs fastify rate limit, best rate limiter nodejs, rate-limiter-flexible alternative, nestjs throttler comparison, fastest rate limiter, rate limit comparison, express rate limit alternative, fastify rate limit alternative, bun rate limiter, hono rate limiter"
 >
   <!-- FAQPage Schema for AI Search -->
   <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
@@ -86,7 +83,6 @@ const faqSchema = {
           <th class="highlight-col">hitlimit</th>
           <th>express-rate-limit</th>
           <th>@fastify/rate-limit</th>
-          <th>@fastify/rate-limit</th>
           <th>rate-limiter-flexible</th>
           <th>@nestjs/throttler</th>
         </tr>
@@ -97,7 +93,6 @@ const faqSchema = {
           <td class="highlight-col good">~7KB</td>
           <td>~66KB</td>
           <td>~15KB</td>
-          <td>~15KB</td>
           <td>~155KB</td>
           <td>~22KB</td>
         </tr>
@@ -105,7 +100,6 @@ const faqSchema = {
           <td>Zero Dependencies</td>
           <td class="highlight-col good">Yes</td>
           <td>No</td>
-          <td>No (3 deps)</td>
           <td>No (3 deps)</td>
           <td>No</td>
           <td>No</td>
@@ -115,14 +109,12 @@ const faqSchema = {
           <td class="highlight-col good">Native</td>
           <td>@types</td>
           <td>Native</td>
-          <td>Native</td>
           <td>@types</td>
           <td>Native</td>
         </tr>
         <tr>
           <td>ESM Support</td>
           <td class="highlight-col good">Native</td>
-          <td>Yes</td>
           <td>Yes</td>
           <td>Yes</td>
           <td>Yes</td>
@@ -143,13 +135,11 @@ const faqSchema = {
           <td>No</td>
           <td>No</td>
           <td>No</td>
-          <td>No</td>
         </tr>
         <tr>
           <td>Redis Store</td>
           <td class="highlight-col">Built-in</td>
           <td>External</td>
-          <td>Built-in</td>
           <td>Built-in</td>
           <td>Built-in</td>
           <td>External</td>
@@ -161,13 +151,11 @@ const faqSchema = {
           <td>No</td>
           <td>No</td>
           <td>No</td>
-          <td>No</td>
         </tr>
         <tr>
           <td>Express</td>
           <td class="highlight-col good">Yes</td>
           <td>Yes</td>
-          <td>No</td>
           <td>No</td>
           <td>Yes</td>
           <td>Via adapter</td>
@@ -177,7 +165,6 @@ const faqSchema = {
           <td class="highlight-col good">Native</td>
           <td>No</td>
           <td class="good">Native</td>
-          <td class="good">Native</td>
           <td>Yes</td>
           <td>No</td>
         </tr>
@@ -186,14 +173,12 @@ const faqSchema = {
           <td class="highlight-col good">Native</td>
           <td>Via wrapper</td>
           <td>No</td>
-          <td>No</td>
           <td>Yes</td>
           <td>Native</td>
         </tr>
         <tr>
           <td>Elysia</td>
           <td class="highlight-col good">Native</td>
-          <td>No</td>
           <td>No</td>
           <td>No</td>
           <td>No</td>
@@ -206,13 +191,11 @@ const faqSchema = {
           <td>No</td>
           <td>No</td>
           <td>No</td>
-          <td>No</td>
         </tr>
         <tr>
           <td>Human-readable Windows</td>
           <td class="highlight-col good">'1m', '1h'</td>
           <td>ms only</td>
-          <td>'1 minute'</td>
           <td>'1 minute'</td>
           <td>seconds</td>
           <td>seconds</td>
@@ -221,7 +204,6 @@ const faqSchema = {
           <td>Tiered Limits</td>
           <td class="highlight-col good">Built-in</td>
           <td>Manual</td>
-          <td>Via dynamic max</td>
           <td>Via dynamic max</td>
           <td>Manual</td>
           <td>Manual</td>

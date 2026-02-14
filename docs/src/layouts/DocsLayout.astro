@@ -13,9 +13,9 @@ interface Props {
 }
 
 const {
-  title = 'Documentation - hitlimit | Rate Limiting for Node.js, Bun, Express, NestJS',
-  description = 'Complete documentation for hitlimit rate limiter. Learn how to implement fast API rate limiting in Express, NestJS, Bun, and Elysia with memory, SQLite, or Redis stores.',
-  keywords = 'hitlimit docs, rate limit documentation, express rate limit guide, nestjs throttler tutorial, bun rate limiter, elysia rate limit plugin, api rate limiting tutorial, nodejs rate limit example, redis rate limit setup, sqlite rate limit'
+  title = 'Documentation - hitlimit | Rate Limiting for Node.js, Bun, Express, Fastify, Hono & NestJS',
+  description = 'Complete documentation for hitlimit rate limiter. Learn how to implement fast API rate limiting in Express, Fastify, Hono, NestJS, Bun, and Elysia with memory, SQLite, or Redis stores.',
+  keywords = 'hitlimit docs, rate limit documentation, express rate limit guide, fastify rate limit, hono rate limit, hono rate limiter, nestjs throttler tutorial, bun rate limiter, elysia rate limit plugin, api rate limiting tutorial, nodejs rate limit example, redis rate limit setup, sqlite rate limit'
 } = Astro.props;
 
 const siteUrl = 'https://hitlimit.jointops.dev';
@@ -134,8 +134,33 @@ const { prev, next } = getPageNavigation(Astro.url.pathname);
 
     <Nav />
 
+    <!-- Mobile sidebar toggle -->
+    <button id="mobile-sidebar-btn" class="fixed bottom-6 left-6 z-40 lg:hidden w-14 h-14 rounded-full bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-secondary)] text-black shadow-lg flex items-center justify-center hover:shadow-[0_0_30px_rgba(0,229,255,0.4)] transition-all" aria-label="Open navigation">
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+
+    <!-- Mobile sidebar drawer -->
+    <div id="mobile-sidebar-overlay" class="fixed inset-0 z-50 hidden lg:hidden">
+      <div id="mobile-sidebar-backdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      <aside id="mobile-sidebar-drawer" class="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-[var(--color-bg-base)] border-r border-[var(--color-border)] overflow-y-auto -translate-x-full transition-transform duration-300">
+        <div class="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
+          <span class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Navigation</span>
+          <button id="mobile-sidebar-close" class="p-2 rounded-lg hover:bg-white/5 text-[var(--color-text-muted)] hover:text-white transition-colors" aria-label="Close navigation">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <DocsSidebar />
+      </aside>
+    </div>
+
     <div class="flex pt-24">
-      <!-- Sidebar -->
+      <!-- Sidebar (desktop) -->
       <aside class="hidden lg:block w-72 flex-shrink-0">
         <div class="fixed top-24 w-72 h-[calc(100vh-6rem)] border-r border-[var(--color-border)] overflow-hidden">
           <DocsSidebar />
@@ -143,14 +168,20 @@ const { prev, next } = getPageNavigation(Astro.url.pathname);
       </aside>
 
       <!-- Main content -->
-      <main class="flex-1 min-w-0 px-6 lg:px-12 py-8 max-w-4xl">
+      <main class="flex-1 min-w-0 px-4 sm:px-6 lg:px-12 py-8 max-w-4xl">
+        <!-- Mobile TOC -->
+        <details id="mobile-toc-details" class="xl:hidden mb-8 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-surface)]">
+          <summary class="px-4 py-3 text-sm font-semibold cursor-pointer text-[var(--color-text-muted)] hover:text-white transition-colors select-none">On this page</summary>
+          <nav id="mobile-toc" class="px-4 pb-4 text-sm space-y-1"></nav>
+        </details>
+
         <article class="prose prose-invert prose-lg max-w-none">
           <slot />
         </article>
 
         <!-- Pagination -->
         <nav class="mt-16 pt-8 border-t border-[var(--color-border)]" aria-label="Documentation pages">
-          <div class="flex items-stretch justify-between gap-4">
+          <div class="flex flex-col sm:flex-row items-stretch justify-between gap-4">
             {prev ? (
               <a href={prev.href} class="group flex-1 flex flex-col gap-1 p-4 rounded-lg border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-all">
                 <span class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
@@ -319,7 +350,9 @@ const { prev, next } = getPageNavigation(Astro.url.pathname);
     border-spacing: 0;
     border: 1px solid var(--color-border);
     border-radius: 12px;
-    overflow: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    display: block;
     margin: 2rem 0;
   }
 
@@ -503,24 +536,100 @@ const { prev, next } = getPageNavigation(Astro.url.pathname);
     font-style: italic;
     padding: 0.5rem 0;
   }
+
+  /* Responsive typography */
+  @media (max-width: 640px) {
+    .prose h1 {
+      font-size: 1.75rem;
+    }
+    .prose h2 {
+      font-size: 1.25rem;
+    }
+  }
+
+  /* Mobile TOC links */
+  .mobile-toc-link {
+    display: block;
+    padding: 0.375rem 0;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .mobile-toc-link:hover {
+    color: var(--color-accent);
+  }
+  .mobile-toc-link.h3 {
+    padding-left: 1rem;
+    font-size: 0.8125rem;
+  }
 </style>
 
 <script>
+  function initMobileSidebar() {
+    const btn = document.getElementById('mobile-sidebar-btn');
+    const overlay = document.getElementById('mobile-sidebar-overlay');
+    const backdrop = document.getElementById('mobile-sidebar-backdrop');
+    const drawer = document.getElementById('mobile-sidebar-drawer');
+    const closeBtn = document.getElementById('mobile-sidebar-close');
+
+    if (!btn || !overlay || !drawer) return;
+
+    let scrollPos = 0;
+
+    function openDrawer() {
+      scrollPos = window.scrollY;
+      overlay.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        drawer.classList.remove('-translate-x-full');
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.top = `-${scrollPos}px`;
+      });
+    }
+
+    function closeDrawer() {
+      drawer.classList.add('-translate-x-full');
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      window.scrollTo(0, scrollPos);
+      setTimeout(() => overlay.classList.add('hidden'), 300);
+    }
+
+    btn.addEventListener('click', openDrawer);
+    closeBtn?.addEventListener('click', closeDrawer);
+    backdrop?.addEventListener('click', closeDrawer);
+
+    // Close on link click inside drawer
+    drawer.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', closeDrawer);
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !overlay.classList.contains('hidden')) closeDrawer();
+    });
+  }
+
   function initTOC() {
     const article = document.querySelector('article');
     const toc = document.getElementById('toc');
+    const mobileToc = document.getElementById('mobile-toc');
     const progressBar = document.getElementById('toc-progress');
     const scrollToTopBtn = document.getElementById('scroll-to-top');
 
-    if (!article || !toc) return;
+    if (!article) return;
 
     // Clear existing TOC
-    toc.innerHTML = '';
+    if (toc) toc.innerHTML = '';
+    if (mobileToc) mobileToc.innerHTML = '';
 
     const headings = article.querySelectorAll('h2, h3');
 
     if (headings.length === 0) {
-      toc.innerHTML = '<div class="toc-empty">No sections found</div>';
+      if (toc) toc.innerHTML = '<div class="toc-empty">No sections found</div>';
       return;
     }
 
@@ -529,28 +638,51 @@ const { prev, next } = getPageNavigation(Astro.url.pathname);
       const id = heading.id || `heading-${index}`;
       heading.id = id;
 
-      const link = document.createElement('a');
-      link.href = `#${id}`;
-      link.className = `toc-link ${heading.tagName.toLowerCase()}`;
-      link.dataset.target = id;
-      link.innerHTML = `
-        <span class="toc-link-indicator"></span>
-        <span class="toc-link-text">${heading.textContent}</span>
-      `;
+      // Desktop TOC link
+      if (toc) {
+        const link = document.createElement('a');
+        link.href = `#${id}`;
+        link.className = `toc-link ${heading.tagName.toLowerCase()}`;
+        link.dataset.target = id;
+        link.innerHTML = `
+          <span class="toc-link-indicator"></span>
+          <span class="toc-link-text">${heading.textContent}</span>
+        `;
 
-      // Smooth scroll on click
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const target = document.getElementById(id);
-        if (target) {
-          const offset = 100;
-          const top = target.getBoundingClientRect().top + window.scrollY - offset;
-          window.scrollTo({ top, behavior: 'smooth' });
-          history.pushState(null, '', `#${id}`);
-        }
-      });
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const target = document.getElementById(id);
+          if (target) {
+            const offset = 100;
+            const top = target.getBoundingClientRect().top + window.scrollY - offset;
+            window.scrollTo({ top, behavior: 'smooth' });
+            history.pushState(null, '', `#${id}`);
+          }
+        });
 
-      toc.appendChild(link);
+        toc.appendChild(link);
+      }
+
+      // Mobile TOC link
+      if (mobileToc) {
+        const mLink = document.createElement('a');
+        mLink.href = `#${id}`;
+        mLink.className = `mobile-toc-link ${heading.tagName.toLowerCase()}`;
+        mLink.textContent = heading.textContent;
+        mLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          const details = document.getElementById('mobile-toc-details') as HTMLDetailsElement;
+          if (details) details.open = false;
+          const target = document.getElementById(id);
+          if (target) {
+            const offset = 100;
+            const top = target.getBoundingClientRect().top + window.scrollY - offset;
+            window.scrollTo({ top, behavior: 'smooth' });
+            history.pushState(null, '', `#${id}`);
+          }
+        });
+        mobileToc.appendChild(mLink);
+      }
     });
 
     // Scroll spy - highlight active section
@@ -643,13 +775,18 @@ const { prev, next } = getPageNavigation(Astro.url.pathname);
     }
   }
 
+  function initAll() {
+    initTOC();
+    initMobileSidebar();
+  }
+
   // Initialize
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTOC);
+    document.addEventListener('DOMContentLoaded', initAll);
   } else {
-    initTOC();
+    initAll();
   }
 
   // Re-init on Astro page transitions
-  document.addEventListener('astro:after-swap', initTOC);
+  document.addEventListener('astro:after-swap', initAll);
 </script>

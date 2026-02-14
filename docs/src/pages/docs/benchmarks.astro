@@ -27,23 +27,23 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
     <tbody>
       <tr>
         <td>Single server, many unique IPs</td>
-        <td><strong>Memory</strong></td>
-        <td class="highlight">2-3M ops/sec</td>
+        <td><strong>Memory</strong> (default)</td>
+        <td class="highlight">3-6M ops/sec</td>
       </tr>
       <tr>
         <td>Need persistence, single server</td>
         <td><strong>SQLite</strong></td>
-        <td class="highlight">400K ops/sec</td>
+        <td class="highlight">387-462K ops/sec</td>
       </tr>
       <tr>
         <td>Multiple servers (distributed)</td>
         <td><strong>Redis</strong></td>
-        <td class="highlight">6.7K ops/sec</td>
+        <td class="highlight">5.4-6.7K ops/sec</td>
       </tr>
       <tr>
-        <td>Bun runtime</td>
+        <td>Bun runtime (persistence)</td>
         <td><strong>bun:sqlite</strong></td>
-        <td class="highlight">520K ops/sec</td>
+        <td class="highlight">387K ops/sec</td>
       </tr>
     </tbody>
   </table>
@@ -199,11 +199,11 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <div class="benchmark-header">hitlimit-bun</div>
     <div class="benchmark-stats">
       <div class="stat">
-        <span class="stat-value">7.2M</span>
+        <span class="stat-value">6.10M</span>
         <span class="stat-label">memory ops/sec</span>
       </div>
       <div class="stat">
-        <span class="stat-value">520K</span>
+        <span class="stat-value">387K</span>
         <span class="stat-label">sqlite ops/sec</span>
       </div>
     </div>
@@ -279,8 +279,8 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
 
   <div class="code-block">
     <div class="code-header"><span class="code-label">Terminal</span></div>
-    <pre><code>git clone https://github.com/JointOps/hitlimit
-cd hitlimit
+    <pre><code>git clone https://github.com/JointOps/hitlimit-monorepo
+cd hitlimit-monorepo
 pnpm install && pnpm build
 
 # Start Redis (optional)
@@ -296,8 +296,8 @@ bun src/scripts/run-bun.ts       # Bun</code></pre>
 
   <div class="callout note">
     <strong>Note:</strong> Benchmark results vary by hardware and environment.
-    Independent tests on different machines have shown hitlimit performing 27-51% faster than express-rate-limit
-    and 3-9x faster than rate-limiter-flexible across all scenarios.
+    In high-traffic scenarios (10k unique IPs), hitlimit is ~33% faster than rate-limiter-flexible and ~2x faster than express-rate-limit.
+    For single-IP scenarios, rate-limiter-flexible is slightly faster.
     Run your own benchmarks to see results on your specific setup.
   </div>
 

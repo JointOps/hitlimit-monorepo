@@ -32,6 +32,8 @@ const searchData: SearchItem[] = [
 
   // Adapters
   { title: 'Express.js', section: 'Adapters', href: '/docs/adapters/express', content: 'express expressjs middleware router route specific global', headings: ['Installation', 'Basic Usage', 'Route-Specific', 'Custom Key'] },
+  { title: 'Fastify', section: 'Adapters', href: '/docs/adapters/fastify', content: 'fastify plugin register rate limit middleware', headings: ['Installation', 'Basic Usage', 'Options'] },
+  { title: 'Hono (Node.js)', section: 'Adapters', href: '/docs/adapters/hono', content: 'hono middleware rate limiting node.js hono-rate-limiter alternative', headings: ['Installation', 'Basic Usage', 'Options', 'Migration'] },
   { title: 'NestJS', section: 'Adapters', href: '/docs/adapters/nestjs', content: 'nestjs module guard decorator controller global throttler', headings: ['Installation', 'Module Setup', 'Guard', 'Decorator'] },
   { title: 'Node.js HTTP', section: 'Adapters', href: '/docs/adapters/node', content: 'node nodejs http native server raw createServer handler', headings: ['Installation', 'Basic Usage', 'Middleware Style'] },
 
@@ -41,6 +43,7 @@ const searchData: SearchItem[] = [
   { title: 'Quick Start', section: 'Bun', href: '/docs/bun/quick-start', content: 'bun quick start getting started basic', headings: ['Basic Usage'] },
   { title: 'Bun.serve', section: 'Bun', href: '/docs/bun/bun-serve', content: 'bun serve server http native handler fetch', headings: ['Usage', 'Configuration'] },
   { title: 'Elysia Plugin', section: 'Bun', href: '/docs/bun/elysia', content: 'elysia plugin framework web bun fast', headings: ['Installation', 'Usage', 'Options'] },
+  { title: 'Hono (Bun)', section: 'Bun', href: '/docs/bun/hono', content: 'hono bun middleware rate limiting 6M ops/sec high performance', headings: ['Installation', 'Usage', 'Performance', 'Options'] },
   { title: 'Stores', section: 'Bun', href: '/docs/bun/stores', content: 'bun stores sqlite memory redis native', headings: ['Memory', 'SQLite', 'Redis'] },
   { title: 'Performance', section: 'Bun', href: '/docs/bun/performance', content: 'performance benchmarks fast speed optimization', headings: ['Benchmarks', 'Tips'] },
 
@@ -152,7 +155,7 @@ const searchData: SearchItem[] = [
     </div>
 
     <div class="search-modal-footer">
-      <div class="search-footer-hints">
+      <div class="search-footer-hints hidden sm:flex">
         <span class="search-hint">
           <kbd>↑</kbd><kbd>↓</kbd> Navigate
         </span>
@@ -258,7 +261,7 @@ const searchData: SearchItem[] = [
   .search-modal {
     width: 100%;
     max-width: 640px;
-    max-height: 70vh;
+    max-height: calc(100dvh - 4rem);
     background: var(--color-bg-elevated);
     border: 1px solid var(--color-border);
     border-radius: 1rem;

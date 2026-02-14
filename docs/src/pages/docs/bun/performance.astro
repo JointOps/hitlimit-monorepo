@@ -94,13 +94,16 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 
   <h2 id="optimization-tips">Optimization Tips</h2>
 
-  <h3 id="tip-1">1. Use Native SQLite Over Redis for Single-Instance</h3>
+  <h3 id="tip-1">1. Use Memory Store (Default) for Best Performance</h3>
 
-  <p>Bun's native SQLite is faster than Redis for single-instance deployments:</p>
+  <p>Memory store is the default in v1.1.0 and provides the best performance. Use SQLite only when you need persistence, and Redis for distributed setups:</p>
 
   <div class="code-block">
-    <pre><code><span class="cm">// Prefer this for single-instance deployments</span>
-<span class="kw">const</span> store = <span class="fn">sqliteStore</span>({"{"} path: <span class="str">'./rate-limits.db'</span> {"}"})
+    <pre><code><span class="cm">// Default: memory store (6M+ ops/sec) - no config needed</span>
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
+
+<span class="cm">// Use SQLite only for persistence</span>
+<span class="cm">// const store = sqliteStore({"{"} path: './rate-limits.db' {"}"})</span>
 
 <span class="cm">// Use Redis only for distributed deployments</span>
 <span class="cm">// const store = redisStore({"{"} url: '...' {"}"})</span></code></pre>
@@ -283,7 +286,7 @@ Bun.<span class="fn">serve</span>({"{"}
     margin: 1.5rem 0;
     border-radius: 0.75rem;
     border: 1px solid var(--color-border);
-    overflow: hidden;
+    overflow-x: auto;
   }
   .benchmark-table table {
     width: 100%;
