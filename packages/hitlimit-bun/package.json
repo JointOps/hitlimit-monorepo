@@ -1,7 +1,7 @@
 {
   "name": "@joint-ops/hitlimit-bun",
-  "version": "1.0.6",
-  "description": "Fast Bun-native rate limiting for Bun.serve & Elysia - API throttling with bun:sqlite, high performance request limiting",
+  "version": "1.1.0",
+  "description": "Ultra-fast Bun-native rate limiting - Memory-first with 6M+ ops/sec for Bun.serve, Elysia & Hono",
   "author": {
     "name": "Shayan M Hussain",
     "email": "shayanhussain48@gmail.com",
@@ -19,10 +19,16 @@
   },
   "keywords": [
     "rate-limit",
-    "rate-limiter",
-    "rate-limiting",
-    "ratelimit",
     "bun",
+    "rate-limiter",
+    "memory",
+    "fast",
+    "elysia",
+    "bun.serve",
+    "middleware",
+    "sqlite",
+    "redis",
+    "hono",
     "bun-rate-limit",
     "bun-sqlite",
     "bun-middleware",
@@ -30,15 +36,12 @@
     "bun-server",
     "bun-native",
     "bun-http",
-    "elysia",
     "elysia-plugin",
     "elysia-rate-limit",
     "elysia-middleware",
     "elysia-throttle",
-    "hono",
     "hono-rate-limit",
     "hono-bun",
-    "middleware",
     "throttle",
     "throttling",
     "api",
@@ -50,7 +53,6 @@
     "brute-force",
     "brute-force-protection",
     "login-protection",
-    "redis",
     "redis-rate-limit",
     "typescript",
     "high-performance",
@@ -64,7 +66,6 @@
     "http-rate-limit",
     "bun-api",
     "bun-framework",
-    "fast",
     "lightweight",
     "zero-dependency",
     "esm"
@@ -83,6 +84,11 @@
       "types": "./dist/elysia.d.ts",
       "bun": "./dist/elysia.js",
       "import": "./dist/elysia.js"
+    },
+    "./hono": {
+      "types": "./dist/hono.d.ts",
+      "bun": "./dist/hono.js",
+      "import": "./dist/hono.js"
     },
     "./stores/memory": {
       "types": "./dist/stores/memory.d.ts",
@@ -105,7 +111,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "bun build ./src/index.ts ./src/elysia.ts ./src/stores/memory.ts ./src/stores/redis.ts ./src/stores/sqlite.ts --outdir=./dist --target=bun --external=elysia --external=ioredis --external=@sinclair/typebox && tsc --emitDeclarationOnly",
+    "build": "bun build ./src/index.ts ./src/elysia.ts ./src/hono.ts ./src/stores/memory.ts ./src/stores/redis.ts ./src/stores/sqlite.ts --outdir=./dist --target=bun --external=elysia --external=hono --external=ioredis --external=@sinclair/typebox && tsc --emitDeclarationOnly",
     "clean": "rm -rf dist",
     "test": "bun test",
     "test:watch": "bun test --watch"
@@ -115,10 +121,14 @@
   },
   "peerDependencies": {
     "elysia": ">=1.0.0",
+    "hono": ">=4.0.0",
     "ioredis": ">=5.0.0"
   },
   "peerDependenciesMeta": {
     "elysia": {
+      "optional": true
+    },
+    "hono": {
       "optional": true
     },
     "ioredis": {
@@ -129,6 +139,7 @@
     "@sinclair/typebox": "^0.34.48",
     "@types/bun": "latest",
     "elysia": "^1.0.0",
+    "hono": "^4.11.9",
     "ioredis": "^5.3.0",
     "typescript": "^5.3.0"
   }

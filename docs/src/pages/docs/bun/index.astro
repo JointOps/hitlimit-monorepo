@@ -4,24 +4,24 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 
 <DocsLayout
   title="Bun Rate Limiting - hitlimit-bun | Fastest Bun Rate Limiter"
-  description="Bun-native rate limiting with hitlimit-bun. The fastest rate limiter for Bun.serve and Elysia with native bun:sqlite support. 7M+ ops/sec performance, zero config setup."
-  keywords="bun rate limit, bun rate limiter, bun serve rate limiting, hitlimit-bun, bun sqlite rate limit, bun api protection, bun middleware, bun throttle, bun request limiting, bun ddos protection"
+  description="Bun-native rate limiting with hitlimit-bun. Memory-first design with 6.10M ops/sec performance. First-class support for Bun.serve, Elysia, and Hono. Optional SQLite/Redis persistence."
+  keywords="bun rate limit, bun rate limiter, bun serve rate limiting, hitlimit-bun, bun memory store, bun sqlite rate limit, bun api protection, bun middleware, bun throttle, bun request limiting, bun ddos protection"
 >
   <h1>Bun Integration</h1>
 
   <p>
     hitlimit provides first-class support for <strong>Bun</strong>, the fast all-in-one JavaScript runtime.
-    With Bun's native SQLite support and optimized performance, hitlimit achieves exceptional throughput
-    for rate limiting in Bun applications.
+    <strong>Memory-first by default</strong> with 6.10M ops/sec performance, 15.7x faster than SQLite.
+    Optional persistence with native bun:sqlite or Redis when you need it.
   </p>
 
   <h2 id="why-bun">Why Use hitlimit with Bun?</h2>
 
   <ul>
-    <li><strong>Native SQLite</strong> - Leverage Bun's built-in SQLite for zero-dependency persistent storage</li>
+    <li><strong>Memory-First</strong> - 6.10M ops/sec by default, 15.7x faster than SQLite (v1.1+)</li>
+    <li><strong>Optional Persistence</strong> - Native bun:sqlite (386K ops/sec) or Redis when needed</li>
     <li><strong>Optimized Performance</strong> - Take advantage of Bun's speed with our optimized adapters</li>
-    <li><strong>Bun.serve Integration</strong> - Direct integration with Bun's HTTP server</li>
-    <li><strong>Elysia Plugin</strong> - First-class plugin for the Elysia framework</li>
+    <li><strong>Multi-Framework</strong> - Bun.serve, Elysia, and Hono support</li>
   </ul>
 
   <h2 id="quick-example">Quick Example</h2>
@@ -63,7 +63,7 @@ Bun.<span class="fn">serve</span>({"{"}
     <pre><code>bun add @joint-ops/hitlimit-bun</code></pre>
   </div>
 
-  <p>This package includes Bun-specific optimizations and native SQLite store support.</p>
+  <p>This package includes Bun-specific optimizations with memory-first design (6.10M ops/sec) and optional native bun:sqlite or Redis stores.</p>
 
   <h2 id="documentation">Documentation</h2>
 
@@ -72,8 +72,9 @@ Bun.<span class="fn">serve</span>({"{"}
     <li><a href="/docs/bun/quick-start">Quick Start</a> - Get started in 5 minutes</li>
     <li><a href="/docs/bun/bun-serve">Bun.serve</a> - Direct HTTP server integration</li>
     <li><a href="/docs/bun/elysia">Elysia</a> - Elysia framework plugin</li>
-    <li><a href="/docs/bun/stores">Stores</a> - Native SQLite and memory stores</li>
-    <li><a href="/docs/bun/performance">Performance</a> - Benchmarks and optimization tips</li>
+    <li><a href="/docs/bun/hono">Hono</a> - Hono framework support</li>
+    <li><a href="/docs/bun/stores">Stores</a> - Memory (default), SQLite, and Redis stores</li>
+    <li><a href="/docs/bun/performance">Performance</a> - 6.10M ops/sec benchmarks and tips</li>
   </ul>
 </DocsLayout>
 

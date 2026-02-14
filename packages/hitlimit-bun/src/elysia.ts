@@ -2,9 +2,20 @@ import { Elysia } from 'elysia'
 import type { HitLimitOptions } from '@joint-ops/hitlimit-types'
 import { resolveConfig } from './core/config.js'
 import { checkLimit } from './core/limiter.js'
-import { sqliteStore } from './stores/sqlite.js'
+import { memoryStore } from './stores/memory.js'
 
 export interface ElysiaHitLimitOptions extends HitLimitOptions<{ request: Request }> {
+  /**
+   * @deprecated Use `store: sqliteStore({ path })` instead.
+   *
+   * Starting with v1.1.0, the default store is Memory for 15.7x better performance.
+   * If you need SQLite persistence:
+   *
+   * ```typescript
+   * import { sqliteStore } from '@joint-ops/hitlimit-bun/stores/sqlite'
+   * hitlimit({ store: sqliteStore({ path: './db.sqlite' }) })
+   * ```
+   */
   sqlitePath?: string
   name?: string
 }
@@ -17,7 +28,18 @@ function getDefaultKey(_ctx: { request: Request }): string {
 
 export function hitlimit(options: ElysiaHitLimitOptions = {}) {
   const pluginName = options.name ?? `hitlimit-${instanceCounter++}`
-  const store = options.store ?? sqliteStore({ path: options.sqlitePath })
+
+  // Deprecation warning for sqlitePath
+  if (options.sqlitePath && !options.store) {
+    console.warn(
+      '[hitlimit-bun] DEPRECATION WARNING: ' +
+      'sqlitePath is deprecated and will be ignored. ' +
+      'Use store: sqliteStore({ path }) instead. ' +
+      'See migration guide: https://hitlimit.jointops.dev/docs/migration/v1.1.0'
+    )
+  }
+
+  const store = options.store ?? memoryStore()
   const config = resolveConfig(options, store, getDefaultKey)
 
   return new Elysia({ name: pluginName })

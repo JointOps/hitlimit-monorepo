@@ -16,7 +16,7 @@ High-performance, framework-agnostic rate limiting for Node.js and Bun. A faster
 | Package | Runtime | Default Store | Install |
 |---------|---------|---------------|---------|
 | [`@joint-ops/hitlimit`](./packages/hitlimit) | Node.js | Memory | `npm i @joint-ops/hitlimit` |
-| [`@joint-ops/hitlimit-bun`](./packages/hitlimit-bun) | Bun | bun:sqlite | `bun add @joint-ops/hitlimit-bun` |
+| [`@joint-ops/hitlimit-bun`](./packages/hitlimit-bun) | Bun | **Memory** (v1.1+) | `bun add @joint-ops/hitlimit-bun` |
 
 ## Quick Start
 
@@ -58,6 +58,24 @@ import { hitlimit } from '@joint-ops/hitlimit-bun/elysia'
 new Elysia()
   .use(hitlimit({ limit: 100, window: '1m' }))
   .listen(3000)
+```
+
+### Hono
+
+```typescript
+// Node.js
+import { Hono } from 'hono'
+import { hitlimit } from '@joint-ops/hitlimit/hono'
+
+const app = new Hono()
+app.use(hitlimit({ limit: 100, window: '1m' }))
+
+// Bun
+import { hitlimit } from '@joint-ops/hitlimit-bun/hono'
+
+const app = new Hono()
+app.use(hitlimit({ limit: 100, window: '1m' }))
+Bun.serve({ port: 3000, fetch: app.fetch })
 ```
 
 ## Community

@@ -1,0 +1,405 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+---
+
+<DocsLayout
+  title="Hono Rate Limit for Bun - hitlimit | Best Bun Hono Rate Limiter"
+  description="Hono rate limiting for Bun with hitlimit-bun. Blazing-fast rate limiter for Hono on Bun runtime with 6M+ ops/sec, native memory store, Redis support, and tiered limits."
+  keywords="bun hono rate limit, hono bun rate limiter, hono bun throttle, hono bun middleware, bun hono rate limit, hono api protection, hono redis, hono memory store"
+>
+  <h1>Hono (Bun)</h1>
+
+  <p>
+    hitlimit provides a blazing-fast adapter for <strong>Hono</strong> running on Bun.
+    With Bun's native speed and hitlimit's memory-first design, achieve <strong>6M+ ops/sec</strong> rate limiting performance.
+  </p>
+
+  <h2 id="installation">Installation</h2>
+
+  <p>Install hitlimit-bun alongside Hono:</p>
+
+  <div class="code-block">
+    <pre><code>bun add @joint-ops/hitlimit-bun hono</code></pre>
+  </div>
+
+  <h2 id="basic-usage">Basic Usage</h2>
+
+  <p>Add rate limiting to your Hono application running on Bun:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">app.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} Hono {"}"} <span class="kw">from</span> <span class="str">'hono'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/hono'</span>
+
+<span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Hono</span>()
+
+<span class="cm">// Apply rate limiting to all routes</span>
+app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+{"}"}))
+
+app.<span class="fn">get</span>(<span class="str">'/'</span>, (c) => c.<span class="fn">text</span>(<span class="str">'Hello Bun + Hono!'</span>))
+app.<span class="fn">get</span>(<span class="str">'/api/data'</span>, (c) => c.<span class="fn">json</span>({"{"} data: <span class="str">'protected'</span> {"}"}))
+
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  fetch: app.fetch
+{"}"})
+
+console.<span class="fn">log</span>(<span class="str">'Server running on port 3000'</span>)</code></pre>
+  </div>
+
+  <h2 id="route-specific">Route-Specific Limits</h2>
+
+  <p>Apply different limits to specific route groups:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">routes.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} Hono {"}"} <span class="kw">from</span> <span class="str">'hono'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/hono'</span>
+
+<span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Hono</span>()
+
+<span class="cm">// Public routes</span>
+app.<span class="fn">get</span>(<span class="str">'/'</span>, (c) => c.<span class="fn">text</span>(<span class="str">'Welcome'</span>))
+
+<span class="cm">// Strict limit for auth routes</span>
+<span class="kw">const</span> auth = <span class="kw">new</span> <span class="fn">Hono</span>()
+auth.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"} limit: <span class="num">5</span>, window: <span class="str">'15m'</span> {"}"}))
+auth.<span class="fn">post</span>(<span class="str">'/login'</span>, (c) => c.<span class="fn">json</span>({"{"} success: <span class="kw">true</span> {"}"}))
+auth.<span class="fn">post</span>(<span class="str">'/register'</span>, (c) => c.<span class="fn">json</span>({"{"} success: <span class="kw">true</span> {"}"}))
+
+<span class="cm">// Higher limit for API routes</span>
+<span class="kw">const</span> api = <span class="kw">new</span> <span class="fn">Hono</span>()
+api.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"} limit: <span class="num">1000</span>, window: <span class="str">'1m'</span> {"}"}))
+api.<span class="fn">get</span>(<span class="str">'/users'</span>, (c) => c.<span class="fn">json</span>([]))
+api.<span class="fn">get</span>(<span class="str">'/posts'</span>, (c) => c.<span class="fn">json</span>([]))
+
+app.<span class="fn">route</span>(<span class="str">'/auth'</span>, auth)
+app.<span class="fn">route</span>(<span class="str">'/api'</span>, api)
+
+Bun.<span class="fn">serve</span>({"{"} port: <span class="num">3000</span>, fetch: app.fetch {"}"})</code></pre>
+  </div>
+
+  <h2 id="custom-key">Custom Key Extraction</h2>
+
+  <p>Rate limit by user ID, API key, or other identifiers:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">custom-key.ts</span>
+    </div>
+    <pre><code><span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Hono</span>()
+  .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+    limit: <span class="num">100</span>,
+    window: <span class="str">'1m'</span>,
+    key: (c) => {"{"}
+      <span class="cm">// Rate limit by API key header</span>
+      <span class="kw">return</span> c.req.<span class="fn">header</span>(<span class="str">'x-api-key'</span>) || <span class="str">'anonymous'</span>
+    {"}"}
+  {"}"}))
+  .<span class="fn">get</span>(<span class="str">'/api'</span>, (c) => c.<span class="fn">text</span>(<span class="str">'Protected'</span>))</code></pre>
+  </div>
+
+  <h2 id="tiered-limits">Tiered Limits</h2>
+
+  <p>Apply different limits based on subscription plan:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">tiers.ts</span>
+    </div>
+    <pre><code><span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Hono</span>()
+  .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+    tiers: {"{"}
+      free: {"{"} limit: <span class="num">10</span>, window: <span class="str">'1m'</span> {"}"},
+      pro: {"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"},
+      enterprise: {"{"} limit: <span class="num">Infinity</span> {"}"}
+    {"}"},
+    tier: (c) => c.req.<span class="fn">header</span>(<span class="str">'x-plan'</span>) || <span class="str">'free'</span>
+  {"}"}))
+  .<span class="fn">get</span>(<span class="str">'/api'</span>, (c) => c.<span class="fn">json</span>({"{"} data: <span class="str">'...'</span> {"}"}))</code></pre>
+  </div>
+
+  <h2 id="response-customization">Custom Error Response</h2>
+
+  <p>Customize the rate limit exceeded response:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">custom-response.ts</span>
+    </div>
+    <pre><code><span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Hono</span>()
+  .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+    limit: <span class="num">100</span>,
+    window: <span class="str">'1m'</span>,
+    response: (info) => ({"{"}
+      error: <span class="str">'RATE_LIMIT_EXCEEDED'</span>,
+      retryAfter: info.resetIn,
+      limit: info.limit,
+      remaining: info.remaining
+    {"}"})
+  {"}"}))
+  .<span class="fn">get</span>(<span class="str">'/'</span>, (c) => c.<span class="fn">text</span>(<span class="str">'Hello'</span>))</code></pre>
+  </div>
+
+  <h2 id="with-stores">Using Stores</h2>
+
+  <p>Use SQLite or Redis stores for persistence across restarts:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">stores.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} Hono {"}"} <span class="kw">from</span> <span class="str">'hono'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/hono'</span>
+<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/sqlite'</span>
+
+<span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Hono</span>()
+  .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+    limit: <span class="num">100</span>,
+    window: <span class="str">'1m'</span>,
+    store: <span class="fn">sqliteStore</span>({"{"}
+      path: <span class="str">'./rate-limits.db'</span>
+    {"}"})
+  {"}"}))
+  .<span class="fn">get</span>(<span class="str">'/'</span>, (c) => c.<span class="fn">text</span>(<span class="str">'Hello World'</span>))
+
+Bun.<span class="fn">serve</span>({"{"} port: <span class="num">3000</span>, fetch: app.fetch {"}"})</code></pre>
+  </div>
+
+  <h2 id="performance">Performance</h2>
+
+  <p>With Bun's native speed and memory-first design, hitlimit achieves exceptional performance:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Configuration</th>
+        <th>Throughput</th>
+        <th>Overhead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Baseline (no limiter)</td>
+        <td>~120,000 req/sec</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <td>With hitlimit (memory)</td>
+        <td>~105,000 req/sec</td>
+        <td>~12%</td>
+      </tr>
+      <tr>
+        <td>Core rate limiting</td>
+        <td>6.10M ops/sec</td>
+        <td>-</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Tips for maximum performance:</strong></p>
+  <ul>
+    <li>Use memory store (default) for best performance</li>
+    <li>Keep time windows reasonable (1m-15m typical)</li>
+    <li>Use <code>skip</code> to bypass internal/health endpoints</li>
+    <li>Consider tiered limits for different user types</li>
+  </ul>
+
+  <h2 id="vs-node">Bun vs Node.js</h2>
+
+  <p>Hono works on both runtimes. Choose based on your needs:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>Bun</th>
+        <th>Node.js</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Package</td>
+        <td><code>@joint-ops/hitlimit-bun/hono</code></td>
+        <td><code>@joint-ops/hitlimit/hono</code></td>
+      </tr>
+      <tr>
+        <td>Default Store</td>
+        <td>Memory (6M+ ops/sec)</td>
+        <td>Memory (7M+ ops/sec)</td>
+      </tr>
+      <tr>
+        <td>HTTP Throughput</td>
+        <td>~105K req/sec</td>
+        <td>~46K req/sec</td>
+      </tr>
+      <tr>
+        <td>Setup</td>
+        <td><code>Bun.serve({"{"} fetch: app.fetch {"}"})</code></td>
+        <td><code>serve({"{"} fetch: app.fetch {"}"})</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="options">Adapter Options</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Option</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>limit</code></td>
+        <td><code>number</code></td>
+        <td>Maximum requests per window (default: 100)</td>
+      </tr>
+      <tr>
+        <td><code>window</code></td>
+        <td><code>string</code></td>
+        <td>Time window (e.g., '1m', '1h') (default: '1m')</td>
+      </tr>
+      <tr>
+        <td><code>key</code></td>
+        <td><code>function</code></td>
+        <td>Custom key extraction function</td>
+      </tr>
+      <tr>
+        <td><code>store</code></td>
+        <td><code>Store</code></td>
+        <td>Storage backend (default: memory)</td>
+      </tr>
+      <tr>
+        <td><code>response</code></td>
+        <td><code>object | function</code></td>
+        <td>Custom 429 response body</td>
+      </tr>
+      <tr>
+        <td><code>skip</code></td>
+        <td><code>function</code></td>
+        <td>Function to skip rate limiting for certain requests</td>
+      </tr>
+      <tr>
+        <td><code>tiers</code></td>
+        <td><code>object</code></td>
+        <td>Tiered rate limit configurations</td>
+      </tr>
+      <tr>
+        <td><code>tier</code></td>
+        <td><code>function</code></td>
+        <td>Function to resolve which tier a request belongs to</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="migration">Migrating from hono-rate-limiter</h2>
+
+  <p>
+    If you're coming from <code>hono-rate-limiter</code>, hitlimit offers the same functionality with a cleaner API,
+    smaller bundle size (7KB vs 88.5KB), and better performance. See the
+    <a href="/docs/comparison#vs-hono-rate-limiter">full comparison and migration guide</a>.
+  </p>
+
+  <h2 id="next-steps">Next Steps</h2>
+
+  <ul>
+    <li><a href="/docs/bun/stores">Stores</a> - Configure native SQLite or Redis</li>
+    <li><a href="/docs/bun/performance">Performance</a> - Optimization tips</li>
+    <li><a href="/docs/adapters/hono">Node.js + Hono</a> - Use Hono with Node.js</li>
+    <li><a href="/docs/comparison#vs-hono-rate-limiter">vs hono-rate-limiter</a> - Comparison and migration guide</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+  .code-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+  }
+  .dot.red { background: rgba(239, 68, 68, 0.8); }
+  .dot.yellow { background: rgba(234, 179, 8, 0.8); }
+  .dot.green { background: rgba(34, 197, 94, 0.8); }
+  .code-filename {
+    margin-left: 1rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+  .code-block pre {
+    padding: 1.5rem;
+    margin: 0;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: var(--color-text-muted); }
+</style>
