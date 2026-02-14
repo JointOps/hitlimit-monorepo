@@ -1,14 +1,25 @@
 import type { HitLimitOptions } from '@joint-ops/hitlimit-types'
 import { resolveConfig } from './core/config.js'
 import { checkLimit } from './core/limiter.js'
-import { sqliteStore } from './stores/sqlite.js'
+import { memoryStore } from './stores/memory.js'
 
 export type { HitLimitOptions, HitLimitInfo, HitLimitResult, HitLimitStore, StoreResult, TierConfig, HeadersConfig, ResolvedConfig, KeyGenerator, TierResolver, SkipFunction, StoreErrorHandler, ResponseFormatter, ResponseConfig, BanConfig, GroupIdResolver } from '@joint-ops/hitlimit-types'
 export { DEFAULT_LIMIT, DEFAULT_WINDOW, DEFAULT_WINDOW_MS, DEFAULT_MESSAGE } from '@joint-ops/hitlimit-types'
-export { sqliteStore } from './stores/sqlite.js'
+export { memoryStore } from './stores/memory.js'
 export { checkLimit }
 
 export interface BunHitLimitOptions extends HitLimitOptions<Request> {
+  /**
+   * @deprecated Use `store: sqliteStore({ path })` instead.
+   *
+   * Starting with v1.1.0, the default store is Memory for 15.7x better performance.
+   * If you need SQLite persistence:
+   *
+   * ```typescript
+   * import { sqliteStore } from '@joint-ops/hitlimit-bun/stores/sqlite'
+   * hitlimit({ store: sqliteStore({ path: './db.sqlite' }) }, handler)
+   * ```
+   */
   sqlitePath?: string
 }
 
@@ -31,7 +42,17 @@ export function hitlimit(
     return activeServer?.requestIP(req)?.address || 'unknown'
   }
 
-  const store = options.store ?? sqliteStore({ path: options.sqlitePath })
+  // Deprecation warning for sqlitePath
+  if (options.sqlitePath && !options.store) {
+    console.warn(
+      '[hitlimit-bun] DEPRECATION WARNING: ' +
+      'sqlitePath is deprecated and will be ignored. ' +
+      'Use store: sqliteStore({ path }) instead. ' +
+      'See migration guide: https://hitlimit.jointops.dev/docs/migration/v1.1.0'
+    )
+  }
+
+  const store = options.store ?? memoryStore()
   const config = resolveConfig(options, store, options.key ?? defaultKey)
 
   // Pre-compute flags
@@ -182,7 +203,17 @@ export function createHitLimit(options: BunHitLimitOptions = {}): HitLimiter {
     return activeServer?.requestIP(req)?.address || 'unknown'
   }
 
-  const store = options.store ?? sqliteStore({ path: options.sqlitePath })
+  // Deprecation warning for sqlitePath
+  if (options.sqlitePath && !options.store) {
+    console.warn(
+      '[hitlimit-bun] DEPRECATION WARNING: ' +
+      'sqlitePath is deprecated and will be ignored. ' +
+      'Use store: sqliteStore({ path }) instead. ' +
+      'See migration guide: https://hitlimit.jointops.dev/docs/migration/v1.1.0'
+    )
+  }
+
+  const store = options.store ?? memoryStore()
   const config = resolveConfig(options, store, options.key ?? defaultKey)
 
   return {
