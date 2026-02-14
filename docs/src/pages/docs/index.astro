@@ -25,7 +25,7 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
         </svg>
       </div>
       <h3>Lightning Fast</h3>
-      <p>Sub-millisecond overhead with optimized algorithms. Benchmarked at <strong>200K+ req/s</strong> on modern hardware.</p>
+      <p>Sub-millisecond overhead with optimized algorithms. Benchmarked at <strong>6M+ ops/sec</strong> (Bun) and <strong>3M+ ops/sec</strong> (Node.js).</p>
     </div>
 
     <div class="feature-card purple">
@@ -105,24 +105,24 @@ app.<span class="fn">listen</span>(<span class="num">3000</span>)</code></pre>
       <tbody>
         <tr>
           <td><strong>Memory</strong></td>
-          <td class="highlight">2.5M ops/s</td>
-          <td>0.3μs (p95: 0.4μs)</td>
+          <td class="highlight">3-6M ops/s</td>
+          <td>~0.3μs (Node.js) / ~166ns (Bun)</td>
         </tr>
         <tr>
           <td><strong>SQLite</strong></td>
-          <td class="highlight">400K ops/s</td>
-          <td>2.5μs (p95: 2.7μs)</td>
+          <td class="highlight">387-462K ops/s</td>
+          <td>~2.4μs</td>
         </tr>
         <tr>
           <td><strong>Redis</strong></td>
-          <td class="highlight">6.7K ops/s</td>
-          <td>150μs (network-bound)</td>
+          <td class="highlight">5.4-6.7K ops/s</td>
+          <td>~145μs (network-bound)</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <p class="note">Benchmarked on Apple M1 Max with 64GB RAM</p>
+  <p class="note">Benchmarked on Apple M2 (ARM64)</p>
 
   <h2 id="getting-started">Getting Started</h2>
 

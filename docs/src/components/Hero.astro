@@ -7,7 +7,7 @@
       <!-- Badge -->
       <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[var(--color-border)] bg-[var(--color-bg-surface)] mb-8 animate-fade-in">
         <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-        <span class="text-sm text-[var(--color-text-secondary)]">v1.0 now available</span>
+        <span class="text-sm text-[var(--color-text-secondary)]">v1.1.0 — Memory-first + Hono</span>
         <svg class="w-4 h-4 text-[var(--color-text-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -21,7 +21,7 @@
 
       <!-- Subheading -->
       <p class="text-lg sm:text-xl text-[var(--color-text-secondary)] max-w-2xl mx-auto mb-10 animate-fade-in-up animation-delay-100">
-        Lightning-fast rate limiting for Node.js, Bun, and beyond.
+        Lightning-fast rate limiting for Express, Fastify, Hono, NestJS, Bun & Elysia.
         Protect your APIs with <span class="text-white font-medium">sub-millisecond</span> performance.
       </p>
 
@@ -71,8 +71,7 @@
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
-  window: <span class="str">'1m'</span>,
-  store: <span class="str">'sqlite'</span>
+  window: <span class="str">'1m'</span>
 {"}"})
 
 app.<span class="fn">use</span>(limiter) <span class="cm">// That's it!</span></code></pre>

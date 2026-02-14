@@ -57,7 +57,7 @@ const icons: Record<string, string> = {
         </span>
         <span class="logo-text">hitlimit</span>
       </a>
-      <span class="version-badge">v1.0.6</span>
+      <span class="version-badge">v1.1.0</span>
     </div>
 
     <!-- Search -->
@@ -618,56 +618,45 @@ const icons: Record<string, string> = {
 </style>
 
 <script>
-  function initSidebar() {
-    // Toggle functionality for main sections
-    const toggles = document.querySelectorAll<HTMLButtonElement>('[data-section-toggle]');
+  // Use document-level event delegation so it works with multiple sidebar
+  // instances (mobile drawer + desktop) and survives Astro page transitions.
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
 
-    toggles.forEach(toggle => {
-      const newToggle = toggle.cloneNode(true) as HTMLButtonElement;
-      toggle.parentNode?.replaceChild(newToggle, toggle);
+    // Section toggle
+    const sectionToggle = target.closest<HTMLButtonElement>('[data-section-toggle]');
+    if (sectionToggle) {
+      e.preventDefault();
+      const sidebar = sectionToggle.closest('.sidebar-wrapper');
+      if (!sidebar) return;
+      const sectionIndex = sectionToggle.getAttribute('data-section-toggle');
+      const content = sidebar.querySelector(`[data-section-content="${sectionIndex}"]`);
+      const chevron = sectionToggle.querySelector('.chevron');
+      const isExpanded = sectionToggle.getAttribute('aria-expanded') === 'true';
 
-      newToggle.addEventListener('click', (e) => {
-        e.preventDefault();
-        const sectionIndex = newToggle.getAttribute('data-section-toggle');
-        const content = document.querySelector(`[data-section-content="${sectionIndex}"]`);
-        const chevron = newToggle.querySelector('.chevron');
-        const isExpanded = newToggle.getAttribute('aria-expanded') === 'true';
+      sectionToggle.setAttribute('aria-expanded', String(!isExpanded));
+      sectionToggle.classList.toggle('active', !isExpanded);
+      content?.classList.toggle('expanded', !isExpanded);
+      chevron?.classList.toggle('expanded', !isExpanded);
+      return;
+    }
 
-        newToggle.setAttribute('aria-expanded', String(!isExpanded));
-        newToggle.classList.toggle('active', !isExpanded);
-        content?.classList.toggle('expanded', !isExpanded);
-        chevron?.classList.toggle('expanded', !isExpanded);
-      });
-    });
+    // Subsection toggle
+    const subToggle = target.closest<HTMLButtonElement>('[data-subsection-toggle]');
+    if (subToggle) {
+      e.preventDefault();
+      e.stopPropagation();
+      const sidebar = subToggle.closest('.sidebar-wrapper');
+      if (!sidebar) return;
+      const subIndex = subToggle.getAttribute('data-subsection-toggle');
+      const content = sidebar.querySelector(`[data-subsection-content="${subIndex}"]`);
+      const chevron = subToggle.querySelector('.sub-chevron');
+      const isExpanded = subToggle.getAttribute('aria-expanded') === 'true';
 
-    // Toggle functionality for subsections
-    const subToggles = document.querySelectorAll<HTMLButtonElement>('[data-subsection-toggle]');
-
-    subToggles.forEach(toggle => {
-      const newToggle = toggle.cloneNode(true) as HTMLButtonElement;
-      toggle.parentNode?.replaceChild(newToggle, toggle);
-
-      newToggle.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const subIndex = newToggle.getAttribute('data-subsection-toggle');
-        const content = document.querySelector(`[data-subsection-content="${subIndex}"]`);
-        const chevron = newToggle.querySelector('.sub-chevron');
-        const isExpanded = newToggle.getAttribute('aria-expanded') === 'true';
-
-        newToggle.setAttribute('aria-expanded', String(!isExpanded));
-        newToggle.classList.toggle('active', !isExpanded);
-        content?.classList.toggle('expanded', !isExpanded);
-        chevron?.classList.toggle('expanded', !isExpanded);
-      });
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSidebar);
-  } else {
-    initSidebar();
-  }
-
-  document.addEventListener('astro:after-swap', initSidebar);
+      subToggle.setAttribute('aria-expanded', String(!isExpanded));
+      subToggle.classList.toggle('active', !isExpanded);
+      content?.classList.toggle('expanded', !isExpanded);
+      chevron?.classList.toggle('expanded', !isExpanded);
+    }
+  });
 </script>

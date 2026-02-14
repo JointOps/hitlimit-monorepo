@@ -122,10 +122,36 @@ const navLinks = [
 </header>
 
 <script>
-  const btn = document.getElementById('mobile-menu-btn');
-  const menu = document.getElementById('mobile-menu');
+  function initNav() {
+    const btn = document.getElementById('mobile-menu-btn');
+    const menu = document.getElementById('mobile-menu');
+    // Mobile menu toggle
+    btn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu?.classList.toggle('hidden');
+    });
 
-  btn?.addEventListener('click', () => {
-    menu?.classList.toggle('hidden');
-  });
+    // Close menu on link click
+    menu?.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => menu?.classList.add('hidden'));
+    });
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target as Node) && e.target !== btn) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu && !menu.classList.contains('hidden')) {
+        menu.classList.add('hidden');
+      }
+    });
+
+  }
+
+  initNav();
+  document.addEventListener('astro:after-swap', initNav);
 </script>

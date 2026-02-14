@@ -96,7 +96,6 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 <span class="cm">// Direct messages - stricter for new conversations</span>
 <span class="kw">export const</span> dmLimit = <span class="fn">hitlimit</span>({"{"}
   store: redis,
-  limit: <span class="num">20</span>,
   window: <span class="str">'1h'</span>,
   key: (req) => {"{"}
     <span class="cm">// Different limits for new vs existing conversations</span>

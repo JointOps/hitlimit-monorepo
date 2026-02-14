@@ -121,7 +121,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "What is hitlimit?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "hitlimit is an open-source rate limiting library for Node.js and Bun created by JointOps. It provides sub-millisecond performance, is 2x faster than express-rate-limit, and has a tiny ~7KB bundle size. It supports Express, NestJS, Bun, and Elysia frameworks with memory, SQLite, and Redis stores."
+            "text": "hitlimit is an open-source rate limiting library for Node.js and Bun created by JointOps. It provides sub-millisecond performance, is 2x faster than express-rate-limit, and has a tiny ~7KB bundle size. It supports Express, Fastify, Hono, NestJS, Bun.serve, and Elysia frameworks with memory, SQLite, and Redis stores."
           }
         },
         {
@@ -315,5 +315,11 @@ const ogImage = `${siteUrl}/og-image.png`;
 
   main {
     animation: fade-in-up 0.6s ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    main {
+      animation: none;
+    }
   }
 </style>
