@@ -51,6 +51,7 @@ export const navigation: NavSection[] = [
     items: [
       { label: 'Express.js', href: '/docs/adapters/express' },
       { label: 'Fastify', href: '/docs/adapters/fastify' },
+      { label: 'Hono', href: '/docs/adapters/hono' },
       { label: 'NestJS', href: '/docs/adapters/nestjs' },
       { label: 'Node.js HTTP', href: '/docs/adapters/node' },
     ],
@@ -96,6 +97,7 @@ export const navigation: NavSection[] = [
         items: [
           { label: 'Bun.serve', href: '/docs/bun/bun-serve' },
           { label: 'Elysia Plugin', href: '/docs/bun/elysia' },
+          { label: 'Hono', href: '/docs/bun/hono' },
         ],
       },
       {

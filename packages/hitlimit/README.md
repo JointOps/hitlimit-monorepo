@@ -17,7 +17,7 @@
 - **Blazing Fast** - 2,450,000+ ops/sec with memory store (multi-IP scenarios), ~7% HTTP overhead
 - **Zero Config** - Works out of the box with sensible defaults
 - **Tiny Footprint** - Only ~7KB core, zero runtime dependencies
-- **Framework Agnostic** - Express, NestJS, Fastify, native HTTP
+- **Framework Agnostic** - Express, Fastify, Hono, NestJS, native HTTP
 - **Multiple Stores** - Memory, Redis, SQLite for distributed systems
 - **TypeScript First** - Full type safety and IntelliSense support
 - **Flexible Keys** - Rate limit by IP, user ID, API key, or custom logic
@@ -122,6 +122,24 @@ await app.register(hitlimit, {
 
 app.get('/api', () => ({ status: 'ok' }))
 await app.listen({ port: 3000 })
+```
+
+### Hono Rate Limiting
+
+```typescript
+import { Hono } from 'hono'
+import { serve } from '@hono/node-server'
+import { hitlimit } from '@joint-ops/hitlimit/hono'
+
+const app = new Hono()
+
+app.use(hitlimit({
+  limit: 100,
+  window: '1m'
+}))
+
+app.get('/api', (c) => c.json({ status: 'ok' }))
+serve({ fetch: app.fetch, port: 3000 })
 ```
 
 ### NestJS Rate Limiting

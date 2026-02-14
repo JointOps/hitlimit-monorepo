@@ -6,32 +6,32 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-Native-black.svg)](https://bun.sh)
 
-> The fastest rate limiter for Bun - Native bun:sqlite performance | Elysia rate limit plugin
+> The fastest rate limiter for Bun - 6M+ ops/sec with memory-first design | Elysia, Hono & Bun.serve
 
-**hitlimit-bun** is a high-performance, Bun-native rate limiting library for Bun.serve and Elysia applications. Built specifically for Bun's runtime with native bun:sqlite for maximum performance. The only rate limiter designed from the ground up for Bun.
+**hitlimit-bun** is a blazing-fast, Bun-native rate limiting library for Bun.serve, Elysia, and Hono applications. **Memory-first by default** with 6.10M ops/sec performance (15.7x faster than SQLite). Optional persistence with native bun:sqlite or Redis when you need it.
 
 **[Documentation](https://hitlimit.jointops.dev/docs/bun)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[npm](https://www.npmjs.com/package/@joint-ops/hitlimit-bun)**
 
 ## ⚡ Why hitlimit-bun?
 
-**hitlimit-bun uses Bun's native SQLite** - no FFI overhead, no Node.js polyfills.
+**Memory-first for maximum performance.** 15.7x faster than SQLite in high-traffic scenarios.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                                                                 │
-│  bun:sqlite         ████████████████████████░░░  386,000 ops/s  │
-│  better-sqlite3     ████████████████████████░░░  400,000 ops/s* │
+│  Memory (v1.1+)     ██████████████████████████████  6.10M ops/s │
+│  SQLite (v1.0)      █░░░░░░░░░░░░░░░░░░░░░░░░░░░░  386K ops/s  │
 │                                                                 │
-│  *estimated - bun:sqlite has zero FFI overhead                  │
+│  15.7x performance improvement with memory default             │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+- **🚀 Memory-First** - 6.10M ops/sec by default (v1.1.0+), 15.7x faster than SQLite
 - **Bun Native** - Built specifically for Bun's runtime, not a Node.js port
-- **6.1M ops/sec** - Memory store (multi-IP scenarios)
-- **386K ops/sec** - With bun:sqlite (multi-IP scenarios)
 - **Zero Config** - Works out of the box with sensible defaults
-- **Elysia Plugin** - First-class Elysia framework integration
+- **Framework Support** - First-class Elysia and Hono integration
+- **Optional Persistence** - SQLite (386K ops/sec) or Redis (6.9K ops/sec) when needed
 - **TypeScript First** - Full type safety and IntelliSense support
 - **Auto-Ban** - Automatically ban repeat offenders after threshold violations
 - **Shared Limits** - Group rate limits via groupId for teams/tenants
@@ -65,6 +65,20 @@ new Elysia()
   .use(hitlimit({ limit: 100, window: '1m' }))
   .get('/', () => 'Hello World!')
   .listen(3000)
+```
+
+### Hono Rate Limiting
+
+```typescript
+import { Hono } from 'hono'
+import { hitlimit } from '@joint-ops/hitlimit-bun/hono'
+
+const app = new Hono()
+
+app.use(hitlimit({ limit: 100, window: '1m' }))
+app.get('/', (c) => c.text('Hello Bun!'))
+
+Bun.serve({ port: 3000, fetch: app.fetch })
 ```
 
 ### Using createHitLimit
