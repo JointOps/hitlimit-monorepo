@@ -1,6 +1,6 @@
 {
   "name": "@joint-ops/hitlimit",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "Fast rate limiting middleware for Express, Fastify, NestJS & Node.js - API throttling, brute force protection, request limiting",
   "author": {
     "name": "Shayan M Hussain",
