@@ -6,6 +6,7 @@ export interface SqliteStoreOptions {
 }
 
 class SqliteStore implements HitLimitStore {
+  isSync = true as const
   private db: Database.Database
   private hitStmt: Database.Statement
   private getStmt: Database.Statement

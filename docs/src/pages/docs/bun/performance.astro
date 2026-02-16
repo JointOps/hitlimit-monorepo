@@ -4,14 +4,14 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 
 <DocsLayout
   title="Bun Rate Limiter Performance - hitlimit-bun | Benchmarks & Optimization"
-  description="Performance benchmarks for hitlimit-bun. Memory-first design with 6.10M ops/sec (15.7x faster than SQLite). Real-world multi-IP benchmarks, optimization tips, and production configuration."
+  description="Performance benchmarks for hitlimit-bun. Memory-first design with 7.29M ops/sec (14.6x faster than SQLite). Real-world multi-IP benchmarks, optimization tips, and production configuration."
   keywords="bun rate limit performance, hitlimit benchmarks, bun vs nodejs speed, bun memory store, bun sqlite performance, rate limiter throughput, bun api performance, high performance rate limiting"
 >
   <h1>Bun Performance</h1>
 
   <p>
     hitlimit-bun is <strong>memory-first by default</strong> for maximum performance.
-    With 6.10M ops/sec throughput (15.7x faster than SQLite), it's optimized for high-traffic applications.
+    With 7.29M ops/sec throughput (14.6x faster than SQLite), it's optimized for high-traffic applications.
     This guide covers benchmarks, optimization tips, and when to use persistence stores.
   </p>
 
@@ -33,32 +33,32 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
       <tbody>
         <tr>
           <td><strong>Memory (Default v1.1+)</strong></td>
-          <td class="highlight">6.10M</td>
-          <td>166ns</td>
-          <td>250ns</td>
+          <td class="highlight">5.00M</td>
+          <td>167ns</td>
+          <td>542ns</td>
           <td class="good">Baseline</td>
         </tr>
         <tr>
           <td><strong>bun:sqlite</strong></td>
-          <td>387K</td>
-          <td>2.42μs</td>
-          <td>5.04μs</td>
-          <td class="warn">15.7x slower</td>
+          <td>379K</td>
+          <td>2.50μs</td>
+          <td>5.13μs</td>
+          <td class="warn">13x slower</td>
         </tr>
         <tr>
           <td><strong>Redis (Local)</strong></td>
-          <td>5.4K</td>
-          <td>145μs</td>
-          <td>447μs</td>
-          <td class="warn">1,130x slower</td>
+          <td>5.2K</td>
+          <td>148μs</td>
+          <td>513μs</td>
+          <td class="warn">960x slower</td>
         </tr>
       </tbody>
     </table>
   </div>
 
   <p class="note">
-    <strong>Real-world scenario:</strong> 10,000 unique IPs. Benchmarked using Bun 1.3.1 with hitlimit-bun.
-    <br>Single-IP performance: Memory 7.21M ops/s, SQLite 520K ops/s, Redis 6.9K ops/s.
+    <strong>Real-world scenario:</strong> 10,000 unique IPs. Benchmarked using Bun 1.3.7 with hitlimit-bun.
+    <br>Single-IP performance: Memory 7.29M ops/s, SQLite 500K ops/s, Redis 6.6K ops/s.
   </p>
 
   <h2 id="vs-nodejs">Bun vs Node.js</h2>
@@ -78,15 +78,15 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
       <tbody>
         <tr>
           <td><strong>Bun 1.3</strong></td>
-          <td class="highlight">7.21M ops/s</td>
-          <td class="highlight">6.10M ops/s</td>
-          <td>387K ops/s</td>
+          <td class="highlight">7.29M ops/s</td>
+          <td class="highlight">5.00M ops/s</td>
+          <td>500K ops/s</td>
         </tr>
         <tr>
           <td><strong>Node.js 24</strong></td>
-          <td>3.13M ops/s</td>
-          <td>2.45M ops/s</td>
-          <td>390K ops/s</td>
+          <td>4.79M ops/s</td>
+          <td>3.26M ops/s</td>
+          <td>499K ops/s</td>
         </tr>
       </tbody>
     </table>

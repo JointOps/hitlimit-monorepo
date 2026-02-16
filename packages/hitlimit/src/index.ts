@@ -40,7 +40,46 @@ export function hitlimit(options: HitLimitOptions<Request> = {}) {
   const windowMs = config.windowMs
   const responseConfig = config.response
 
-  // Fast path: no skip, no tiers, no ban, no group (most common case)
+  const isSyncStore = store.isSync === true
+  const isSyncKey = !options.key
+
+  // Sync fast path: sync store + default key + no skip/tiers/ban/group
+  // Pure synchronous execution — no async, no await, no microtask scheduling
+  if (!hasSkip && !hasTiers && !hasBan && !hasGroup && isSyncStore && isSyncKey) {
+    return (req: Request, res: Response, next: NextFunction) => {
+      const key = req.ip || req.socket?.remoteAddress || 'unknown'
+      const result = store.hit(key, windowMs, limit) as import('@joint-ops/hitlimit-types').StoreResult
+      const allowed = result.count <= limit
+      const remaining = Math.max(0, limit - result.count)
+      const resetIn = Math.ceil((result.resetAt - Date.now()) / 1000)
+
+      if (standardHeaders) {
+        res.setHeader('RateLimit-Limit', limit)
+        res.setHeader('RateLimit-Remaining', remaining)
+        res.setHeader('RateLimit-Reset', resetIn)
+      }
+      if (legacyHeaders) {
+        res.setHeader('X-RateLimit-Limit', limit)
+        res.setHeader('X-RateLimit-Remaining', remaining)
+        res.setHeader('X-RateLimit-Reset', Math.ceil(result.resetAt / 1000))
+      }
+
+      if (!allowed) {
+        if (retryAfterHeader) {
+          res.setHeader('Retry-After', resetIn)
+        }
+        const body = buildResponseBody(responseConfig, {
+          limit, remaining: 0, resetIn, resetAt: result.resetAt, key
+        })
+        res.status(429).json(body)
+        return
+      }
+
+      next()
+    }
+  }
+
+  // Async fast path: no skip, no tiers, no ban, no group (async store or custom key)
   if (!hasSkip && !hasTiers && !hasBan && !hasGroup) {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -50,7 +89,6 @@ export function hitlimit(options: HitLimitOptions<Request> = {}) {
         const remaining = Math.max(0, limit - result.count)
         const resetIn = Math.ceil((result.resetAt - Date.now()) / 1000)
 
-        // Set headers directly
         if (standardHeaders) {
           res.setHeader('RateLimit-Limit', limit)
           res.setHeader('RateLimit-Remaining', remaining)

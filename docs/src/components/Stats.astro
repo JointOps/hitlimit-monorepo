@@ -1,17 +1,17 @@
 ---
 // Real benchmarks from benchmarks/results/bun-latest.md & node-latest.md
 const stats = [
-  { value: '6M+', label: 'ops/sec', sublabel: 'Bun memory store' },
+  { value: '7M+', label: 'ops/sec', sublabel: 'Bun memory store' },
   { value: '<1ms', label: 'Latency', sublabel: 'p95 response time' },
   { value: '0', label: 'Dependencies', sublabel: 'for core module' },
   { value: '100%', label: 'TypeScript', sublabel: 'fully typed' },
 ];
 
-// Real benchmarks - Bun v1.1.0 numbers from benchmarks/results/bun-latest.md
+// Real benchmarks - Bun v1.1.1 numbers from benchmarks/results/bun-latest.md
 const benchmarks = [
-  { store: 'Memory', throughput: '6.10M', latency: '~166ns', note: 'Fastest for high-traffic', color: 'cyan' },
-  { store: 'SQLite', throughput: '387K', latency: '~2.4μs', note: 'Persistent storage', color: 'purple' },
-  { store: 'Redis', throughput: '5.4K', latency: '~145μs', note: 'Distributed systems', color: 'cyan' },
+  { store: 'Memory', throughput: '7.29M', latency: '~137ns', note: 'Fastest for high-traffic', color: 'cyan' },
+  { store: 'SQLite', throughput: '500K', latency: '~2.0μs', note: 'Persistent storage', color: 'purple' },
+  { store: 'Redis', throughput: '6.6K', latency: '~152μs', note: 'Distributed systems', color: 'cyan' },
 ];
 ---
 
@@ -71,7 +71,7 @@ const benchmarks = [
       </div>
 
       <p class="text-center text-sm text-[var(--color-text-muted)] mt-4">
-        Benchmarks from Bun v1.1.0 on Apple M2. Redis throughput is network-bound. Memory and SQLite run in-process.
+        Benchmarks from Bun v1.3.7 on Apple M2. Redis throughput is network-bound. Memory and SQLite run in-process.
       </p>
     </div>
   </div>

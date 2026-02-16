@@ -6,6 +6,7 @@ export interface SqliteStoreOptions {
 }
 
 class BunSqliteStore implements HitLimitStore {
+  isSync = true as const
   private db: Database
   private hitStmt: ReturnType<Database['prepare']>
   private getStmt: ReturnType<Database['prepare']>

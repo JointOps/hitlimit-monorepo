@@ -38,33 +38,33 @@ bun src/scripts/run-bun.ts
 
 | Store | Scenario | Ops/sec | Avg Latency |
 |-------|----------|---------|-------------|
-| **Memory** | single-ip | 3.13M | 319ns |
-| **Memory** | 10k IPs | 2.32M | 431ns |
-| **SQLite** | single-ip | 472K | 2.12μs |
-| **SQLite** | 10k IPs | 393K | 2.54μs |
-| **Redis** | single-ip | 6.7K | 149μs |
-| **Redis** | 10k IPs | 6.5K | 153μs |
+| **Memory** | single-ip | 4.79M | 209ns |
+| **Memory** | 10k IPs | 3.26M | 307ns |
+| **SQLite** | single-ip | 499K | 2.00μs |
+| **SQLite** | 10k IPs | 407K | 2.46μs |
+| **Redis** | single-ip | 6.6K | 152μs |
+| **Redis** | 10k IPs | 6.4K | 157μs |
 
 ### Bun (hitlimit-bun)
 
 | Store | Scenario | Ops/sec | Avg Latency |
 |-------|----------|---------|-------------|
-| **Memory** | single-ip | 7.21M | 139ns |
-| **Memory** | 10k IPs | 6.10M | 164ns |
-| **bun:sqlite** | single-ip | 520K | 1.92μs |
-| **bun:sqlite** | 10k IPs | 387K | 2.59μs |
-| **Redis** | single-ip | 6.9K | 146μs |
-| **Redis** | 10k IPs | 5.4K | 187μs |
+| **Memory** | single-ip | 7.29M | 137ns |
+| **Memory** | 10k IPs | 5.00M | 200ns |
+| **bun:sqlite** | single-ip | 500K | 2.00μs |
+| **bun:sqlite** | 10k IPs | 379K | 2.64μs |
+| **Redis** | single-ip | 6.6K | 152μs |
+| **Redis** | 10k IPs | 5.2K | 192μs |
 
 ### Comparison with Competitors (Memory Store, 10K IPs)
 
 | Library | Ops/sec | vs Fastest |
 |---------|---------|------------|
-| **hitlimit** | **2.32M** | **fastest** |
-| rate-limiter-flexible | 1.63M | 70% |
-| express-rate-limit | 1.22M | 53% |
+| **hitlimit** | **3.26M** | **fastest** |
+| rate-limiter-flexible | 1.64M | 50% |
+| express-rate-limit | 1.17M | 36% |
 
-> Note: For single-IP scenarios, rate-limiter-flexible is slightly faster (3.34M vs 3.13M).
+> hitlimit is now the fastest in ALL memory scenarios — 1.45x on single-IP (4.79M vs 3.30M) and 2x on 10K IPs.
 
 ## Redis Setup
 
@@ -84,7 +84,7 @@ Results are saved to `benchmarks/results/`:
 
 ## Key Insights
 
-1. **Memory Store**: hitlimit is 42% faster than rate-limiter-flexible with many unique IPs
-2. **SQLite Store**: Only hitlimit offers built-in SQLite (400K+ ops/sec)
+1. **Memory Store**: hitlimit is 2x faster than rate-limiter-flexible with many unique IPs (sync fast path)
+2. **SQLite Store**: Only hitlimit offers built-in SQLite (400-500K ops/sec)
 3. **Redis Store**: Network-bound (~150μs latency), all libraries perform similarly
-4. **Bun Runtime**: 2-3x faster than Node.js for memory operations
+4. **Bun Runtime**: 1.5-2x faster than Node.js for memory operations
