@@ -20,13 +20,15 @@ describe('Concurrent Access', () => {
       const windowMs = 60000
       const limit = 1000
 
-      const promises = Array.from({ length: 100 }, () =>
-        store.hit(key, windowMs, limit)
-      )
+      // Memory store is sync and reuses a single result object,
+      // so capture count immediately after each hit
+      const counts: number[] = []
+      for (let i = 0; i < 100; i++) {
+        const result = store.hit(key, windowMs, limit)
+        counts.push((result as { count: number }).count)
+      }
 
-      const results = await Promise.all(promises)
-
-      const counts = results.map(r => r.count).sort((a, b) => a - b)
+      counts.sort((a, b) => a - b)
       expect(counts[0]).toBe(1)
       expect(counts[99]).toBe(100)
 
@@ -38,14 +40,15 @@ describe('Concurrent Access', () => {
       const windowMs = 60000
       const limit = 100
 
-      const promises = Array.from({ length: 50 }, (_, i) =>
-        store.hit(`key-${i}`, windowMs, limit)
-      )
+      // Consume count immediately per hit (reused result object)
+      const counts: number[] = []
+      for (let i = 0; i < 50; i++) {
+        const result = store.hit(`key-${i}`, windowMs, limit)
+        counts.push((result as { count: number }).count)
+      }
 
-      const results = await Promise.all(promises)
-
-      results.forEach(result => {
-        expect(result.count).toBe(1)
+      counts.forEach(count => {
+        expect(count).toBe(1)
       })
     })
 
