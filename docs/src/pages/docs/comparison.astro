@@ -11,7 +11,7 @@ const faqSchema = {
       "name": "How fast is hitlimit compared to express-rate-limit?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "hitlimit achieves 2.32M ops/sec vs 1.22M for express-rate-limit in high-traffic scenarios (10k unique IPs), making it nearly 2x faster. For single-IP scenarios, performance is comparable."
+        "text": "hitlimit achieves 3.26M ops/sec vs 1.17M for express-rate-limit in high-traffic scenarios (10k unique IPs), making it nearly 3x faster. hitlimit is also 1.45x faster than rate-limiter-flexible on single-IP scenarios."
       }
     },
     {
@@ -122,10 +122,10 @@ const faqSchema = {
         </tr>
         <tr>
           <td>Memory Store (high-traffic)</td>
-          <td class="highlight-col good">2.45M ops/s</td>
-          <td>1.21M ops/s</td>
+          <td class="highlight-col good">3.26M ops/s</td>
+          <td>1.17M ops/s</td>
           <td>N/A</td>
-          <td>1.84M ops/s</td>
+          <td>1.64M ops/s</td>
           <td>N/A</td>
         </tr>
         <tr>
@@ -402,27 +402,27 @@ const faqSchema = {
       <div class="benchmark-bar hitlimit" style="width: 100%;"></div>
       <div class="benchmark-info">
         <span class="benchmark-name">hitlimit</span>
-        <span class="benchmark-value">2.45M ops/s</span>
+        <span class="benchmark-value">3.26M ops/s</span>
       </div>
     </div>
     <div class="benchmark-item">
-      <div class="benchmark-bar other" style="width: 75%;"></div>
+      <div class="benchmark-bar other" style="width: 50%;"></div>
       <div class="benchmark-info">
         <span class="benchmark-name">rate-limiter-flexible</span>
-        <span class="benchmark-value">1.84M ops/s</span>
+        <span class="benchmark-value">1.64M ops/s</span>
       </div>
     </div>
     <div class="benchmark-item">
-      <div class="benchmark-bar other" style="width: 49%;"></div>
+      <div class="benchmark-bar other" style="width: 36%;"></div>
       <div class="benchmark-info">
         <span class="benchmark-name">express-rate-limit</span>
-        <span class="benchmark-value">1.21M ops/s</span>
+        <span class="benchmark-value">1.17M ops/s</span>
       </div>
     </div>
   </div>
 
   <p class="benchmark-note">
-    Memory store, 10k unique keys. For single-IP scenarios, rate-limiter-flexible is slightly faster (3.24M vs 3.14M).
+    Memory store, 10k unique keys. hitlimit is also fastest on single-IP (4.79M vs 3.30M for rate-limiter-flexible).
     <a href="/docs/benchmarks">See full benchmarks</a>
   </p>
 

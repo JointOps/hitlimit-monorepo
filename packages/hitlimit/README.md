@@ -14,7 +14,7 @@
 
 ## Why hitlimit?
 
-- **Blazing Fast** - 2,450,000+ ops/sec with memory store (multi-IP scenarios), ~7% HTTP overhead
+- **Blazing Fast** - 4,790,000+ ops/sec with memory store, ~7% HTTP overhead
 - **Zero Config** - Works out of the box with sensible defaults
 - **Tiny Footprint** - Only ~7KB core, zero runtime dependencies
 - **Framework Agnostic** - Express, Fastify, Hono, NestJS, native HTTP
@@ -34,17 +34,17 @@ hitlimit is designed for speed. Here's how it performs:
 
 | Store | Operations/sec | Avg Latency | Use Case |
 |-------|----------------|-------------|----------|
-| **Memory** | 2,450,000+ | 0.41μs | Single instance, no persistence (multi-IP scenarios) |
-| **SQLite** | 390,000+ | 2.56μs | Single instance, persistence needed (multi-IP scenarios) |
-| **Redis** | 6,500+ | 153μs | Multi-instance, distributed |
+| **Memory** | 4,790,000+ | 0.21μs | Single instance, no persistence |
+| **SQLite** | 499,000+ | 2.00μs | Single instance, persistence needed |
+| **Redis** | 6,600+ | 152μs | Multi-instance, distributed |
 
 ### vs Competitors
 
 | Library | Memory 10K IPs (ops/s) | Bundle Size |
 |---------|------------------------|-------------|
-| **hitlimit** | **2,450,000** | **~7KB** |
-| rate-limiter-flexible | 1,840,000 | ~155KB |
-| express-rate-limit | 1,210,000 | ~66KB |
+| **hitlimit** | **3,260,000** | **~7KB** |
+| rate-limiter-flexible | 1,640,000 | ~155KB |
+| express-rate-limit | 1,170,000 | ~66KB |
 
 > **Note:** Benchmark results vary by hardware and environment. Run your own benchmarks to see results on your specific setup.
 
