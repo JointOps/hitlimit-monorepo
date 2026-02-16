@@ -71,7 +71,98 @@ export function hitlimit(
   // Pre-create blocked response JSON
   const blockedBody = JSON.stringify(response)
 
-  // Fast path: no skip, no tiers, no ban, no group (most common case)
+  const isSyncStore = store.isSync === true
+  const isSyncKey = !customKey
+
+  // Sync fast path: sync store + default key + no skip/tiers/ban/group
+  // Pure synchronous execution — no async, no await, no microtask scheduling
+  if (!hasSkip && !hasTiers && !hasBan && !hasGroup && isSyncStore && isSyncKey) {
+    return (req: Request, server: BunServer) => {
+      const ip = server.requestIP(req)?.address || 'unknown'
+      const result = store.hit(ip, windowMs, limit) as import('@joint-ops/hitlimit-types').StoreResult
+      const allowed = result.count <= limit
+
+      if (!allowed) {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+        const resetIn = Math.ceil((result.resetAt - Date.now()) / 1000)
+
+        if (standardHeaders) {
+          headers['RateLimit-Limit'] = String(limit)
+          headers['RateLimit-Remaining'] = '0'
+          headers['RateLimit-Reset'] = String(resetIn)
+        }
+        if (legacyHeaders) {
+          headers['X-RateLimit-Limit'] = String(limit)
+          headers['X-RateLimit-Remaining'] = '0'
+          headers['X-RateLimit-Reset'] = String(Math.ceil(result.resetAt / 1000))
+        }
+        if (retryAfterHeader) {
+          headers['Retry-After'] = String(resetIn)
+        }
+
+        return new Response(blockedBody, { status: 429, headers })
+      }
+
+      const res = handler(req, server)
+
+      // If handler returns a Promise, wrap with headers asynchronously
+      if (res instanceof Promise) {
+        return res.then(response => {
+          if (standardHeaders || legacyHeaders) {
+            const resetIn = Math.ceil((result.resetAt - Date.now()) / 1000)
+            const remaining = Math.max(0, limit - result.count)
+            const newHeaders = new Headers(response.headers)
+
+            if (standardHeaders) {
+              newHeaders.set('RateLimit-Limit', String(limit))
+              newHeaders.set('RateLimit-Remaining', String(remaining))
+              newHeaders.set('RateLimit-Reset', String(resetIn))
+            }
+            if (legacyHeaders) {
+              newHeaders.set('X-RateLimit-Limit', String(limit))
+              newHeaders.set('X-RateLimit-Remaining', String(remaining))
+              newHeaders.set('X-RateLimit-Reset', String(Math.ceil(result.resetAt / 1000)))
+            }
+
+            return new Response(response.body, {
+              status: response.status,
+              statusText: response.statusText,
+              headers: newHeaders
+            })
+          }
+          return response
+        })
+      }
+
+      // Handler returned synchronously — add headers inline
+      if (standardHeaders || legacyHeaders) {
+        const resetIn = Math.ceil((result.resetAt - Date.now()) / 1000)
+        const remaining = Math.max(0, limit - result.count)
+        const newHeaders = new Headers(res.headers)
+
+        if (standardHeaders) {
+          newHeaders.set('RateLimit-Limit', String(limit))
+          newHeaders.set('RateLimit-Remaining', String(remaining))
+          newHeaders.set('RateLimit-Reset', String(resetIn))
+        }
+        if (legacyHeaders) {
+          newHeaders.set('X-RateLimit-Limit', String(limit))
+          newHeaders.set('X-RateLimit-Remaining', String(remaining))
+          newHeaders.set('X-RateLimit-Reset', String(Math.ceil(result.resetAt / 1000)))
+        }
+
+        return new Response(res.body, {
+          status: res.status,
+          statusText: res.statusText,
+          headers: newHeaders
+        })
+      }
+
+      return res
+    }
+  }
+
+  // Async fast path: no skip, no tiers, no ban, no group (async store or custom key)
   if (!hasSkip && !hasTiers && !hasBan && !hasGroup) {
     return async (req: Request, server: BunServer) => {
       try {

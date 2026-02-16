@@ -61,6 +61,8 @@ export interface FastResult {
 }
 
 export interface HitLimitStore {
+  /** If true, hit() is guaranteed to return StoreResult (not Promise) */
+  isSync?: boolean
   hit(key: string, windowMs: number, limit: number): Promise<StoreResult> | StoreResult
   reset(key: string): Promise<void> | void
   shutdown?(): Promise<void> | void

@@ -1,7 +1,9 @@
 import type { IncomingMessage } from 'http'
-import type { HitLimitOptions, HitLimitResult } from '@joint-ops/hitlimit-types'
+import type { HitLimitOptions, HitLimitResult, StoreResult } from '@joint-ops/hitlimit-types'
 import { resolveConfig } from './core/config.js'
 import { checkLimit } from './core/limiter.js'
+import { buildHeaders } from './core/headers.js'
+import { buildBody } from './core/response.js'
 import { memoryStore } from './stores/memory.js'
 
 export type { HitLimitOptions, HitLimitInfo, HitLimitResult, HitLimitStore, StoreResult } from '@joint-ops/hitlimit-types'
@@ -12,7 +14,7 @@ function getDefaultKey(req: IncomingMessage): string {
 }
 
 export interface HitLimiter {
-  check(req: IncomingMessage): Promise<HitLimitResult>
+  check(req: IncomingMessage): HitLimitResult | Promise<HitLimitResult>
   reset(key: string): Promise<void> | void
 }
 
@@ -20,6 +22,39 @@ export function createHitLimit(options: HitLimitOptions<IncomingMessage> = {}): 
   const store = options.store ?? memoryStore()
   const config = resolveConfig(options, store, getDefaultKey)
 
+  const hasSkip = !!config.skip
+  const hasTiers = !!(config.tier && config.tiers)
+  const hasBan = !!config.ban
+  const hasGroup = !!config.group
+  const isSyncStore = store.isSync === true
+  const isSyncKey = !options.key
+
+  // Sync fast path: sync store + default key + no skip/tiers/ban/group
+  if (!hasSkip && !hasTiers && !hasBan && !hasGroup && isSyncStore && isSyncKey) {
+    return {
+      check(req: IncomingMessage): HitLimitResult {
+        const key = req.socket?.remoteAddress || 'unknown'
+        const result = store.hit(key, config.windowMs, config.limit) as StoreResult
+        const allowed = result.count <= config.limit
+        const remaining = Math.max(0, config.limit - result.count)
+        const resetIn = Math.ceil((result.resetAt - Date.now()) / 1000)
+
+        const info = {
+          limit: config.limit, remaining, resetIn, resetAt: result.resetAt, key
+        }
+        const headers = buildHeaders(info, config.headers, allowed)
+        const body = allowed ? {} : buildBody(config.response, info)
+
+        return { allowed, info, headers, body }
+      },
+
+      reset(key: string) {
+        return store.reset(key)
+      }
+    }
+  }
+
+  // Full async path
   return {
     async check(req: IncomingMessage): Promise<HitLimitResult> {
       if (config.skip) {

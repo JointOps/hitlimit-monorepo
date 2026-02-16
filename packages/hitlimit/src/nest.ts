@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import type { Request, Response } from 'express'
-import type { HitLimitOptions, HitLimitStore, ResolvedConfig } from '@joint-ops/hitlimit-types'
+import type { HitLimitOptions, HitLimitStore, ResolvedConfig, StoreResult } from '@joint-ops/hitlimit-types'
 import { resolveConfig } from './core/config.js'
 import { checkLimit } from './core/limiter.js'
 import { memoryStore } from './stores/memory.js'
@@ -46,7 +46,7 @@ export class HitLimitGuard implements CanActivate {
     this.config = resolveConfig(options, this.store, getDefaultKey)
   }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>()
     const response = context.switchToHttp().getResponse<Response>()
 
@@ -64,6 +64,55 @@ export class HitLimitGuard implements CanActivate {
       )
     }
 
+    // Sync fast path: sync store + default key + no skip/tiers/ban/group + no route overrides
+    const store = config.store
+    if (
+      store.isSync === true &&
+      !config.skip &&
+      !(config.tier && config.tiers) &&
+      !config.ban &&
+      !config.group &&
+      !routeOptions?.key
+    ) {
+      return this.canActivateSync(request, response, config)
+    }
+
+    return this.canActivateAsync(request, response, config)
+  }
+
+  private canActivateSync(request: Request, response: Response, config: ResolvedConfig<Request>): boolean {
+    const key = request.ip || request.socket?.remoteAddress || 'unknown'
+    const result = config.store.hit(key, config.windowMs, config.limit) as StoreResult
+    const allowed = result.count <= config.limit
+    const remaining = Math.max(0, config.limit - result.count)
+    const resetIn = Math.ceil((result.resetAt - Date.now()) / 1000)
+
+    if (config.headers.standard) {
+      response.setHeader('RateLimit-Limit', config.limit)
+      response.setHeader('RateLimit-Remaining', remaining)
+      response.setHeader('RateLimit-Reset', resetIn)
+    }
+    if (config.headers.legacy) {
+      response.setHeader('X-RateLimit-Limit', config.limit)
+      response.setHeader('X-RateLimit-Remaining', remaining)
+      response.setHeader('X-RateLimit-Reset', Math.ceil(result.resetAt / 1000))
+    }
+
+    if (!allowed) {
+      if (config.headers.retryAfter) {
+        response.setHeader('Retry-After', resetIn)
+      }
+      const body = typeof config.response === 'function'
+        ? config.response({ limit: config.limit, remaining: 0, resetIn, resetAt: result.resetAt, key })
+        : { ...config.response, limit: config.limit, remaining: 0, resetIn }
+      response.status(429).json(body)
+      return false
+    }
+
+    return true
+  }
+
+  private async canActivateAsync(request: Request, response: Response, config: ResolvedConfig<Request>): Promise<boolean> {
     if (config.skip) {
       const shouldSkip = await config.skip(request)
       if (shouldSkip) {

@@ -27,6 +27,7 @@ interface ViolationEntry {
 }
 
 class MemoryStore implements HitLimitStore {
+  isSync = true as const
   private readonly hits: Map<string, Entry> = new Map()
   private readonly bans: Map<string, BanEntry> = new Map()
   private readonly violations: Map<string, ViolationEntry> = new Map()
