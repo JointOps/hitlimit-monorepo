@@ -121,7 +121,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "What is hitlimit?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "hitlimit is an open-source rate limiting library for Node.js and Bun created by JointOps. It provides sub-millisecond performance, is 2x faster than express-rate-limit, and has a tiny ~7KB bundle size. It supports Express, Fastify, Hono, NestJS, Bun.serve, and Elysia frameworks with memory, SQLite, and Redis stores."
+            "text": "hitlimit is an open-source rate limiting library for Node.js and Bun created by JointOps. It provides sub-millisecond performance, is 3x faster than express-rate-limit in high-traffic scenarios, and has a ~6KB bundle (Node.js) or ~18KB (Bun). It supports Express, Fastify, Hono, NestJS, Bun.serve, and Elysia frameworks with memory, SQLite, and Redis stores."
           }
         },
         {
@@ -129,7 +129,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "Is hitlimit faster than express-rate-limit?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, hitlimit is approximately 2x faster than express-rate-limit in benchmarks. It achieves 2.97 million operations per second compared to 1.52 million for express-rate-limit. It also has a 10x smaller bundle size at ~7KB vs ~64KB."
+            "text": "Yes, hitlimit is approximately 3x faster than express-rate-limit in high-traffic benchmarks. It achieves 3.26 million operations per second compared to 1.17 million for express-rate-limit (10K unique IPs). The Node.js package is ~6KB, compared to ~66KB for express-rate-limit."
           }
         },
         {
@@ -169,7 +169,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "What is the difference between hitlimit and rate-limiter-flexible?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "hitlimit is faster (2.97M ops/sec vs 1.8M), has a smaller bundle (~7KB vs ~120KB), and offers simpler configuration. rate-limiter-flexible has more features but hitlimit covers common use cases with better performance."
+            "text": "hitlimit is faster (3.26M ops/sec vs 1.64M in high-traffic scenarios), has a smaller bundle (~6KB vs ~155KB), and offers simpler configuration. rate-limiter-flexible has more features but hitlimit covers common use cases with better performance."
           }
         },
         {

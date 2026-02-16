@@ -35,7 +35,7 @@
 - **TypeScript First** - Full type safety and IntelliSense support
 - **Auto-Ban** - Automatically ban repeat offenders after threshold violations
 - **Shared Limits** - Group rate limits via groupId for teams/tenants
-- **Tiny Footprint** - ~23KB total, zero runtime dependencies
+- **Tiny Footprint** - ~18KB core bundle, zero runtime dependencies
 
 ## Installation
 

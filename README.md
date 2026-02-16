@@ -88,7 +88,7 @@ Bun.serve({ port: 3000, fetch: app.fetch })
 
 - **Blazing fast** - Optimized for each runtime
 - **Zero config** - Works out of the box
-- **Tiny** - ~7KB (hitlimit), ~23KB (hitlimit-bun)
+- **Tiny** - ~6KB (hitlimit Node.js) / ~18KB (hitlimit-bun)
 - **Pluggable stores** - Memory, SQLite, Redis
 - **Tiered limits** - Different limits per user plan
 - **Customizable** - Keys, responses, headers

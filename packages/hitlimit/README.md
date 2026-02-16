@@ -16,7 +16,7 @@
 
 - **Blazing Fast** - 4,790,000+ ops/sec with memory store, ~7% HTTP overhead
 - **Zero Config** - Works out of the box with sensible defaults
-- **Tiny Footprint** - Only ~7KB core, zero runtime dependencies
+- **Tiny Footprint** - ~6KB core entry point, zero runtime dependencies
 - **Framework Agnostic** - Express, Fastify, Hono, NestJS, native HTTP
 - **Multiple Stores** - Memory, Redis, SQLite for distributed systems
 - **TypeScript First** - Full type safety and IntelliSense support
@@ -42,7 +42,7 @@ hitlimit is designed for speed. Here's how it performs:
 
 | Library | Memory 10K IPs (ops/s) | Bundle Size |
 |---------|------------------------|-------------|
-| **hitlimit** | **3,260,000** | **~7KB** |
+| **hitlimit** | **3,260,000** | **~6KB** |
 | rate-limiter-flexible | 1,640,000 | ~155KB |
 | express-rate-limit | 1,170,000 | ~66KB |
 
