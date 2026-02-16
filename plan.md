@@ -1045,14 +1045,16 @@ Entry becomes leaner (no more timeoutId). Hot path now checks `Date.now() >= ent
 ### Phase 2 Status: COMPLETE ✅
 
 - Branch: `perf/v1.1.2-zero-alloc-sweep`
-- Commit: `1b0299d` — perf: zero-allocation hot path + sweep timer
-- 16 files changed, +973 / -600 lines
+- PR: https://github.com/JointOps/hitlimit-monorepo/pull/15
+- 8 commits, 26 files changed
 - All Node.js tests pass (211/211)
-- All Bun tests pass individually (200/200, full-suite has pre-existing port-conflict flakes)
+- All Bun tests pass (194/200, 6 pre-existing port-conflict flakes in adapter tests)
 - Benchmarks saved to `benchmarks/results/v1.1.2/`
-- Note: Throughput numbers similar to v1.1.1 — the real gains are reduced GC pressure, eliminated timer overhead, and leaner memory entries (not measurable by raw ops/sec)
+- Docs updated across 9 files with v1.1.2 numbers (Option A: multi-IP-10k lead)
+- Contributor update: ShayanHussainSB → tanv33 across all plan.md references
+- Performance tradeoff: single-IP -12.6% (Date.now overhead), multi-IP-10k +2.7% (Node) / +12.3% (Bun)
 - 2.3 (inline key extraction) was already done in Phase 1's sync fast path
-- **Next**: Create PR, merge, bump version, tag release, then start Phase 3
+- **Next**: Merge PR, tag v1.1.2, push tag to trigger release CI, then start Phase 3
 
 ---
 
