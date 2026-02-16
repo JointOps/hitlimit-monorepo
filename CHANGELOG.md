@@ -2,7 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - v1.1.1
+## [Unreleased] - v1.1.2
+
+### Internal
+
+- **Zero-allocation hot path** — reuse a single result object in memory store instead of creating a new one per hit
+- **Sweep timer** — replace per-key setTimeout with a single setInterval (10s) for cleanup
+  - Eliminates thousands of timer handles under high concurrency
+  - Leaner entry objects (no more timeoutId per entry)
+  - Inline expiry check handles entries that expire between sweeps
+- Reduced GC pressure under sustained load
+- Zero breaking changes — all existing code works identically
+
+### Tests
+
+- Added zero-allocation result reuse tests (both packages)
+- Added sweep timer and inline expiry tests
+- Added 100K key memory-bounded test
+
+## [1.1.1] - 2026-02-16
 
 ### Performance
 
