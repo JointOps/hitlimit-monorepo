@@ -288,39 +288,6 @@ hitlimit({
 })
 ```
 
-### Auto-Ban Repeat Offenders
-
-Automatically ban clients that repeatedly exceed rate limits.
-
-```javascript
-hitlimit({
-  limit: 10,
-  window: '1m',
-  ban: {
-    threshold: 5,  // Ban after 5 violations
-    duration: '1h' // Ban lasts 1 hour
-  }
-})
-```
-
-Banned clients receive `X-RateLimit-Ban: true` header and `banned: true` in the response body.
-
-### Grouped / Shared Limits
-
-Rate limit by organization, API key, or any shared identifier.
-
-```javascript
-// Per-API-key rate limiting
-hitlimit({
-  limit: 1000,
-  window: '1h',
-  group: (req) => req.headers['x-api-key'] || 'anonymous'
-})
-
-// Static group prefix
-hitlimit({ group: 'api', limit: 100, window: '1m' })
-```
-
 ## Configuration Options
 
 ```javascript

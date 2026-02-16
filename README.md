@@ -151,9 +151,10 @@ app.use(hitlimit()) // uses memory store
 import { sqliteStore } from '@joint-ops/hitlimit/stores/sqlite'
 app.use(hitlimit({ store: sqliteStore({ path: './ratelimit.db' }) }))
 
-// Bun (uses bun:sqlite - DEFAULT)
+// Bun (uses bun:sqlite)
 import { hitlimit } from '@joint-ops/hitlimit-bun'
-Bun.serve({ fetch: hitlimit({}, handler) }) // uses bun:sqlite by default
+import { sqliteStore } from '@joint-ops/hitlimit-bun'
+Bun.serve({ fetch: hitlimit({ store: sqliteStore({ path: './ratelimit.db' }) }, handler) })
 ```
 
 ### Redis

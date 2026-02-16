@@ -14,7 +14,7 @@
 
 ## ⚡ Why hitlimit-bun?
 
-**Memory-first for maximum performance.** 15.7x faster than SQLite in high-traffic scenarios.
+**Memory-first for maximum performance.** 14.6x faster than SQLite.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -249,7 +249,7 @@ hitlimit({
     retryAfter: true  // Retry-After header on 429
   },
 
-  // Store (default: bun:sqlite)
+  // Store (default: memory)
   store: sqliteStore({ path: './ratelimit.db' }),
 
   // Skip rate limiting
@@ -274,39 +274,30 @@ hitlimit({
 
 ## Storage Backends
 
-### SQLite Store (Default)
+### Memory Store (Default)
 
-Uses Bun's native bun:sqlite for maximum performance. Default store.
+Fastest option, used by default. No persistence.
 
 ```typescript
 import { hitlimit } from '@joint-ops/hitlimit-bun'
 
-// Default - uses bun:sqlite with in-memory database
+// Default - uses memory store (no config needed)
 Bun.serve({
   fetch: hitlimit({}, handler)
 })
+```
 
-// Custom path for persistence
+### SQLite Store
+
+Uses Bun's native bun:sqlite for persistent rate limiting.
+
+```typescript
+import { hitlimit } from '@joint-ops/hitlimit-bun'
 import { sqliteStore } from '@joint-ops/hitlimit-bun'
 
 Bun.serve({
   fetch: hitlimit({
     store: sqliteStore({ path: './ratelimit.db' })
-  }, handler)
-})
-```
-
-### Memory Store
-
-For simple use cases without persistence.
-
-```typescript
-import { hitlimit } from '@joint-ops/hitlimit-bun'
-import { memoryStore } from '@joint-ops/hitlimit-bun/stores/memory'
-
-Bun.serve({
-  fetch: hitlimit({
-    store: memoryStore()
   }, handler)
 })
 ```
@@ -366,7 +357,7 @@ hitlimit-bun is optimized for Bun's runtime with native performance:
 | Store | Operations/sec | vs Node.js |
 |-------|----------------|------------|
 | **Memory** | 7,290,000+ | +52% faster |
-| **bun:sqlite** | 500,000+ | **+6% faster** |
+| **bun:sqlite** | 500,000+ | ~same |
 | **Redis** | 6,600+ | ~same |
 
 ### HTTP Throughput
@@ -437,7 +428,7 @@ new Elysia()
 Node.js rate limiters like express-rate-limit use better-sqlite3 which relies on N-API bindings. In Bun, this adds overhead and loses the performance benefits of Bun's native runtime.
 
 **hitlimit-bun** is built specifically for Bun:
-- Uses native `bun:sqlite` (2.7x faster than better-sqlite3)
+- Uses native `bun:sqlite` (no N-API overhead)
 - No FFI overhead or Node.js polyfills
 - First-class Elysia framework support
 - Optimized for Bun.serve's request handling
