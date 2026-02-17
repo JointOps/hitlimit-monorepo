@@ -1,16 +1,16 @@
 ---
 // Real benchmarks from benchmarks/results/bun-latest.md & node-latest.md
 const stats = [
-  { value: '7M+', label: 'ops/sec', sublabel: 'Bun memory store' },
+  { value: '5M+', label: 'ops/sec', sublabel: 'Bun memory (10K IPs)' },
   { value: '<1ms', label: 'Latency', sublabel: 'p95 response time' },
   { value: '0', label: 'Dependencies', sublabel: 'for core module' },
   { value: '100%', label: 'TypeScript', sublabel: 'fully typed' },
 ];
 
-// Real benchmarks - Bun v1.1.1 numbers from benchmarks/results/bun-latest.md
+// Real benchmarks - Bun v1.1.2 numbers (10K IPs) from benchmarks/results/bun-latest.md
 const benchmarks = [
-  { store: 'Memory', throughput: '7.29M', latency: '~137ns', note: 'Fastest for high-traffic', color: 'cyan' },
-  { store: 'SQLite', throughput: '500K', latency: '~2.0μs', note: 'Persistent storage', color: 'purple' },
+  { store: 'Memory', throughput: '5.62M', latency: '~178ns', note: 'Fastest for high-traffic', color: 'cyan' },
+  { store: 'SQLite', throughput: '383K', latency: '~2.6μs', note: 'Persistent storage', color: 'purple' },
   { store: 'Redis', throughput: '6.6K', latency: '~152μs', note: 'Distributed systems', color: 'cyan' },
 ];
 ---

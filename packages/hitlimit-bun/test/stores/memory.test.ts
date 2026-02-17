@@ -114,4 +114,73 @@ describe('MemoryStore', () => {
       expect(store.recordViolation!('key1', 60000)).toBe(1)
     })
   })
+
+  describe('zero-allocation result reuse', () => {
+    it('returns same object reference from consecutive hits', () => {
+      const result1 = store.hit('key1', 60000, 100)
+      const result2 = store.hit('key1', 60000, 100)
+      expect(result1).toBe(result2)
+    })
+
+    it('result values are correct when consumed immediately', () => {
+      const r1 = store.hit('key1', 60000, 100)
+      const count1 = r1.count
+      expect(count1).toBe(1)
+
+      store.hit('key1', 60000, 100)
+      expect(r1.count).toBe(2)
+
+      const r2 = store.hit('key2', 60000, 100)
+      expect(r2.count).toBe(1)
+      expect(r1.count).toBe(1) // r1 === r2, now shows key2's data
+    })
+
+    it('subsequent hit overwrites previous result reference', () => {
+      const result = store.hit('key1', 60000, 100)
+      expect(result.count).toBe(1)
+
+      store.hit('key2', 60000, 100)
+      expect(result.count).toBe(1)
+
+      store.hit('key1', 60000, 100)
+      expect(result.count).toBe(2)
+    })
+  })
+
+  describe('sweep timer and inline expiry', () => {
+    it('handles expired entry on access before sweep runs', async () => {
+      store.hit('key1', 50, 100)
+      expect(store.hit('key1', 50, 100).count).toBe(2)
+
+      await Bun.sleep(100)
+
+      expect(store.hit('key1', 50, 100).count).toBe(1)
+    })
+
+    it('expired entry gets fresh resetAt', async () => {
+      store.hit('key1', 50, 100)
+
+      await Bun.sleep(100)
+
+      const before = Date.now()
+      const result = store.hit('key1', 60000, 100)
+      expect(result.count).toBe(1)
+      expect(result.resetAt).toBeGreaterThanOrEqual(before + 60000)
+    })
+  })
+
+  describe('memory bounded', () => {
+    it('100K unique keys do not leak after expiry and re-access', async () => {
+      const window = 50
+      for (let i = 0; i < 100_000; i++) {
+        store.hit(`ip-${i}`, window, 100)
+      }
+
+      await Bun.sleep(100)
+
+      for (let i = 0; i < 100; i++) {
+        expect(store.hit(`ip-${i}`, window, 100).count).toBe(1)
+      }
+    })
+  })
 })

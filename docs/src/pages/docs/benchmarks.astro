@@ -86,21 +86,21 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <tbody>
       <tr class="winner hitlimit-win">
         <td><strong>hitlimit</strong></td>
-        <td><strong>4.79M</strong></td>
-        <td>209ns</td>
+        <td><strong>4.19M</strong></td>
+        <td>239ns</td>
         <td><strong>fastest</strong></td>
       </tr>
       <tr>
         <td>rate-limiter-flexible</td>
-        <td>3.30M</td>
-        <td>303ns</td>
-        <td>69%</td>
+        <td>3.32M</td>
+        <td>301ns</td>
+        <td>79%</td>
       </tr>
       <tr>
         <td>express-rate-limit</td>
-        <td>1.14M</td>
-        <td>879ns</td>
-        <td>24%</td>
+        <td>1.30M</td>
+        <td>767ns</td>
+        <td>31%</td>
       </tr>
     </tbody>
   </table>
@@ -120,20 +120,20 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <tbody>
       <tr class="winner hitlimit-win">
         <td><strong>hitlimit</strong></td>
-        <td><strong>3.26M</strong></td>
-        <td>307ns</td>
+        <td><strong>3.35M</strong></td>
+        <td>299ns</td>
         <td><strong>fastest</strong></td>
       </tr>
       <tr>
         <td>rate-limiter-flexible</td>
-        <td>1.64M</td>
-        <td>608ns</td>
-        <td>50%</td>
+        <td>1.58M</td>
+        <td>633ns</td>
+        <td>47%</td>
       </tr>
       <tr>
         <td>express-rate-limit</td>
-        <td>1.17M</td>
-        <td>852ns</td>
+        <td>1.20M</td>
+        <td>833ns</td>
         <td>36%</td>
       </tr>
     </tbody>
@@ -141,7 +141,7 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
 
   <div class="callout">
     <strong>Key Insight:</strong> hitlimit's sync fast path eliminates async/await overhead for in-process stores.
-    For high-traffic APIs, hitlimit is 2x faster than rate-limiter-flexible.
+    For high-traffic APIs, hitlimit is 2.1x faster than rate-limiter-flexible.
   </div>
 
   <h2 id="sqlite-store">SQLite Store</h2>
@@ -152,11 +152,11 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <div class="benchmark-header">SQLite Store (Node.js)</div>
     <div class="benchmark-stats">
       <div class="stat">
-        <span class="stat-value">407-499K</span>
+        <span class="stat-value">428-516K</span>
         <span class="stat-label">ops/sec</span>
       </div>
       <div class="stat">
-        <span class="stat-value">2.0μs</span>
+        <span class="stat-value">1.94μs</span>
         <span class="stat-label">avg latency</span>
       </div>
     </div>
@@ -199,12 +199,12 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <div class="benchmark-header">hitlimit-bun</div>
     <div class="benchmark-stats">
       <div class="stat">
-        <span class="stat-value">7.29M</span>
-        <span class="stat-label">memory ops/sec</span>
+        <span class="stat-value">5.62M</span>
+        <span class="stat-label">memory ops/sec (10K IPs)</span>
       </div>
       <div class="stat">
-        <span class="stat-value">500K</span>
-        <span class="stat-label">sqlite ops/sec</span>
+        <span class="stat-value">383K</span>
+        <span class="stat-label">sqlite ops/sec (10K IPs)</span>
       </div>
     </div>
   </div>
@@ -296,7 +296,7 @@ bun src/scripts/run-bun.ts       # Bun</code></pre>
 
   <div class="callout note">
     <strong>Note:</strong> Benchmark results vary by hardware and environment.
-    hitlimit is now the fastest in ALL memory scenarios — 1.45x faster than rate-limiter-flexible on single-IP and 2x faster on high-traffic (10K IPs).
+    hitlimit is the fastest in ALL memory scenarios — 1.26x faster than rate-limiter-flexible on single-IP and 2.1x faster on high-traffic (10K IPs).
     Run your own benchmarks to see results on your specific setup.
   </div>
 
