@@ -1042,11 +1042,13 @@ Entry becomes leaner (no more timeoutId). Hot path now checks `Date.now() >= ent
 - [ ] `benchmarks/README.md` — Latest results
 - [x] `CHANGELOG.md` — Add v1.1.2 entry
 
-### Phase 2 Status: COMPLETE ✅
+### Phase 2 Status: RELEASED ✅
 
 - Branch: `perf/v1.1.2-zero-alloc-sweep`
-- PR: https://github.com/JointOps/hitlimit-monorepo/pull/15
-- 8 commits, 26 files changed
+- PR: [#15](https://github.com/JointOps/hitlimit-monorepo/pull/15) — merged
+- Release: [v1.1.2](https://github.com/JointOps/hitlimit-monorepo/releases/tag/v1.1.2) — published to npm
+- npm: `@joint-ops/hitlimit@1.1.2`, `@joint-ops/hitlimit-bun@1.1.2`, `@joint-ops/hitlimit-types@1.1.2`
+- 9 commits, 30 files changed
 - All Node.js tests pass (211/211)
 - All Bun tests pass (194/200, 6 pre-existing port-conflict flakes in adapter tests)
 - Benchmarks saved to `benchmarks/results/v1.1.2/`
@@ -1054,7 +1056,6 @@ Entry becomes leaner (no more timeoutId). Hot path now checks `Date.now() >= ent
 - Contributor update: ShayanHussainSB → tanv33 across all plan.md references
 - Performance tradeoff: single-IP -12.6% (Date.now overhead), multi-IP-10k +2.7% (Node) / +12.3% (Bun)
 - 2.3 (inline key extraction) was already done in Phase 1's sync fast path
-- **Next**: Merge PR, tag v1.1.2, push tag to trigger release CI, then start Phase 3
 
 ---
 
