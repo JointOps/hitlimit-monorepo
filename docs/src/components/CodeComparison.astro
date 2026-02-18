@@ -1,9 +1,9 @@
 ---
 ---
 
-<section class="py-24 px-4 border-t border-[var(--color-border)]">
+<section class="py-24 px-4 section-divider">
   <div class="max-w-6xl mx-auto">
-    <div class="text-center mb-16">
+    <div class="text-center mb-16 reveal">
       <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-500/30 bg-purple-500/10 mb-6">
         <span class="text-sm font-semibold text-purple-400">Built for SaaS</span>
       </div>
@@ -16,9 +16,9 @@
       </p>
     </div>
 
-    <div class="grid lg:grid-cols-2 gap-8">
+    <div class="grid lg:grid-cols-2 gap-8 reveal-stagger">
       <!-- Before: express-rate-limit -->
-      <div class="relative">
+      <div class="relative reveal-child">
         <div class="absolute -top-3 left-4 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-semibold uppercase tracking-wider">
           Before
         </div>
@@ -85,7 +85,7 @@ app.<span class="fn">use</span>((<span class="pr">req</span>, <span class="pr">r
       </div>
 
       <!-- After: hitlimit -->
-      <div class="relative">
+      <div class="relative reveal-child">
         <div class="absolute -top-3 left-4 px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30 text-green-400 text-xs font-semibold uppercase tracking-wider">
           After
         </div>
@@ -96,17 +96,18 @@ app.<span class="fn">use</span>((<span class="pr">req</span>, <span class="pr">r
               <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
               <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
             </div>
-            <span class="ml-4 text-xs text-[var(--color-accent)] font-mono font-semibold">hitlimit</span>
+            <span class="ml-4 text-xs text-[var(--color-accent)] font-mono font-semibold">hitlimit — Node.js & Bun</span>
           </div>
           <div class="p-6 font-mono text-sm overflow-x-auto">
-            <pre class="code-text"><code>app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+            <pre class="code-text"><code><span class="cm">// Works with Express, Fastify, Hono, Bun.serve, Elysia...</span>
+<span class="fn">hitlimit</span>({"{"}
   tiers: {"{"}
     free: {"{"} limit: <span class="num">100</span>, window: <span class="str">'1h'</span> {"}"},
     pro: {"{"} limit: <span class="num">5000</span>, window: <span class="str">'1h'</span> {"}"},
     enterprise: {"{"} limit: <span class="num">Infinity</span> {"}"}
   {"}"},
   tier: (<span class="pr">req</span>) => req.user?.plan || <span class="str">'free'</span>
-{"}"}))</code></pre>
+{"}"})</code></pre>
           </div>
           <div class="px-6 py-4 border-t border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
             <div class="flex flex-wrap items-center gap-4 text-sm text-[var(--color-text-muted)]">
@@ -115,7 +116,7 @@ app.<span class="fn">use</span>((<span class="pr">req</span>, <span class="pr">r
                   <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                8 lines
+                7 lines
               </span>
               <span class="flex items-center gap-1">
                 <svg class="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -131,6 +132,13 @@ app.<span class="fn">use</span>((<span class="pr">req</span>, <span class="pr">r
                 </svg>
                 Human time
               </span>
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Any runtime
+              </span>
             </div>
           </div>
         </div>
@@ -138,10 +146,10 @@ app.<span class="fn">use</span>((<span class="pr">req</span>, <span class="pr">r
     </div>
 
     <!-- Reduction callout -->
-    <div class="mt-12 text-center">
+    <div class="mt-12 text-center reveal">
       <div class="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5">
         <span class="text-4xl font-black gradient-text">3x</span>
-        <span class="text-[var(--color-text-secondary)]">less code - the #1 feature for SaaS builders</span>
+        <span class="text-[var(--color-text-secondary)]">less code for the same result</span>
       </div>
     </div>
   </div>

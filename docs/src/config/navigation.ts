@@ -3,6 +3,9 @@
  *
  * This file defines the sidebar structure and provides utilities
  * for navigating between documentation pages.
+ *
+ * Two navigation trees are exported — one for Node.js docs, one for Bun docs.
+ * The runtime switcher in the sidebar toggles between them.
  */
 
 export interface NavItem {
@@ -23,19 +26,9 @@ export interface NavSection {
 }
 
 /**
- * Documentation sidebar structure
- *
- * Order is optimized for user journey:
- * 1. Getting Started - New users start here
- * 2. Adapters (Node.js) - Most common use case
- * 3. Configuration - Customization options
- * 4. Stores - Data persistence options
- * 5. Bun - Alternative runtime
- * 6. Guides - Practical guidance
- * 7. Examples - Real-world patterns
- * 8. API Reference - Technical reference
+ * Node.js documentation sidebar structure
  */
-export const navigation: NavSection[] = [
+export const nodeNavigation: NavSection[] = [
   {
     title: 'Getting Started',
     icon: 'rocket',
@@ -46,7 +39,7 @@ export const navigation: NavSection[] = [
     ],
   },
   {
-    title: 'Node.js Adapters',
+    title: 'Adapters',
     icon: 'plug',
     items: [
       { label: 'Express.js', href: '/docs/adapters/express' },
@@ -78,35 +71,6 @@ export const navigation: NavSection[] = [
       { label: 'SQLite Store', href: '/docs/stores/sqlite' },
       { label: 'Redis Store', href: '/docs/stores/redis' },
       { label: 'Custom Stores', href: '/docs/stores/custom' },
-    ],
-  },
-  {
-    title: 'Bun Runtime',
-    icon: 'zap',
-    subsections: [
-      {
-        title: 'Getting Started',
-        items: [
-          { label: 'Introduction', href: '/docs/bun' },
-          { label: 'Installation', href: '/docs/bun/installation' },
-          { label: 'Quick Start', href: '/docs/bun/quick-start' },
-        ],
-      },
-      {
-        title: 'Adapters',
-        items: [
-          { label: 'Bun.serve', href: '/docs/bun/bun-serve' },
-          { label: 'Elysia Plugin', href: '/docs/bun/elysia' },
-          { label: 'Hono', href: '/docs/bun/hono' },
-        ],
-      },
-      {
-        title: 'Advanced',
-        items: [
-          { label: 'Stores', href: '/docs/bun/stores' },
-          { label: 'Performance', href: '/docs/bun/performance' },
-        ],
-      },
     ],
   },
   {
@@ -152,12 +116,108 @@ export const navigation: NavSection[] = [
 ];
 
 /**
+ * Bun documentation sidebar structure
+ */
+export const bunNavigation: NavSection[] = [
+  {
+    title: 'Getting Started',
+    icon: 'rocket',
+    items: [
+      { label: 'Introduction', href: '/docs' },
+      { label: 'Installation', href: '/docs/installation' },
+      { label: 'Quick Start', href: '/docs/bun/quick-start' },
+    ],
+  },
+  {
+    title: 'Adapters',
+    icon: 'plug',
+    items: [
+      { label: 'Bun.serve', href: '/docs/bun/bun-serve' },
+      { label: 'Elysia Plugin', href: '/docs/bun/elysia' },
+      { label: 'Hono', href: '/docs/adapters/hono' },
+    ],
+  },
+  {
+    title: 'Configuration',
+    icon: 'settings',
+    items: [
+      { label: 'All Options', href: '/docs/configuration/options' },
+      { label: 'Time Windows', href: '/docs/configuration/window' },
+      { label: 'Tiered Limits', href: '/docs/configuration/tiered' },
+      { label: 'Custom Keys', href: '/docs/configuration/custom-key' },
+      { label: 'Custom Responses', href: '/docs/configuration/custom-response' },
+      { label: 'Headers', href: '/docs/configuration/headers' },
+      { label: 'Skip & Whitelist', href: '/docs/configuration/skip' },
+    ],
+  },
+  {
+    title: 'Storage Backends',
+    icon: 'database',
+    items: [
+      { label: 'Overview', href: '/docs/stores/overview' },
+      { label: 'Memory Store', href: '/docs/stores/memory' },
+      { label: 'SQLite Store', href: '/docs/stores/sqlite' },
+      { label: 'Redis Store', href: '/docs/stores/redis' },
+      { label: 'Custom Stores', href: '/docs/stores/custom' },
+    ],
+  },
+  {
+    title: 'Guides',
+    icon: 'book',
+    items: [
+      { label: 'Production Deployment', href: '/docs/guides/production' },
+      { label: 'Scaling', href: '/docs/guides/scaling' },
+      { label: 'Monitoring', href: '/docs/guides/monitoring' },
+      { label: 'Testing', href: '/docs/guides/testing' },
+    ],
+  },
+  {
+    title: 'Examples',
+    icon: 'layers',
+    items: [
+      { label: 'Overview', href: '/docs/bun/examples' },
+      { label: 'SaaS API', href: '/docs/bun/examples/saas' },
+      { label: 'Authentication', href: '/docs/bun/examples/auth' },
+    ],
+  },
+  {
+    title: 'API Reference',
+    icon: 'code',
+    items: [
+      { label: 'hitlimit()', href: '/docs/bun/api/hitlimit' },
+      { label: 'Stores API', href: '/docs/bun/api/stores' },
+      { label: 'TypeScript Types', href: '/docs/api/types' },
+    ],
+  },
+  {
+    title: 'Benchmarks',
+    icon: 'activity',
+    items: [
+      { label: 'Performance Results', href: '/docs/benchmarks' },
+      { label: 'Comparison Overview', href: '/docs/comparison' },
+    ],
+  },
+];
+
+/**
+ * Get navigation array for a given runtime
+ */
+export const getNavigation = (runtime: 'node' | 'bun'): NavSection[] =>
+  runtime === 'bun' ? bunNavigation : nodeNavigation;
+
+/**
+ * Backward-compatible default export
+ */
+export const navigation = nodeNavigation;
+
+/**
  * Get a flat list of all navigation items in order
  */
-export function getFlatNavigation(): NavItem[] {
+export function getFlatNavigation(runtime: 'node' | 'bun' = 'node'): NavItem[] {
   const items: NavItem[] = [];
+  const nav = getNavigation(runtime);
 
-  for (const section of navigation) {
+  for (const section of nav) {
     if (section.items) {
       items.push(...section.items);
     }
@@ -189,8 +249,9 @@ export interface PageNavigation {
 /**
  * Get previous and next pages for a given path
  */
-export function getPageNavigation(currentPath: string): PageNavigation {
-  const flatNav = getFlatNavigation();
+export function getPageNavigation(currentPath: string, runtime: 'node' | 'bun' = 'node'): PageNavigation {
+  const flatNav = getFlatNavigation(runtime);
+  const nav = getNavigation(runtime);
 
   // Normalize path (remove trailing slash)
   const normalizedPath = currentPath.endsWith('/') && currentPath !== '/'
@@ -208,7 +269,7 @@ export function getPageNavigation(currentPath: string): PageNavigation {
 
   // Find section for each item
   const findSection = (href: string): string => {
-    for (const section of navigation) {
+    for (const section of nav) {
       if (section.items?.some(item => item.href === href)) {
         return section.title;
       }
@@ -237,12 +298,14 @@ export function getPageNavigation(currentPath: string): PageNavigation {
 /**
  * Find which section contains the active page
  */
-export function getActiveSectionIndex(currentPath: string): number {
+export function getActiveSectionIndex(currentPath: string, runtime: 'node' | 'bun' = 'node'): number {
   const normalizedPath = currentPath.endsWith('/') && currentPath !== '/'
     ? currentPath.slice(0, -1)
     : currentPath;
 
-  return navigation.findIndex(section => {
+  const nav = getNavigation(runtime);
+
+  return nav.findIndex(section => {
     if (section.items) {
       return section.items.some(
         item => normalizedPath === item.href || currentPath === item.href + '/'

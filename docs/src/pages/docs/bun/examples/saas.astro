@@ -1,0 +1,228 @@
+---
+import DocsLayout from '../../../../layouts/DocsLayout.astro';
+import RuntimeBanner from '../../../../components/RuntimeBanner.astro';
+---
+
+<DocsLayout
+  title="SaaS API Rate Limiting (Bun) - hitlimit-bun | Tiered Limits"
+  description="Production-ready SaaS rate limiting for Bun. Implement tiered limits by subscription plan with Bun.serve and Elysia, Redis for distributed state."
+  keywords="bun saas rate limit, bun tiered rate limit, bun subscription rate limit, hitlimit-bun saas, bun api tier limits"
+>
+  <h1>SaaS API Rate Limiting (Bun)</h1>
+
+  <RuntimeBanner currentRuntime="bun" counterpartHref="/docs/examples/saas" counterpartLabel="Node.js SaaS Example" />
+
+  <p>
+    A complete example for a SaaS application with tiered rate limits based on subscription plans.
+    Uses <code>@joint-ops/hitlimit-bun</code> with Redis for distributed state across multiple Bun instances.
+  </p>
+
+  <h2 id="scenario">Scenario</h2>
+
+  <ul>
+    <li><strong>Free tier:</strong> 100 API requests/hour</li>
+    <li><strong>Pro tier:</strong> 5,000 API requests/hour</li>
+    <li><strong>Enterprise:</strong> Unlimited</li>
+  </ul>
+
+  <h2 id="implementation">Implementation</h2>
+
+  <p>A <code>Bun.serve</code> implementation with tiered rate limiting, Redis-backed state, and custom JSON error responses:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">server.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/redis'</span>
+
+<span class="cm">// Tier configuration from your pricing page</span>
+<span class="kw">const</span> TIER_LIMITS = {"{"}
+  free: {"{"} limit: <span class="num">100</span>, window: <span class="str">'1h'</span> {"}"},
+  pro: {"{"} limit: <span class="num">5000</span>, window: <span class="str">'1h'</span> {"}"},
+  enterprise: {"{"} limit: <span class="num">Infinity</span> {"}"}
+{"}"} <span class="kw">as const</span>
+
+<span class="kw">const</span> apiLimiter = <span class="fn">hitlimit</span>({"{"}
+  store: <span class="fn">redisStore</span>({"{"} url: Bun.env.REDIS_URL {"}"}),
+
+  tiers: TIER_LIMITS,
+
+  <span class="cm">// Get tier from auth header/token</span>
+  tier: (req) => {"{"}
+    <span class="kw">return</span> <span class="fn">getUserTier</span>(req) || <span class="str">'free'</span>
+  {"}"},
+
+  <span class="cm">// Rate limit by workspace, not individual user</span>
+  key: (req) => {"{"}
+    <span class="kw">const</span> user = <span class="fn">getUser</span>(req)
+    <span class="kw">return</span> user ? <span class="str">`workspace:</span>${"{"}user.workspaceId{"}"}<span class="str">`</span> : <span class="fn">getIP</span>(req)
+  {"}"},
+
+  <span class="cm">// Custom response matching your API style</span>
+  response: (info) => ({"{"}
+    error: <span class="str">'RATE_LIMITED'</span>,
+    message: <span class="str">`Rate limit exceeded. Try again in </span>${"{"}Math.<span class="fn">ceil</span>(info.resetIn / <span class="num">60</span>){"}"}<span class="str"> minutes.`</span>,
+    upgrade: <span class="str">'https://example.com/pricing'</span>
+  {"}"})
+{"}"})
+
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> url = <span class="kw">new</span> <span class="fn">URL</span>(req.url)
+
+    <span class="cm">// Skip rate limiting for health checks</span>
+    <span class="kw">if</span> (url.pathname === <span class="str">'/health'</span>) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'OK'</span>)
+    {"}"}
+
+    <span class="kw">const</span> {"{"} allowed, remaining, reset, limit {"}"} = <span class="kw">await</span> apiLimiter.<span class="fn">check</span>(req)
+
+    <span class="kw">const</span> headers = {"{"}
+      <span class="str">'X-RateLimit-Limit'</span>: String(limit),
+      <span class="str">'X-RateLimit-Remaining'</span>: String(remaining),
+      <span class="str">'X-RateLimit-Reset'</span>: String(reset),
+      <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>
+    {"}"}
+
+    <span class="kw">if</span> (!allowed) {"{"}
+      <span class="kw">return</span> Response.<span class="fn">json</span>(
+        {"{"}
+          error: <span class="str">'RATE_LIMITED'</span>,
+          message: <span class="str">'Rate limit exceeded'</span>,
+          upgrade: <span class="str">'https://example.com/pricing'</span>
+        {"}"},
+        {"{"} status: <span class="num">429</span>, headers: {"{"} ...headers, <span class="str">'Retry-After'</span>: String(reset) {"}"} {"}"}
+      )
+    {"}"}
+
+    <span class="cm">// Route handling</span>
+    <span class="kw">if</span> (url.pathname.<span class="fn">startsWith</span>(<span class="str">'/api/projects'</span>)) {"{"}
+      <span class="kw">return</span> Response.<span class="fn">json</span>({"{"} projects: [] {"}"}, {"{"} headers {"}"})
+    {"}"}
+
+    <span class="kw">return</span> Response.<span class="fn">json</span>({"{"} status: <span class="str">'ok'</span> {"}"}, {"{"} headers {"}"})
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="elysia-version">Elysia Version</h2>
+
+  <p>The same tiered SaaS rate limiting implemented with the Elysia framework:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">app.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} Elysia {"}"} <span class="kw">from</span> <span class="str">'elysia'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/elysia'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/redis'</span>
+
+<span class="kw">const</span> TIER_LIMITS = {"{"}
+  free: {"{"} limit: <span class="num">100</span>, window: <span class="str">'1h'</span> {"}"},
+  pro: {"{"} limit: <span class="num">5000</span>, window: <span class="str">'1h'</span> {"}"},
+  enterprise: {"{"} limit: <span class="num">Infinity</span> {"}"}
+{"}"} <span class="kw">as const</span>
+
+<span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
+  .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+    store: <span class="fn">redisStore</span>({"{"} url: Bun.env.REDIS_URL {"}"}),
+    tiers: TIER_LIMITS,
+    tier: ({"{"} request {"}"}) => {"{"}
+      <span class="kw">return</span> <span class="fn">getUserTier</span>(request) || <span class="str">'free'</span>
+    {"}"},
+    key: ({"{"} request {"}"}) => {"{"}
+      <span class="kw">const</span> user = <span class="fn">getUser</span>(request)
+      <span class="kw">return</span> user ? <span class="str">`workspace:</span>${"{"}user.workspaceId{"}"}<span class="str">`</span> : <span class="str">'anonymous'</span>
+    {"}"},
+    response: {"{"}
+      error: <span class="str">'RATE_LIMITED'</span>,
+      message: <span class="str">'Rate limit exceeded'</span>,
+      upgrade: <span class="str">'https://example.com/pricing'</span>
+    {"}"}
+  {"}"}))
+  .<span class="fn">get</span>(<span class="str">'/api/projects'</span>, () => ({"{"} projects: [] {"}"}))
+  .<span class="fn">post</span>(<span class="str">'/api/projects'</span>, ({"{"} body {"}"}) => ({"{"} created: <span class="kw">true</span> {"}"}))
+  .<span class="fn">get</span>(<span class="str">'/api/projects/:id'</span>, ({"{"} params {"}"}) => ({"{"} id: params.id {"}"}))
+  .<span class="fn">listen</span>(<span class="num">3000</span>)</code></pre>
+  </div>
+
+  <h2 id="key-points">Key Points</h2>
+
+  <ul>
+    <li><strong>Per-workspace limits:</strong> Rate limits are shared across all users in a workspace, preventing one power user from exhausting the team's quota</li>
+    <li><strong>Redis for distributed state:</strong> When running multiple Bun instances behind a load balancer, Redis ensures rate limit counters are shared across all nodes</li>
+    <li><strong>Bun.env for configuration:</strong> Uses <code>Bun.env.REDIS_URL</code> instead of <code>process.env</code> for Bun-native environment variable access</li>
+    <li><strong>100/hour for free tier:</strong> Enough for basic integrations, but encourages upgrade for heavy use</li>
+    <li><strong>5,000/hour for pro:</strong> ~83 req/min — sufficient for most SaaS integrations</li>
+    <li><strong>Infinity for enterprise:</strong> No rate limit enforced, but requests are still tracked for analytics</li>
+    <li><strong>Custom JSON responses:</strong> Return structured error bodies that match your API convention, including an upgrade URL for monetization</li>
+    <li><strong>Health check skip:</strong> Always bypass rate limiting for health check endpoints used by load balancers and uptime monitors</li>
+  </ul>
+
+</DocsLayout>
+
+<style>
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+  .code-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+  }
+  .dot.red { background: rgba(239, 68, 68, 0.8); }
+  .dot.yellow { background: rgba(234, 179, 8, 0.8); }
+  .dot.green { background: rgba(34, 197, 94, 0.8); }
+  .code-filename {
+    margin-left: 1rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+  .code-block pre {
+    padding: 1.5rem;
+    margin: 0;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: var(--color-text-muted); }
+</style>

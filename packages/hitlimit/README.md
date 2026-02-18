@@ -4,49 +4,47 @@
 [![npm downloads](https://img.shields.io/npm/dm/@joint-ops/hitlimit.svg)](https://www.npmjs.com/package/@joint-ops/hitlimit)
 [![GitHub](https://img.shields.io/github/license/JointOps/hitlimit-monorepo)](https://github.com/JointOps/hitlimit-monorepo)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
-[![Bundle Size](https://img.shields.io/bundlephobia/minzip/@joint-ops/hitlimit)](https://bundlephobia.com/package/@joint-ops/hitlimit)
+[![Zero Dependencies](https://img.shields.io/badge/Dependencies-0-brightgreen.svg)](https://www.npmjs.com/package/@joint-ops/hitlimit)
 
-> The fastest rate limiter for Node.js - Express, Fastify, NestJS, and native HTTP | express-rate-limit alternative
+> The fastest rate limiter for Node.js — Express, Fastify, Hono, NestJS & native HTTP
 
-**hitlimit** is a high-performance rate limiting middleware for Node.js applications. Protect your APIs from abuse, prevent brute force attacks, and throttle requests with sub-millisecond overhead. A faster, lighter alternative to express-rate-limit and rate-limiter-flexible.
+**hitlimit** is a high-performance rate limiting middleware for Node.js. 3.4x faster than express-rate-limit under real-world load. Atomic Redis Lua scripts for distributed systems. Zero runtime dependencies.
 
 **[Documentation](https://hitlimit.jointops.dev)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[npm](https://www.npmjs.com/package/@joint-ops/hitlimit)**
 
 ## Why hitlimit?
 
-- **Blazing Fast** - 3,350,000+ ops/sec under real-world load (10K IPs), ~7% HTTP overhead
-- **Zero Config** - Works out of the box with sensible defaults
-- **Tiny Footprint** - ~6KB core entry point, zero runtime dependencies
-- **Framework Agnostic** - Express, Fastify, Hono, NestJS, native HTTP
-- **Multiple Stores** - Memory, Redis, SQLite for distributed systems
-- **TypeScript First** - Full type safety and IntelliSense support
-- **Flexible Keys** - Rate limit by IP, user ID, API key, or custom logic
-- **Tiered Limits** - Different limits for free/pro/enterprise users
-- **Auto-Ban** - Automatically ban repeat offenders after threshold violations
-- **Shared Limits** - Group rate limits via groupId for teams/tenants
-- **Standard Headers** - RFC-compliant RateLimit-* and X-RateLimit-* headers
+- **3.25M+ ops/sec** under real-world load (10K unique IPs), ~7% HTTP overhead
+- **8 framework adapters** — Express, Fastify, Hono, NestJS, native HTTP
+- **Zero runtime dependencies** — nothing extra to install
+- **3 storage backends** — Memory, Redis (atomic Lua scripts), SQLite
+- **Atomic Redis** — Single-roundtrip Lua scripts with EVALSHA caching
+- **TypeScript native** — Full type safety and IntelliSense
+- **Human-readable windows** — `'1m'`, `'15m'`, `'1h'` instead of milliseconds
+- **Tiered limits** — Free/Pro/Enterprise in 8 lines of code
+- **Auto-ban** — Ban repeat offenders after threshold violations
+- **Shared limits** — Group rate limits via `groupId` for teams/tenants
+- **Standard headers** — Both RFC `RateLimit-*` and legacy `X-RateLimit-*`
 
 ## Performance
 
-hitlimit is designed for speed. Here's how it performs:
-
-### Store Benchmarks
+### Store Benchmarks (Node.js v24)
 
 | Store | Operations/sec | Avg Latency | Use Case |
 |-------|----------------|-------------|----------|
-| **Memory** | 4,190,000+ | 0.24μs | Single instance, no persistence |
-| **SQLite** | 516,000+ | 1.94μs | Single instance, persistence needed |
-| **Redis** | 6,600+ | 152μs | Multi-instance, distributed |
+| **Memory** | 4,110,000+ | 0.24μs | Single instance, no persistence |
+| **SQLite** | 490,000+ | 2.04μs | Single instance, persistence needed |
+| **Redis** | 6,800+ | 146μs | Multi-instance, distributed |
 
-### vs Competitors
+### vs Competitors (Memory Store, 10K IPs)
 
-| Library | Memory 10K IPs (ops/s) | Bundle Size |
-|---------|------------------------|-------------|
-| **hitlimit** | **3,350,000** | **~6KB** |
-| rate-limiter-flexible | 1,580,000 | ~155KB |
-| express-rate-limit | 1,200,000 | ~66KB |
+| Library | ops/sec | Zero Deps | Framework Adapters |
+|---------|---------|-----------|-------------------|
+| **hitlimit** | **3,250,000** | Yes | 8 built-in |
+| rate-limiter-flexible | 1,840,000 | Yes | DIY |
+| express-rate-limit | 957,000 | No (1 dep) | 1 |
 
-> **Note:** Benchmark results vary by hardware and environment. Run your own benchmarks to see results on your specific setup.
+> 3.4x faster than express-rate-limit, 1.8x faster than rate-limiter-flexible under high-traffic load. Results vary by hardware — [run the benchmarks yourself](https://github.com/JointOps/hitlimit-monorepo). These are our benchmarks and we've done our best to keep them fair and reproducible. They're not set in stone — there's always room for improvement. If you find issues or have suggestions, please open an issue or PR.
 
 ### HTTP Overhead
 
@@ -354,7 +352,7 @@ app.use(hitlimit()) // Uses memory store by default
 
 ### Redis Store
 
-Best for distributed systems and multi-server deployments.
+Best for distributed systems. Uses atomic Lua scripts — single-roundtrip with EVALSHA caching.
 
 ```javascript
 import { hitlimit } from '@joint-ops/hitlimit'
@@ -447,7 +445,7 @@ export class AppController {
 import rateLimit from 'express-rate-limit'
 app.use(rateLimit({ windowMs: 60000, max: 100 }))
 
-// After (hitlimit) - 2x faster, smaller bundle
+// After (hitlimit) — 3x faster with many unique IPs, zero deps
 import { hitlimit } from '@joint-ops/hitlimit'
 app.use(hitlimit({ window: '1m', limit: 100 }))
 ```
@@ -459,7 +457,7 @@ app.use(hitlimit({ window: '1m', limit: 100 }))
 import { RateLimiterMemory } from 'rate-limiter-flexible'
 const limiter = new RateLimiterMemory({ points: 100, duration: 60 })
 
-// After (hitlimit) - simpler API, better DX
+// After (hitlimit) — built-in middleware, human-readable windows
 import { hitlimit } from '@joint-ops/hitlimit'
 app.use(hitlimit({ limit: 100, window: '1m' }))
 ```
@@ -471,7 +469,7 @@ app.use(hitlimit({ limit: 100, window: '1m' }))
 import rateLimit from '@fastify/rate-limit'
 await app.register(rateLimit, { max: 100, timeWindow: '1 minute' })
 
-// After (hitlimit) - tiered limits, SQLite, multi-framework
+// After (hitlimit) — tiered limits, Redis/SQLite, multi-framework
 import { hitlimit } from '@joint-ops/hitlimit/fastify'
 await app.register(hitlimit, { limit: 100, window: '1m' })
 ```
@@ -483,7 +481,7 @@ await app.register(hitlimit, { limit: 100, window: '1m' })
 @UseGuards(ThrottlerGuard)
 @Throttle({ default: { limit: 100, ttl: 60000 } })
 
-// After (hitlimit) - more flexible, better performance
+// After (hitlimit) — tiered limits, Redis/SQLite stores
 import { HitLimitGuard, HitLimit } from '@joint-ops/hitlimit/nest'
 @UseGuards(HitLimitGuard)
 @HitLimit({ limit: 100, window: '1m' })
@@ -491,8 +489,4 @@ import { HitLimitGuard, HitLimit } from '@joint-ops/hitlimit/nest'
 
 ## License
 
-MIT - Use freely in personal and commercial projects.
-
-## Keywords
-
-rate limit, rate limiter, rate limiting, express rate limit, express middleware, express-rate-limit, express-rate-limit alternative, fastify rate limit, fastify plugin, fastify-rate-limit alternative, nestjs rate limit, nestjs throttler, @nestjs/throttler alternative, nestjs guard, nodejs rate limit, node rate limiter, api rate limiting, throttle requests, request throttling, api throttling, ddos protection, brute force protection, redis rate limit, memory rate limit, sqlite rate limit, sliding window, fixed window, token bucket, leaky bucket, rate-limiter-flexible alternative, api security, request limiter, http rate limit, express slow down, api protection, login protection, authentication rate limit
+MIT

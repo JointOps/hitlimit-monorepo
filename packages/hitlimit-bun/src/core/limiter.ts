@@ -60,7 +60,29 @@ export async function checkLimitFast<TRequest>(
   }
   const { limit, windowMs } = resolveTier(config, tierName)
 
-  // Check ban status
+  if (limit === Infinity) {
+    return { allowed: true, limit, remaining: Infinity, resetIn: 0, resetAt: 0 }
+  }
+
+  // Atomic path: hitWithBan combines ban check + hit + violation tracking in 1 round-trip
+  if (config.ban && config.store.hitWithBan) {
+    const r = await config.store.hitWithBan(key, windowMs, limit, config.ban.threshold, config.ban.durationMs)
+    if (r.banned && r.count === 0) {
+      // Already banned
+      return { allowed: false, limit, remaining: 0, resetIn: Math.ceil((r.banExpiresAt - Date.now()) / 1000), resetAt: r.banExpiresAt }
+    }
+    const allowed = r.count <= limit
+    const now = Date.now()
+    return {
+      allowed,
+      limit,
+      remaining: Math.max(0, limit - r.count),
+      resetIn: Math.max(0, Math.ceil((r.resetAt - now) / 1000)),
+      resetAt: r.resetAt
+    }
+  }
+
+  // Fallback: separate calls for stores without hitWithBan
   if (config.ban && config.store.isBanned) {
     const banned = await config.store.isBanned(key)
     if (banned) {
@@ -72,10 +94,6 @@ export async function checkLimitFast<TRequest>(
         resetAt: Date.now() + config.ban.durationMs
       }
     }
-  }
-
-  if (limit === Infinity) {
-    return { allowed: true, limit, remaining: Infinity, resetIn: 0, resetAt: 0 }
   }
 
   const result = await config.store.hit(key, windowMs, limit)
@@ -112,7 +130,47 @@ export async function checkLimit<TRequest>(
   }
   const { limit, windowMs } = resolveTier(config, tierName)
 
-  // Check ban status BEFORE hitting store
+  // Infinity limit skips store entirely (no violations possible)
+  if (limit === Infinity) {
+    return {
+      allowed: true,
+      info: { limit, remaining: Infinity, resetIn: 0, resetAt: 0, key, tier: tierName, group: groupId },
+      headers: {},
+      body: {}
+    }
+  }
+
+  // Atomic path: hitWithBan combines ban check + hit + violation tracking in 1 round-trip
+  if (config.ban && config.store.hitWithBan) {
+    const r = await config.store.hitWithBan(key, windowMs, limit, config.ban.threshold, config.ban.durationMs)
+
+    if (r.banned && r.count === 0) {
+      // Already banned
+      const info: HitLimitInfo = {
+        limit, remaining: 0,
+        resetIn: Math.ceil((r.banExpiresAt - Date.now()) / 1000),
+        resetAt: r.banExpiresAt,
+        key, tier: tierName, banned: true, banExpiresAt: r.banExpiresAt, group: groupId
+      }
+      return { allowed: false, info, headers: buildHeaders(info, config.headers, false), body: buildBody(config.response, info) }
+    }
+
+    const now = Date.now()
+    const allowed = r.count <= limit
+    const info: HitLimitInfo = {
+      limit,
+      remaining: Math.max(0, limit - r.count),
+      resetIn: Math.max(0, Math.ceil((r.resetAt - now) / 1000)),
+      resetAt: r.resetAt,
+      key, tier: tierName, group: groupId
+    }
+    if (r.violations > 0) info.violations = r.violations
+    if (r.banned) { info.banned = true; info.banExpiresAt = r.banExpiresAt }
+
+    return { allowed, info, headers: buildHeaders(info, config.headers, allowed), body: allowed ? {} : buildBody(config.response, info) }
+  }
+
+  // Fallback: separate calls for stores without hitWithBan
   if (config.ban && config.store.isBanned) {
     const banned = await config.store.isBanned(key)
     if (banned) {
@@ -134,16 +192,6 @@ export async function checkLimit<TRequest>(
         headers: buildHeaders(info, config.headers, false),
         body: buildBody(config.response, info)
       }
-    }
-  }
-
-  // Infinity limit skips store entirely (no violations possible)
-  if (limit === Infinity) {
-    return {
-      allowed: true,
-      info: { limit, remaining: Infinity, resetIn: 0, resetAt: 0, key, tier: tierName, group: groupId },
-      headers: {},
-      body: {}
     }
   }
 

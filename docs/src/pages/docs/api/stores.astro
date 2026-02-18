@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeBanner from '../../../components/RuntimeBanner.astro';
 ---
 
 <DocsLayout
@@ -8,6 +9,11 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   keywords="hitlimit store api, rate limit store interface, memory store api, sqlite store api, redis store api, custom rate limit store, store methods, rate limit storage"
 >
   <h1>Store API</h1>
+  <RuntimeBanner
+    currentRuntime="node"
+    counterpartHref="/docs/bun/api/stores"
+    counterpartLabel="Bun Stores API"
+  />
 
   <p>Stores manage rate limit data persistence. All stores implement the <code>Store</code> interface.</p>
 

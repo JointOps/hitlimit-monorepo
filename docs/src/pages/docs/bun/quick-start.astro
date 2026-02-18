@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeBanner from '../../../components/RuntimeBanner.astro';
 ---
 
 <DocsLayout
@@ -8,6 +9,12 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   keywords="bun rate limit quick start, hitlimit-bun tutorial, bun serve rate limiting, bun:sqlite rate limit, bun api protection, bun rate limiter setup, elysia rate limit tutorial"
 >
   <h1>Bun Quick Start</h1>
+
+  <RuntimeBanner
+    currentRuntime="bun"
+    counterpartHref="/docs/quick-start"
+    counterpartLabel="Node.js Quick Start"
+  />
 
   <p>Get up and running with hitlimit in Bun in under 5 minutes.</p>
 

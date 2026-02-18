@@ -1,6 +1,7 @@
 ---
 import DocsLayout from '../../layouts/DocsLayout.astro';
 import Tabs from '../../components/Tabs.astro';
+import RuntimeCodeTabs from '../../components/RuntimeCodeTabs.astro';
 ---
 
 <DocsLayout
@@ -12,26 +13,45 @@ import Tabs from '../../components/Tabs.astro';
 
   <p>Install hitlimit using your preferred package manager.</p>
 
-  <h2 id="nodejs">Node.js</h2>
+  <h2 id="install">Install the Package</h2>
 
-  <Tabs
-    tabs={[
-      { label: 'npm', content: 'npm install @joint-ops/hitlimit' },
-      { label: 'pnpm', content: 'pnpm add @joint-ops/hitlimit' },
-      { label: 'yarn', content: 'yarn add @joint-ops/hitlimit' },
-      { label: 'bun', content: 'bun add @joint-ops/hitlimit' },
-    ]}
+  <RuntimeCodeTabs
+    node='npm install @joint-ops/hitlimit\n<span class="cm"># or: pnpm add @joint-ops/hitlimit</span>\n<span class="cm"># or: yarn add @joint-ops/hitlimit</span>'
+    bun='bun add @joint-ops/hitlimit-bun'
   />
 
-  <h2 id="bun">Bun (Optimized)</h2>
+  <div data-runtime-content="bun">
+    <p>
+      The <code>hitlimit-bun</code> package is optimized specifically for Bun and includes
+      native SQLite store support out of the box.
+    </p>
+  </div>
 
-  <p>For Bun applications, use the Bun-optimized package with native SQLite:</p>
+  <div data-runtime-content="bun">
+    <h2 id="verify">Verify Installation</h2>
 
-  <Tabs
-    tabs={[
-      { label: 'bun', content: 'bun add @joint-ops/hitlimit-bun' },
-    ]}
-  />
+    <p>Create a test file to verify the installation:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+        <span class="code-filename">test.ts</span>
+      </div>
+      <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">10</span>, window: <span class="str">'1m'</span> {"}"})
+
+console.<span class="fn">log</span>(<span class="str">'hitlimit-bun installed successfully!'</span>)</code></pre>
+    </div>
+
+    <p>Run the test:</p>
+
+    <Tabs tabs={[{ label: 'bun', content: 'bun run test.ts' }]} />
+  </div>
 
   <h2 id="stores">Optional Store Packages</h2>
 
@@ -39,32 +59,54 @@ import Tabs from '../../components/Tabs.astro';
 
   <h3>Redis Store</h3>
   <p>Install the <code>ioredis</code> peer dependency to use the Redis store:</p>
-  <Tabs
-    tabs={[
-      { label: 'npm', content: 'npm install ioredis' },
-      { label: 'pnpm', content: 'pnpm add ioredis' },
-      { label: 'yarn', content: 'yarn add ioredis' },
-    ]}
+  <RuntimeCodeTabs
+    node='npm install ioredis\n<span class="cm"># or: pnpm add ioredis</span>'
+    bun='bun add ioredis'
   />
 
-  <h3>SQLite Store (Node.js)</h3>
-  <Tabs
-    tabs={[
-      { label: 'npm', content: 'npm install better-sqlite3' },
-      { label: 'pnpm', content: 'pnpm add better-sqlite3' },
-      { label: 'yarn', content: 'yarn add better-sqlite3' },
-    ]}
+  <h3>SQLite Store</h3>
+  <RuntimeCodeTabs
+    node='npm install better-sqlite3\n<span class="cm"># or: pnpm add better-sqlite3</span>'
+    bun='<span class="cm"># Built-in! Bun includes bun:sqlite natively.</span>\n<span class="cm"># No additional package needed.</span>'
   />
 
   <h2 id="requirements">Requirements</h2>
 
-  <ul>
-    <li><strong>Node.js</strong>: v18.0.0 or higher</li>
-    <li><strong>Bun</strong>: v1.0.0 or higher</li>
-    <li><strong>TypeScript</strong>: v5.0 or higher (optional)</li>
-  </ul>
+  <div data-runtime-content="node">
+    <ul>
+      <li><strong>Node.js</strong>: v18.0.0 or higher</li>
+      <li><strong>TypeScript</strong>: v5.0 or higher (optional)</li>
+    </ul>
+  </div>
+
+  <div data-runtime-content="bun">
+    <ul>
+      <li><strong>Bun</strong>: v1.0.0 or higher</li>
+      <li><strong>TypeScript</strong>: v5.0 or higher (optional but recommended)</li>
+    </ul>
+  </div>
 
   <h2 id="next-steps">Next Steps</h2>
 
-  <p>Now that you have hitlimit installed, head over to the <a href="/docs/quick-start">Quick Start</a> guide to set up your first rate limiter.</p>
+  <div data-runtime-content="node">
+    <p>Now that you have hitlimit installed, head over to the <a href="/docs/quick-start">Quick Start</a> guide to set up your first rate limiter.</p>
+  </div>
+
+  <div data-runtime-content="bun">
+    <p>Now that you have hitlimit-bun installed, proceed to the <a href="/docs/bun/quick-start">Quick Start</a> guide.</p>
+  </div>
 </DocsLayout>
+
+<style>
+  .code-block { margin: 1.5rem 0; border-radius: 1rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); background: var(--color-bg-elevated); }
+  .code-dots { display: flex; gap: 0.5rem; }
+  .dot { width: 0.75rem; height: 0.75rem; border-radius: 50%; }
+  .dot.red { background: rgba(239, 68, 68, 0.8); }
+  .dot.yellow { background: rgba(234, 179, 8, 0.8); }
+  .dot.green { background: rgba(34, 197, 94, 0.8); }
+  .code-filename { margin-left: 1rem; font-size: 0.75rem; color: var(--color-text-muted); font-family: var(--font-mono); }
+  .code-block pre { padding: 1.5rem; margin: 0; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; }
+</style>

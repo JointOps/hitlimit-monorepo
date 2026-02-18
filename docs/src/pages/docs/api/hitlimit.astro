@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeBanner from '../../../components/RuntimeBanner.astro';
 ---
 
 <DocsLayout
@@ -8,6 +9,11 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   keywords="hitlimit api, rate limit function, hitlimit options, rate limiter api reference, middleware function, hitlimit configuration, rate limit parameters, nodejs middleware api"
 >
   <h1>hitlimit() Function</h1>
+  <RuntimeBanner
+    currentRuntime="node"
+    counterpartHref="/docs/bun/api/hitlimit"
+    counterpartLabel="Bun hitlimit() API"
+  />
 
   <p>The main function to create rate limiting middleware.</p>
 

@@ -1,7 +1,8 @@
 ---
 import SearchModal from './SearchModal.astro';
 import {
-  navigation as sidebar,
+  nodeNavigation,
+  bunNavigation,
   getActiveSectionIndex,
   getSectionItemCount,
   type NavSection
@@ -9,18 +10,12 @@ import {
 
 const currentPath = Astro.url.pathname;
 
-// Find which section contains the active page
-const activeSectionIndex = getActiveSectionIndex(currentPath);
+// Detect runtime from URL path
+const urlRuntime = currentPath.startsWith('/docs/bun') ? 'bun' : 'node';
 
-// Find active subsection for sections with subsections
-const getActiveSubsection = (section: NavSection) => {
-  if (!section.subsections) return -1;
-  return section.subsections.findIndex(sub =>
-    sub.items.some(item =>
-      currentPath === item.href || currentPath === item.href + '/'
-    )
-  );
-};
+// Find which section contains the active page for each runtime
+const nodeActiveSectionIndex = getActiveSectionIndex(currentPath, 'node');
+const bunActiveSectionIndex = getActiveSectionIndex(currentPath, 'bun');
 
 // Count total items including subsections
 const getTotalItems = getSectionItemCount;
@@ -42,6 +37,7 @@ const icons: Record<string, string> = {
   github: '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/>',
   npm: '<path d="M1 8h22v8H12v2H7v-2H1z"/><path d="M7 8v8"/><path d="M12 8v8"/><path d="M17 8v8"/><path d="M17 12h3"/>',
 };
+
 ---
 
 <aside class="sidebar-wrapper">
@@ -57,23 +53,39 @@ const icons: Record<string, string> = {
         </span>
         <span class="logo-text">hitlimit</span>
       </a>
-      <span class="version-badge">v1.1.0</span>
+      <span class="version-badge">v1.1.3</span>
     </div>
 
     <!-- Search -->
     <div class="search-container">
       <SearchModal />
     </div>
+
+    <!-- Runtime Switcher -->
+    <div class="runtime-switcher-container">
+      <div class="runtime-switcher" role="tablist" aria-label="Select runtime">
+        <button data-runtime-switch="node" class="runtime-switch-btn" role="tab" aria-selected={urlRuntime === 'node' ? 'true' : 'false'} tabindex={urlRuntime === 'node' ? 0 : -1}>
+          <svg class="runtime-switch-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11.998 24c-.321 0-.641-.084-.922-.247l-2.936-1.737c-.438-.245-.224-.332-.08-.383.585-.203.703-.25 1.328-.604.065-.037.151-.023.218.017l2.256 1.339c.082.045.197.045.272 0l8.795-5.076c.082-.047.134-.141.134-.238V6.921c0-.099-.053-.192-.137-.242l-8.791-5.072c-.081-.047-.189-.047-.271 0L3.075 6.68c-.084.049-.137.142-.137.24v10.15c0 .097.054.189.139.235l2.409 1.392c1.307.654 2.108-.116 2.108-.89V7.787c0-.142.114-.253.256-.253h1.115c.139 0 .255.112.255.253v10.021c0 1.745-.95 2.745-2.604 2.745-.508 0-.909 0-2.026-.551L2.28 18.675c-.57-.329-.922-.945-.922-1.604V6.921c0-.659.353-1.275.922-1.603l8.795-5.082c.557-.315 1.296-.315 1.848 0l8.794 5.082c.57.329.924.944.924 1.603v10.15c0 .659-.354 1.273-.924 1.604l-8.794 5.078C12.643 23.916 12.324 24 11.998 24zM19.099 13.993c0-1.9-1.284-2.406-3.987-2.763-2.731-.361-3.009-.548-3.009-1.187 0-.528.235-1.233 2.258-1.233 1.807 0 2.473.389 2.747 1.607.024.115.129.199.247.199h1.141c.071 0 .138-.031.186-.081.048-.054.074-.123.067-.196-.177-2.098-1.571-3.076-4.388-3.076-2.508 0-4.004 1.058-4.004 2.833 0 1.925 1.488 2.457 3.895 2.695 2.88.282 3.103.703 3.103 1.269 0 .983-.789 1.402-2.642 1.402-2.327 0-2.839-.584-3.011-1.742-.02-.124-.126-.215-.253-.215h-1.137c-.141 0-.254.112-.254.253 0 1.482.806 3.248 4.655 3.248 2.855 0 4.453-1.097 4.453-2.98z"/>
+          </svg>
+          Node.js
+        </button>
+        <button data-runtime-switch="bun" class="runtime-switch-btn" role="tab" aria-selected={urlRuntime === 'bun' ? 'true' : 'false'} tabindex={urlRuntime === 'bun' ? 0 : -1}>
+          <svg class="runtime-switch-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 22.596c6.628 0 12-4.338 12-9.688 0-3.318-2.057-6.248-5.219-7.986-1.286-.715-2.297-1.357-3.139-1.89C14.058 2.025 13.08 1.404 12 1.404c-1.097 0-2.334.785-3.966 1.821a49.92 49.92 0 0 1-2.816 1.697C2.057 6.66 0 9.59 0 12.908c0 5.35 5.372 9.687 12 9.687v.001ZM10.599 4.715c.334-.759.503-1.58.498-2.409 0-.145.202-.187.23-.029.658 2.783-.902 4.162-2.057 4.624-.124.048-.199-.121-.103-.209a5.763 5.763 0 0 0 1.432-1.977Zm2.058-.102a5.82 5.82 0 0 0-.782-2.306v-.016c-.069-.123.086-.263.185-.172 1.962 2.111 1.307 4.067.556 5.051-.082.103-.23-.003-.189-.126a5.85 5.85 0 0 0 .23-2.431Zm1.776-.561a5.727 5.727 0 0 0-1.612-1.806v-.014c-.112-.085-.024-.274.114-.218 2.595 1.087 2.774 3.18 2.459 4.407a.116.116 0 0 1-.049.071.11.11 0 0 1-.153-.026.122.122 0 0 1-.022-.083 5.891 5.891 0 0 0-.737-2.331Zm-5.087.561c-.617.546-1.282.76-2.063 1-.117 0-.195-.078-.156-.181 1.752-.909 2.376-1.649 2.999-2.778 0 0 .155-.118.188.085 0 .304-.349 1.329-.968 1.874Zm4.945 11.237a2.957 2.957 0 0 1-.937 1.553c-.346.346-.8.565-1.286.62a2.178 2.178 0 0 1-1.327-.62 2.955 2.955 0 0 1-.925-1.553.244.244 0 0 1 .064-.198.234.234 0 0 1 .193-.069h3.965a.226.226 0 0 1 .19.07c.05.053.073.125.063.197Zm-5.458-2.176a1.862 1.862 0 0 1-2.384-.245 1.98 1.98 0 0 1-.233-2.447c.207-.319.503-.566.848-.713a1.84 1.84 0 0 1 1.092-.11c.366.075.703.261.967.531a1.98 1.98 0 0 1 .408 2.114 1.931 1.931 0 0 1-.698.869v.001Zm8.495.005a1.86 1.86 0 0 1-2.381-.253 1.964 1.964 0 0 1-.547-1.366c0-.384.11-.76.32-1.079.207-.319.503-.567.849-.713a1.844 1.844 0 0 1 1.093-.108c.367.076.704.262.968.534a1.98 1.98 0 0 1 .4 2.117 1.932 1.932 0 0 1-.702.868Z"/>
+          </svg>
+          Bun
+        </button>
+      </div>
+    </div>
   </div>
 
-  <!-- Scrollable Navigation -->
-  <nav class="sidebar-nav">
-    {sidebar.map((section, sectionIndex) => {
-      const isActiveSection = sectionIndex === activeSectionIndex;
-      const sectionId = `section-${sectionIndex}`;
+  <!-- Node.js Navigation -->
+  <nav data-runtime-nav="node" class="sidebar-nav">
+    {nodeNavigation.map((section, sectionIndex) => {
+      const isActiveSection = sectionIndex === nodeActiveSectionIndex;
+      const sectionId = `node-section-${sectionIndex}`;
       const shouldExpand = sectionIndex === 0 || isActiveSection;
-      const activeSubsection = getActiveSubsection(section);
-      const hasSubsections = !!section.subsections;
 
       return (
         <div class="sidebar-section" data-section={sectionIndex}>
@@ -103,7 +115,6 @@ const icons: Record<string, string> = {
             class={`section-content ${shouldExpand ? 'expanded' : ''}`}
             data-section-content={sectionIndex}
           >
-            {/* Regular items */}
             {section.items && (
               <ul class="section-items">
                 {section.items.map((item) => {
@@ -124,59 +135,66 @@ const icons: Record<string, string> = {
                 })}
               </ul>
             )}
+          </div>
+        </div>
+      );
+    })}
+  </nav>
 
-            {/* Subsections (for Bun) */}
-            {section.subsections && (
-              <div class="subsections">
-                {section.subsections.map((subsection, subIndex) => {
-                  const subId = `${sectionId}-sub-${subIndex}`;
-                  const isSubActive = activeSubsection === subIndex;
-                  const shouldExpandSub = isSubActive || subIndex === 0;
+  <!-- Bun Navigation -->
+  <nav data-runtime-nav="bun" class="sidebar-nav">
+    {bunNavigation.map((section, sectionIndex) => {
+      const isActiveSection = sectionIndex === bunActiveSectionIndex;
+      const sectionId = `bun-section-${sectionIndex}`;
+      const shouldExpand = sectionIndex === 0 || isActiveSection;
 
+      return (
+        <div class="sidebar-section" data-section={sectionIndex}>
+          <button
+            class={`section-header ${shouldExpand ? 'active' : ''}`}
+            data-section-toggle={sectionIndex}
+            aria-expanded={shouldExpand ? 'true' : 'false'}
+            aria-controls={sectionId}
+            type="button"
+          >
+            <div class="section-header-left">
+              <span class="section-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={icons[section.icon]} />
+              </span>
+              <span class="section-title">{section.title}</span>
+            </div>
+            <div class="section-header-right">
+              <span class="item-count">{getTotalItems(section)}</span>
+              <span class={`chevron ${shouldExpand ? 'expanded' : ''}`}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={icons.chevron} />
+              </span>
+            </div>
+          </button>
+
+          <div
+            id={sectionId}
+            class={`section-content ${shouldExpand ? 'expanded' : ''}`}
+            data-section-content={sectionIndex}
+          >
+            {section.items && (
+              <ul class="section-items">
+                {section.items.map((item) => {
+                  const isActive = currentPath === item.href || currentPath === item.href + '/';
                   return (
-                    <div class="subsection" data-subsection={subIndex}>
-                      <button
-                        class={`subsection-header ${shouldExpandSub ? 'active' : ''}`}
-                        data-subsection-toggle={`${sectionIndex}-${subIndex}`}
-                        aria-expanded={shouldExpandSub ? 'true' : 'false'}
-                        aria-controls={subId}
-                        type="button"
+                    <li>
+                      <a
+                        href={item.href}
+                        class={`sidebar-link ${isActive ? 'active' : ''}`}
+                        data-search-item
+                        data-label={item.label}
                       >
-                        <span class={`sub-chevron ${shouldExpandSub ? 'expanded' : ''}`}>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={icons.chevronRight} />
-                        </span>
-                        <span class="subsection-title">{subsection.title}</span>
-                        <span class="sub-count">{subsection.items.length}</span>
-                      </button>
-
-                      <div
-                        id={subId}
-                        class={`subsection-content ${shouldExpandSub ? 'expanded' : ''}`}
-                        data-subsection-content={`${sectionIndex}-${subIndex}`}
-                      >
-                        <ul class="subsection-items">
-                          {subsection.items.map((item) => {
-                            const isActive = currentPath === item.href || currentPath === item.href + '/';
-                            return (
-                              <li>
-                                <a
-                                  href={item.href}
-                                  class={`sidebar-link nested ${isActive ? 'active' : ''}`}
-                                  data-search-item
-                                  data-label={item.label}
-                                >
-                                  <span class="link-indicator"></span>
-                                  <span class="link-text">{item.label}</span>
-                                </a>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    </div>
+                        <span class="link-indicator"></span>
+                        <span class="link-text">{item.label}</span>
+                      </a>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             )}
           </div>
         </div>
@@ -274,14 +292,84 @@ const icons: Record<string, string> = {
     border-bottom: 1px solid var(--color-border);
   }
 
-  /* Navigation */
+  /* Runtime Switcher */
+  .runtime-switcher-container {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .runtime-switcher {
+    display: flex;
+    padding: 3px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--color-border);
+    border-radius: 0.625rem;
+    gap: 3px;
+  }
+
+  .runtime-switch-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    font-family: inherit;
+  }
+
+  .runtime-switch-icon {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .runtime-switch-btn[data-runtime-switch="node"][aria-selected="true"] {
+    background: rgba(34, 197, 94, 0.08);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.15);
+    font-weight: 600;
+  }
+
+  .runtime-switch-btn[data-runtime-switch="bun"][aria-selected="true"] {
+    background: rgba(245, 158, 11, 0.08);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
+    font-weight: 600;
+  }
+
+  .runtime-switch-btn:hover:not([aria-selected="true"]) {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text-secondary);
+  }
+
+  /* Navigation — CSS-only runtime switching via html[data-runtime] */
   .sidebar-nav {
     flex: 1;
     overflow-y: auto;
-    display: flex;
     flex-direction: column;
     gap: 0.125rem;
     padding: 1rem 1rem 0;
+    display: none;
+  }
+
+  /* Show the active runtime's nav tree */
+  :global(html[data-runtime="node"]) [data-runtime-nav="node"],
+  :global(html[data-runtime="bun"]) [data-runtime-nav="bun"] {
+    display: flex;
+  }
+
+  /* Fallback: if no data-runtime set yet, show node */
+  :global(html:not([data-runtime])) [data-runtime-nav="node"] {
+    display: flex;
   }
 
   .sidebar-section {
@@ -408,105 +496,6 @@ const icons: Record<string, string> = {
     padding-bottom: 0.375rem;
   }
 
-  /* Subsections */
-  .subsections {
-    overflow: hidden;
-    padding: 0.25rem 0;
-  }
-
-  .subsection {
-    margin: 0.125rem 0;
-  }
-
-  .subsection-header {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    width: 100%;
-    padding: 0.375rem 0.625rem 0.375rem 1.5rem;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    border-radius: 0.375rem;
-    transition: all 0.15s ease;
-  }
-
-  .subsection-header:hover {
-    background: rgba(255, 255, 255, 0.04);
-  }
-
-  .subsection-header.active {
-    background: rgba(0, 229, 255, 0.04);
-  }
-
-  .sub-chevron {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 0.875rem;
-    height: 0.875rem;
-    color: var(--color-text-muted);
-    transition: transform 0.15s ease, color 0.15s ease;
-  }
-
-  .sub-chevron svg {
-    width: 0.625rem;
-    height: 0.625rem;
-  }
-
-  .sub-chevron.expanded {
-    transform: rotate(90deg);
-    color: var(--color-accent);
-  }
-
-  .subsection-title {
-    flex: 1;
-    font-size: 0.6875rem;
-    font-weight: 500;
-    color: var(--color-text-muted);
-    text-align: left;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: color 0.15s ease;
-  }
-
-  .subsection-header:hover .subsection-title,
-  .subsection-header.active .subsection-title {
-    color: var(--color-text-secondary);
-  }
-
-  .sub-count {
-    font-size: 0.5625rem;
-    font-weight: 500;
-    padding: 0.0625rem 0.25rem;
-    border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--color-text-muted);
-    font-family: var(--font-mono);
-  }
-
-  /* Subsection Content */
-  .subsection-content {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 0.15s ease;
-  }
-
-  .subsection-content.expanded {
-    grid-template-rows: 1fr;
-  }
-
-  .subsection-items {
-    overflow: hidden;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .subsection-content.expanded .subsection-items {
-    padding: 0.125rem 0 0.25rem;
-  }
-
   /* Sidebar Links */
   .sidebar-link {
     display: flex;
@@ -518,10 +507,6 @@ const icons: Record<string, string> = {
     margin: 0.0625rem 0.25rem;
     transition: all 0.15s ease;
     position: relative;
-  }
-
-  .sidebar-link.nested {
-    padding-left: 3rem;
   }
 
   .sidebar-link:hover {
@@ -540,10 +525,6 @@ const icons: Record<string, string> = {
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.15);
     transition: all 0.2s ease;
-  }
-
-  .sidebar-link.nested .link-indicator {
-    left: 1.75rem;
   }
 
   .sidebar-link:hover .link-indicator {
@@ -618,8 +599,97 @@ const icons: Record<string, string> = {
 </style>
 
 <script>
-  // Use document-level event delegation so it works with multiple sidebar
-  // instances (mobile drawer + desktop) and survives Astro page transitions.
+  // Redirect maps: runtime-specific pages → their equivalent in the other runtime
+  const nodeToBun: Record<string, string> = {
+    '/docs/quick-start': '/docs/bun/quick-start',
+    '/docs/adapters/express': '/docs/bun/elysia',
+    '/docs/adapters/fastify': '/docs/bun/bun-serve',
+    '/docs/adapters/nestjs': '/docs/bun/bun-serve',
+    '/docs/adapters/node': '/docs/bun/bun-serve',
+    '/docs/examples': '/docs/bun/examples',
+    '/docs/examples/saas': '/docs/bun/examples/saas',
+    '/docs/examples/auth': '/docs/bun/examples/auth',
+    '/docs/examples/ecommerce': '/docs/bun/examples',
+    '/docs/examples/social': '/docs/bun/examples',
+    '/docs/examples/gaming': '/docs/bun/examples',
+    '/docs/examples/cinema': '/docs/bun/examples',
+    '/docs/api/hitlimit': '/docs/bun/api/hitlimit',
+    '/docs/api/stores': '/docs/bun/api/stores',
+  };
+
+  const bunToNode: Record<string, string> = {
+    '/docs/bun/quick-start': '/docs/quick-start',
+    '/docs/bun/bun-serve': '/docs/adapters/node',
+    '/docs/bun/elysia': '/docs/adapters/express',
+    '/docs/bun/examples': '/docs/examples',
+    '/docs/bun/examples/saas': '/docs/examples/saas',
+    '/docs/bun/examples/auth': '/docs/examples/auth',
+    '/docs/bun/api/hitlimit': '/docs/api/hitlimit',
+    '/docs/bun/api/stores': '/docs/api/stores',
+  };
+
+  function normalizePath(path: string): string {
+    return path.replace(/\/$/, '') || '/docs';
+  }
+
+  // Detect runtime from the current page URL (null = shared page)
+  function getPageRuntime(): 'node' | 'bun' | null {
+    const path = normalizePath(window.location.pathname);
+    if (path in bunToNode) return 'bun';
+    if (path in nodeToBun) return 'node';
+    return null; // shared page — use stored preference
+  }
+
+  function initRuntimeSwitcher() {
+    const stored = localStorage.getItem('hitlimit-runtime') || 'node';
+    const pageRuntime = getPageRuntime();
+
+    // Runtime-specific pages override stored preference so sidebar matches content
+    const effective = pageRuntime || stored;
+
+    applyRuntime(effective);
+  }
+
+  function applyRuntime(runtime: string) {
+    // CSS handles nav tree visibility via html[data-runtime]
+    document.documentElement.dataset.runtime = runtime;
+
+    // Update switcher button states
+    document.querySelectorAll('[data-runtime-switch]').forEach(btn => {
+      const btnRuntime = btn.getAttribute('data-runtime-switch');
+      btn.setAttribute('aria-selected', btnRuntime === runtime ? 'true' : 'false');
+      (btn as HTMLElement).tabIndex = btnRuntime === runtime ? 0 : -1;
+    });
+  }
+
+  // Event delegation for runtime switcher clicks
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('[data-runtime-switch]');
+    if (btn) {
+      const runtime = btn.getAttribute('data-runtime-switch') as string;
+      localStorage.setItem('hitlimit-runtime', runtime);
+
+      // If on a runtime-specific page, redirect to the equivalent page
+      const path = normalizePath(window.location.pathname);
+      const redirect = runtime === 'bun' ? nodeToBun[path] : bunToNode[path];
+      if (redirect) {
+        window.location.href = redirect;
+        return;
+      }
+
+      // Shared page — just swap UI in place
+      applyRuntime(runtime);
+      window.dispatchEvent(new CustomEvent('runtime-change', { detail: { runtime } }));
+    }
+  });
+
+  // Listen for runtime-change events from RuntimeCodeTabs to sync sidebar
+  window.addEventListener('runtime-change', ((e: CustomEvent<{ runtime: string }>) => {
+    const runtime = e.detail?.runtime;
+    if (runtime) applyRuntime(runtime);
+  }) as EventListener);
+
+  // Event delegation for section toggle
   document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
 
@@ -627,10 +697,10 @@ const icons: Record<string, string> = {
     const sectionToggle = target.closest<HTMLButtonElement>('[data-section-toggle]');
     if (sectionToggle) {
       e.preventDefault();
-      const sidebar = sectionToggle.closest('.sidebar-wrapper');
-      if (!sidebar) return;
+      const navTree = sectionToggle.closest('[data-runtime-nav]');
+      if (!navTree) return;
       const sectionIndex = sectionToggle.getAttribute('data-section-toggle');
-      const content = sidebar.querySelector(`[data-section-content="${sectionIndex}"]`);
+      const content = navTree.querySelector(`[data-section-content="${sectionIndex}"]`);
       const chevron = sectionToggle.querySelector('.chevron');
       const isExpanded = sectionToggle.getAttribute('aria-expanded') === 'true';
 
@@ -640,23 +710,8 @@ const icons: Record<string, string> = {
       chevron?.classList.toggle('expanded', !isExpanded);
       return;
     }
-
-    // Subsection toggle
-    const subToggle = target.closest<HTMLButtonElement>('[data-subsection-toggle]');
-    if (subToggle) {
-      e.preventDefault();
-      e.stopPropagation();
-      const sidebar = subToggle.closest('.sidebar-wrapper');
-      if (!sidebar) return;
-      const subIndex = subToggle.getAttribute('data-subsection-toggle');
-      const content = sidebar.querySelector(`[data-subsection-content="${subIndex}"]`);
-      const chevron = subToggle.querySelector('.sub-chevron');
-      const isExpanded = subToggle.getAttribute('aria-expanded') === 'true';
-
-      subToggle.setAttribute('aria-expanded', String(!isExpanded));
-      subToggle.classList.toggle('active', !isExpanded);
-      content?.classList.toggle('expanded', !isExpanded);
-      chevron?.classList.toggle('expanded', !isExpanded);
-    }
   });
+
+  initRuntimeSwitcher();
+  document.addEventListener('astro:after-swap', initRuntimeSwitcher);
 </script>

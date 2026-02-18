@@ -1,12 +1,12 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
-import Tabs from '../../../components/Tabs.astro';
+import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 ---
 
 <DocsLayout
   title="Hono Rate Limit Middleware - hitlimit | Best Hono Rate Limiter"
-  description="Hono rate limiting middleware with hitlimit. Protect your Hono APIs with high-performance rate limiting - route-specific limits, custom keys, Redis/SQLite stores. hono-rate-limiter alternative."
-  keywords="hono rate limit, hono rate limiter, hono middleware rate limiting, hono.js rate limit, hono api rate limit, hono-rate-limiter alternative, nodejs hono throttle, hono api protection, hono brute force protection"
+  description="Hono rate limiting middleware with hitlimit. Protect your Hono APIs with high-performance rate limiting - route-specific limits, custom keys, Redis/SQLite stores. Works on Node.js and Bun."
+  keywords="hono rate limit, hono rate limiter, hono middleware rate limiting, hono.js rate limit, hono api rate limit, bun hono rate limit, hono-rate-limiter alternative, hono api protection"
 >
   <h1>Hono Adapter</h1>
 
@@ -14,22 +14,19 @@ import Tabs from '../../../components/Tabs.astro';
 
   <h2 id="installation">Installation</h2>
 
-  <Tabs
-    tabs={[
-      { label: 'npm', content: 'npm install @joint-ops/hitlimit hono' },
-      { label: 'pnpm', content: 'pnpm add @joint-ops/hitlimit hono' },
-      { label: 'yarn', content: 'yarn add @joint-ops/hitlimit hono' },
-      { label: 'bun', content: 'bun add @joint-ops/hitlimit hono' },
-    ]}
+  <RuntimeCodeTabs
+    node='npm install @joint-ops/hitlimit hono\n<span class="cm"># or: pnpm add @joint-ops/hitlimit hono</span>'
+    bun='bun add @joint-ops/hitlimit-bun hono'
   />
 
   <h2 id="basic-usage">Basic Usage</h2>
 
   <p>Use hitlimit as Hono middleware:</p>
 
-  <div class="code-block">
-    <div class="code-header"><span class="code-label">app.ts</span></div>
-    <pre><code><span class="kw">import</span> {"{"} Hono {"}"} <span class="kw">from</span> <span class="str">'hono'</span>
+  <div data-runtime-content="node">
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">app.ts</span></div>
+      <pre><code><span class="kw">import</span> {"{"} Hono {"}"} <span class="kw">from</span> <span class="str">'hono'</span>
 <span class="kw">import</span> {"{"} serve {"}"} <span class="kw">from</span> <span class="str">'@hono/node-server'</span>
 <span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/hono'</span>
 
@@ -44,6 +41,27 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
 app.<span class="fn">get</span>(<span class="str">'/'</span>, (c) => c.<span class="fn">text</span>(<span class="str">'Hello World'</span>))
 
 <span class="fn">serve</span>({"{"} fetch: app.fetch, port: <span class="num">3000</span> {"}"})</code></pre>
+    </div>
+  </div>
+
+  <div data-runtime-content="bun">
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">app.ts</span></div>
+      <pre><code><span class="kw">import</span> {"{"} Hono {"}"} <span class="kw">from</span> <span class="str">'hono'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/hono'</span>
+
+<span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Hono</span>()
+
+<span class="cm">// Apply to all routes</span>
+app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+{"}"}))
+
+app.<span class="fn">get</span>(<span class="str">'/'</span>, (c) => c.<span class="fn">text</span>(<span class="str">'Hello Bun + Hono!'</span>))
+
+Bun.<span class="fn">serve</span>({"{"} port: <span class="num">3000</span>, fetch: app.fetch {"}"})</code></pre>
+    </div>
   </div>
 
   <h2 id="route-specific">Route-Specific Rate Limiting</h2>
@@ -51,11 +69,7 @@ app.<span class="fn">get</span>(<span class="str">'/'</span>, (c) => c.<span cla
   <p>Apply different limits to specific routes:</p>
 
   <div class="code-block">
-    <div class="code-header"><span class="code-label">routes.ts</span></div>
-    <pre><code><span class="kw">import</span> {"{"} Hono {"}"} <span class="kw">from</span> <span class="str">'hono'</span>
-<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/hono'</span>
-
-<span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Hono</span>()
+    <pre><code><span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Hono</span>()
 
 <span class="cm">// Public routes</span>
 app.<span class="fn">get</span>(<span class="str">'/'</span>, (c) => c.<span class="fn">text</span>(<span class="str">'Welcome'</span>))
@@ -81,9 +95,7 @@ app.<span class="fn">route</span>(<span class="str">'/api'</span>, api)</code></
   <p>Rate limit by user ID, API key, or custom identifiers:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/hono'</span>
-
-app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+    <pre><code>app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
   window: <span class="str">'1m'</span>,
   key: (c) => {"{"}
@@ -98,9 +110,7 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
   <p>Apply different limits based on user plan or tier:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/hono'</span>
-
-app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+    <pre><code>app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
   tiers: {"{"}
     free: {"{"} limit: <span class="num">10</span>, window: <span class="str">'1m'</span> {"}"},
     pro: {"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"},
@@ -148,18 +158,10 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
 
   <p>Use Redis or SQLite for distributed rate limiting:</p>
 
-  <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/hono'</span>
-<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
-
-app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">100</span>,
-  window: <span class="str">'1m'</span>,
-  store: <span class="fn">redisStore</span>({"{"}
-    url: <span class="str">'redis://localhost:6379'</span>
-  {"}"})
-{"}"}))</code></pre>
-  </div>
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/hono&#39;</span>\n<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/redis&#39;</span>\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({"{"}\n    url: <span class="str">&#39;redis://localhost:6379&#39;</span>\n  {"}"})\n{"}"}))'
+    bun='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/hono&#39;</span>\n<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/sqlite&#39;</span>\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">sqliteStore</span>({"{"}\n    path: <span class="str">&#39;./rate-limits.db&#39;</span>\n  {"}"})\n{"}"}))'
+  />
 
   <h2 id="migration">Migrating from hono-rate-limiter</h2>
 
@@ -178,9 +180,7 @@ app.<span class="fn">use</span>(<span class="fn">rateLimiter</span>({"{"}
 
   <div class="code-block">
     <div class="code-header"><span class="code-label">After (hitlimit)</span></div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/hono'</span>
-
-app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+    <pre><code>app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
   window: <span class="str">'1m'</span>, <span class="cm">// human-readable!</span>
   limit: <span class="num">100</span>,
   key: (c) => c.req.<span class="fn">header</span>(<span class="str">'x-api-key'</span>) || <span class="str">'anonymous'</span>
@@ -189,19 +189,11 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
 
   <p><strong>Key improvements:</strong></p>
   <ul>
-    <li><strong>Human-readable time windows</strong> - <code>'1m'</code> instead of milliseconds</li>
-    <li><strong>Built-in tiered limits</strong> - No manual tier management needed</li>
-    <li><strong>Smaller bundle size</strong> - ~6KB (Node.js) / ~18KB (Bun) vs ~88.5KB</li>
-    <li><strong>More stores</strong> - Memory, SQLite, Redis built-in (no separate packages)</li>
-    <li><strong>Better TypeScript</strong> - Full type inference for all options</li>
-  </ul>
-
-  <h2 id="next-steps">Next Steps</h2>
-
-  <ul>
-    <li><a href="/docs/configuration/options">Configuration Options</a> - All available options</li>
-    <li><a href="/docs/stores/overview">Stores</a> - Memory, SQLite, Redis</li>
-    <li><a href="/docs/bun/hono">Bun + Hono</a> - Use Hono with Bun for maximum performance</li>
+    <li><strong>Human-readable time windows</strong> — <code>'1m'</code> instead of milliseconds</li>
+    <li><strong>Built-in tiered limits</strong> — No manual tier management needed</li>
+    <li><strong>Zero runtime dependencies</strong> — no external packages needed</li>
+    <li><strong>More stores</strong> — Memory, SQLite, Redis built-in (no separate packages)</li>
+    <li><strong>Better TypeScript</strong> — Full type inference for all options</li>
   </ul>
 </DocsLayout>
 

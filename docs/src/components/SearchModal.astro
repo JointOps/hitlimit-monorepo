@@ -5,58 +5,78 @@ interface SearchItem {
   href: string;
   content: string;
   headings: string[];
+  runtime: 'node' | 'bun' | 'both';
 }
 
 // Comprehensive search data for all docs
 const searchData: SearchItem[] = [
   // Getting Started
-  { title: 'Introduction', section: 'Getting Started', href: '/docs', content: 'hitlimit rate limiting library typescript node.js bun express nestjs fast lightweight', headings: ['Features', 'Why hitlimit'] },
-  { title: 'Installation', section: 'Getting Started', href: '/docs/installation', content: 'npm install pnpm yarn bun add package setup', headings: ['npm', 'pnpm', 'yarn', 'bun'] },
-  { title: 'Quick Start', section: 'Getting Started', href: '/docs/quick-start', content: 'getting started basic usage example middleware setup', headings: ['Basic Usage', 'Configuration'] },
+  { title: 'Introduction', section: 'Getting Started', href: '/docs', content: 'hitlimit rate limiting library typescript node.js bun express nestjs fast lightweight', headings: ['Features', 'Why hitlimit'], runtime: 'node' },
+  { title: 'Installation', section: 'Getting Started', href: '/docs/installation', content: 'npm install pnpm yarn bun add package setup', headings: ['npm', 'pnpm', 'yarn', 'bun'], runtime: 'both' },
+  { title: 'Quick Start', section: 'Getting Started', href: '/docs/quick-start', content: 'getting started basic usage example middleware setup', headings: ['Basic Usage', 'Configuration'], runtime: 'node' },
 
   // Configuration
-  { title: 'All Options', section: 'Configuration', href: '/docs/configuration/options', content: 'configuration options settings limit window store key skip message headers', headings: ['limit', 'window', 'store', 'key', 'skip', 'message'] },
-  { title: 'Time Windows', section: 'Configuration', href: '/docs/configuration/window', content: 'time window duration seconds minutes hours days sliding fixed', headings: ['Formats', 'Sliding Window', 'Fixed Window'] },
-  { title: 'Tiered Limits', section: 'Configuration', href: '/docs/configuration/tiered', content: 'tiered limits different rates user roles admin premium free', headings: ['User Tiers', 'Dynamic Limits'] },
-  { title: 'Custom Keys', section: 'Configuration', href: '/docs/configuration/custom-key', content: 'custom key extraction user id api key ip address identifier', headings: ['By User ID', 'By API Key', 'By IP'] },
-  { title: 'Custom Responses', section: 'Configuration', href: '/docs/configuration/custom-response', content: 'custom response error message 429 too many requests json html', headings: ['JSON Response', 'Custom Handler'] },
-  { title: 'Headers', section: 'Configuration', href: '/docs/configuration/headers', content: 'rate limit headers x-ratelimit-limit remaining reset retry-after', headings: ['Standard Headers', 'Custom Headers'] },
-  { title: 'Skip/Whitelist', section: 'Configuration', href: '/docs/configuration/skip', content: 'skip whitelist bypass exclude admin routes health check', headings: ['Skip Function', 'Whitelist IPs'] },
+  { title: 'All Options', section: 'Configuration', href: '/docs/configuration/options', content: 'configuration options settings limit window store key skip message headers', headings: ['limit', 'window', 'store', 'key', 'skip', 'message'], runtime: 'both' },
+  { title: 'Time Windows', section: 'Configuration', href: '/docs/configuration/window', content: 'time window duration seconds minutes hours days sliding fixed', headings: ['Formats', 'Sliding Window', 'Fixed Window'], runtime: 'both' },
+  { title: 'Tiered Limits', section: 'Configuration', href: '/docs/configuration/tiered', content: 'tiered limits different rates user roles admin premium free', headings: ['User Tiers', 'Dynamic Limits'], runtime: 'both' },
+  { title: 'Custom Keys', section: 'Configuration', href: '/docs/configuration/custom-key', content: 'custom key extraction user id api key ip address identifier', headings: ['By User ID', 'By API Key', 'By IP'], runtime: 'both' },
+  { title: 'Custom Responses', section: 'Configuration', href: '/docs/configuration/custom-response', content: 'custom response error message 429 too many requests json html', headings: ['JSON Response', 'Custom Handler'], runtime: 'both' },
+  { title: 'Headers', section: 'Configuration', href: '/docs/configuration/headers', content: 'rate limit headers x-ratelimit-limit remaining reset retry-after', headings: ['Standard Headers', 'Custom Headers'], runtime: 'both' },
+  { title: 'Skip/Whitelist', section: 'Configuration', href: '/docs/configuration/skip', content: 'skip whitelist bypass exclude admin routes health check', headings: ['Skip Function', 'Whitelist IPs'], runtime: 'both' },
 
   // Stores
-  { title: 'Overview', section: 'Stores', href: '/docs/stores/overview', content: 'stores storage backend memory redis sqlite persistence distributed', headings: ['Memory', 'Redis', 'SQLite'] },
-  { title: 'Memory Store', section: 'Stores', href: '/docs/stores/memory', content: 'memory store in-memory default development local single instance', headings: ['Usage', 'Options', 'Limitations'] },
-  { title: 'SQLite Store', section: 'Stores', href: '/docs/stores/sqlite', content: 'sqlite store database persistent better-sqlite3 file local', headings: ['Installation', 'Usage', 'Options'] },
-  { title: 'Redis Store', section: 'Stores', href: '/docs/stores/redis', content: 'redis store distributed cluster ioredis scaling production', headings: ['Installation', 'Usage', 'Cluster', 'Options'] },
-  { title: 'Custom Stores', section: 'Stores', href: '/docs/stores/custom', content: 'custom store implementation interface adapter create own', headings: ['Interface', 'Implementation', 'Example'] },
+  { title: 'Overview', section: 'Stores', href: '/docs/stores/overview', content: 'stores storage backend memory redis sqlite persistence distributed', headings: ['Memory', 'Redis', 'SQLite'], runtime: 'both' },
+  { title: 'Memory Store', section: 'Stores', href: '/docs/stores/memory', content: 'memory store in-memory default development local single instance', headings: ['Usage', 'Options', 'Limitations'], runtime: 'both' },
+  { title: 'SQLite Store', section: 'Stores', href: '/docs/stores/sqlite', content: 'sqlite store database persistent better-sqlite3 file local', headings: ['Installation', 'Usage', 'Options'], runtime: 'both' },
+  { title: 'Redis Store', section: 'Stores', href: '/docs/stores/redis', content: 'redis store distributed cluster ioredis scaling production', headings: ['Installation', 'Usage', 'Cluster', 'Options'], runtime: 'both' },
+  { title: 'Custom Stores', section: 'Stores', href: '/docs/stores/custom', content: 'custom store implementation interface adapter create own', headings: ['Interface', 'Implementation', 'Example'], runtime: 'both' },
 
   // Adapters
-  { title: 'Express.js', section: 'Adapters', href: '/docs/adapters/express', content: 'express expressjs middleware router route specific global', headings: ['Installation', 'Basic Usage', 'Route-Specific', 'Custom Key'] },
-  { title: 'Fastify', section: 'Adapters', href: '/docs/adapters/fastify', content: 'fastify plugin register rate limit middleware', headings: ['Installation', 'Basic Usage', 'Options'] },
-  { title: 'Hono (Node.js)', section: 'Adapters', href: '/docs/adapters/hono', content: 'hono middleware rate limiting node.js hono-rate-limiter alternative', headings: ['Installation', 'Basic Usage', 'Options', 'Migration'] },
-  { title: 'NestJS', section: 'Adapters', href: '/docs/adapters/nestjs', content: 'nestjs module guard decorator controller global throttler', headings: ['Installation', 'Module Setup', 'Guard', 'Decorator'] },
-  { title: 'Node.js HTTP', section: 'Adapters', href: '/docs/adapters/node', content: 'node nodejs http native server raw createServer handler', headings: ['Installation', 'Basic Usage', 'Middleware Style'] },
+  { title: 'Express.js', section: 'Adapters', href: '/docs/adapters/express', content: 'express expressjs middleware router route specific global', headings: ['Installation', 'Basic Usage', 'Route-Specific', 'Custom Key'], runtime: 'node' },
+  { title: 'Fastify', section: 'Adapters', href: '/docs/adapters/fastify', content: 'fastify plugin register rate limit middleware', headings: ['Installation', 'Basic Usage', 'Options'], runtime: 'node' },
+  { title: 'Hono (Node.js)', section: 'Adapters', href: '/docs/adapters/hono', content: 'hono middleware rate limiting node.js hono-rate-limiter alternative', headings: ['Installation', 'Basic Usage', 'Options', 'Migration'], runtime: 'node' },
+  { title: 'NestJS', section: 'Adapters', href: '/docs/adapters/nestjs', content: 'nestjs module guard decorator controller global throttler', headings: ['Installation', 'Module Setup', 'Guard', 'Decorator'], runtime: 'node' },
+  { title: 'Node.js HTTP', section: 'Adapters', href: '/docs/adapters/node', content: 'node nodejs http native server raw createServer handler', headings: ['Installation', 'Basic Usage', 'Middleware Style'], runtime: 'node' },
 
   // Bun
-  { title: 'Introduction', section: 'Bun', href: '/docs/bun', content: 'bun runtime fast performance native typescript', headings: ['Why Bun', 'Features'] },
-  { title: 'Installation', section: 'Bun', href: '/docs/bun/installation', content: 'bun install add package setup', headings: ['Installation'] },
-  { title: 'Quick Start', section: 'Bun', href: '/docs/bun/quick-start', content: 'bun quick start getting started basic', headings: ['Basic Usage'] },
-  { title: 'Bun.serve', section: 'Bun', href: '/docs/bun/bun-serve', content: 'bun serve server http native handler fetch', headings: ['Usage', 'Configuration'] },
-  { title: 'Elysia Plugin', section: 'Bun', href: '/docs/bun/elysia', content: 'elysia plugin framework web bun fast', headings: ['Installation', 'Usage', 'Options'] },
-  { title: 'Hono (Bun)', section: 'Bun', href: '/docs/bun/hono', content: 'hono bun middleware rate limiting 6M ops/sec high performance', headings: ['Installation', 'Usage', 'Performance', 'Options'] },
-  { title: 'Stores', section: 'Bun', href: '/docs/bun/stores', content: 'bun stores sqlite memory redis native', headings: ['Memory', 'SQLite', 'Redis'] },
-  { title: 'Performance', section: 'Bun', href: '/docs/bun/performance', content: 'performance benchmarks fast speed optimization', headings: ['Benchmarks', 'Tips'] },
+  { title: 'Introduction', section: 'Bun', href: '/docs/bun', content: 'bun runtime fast performance native typescript', headings: ['Why Bun', 'Features'], runtime: 'bun' },
+  { title: 'Installation', section: 'Bun', href: '/docs/bun/installation', content: 'bun install add package setup', headings: ['Installation'], runtime: 'bun' },
+  { title: 'Quick Start', section: 'Bun', href: '/docs/bun/quick-start', content: 'bun quick start getting started basic', headings: ['Basic Usage'], runtime: 'bun' },
+  { title: 'Bun.serve', section: 'Bun', href: '/docs/bun/bun-serve', content: 'bun serve server http native handler fetch', headings: ['Usage', 'Configuration'], runtime: 'bun' },
+  { title: 'Elysia Plugin', section: 'Bun', href: '/docs/bun/elysia', content: 'elysia plugin framework web bun fast', headings: ['Installation', 'Usage', 'Options'], runtime: 'bun' },
+  { title: 'Hono (Bun)', section: 'Bun', href: '/docs/bun/hono', content: 'hono bun middleware rate limiting 6M ops/sec high performance', headings: ['Installation', 'Usage', 'Performance', 'Options'], runtime: 'bun' },
+  { title: 'Stores', section: 'Bun', href: '/docs/bun/stores', content: 'bun stores sqlite memory redis native', headings: ['Memory', 'SQLite', 'Redis'], runtime: 'bun' },
+  { title: 'Performance', section: 'Bun', href: '/docs/bun/performance', content: 'performance benchmarks fast speed optimization', headings: ['Benchmarks', 'Tips'], runtime: 'bun' },
+
+  // Bun Stores
+  { title: 'Memory Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/memory', content: 'bun memory store in-memory default 5.62M ops/sec fastest', headings: ['Usage', 'Characteristics', 'Performance'], runtime: 'bun' },
+  { title: 'SQLite Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/sqlite', content: 'bun sqlite bun:sqlite native store persistent 383K ops/sec zero dependencies', headings: ['Installation', 'Usage', 'Options', 'vs Node.js'], runtime: 'bun' },
+  { title: 'Redis Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/redis', content: 'bun redis store distributed ioredis lua scripts 6.8K ops/sec', headings: ['Installation', 'Usage', 'Options', 'Lua Scripts'], runtime: 'bun' },
+
+  // Bun Guides
+  { title: 'Configuration (Bun)', section: 'Bun Guides', href: '/docs/bun/configuration', content: 'bun configuration options settings limit window store key skip headers ban', headings: ['Basic Options', 'Advanced Options', 'Ban', 'Tiered Limits'], runtime: 'bun' },
+  { title: 'Production (Bun)', section: 'Bun Guides', href: '/docs/bun/guides/production', content: 'bun production deployment best practices redis graceful shutdown', headings: ['Store Selection', 'Redis Setup', 'Environment', 'Shutdown'], runtime: 'bun' },
+  { title: 'Scaling (Bun)', section: 'Bun Guides', href: '/docs/bun/guides/scaling', content: 'bun scaling horizontal distributed memory sqlite redis migration', headings: ['Single Instance', 'Persistence', 'Redis', 'Migration'], runtime: 'bun' },
+
+  // Bun Examples
+  { title: 'Examples (Bun)', section: 'Bun Examples', href: '/docs/bun/examples', content: 'bun examples patterns bun.serve elysia hono production', headings: ['Quick Start', 'Detailed Examples', 'Patterns'], runtime: 'bun' },
+  { title: 'SaaS API (Bun)', section: 'Bun Examples', href: '/docs/bun/examples/saas', content: 'bun saas tiered limits subscription free pro enterprise workspace', headings: ['Scenario', 'Implementation', 'Elysia Version'], runtime: 'bun' },
+  { title: 'Auth (Bun)', section: 'Bun Examples', href: '/docs/bun/examples/auth', content: 'bun authentication login brute force password reset registration', headings: ['Scenario', 'Implementation', 'Route Handling'], runtime: 'bun' },
+
+  // Bun API
+  { title: 'hitlimit() (Bun)', section: 'Bun API', href: '/docs/bun/api/hitlimit', content: 'bun hitlimit function api limiter check method options', headings: ['Signature', 'Options', 'Return Value', 'Check Result'], runtime: 'bun' },
+  { title: 'Stores API (Bun)', section: 'Bun API', href: '/docs/bun/api/stores', content: 'bun stores api interface memoryStore sqliteStore redisStore HitLimitStore', headings: ['Interface', 'Memory', 'SQLite', 'Redis', 'Custom'], runtime: 'bun' },
 
   // API Reference
-  { title: 'hitlimit()', section: 'API Reference', href: '/docs/api/hitlimit', content: 'hitlimit function api main middleware create limiter', headings: ['Signature', 'Options', 'Returns'] },
-  { title: 'Stores', section: 'API Reference', href: '/docs/api/stores', content: 'stores api interface methods increment get reset', headings: ['Interface', 'Methods'] },
-  { title: 'TypeScript Types', section: 'API Reference', href: '/docs/api/types', content: 'typescript types interfaces generics type definitions', headings: ['Options', 'Store', 'Result'] },
+  { title: 'hitlimit()', section: 'API Reference', href: '/docs/api/hitlimit', content: 'hitlimit function api main middleware create limiter', headings: ['Signature', 'Options', 'Returns'], runtime: 'both' },
+  { title: 'Stores', section: 'API Reference', href: '/docs/api/stores', content: 'stores api interface methods increment get reset', headings: ['Interface', 'Methods'], runtime: 'both' },
+  { title: 'TypeScript Types', section: 'API Reference', href: '/docs/api/types', content: 'typescript types interfaces generics type definitions', headings: ['Options', 'Store', 'Result'], runtime: 'both' },
 
   // Guides
-  { title: 'Production', section: 'Guides', href: '/docs/guides/production', content: 'production deployment best practices security redis cluster', headings: ['Best Practices', 'Security', 'Scaling'] },
-  { title: 'Scaling', section: 'Guides', href: '/docs/guides/scaling', content: 'scaling horizontal distributed multiple instances load balancer', headings: ['Horizontal Scaling', 'Redis Cluster'] },
-  { title: 'Monitoring', section: 'Guides', href: '/docs/guides/monitoring', content: 'monitoring metrics logging prometheus grafana alerts', headings: ['Metrics', 'Logging', 'Alerts'] },
-  { title: 'Testing', section: 'Guides', href: '/docs/guides/testing', content: 'testing unit integration mock jest vitest', headings: ['Unit Tests', 'Integration', 'Mocking'] },
+  { title: 'Production', section: 'Guides', href: '/docs/guides/production', content: 'production deployment best practices security redis cluster', headings: ['Best Practices', 'Security', 'Scaling'], runtime: 'both' },
+  { title: 'Scaling', section: 'Guides', href: '/docs/guides/scaling', content: 'scaling horizontal distributed multiple instances load balancer', headings: ['Horizontal Scaling', 'Redis Cluster'], runtime: 'both' },
+  { title: 'Monitoring', section: 'Guides', href: '/docs/guides/monitoring', content: 'monitoring metrics logging prometheus grafana alerts', headings: ['Metrics', 'Logging', 'Alerts'], runtime: 'both' },
+  { title: 'Testing', section: 'Guides', href: '/docs/guides/testing', content: 'testing unit integration mock jest vitest', headings: ['Unit Tests', 'Integration', 'Mocking'], runtime: 'both' },
 ];
 ---
 
@@ -93,6 +113,18 @@ const searchData: SearchItem[] = [
         />
         <kbd class="search-esc">ESC</kbd>
       </div>
+    </div>
+
+    <div class="search-filters" id="search-filters">
+      <button class="search-filter-chip active" data-filter="all" type="button">All</button>
+      <button class="search-filter-chip" data-filter="node" type="button">
+        <svg class="filter-chip-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M11.998 24c-.321 0-.641-.084-.922-.247l-2.936-1.737c-.438-.245-.224-.332-.08-.383.585-.203.703-.25 1.328-.604.065-.037.151-.023.218.017l2.256 1.339c.082.045.197.045.272 0l8.795-5.076c.082-.047.134-.141.134-.238V6.921c0-.099-.053-.192-.137-.242l-8.791-5.072c-.081-.047-.189-.047-.271 0L3.075 6.68c-.084.049-.137.142-.137.24v10.15c0 .097.054.189.139.235l2.409 1.392c1.307.654 2.108-.116 2.108-.89V7.787c0-.142.114-.253.256-.253h1.115c.139 0 .255.112.255.253v10.021c0 1.745-.95 2.745-2.604 2.745-.508 0-.909 0-2.026-.551L2.28 18.675c-.57-.329-.922-.945-.922-1.604V6.921c0-.659.353-1.275.922-1.603l8.795-5.082c.557-.315 1.296-.315 1.848 0l8.794 5.082c.57.329.924.944.924 1.603v10.15c0 .659-.354 1.273-.924 1.604l-8.794 5.078C12.643 23.916 12.324 24 11.998 24zM19.099 13.993c0-1.9-1.284-2.406-3.987-2.763-2.731-.361-3.009-.548-3.009-1.187 0-.528.235-1.233 2.258-1.233 1.807 0 2.473.389 2.747 1.607.024.115.129.199.247.199h1.141c.071 0 .138-.031.186-.081.048-.054.074-.123.067-.196-.177-2.098-1.571-3.076-4.388-3.076-2.508 0-4.004 1.058-4.004 2.833 0 1.925 1.488 2.457 3.895 2.695 2.88.282 3.103.703 3.103 1.269 0 .983-.789 1.402-2.642 1.402-2.327 0-2.839-.584-3.011-1.742-.02-.124-.126-.215-.253-.215h-1.137c-.141 0-.254.112-.254.253 0 1.482.806 3.248 4.655 3.248 2.855 0 4.453-1.097 4.453-2.98z"/></svg>
+        Node.js
+      </button>
+      <button class="search-filter-chip" data-filter="bun" type="button">
+        <svg class="filter-chip-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22.596c6.628 0 12-4.338 12-9.688 0-3.318-2.057-6.248-5.219-7.986-1.286-.715-2.297-1.357-3.139-1.89C14.058 2.025 13.08 1.404 12 1.404c-1.097 0-2.334.785-3.966 1.821a49.92 49.92 0 0 1-2.816 1.697C2.057 6.66 0 9.59 0 12.908c0 5.35 5.372 9.687 12 9.687v.001ZM10.599 4.715c.334-.759.503-1.58.498-2.409 0-.145.202-.187.23-.029.658 2.783-.902 4.162-2.057 4.624-.124.048-.199-.121-.103-.209a5.763 5.763 0 0 0 1.432-1.977Zm2.058-.102a5.82 5.82 0 0 0-.782-2.306v-.016c-.069-.123.086-.263.185-.172 1.962 2.111 1.307 4.067.556 5.051-.082.103-.23-.003-.189-.126a5.85 5.85 0 0 0 .23-2.431Zm1.776-.561a5.727 5.727 0 0 0-1.612-1.806v-.014c-.112-.085-.024-.274.114-.218 2.595 1.087 2.774 3.18 2.459 4.407a.116.116 0 0 1-.049.071.11.11 0 0 1-.153-.026.122.122 0 0 1-.022-.083 5.891 5.891 0 0 0-.737-2.331Zm-5.087.561c-.617.546-1.282.76-2.063 1-.117 0-.195-.078-.156-.181 1.752-.909 2.376-1.649 2.999-2.778 0 0 .155-.118.188.085 0 .304-.349 1.329-.968 1.874Zm4.945 11.237a2.957 2.957 0 0 1-.937 1.553c-.346.346-.8.565-1.286.62a2.178 2.178 0 0 1-1.327-.62 2.955 2.955 0 0 1-.925-1.553.244.244 0 0 1 .064-.198.234.234 0 0 1 .193-.069h3.965a.226.226 0 0 1 .19.07c.05.053.073.125.063.197Zm-5.458-2.176a1.862 1.862 0 0 1-2.384-.245 1.98 1.98 0 0 1-.233-2.447c.207-.319.503-.566.848-.713a1.84 1.84 0 0 1 1.092-.11c.366.075.703.261.967.531a1.98 1.98 0 0 1 .408 2.114 1.931 1.931 0 0 1-.698.869v.001Zm8.495.005a1.86 1.86 0 0 1-2.381-.253 1.964 1.964 0 0 1-.547-1.366c0-.384.11-.76.32-1.079.207-.319.503-.567.849-.713a1.844 1.844 0 0 1 1.093-.108c.367.076.704.262.968.534a1.98 1.98 0 0 1 .4 2.117 1.932 1.932 0 0 1-.702.868Z"/></svg>
+        Bun
+      </button>
     </div>
 
     <div class="search-modal-body" id="search-body">
@@ -619,6 +651,81 @@ const searchData: SearchItem[] = [
   .search-no-results:not(.active) {
     display: none;
   }
+
+  /* Filter Chips */
+  .search-filters {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .search-filter-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+
+  .search-filter-chip:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text-secondary);
+  }
+
+  .search-filter-chip.active {
+    background: rgba(0, 229, 255, 0.1);
+    border-color: rgba(0, 229, 255, 0.3);
+    color: var(--color-accent);
+  }
+
+  .search-filter-chip[data-filter="node"].active {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+  }
+
+  .search-filter-chip[data-filter="bun"].active {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #f59e0b;
+  }
+
+  .filter-chip-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  /* Runtime Badges */
+  .result-runtime-badge {
+    font-size: 0.5625rem;
+    font-weight: 600;
+    padding: 0.0625rem 0.375rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    margin-left: 0.375rem;
+    flex-shrink: 0;
+  }
+
+  .result-runtime-node {
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+
+  .result-runtime-bun {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
 </style>
 
 <script>
@@ -632,10 +739,18 @@ const searchData: SearchItem[] = [
     const noResults = document.getElementById('search-no-results');
 
     const searchData = (window as any).__DOCS_SEARCH_DATA__ || [];
+    const filtersContainer = document.getElementById('search-filters');
     let selectedIndex = -1;
     let currentResults: any[] = [];
+    let currentFilter: 'all' | 'node' | 'bun' = 'all';
 
     if (!trigger || !modal || !input) return;
+
+    // Auto-set filter based on global runtime preference
+    const savedRuntime = localStorage.getItem('hitlimit-runtime');
+    if (savedRuntime === 'node' || savedRuntime === 'bun') {
+      // Keep 'all' as default but we'll use this for prioritization
+    }
 
     // Section icons
     const sectionIcons: Record<string, string> = {
@@ -646,6 +761,12 @@ const searchData: SearchItem[] = [
       'Bun': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
       'API Reference': '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
       'Guides': '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h8"/>',
+      'Bun Stores': '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+      'Bun Guides': '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h8"/>',
+      'Bun Examples': '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+      'Bun API': '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+      'Examples': '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+      'Benchmarks': '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
     };
 
     function openModal() {
@@ -696,12 +817,31 @@ const searchData: SearchItem[] = [
       }
 
       const q = query.toLowerCase();
-      currentResults = searchData.filter((item: any) =>
+      let filtered = searchData.filter((item: any) =>
         item.title.toLowerCase().includes(q) ||
         item.section.toLowerCase().includes(q) ||
         item.content.toLowerCase().includes(q) ||
         item.headings.some((h: string) => h.toLowerCase().includes(q))
       );
+
+      // Apply runtime filter
+      if (currentFilter === 'node') {
+        filtered = filtered.filter((item: any) => item.runtime === 'node' || item.runtime === 'both');
+      } else if (currentFilter === 'bun') {
+        filtered = filtered.filter((item: any) => item.runtime === 'bun' || item.runtime === 'both');
+      } else {
+        // 'all' — prioritize user's selected runtime from localStorage
+        const preferredRuntime = localStorage.getItem('hitlimit-runtime');
+        if (preferredRuntime === 'node' || preferredRuntime === 'bun') {
+          filtered.sort((a: any, b: any) => {
+            const aMatch = a.runtime === preferredRuntime || a.runtime === 'both' ? 0 : 1;
+            const bMatch = b.runtime === preferredRuntime || b.runtime === 'both' ? 0 : 1;
+            return aMatch - bMatch;
+          });
+        }
+      }
+
+      currentResults = filtered;
 
       if (currentResults.length === 0) {
         showNoResults();
@@ -723,13 +863,14 @@ const searchData: SearchItem[] = [
         items.forEach((item: any, idx: number) => {
           const globalIdx = currentResults.indexOf(item);
           const icon = sectionIcons[section] || sectionIcons['Getting Started'];
+          const runtimeBadge = item.runtime === 'node' ? '<span class="result-runtime-badge result-runtime-node">N</span>' : item.runtime === 'bun' ? '<span class="result-runtime-badge result-runtime-bun">B</span>' : '';
           html += `
             <a href="${item.href}" class="search-result-item" data-index="${globalIdx}">
               <span class="result-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icon}</svg>
               </span>
               <span class="result-content">
-                <div class="result-title">${highlightMatch(item.title, query)}</div>
+                <div class="result-title">${highlightMatch(item.title, query)}${runtimeBadge}</div>
                 <div class="result-breadcrumb">Docs → ${section}</div>
               </span>
               <span class="result-arrow">→</span>
@@ -808,6 +949,25 @@ const searchData: SearchItem[] = [
           }
         }
       }
+    });
+
+    // Filter chip click handlers (event delegation)
+    filtersContainer?.addEventListener('click', (e) => {
+      const chip = (e.target as Element).closest('.search-filter-chip') as HTMLElement;
+      if (!chip) return;
+      const filter = chip.dataset.filter as 'all' | 'node' | 'bun';
+      if (!filter) return;
+
+      currentFilter = filter;
+
+      // Update active state on all chips
+      filtersContainer.querySelectorAll('.search-filter-chip').forEach((c) => {
+        c.classList.remove('active');
+      });
+      chip.classList.add('active');
+
+      // Re-run search with current input
+      search(input.value);
     });
 
     // Handle quick link and result clicks

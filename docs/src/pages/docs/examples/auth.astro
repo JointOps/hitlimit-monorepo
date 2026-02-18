@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeBanner from '../../../components/RuntimeBanner.astro';
 ---
 
 <DocsLayout
@@ -8,6 +9,11 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   keywords="login rate limit, brute force protection, 2fa rate limit, password reset rate limit, auth rate limiting, express login protection"
 >
   <h1>Authentication Rate Limiting</h1>
+  <RuntimeBanner
+    currentRuntime="node"
+    counterpartHref="/docs/bun/examples/auth"
+    counterpartLabel="Bun Auth Example"
+  />
 
   <p>
     Protecting authentication endpoints is critical. This example shows how to implement

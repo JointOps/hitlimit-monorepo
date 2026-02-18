@@ -1,0 +1,114 @@
+---
+---
+
+<section class="py-12 px-4">
+  <div class="max-w-3xl mx-auto reveal">
+    <div class="relative rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] p-6 sm:p-8 overflow-hidden">
+      <!-- Gradient top edge -->
+      <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--color-accent)] to-transparent"></div>
+
+      <div class="flex flex-col sm:flex-row items-center gap-6">
+        <!-- Text -->
+        <div class="text-center sm:text-left flex-shrink-0">
+          <p class="text-lg font-semibold text-white mb-1">Get started in seconds</p>
+          <p class="text-sm text-[var(--color-text-muted)]">Zero config. Zero dependencies.</p>
+        </div>
+
+        <!-- Install command -->
+        <div class="flex-1 w-full">
+          <div class="flex items-center gap-2 mb-2" id="install-tabs">
+            <button data-install-tab="npm" class="install-tab-btn active text-xs px-3 py-1 rounded-md font-semibold transition-all duration-200">npm</button>
+            <button data-install-tab="pnpm" class="install-tab-btn text-xs px-3 py-1 rounded-md font-semibold transition-all duration-200">pnpm</button>
+            <button data-install-tab="yarn" class="install-tab-btn text-xs px-3 py-1 rounded-md font-semibold transition-all duration-200">yarn</button>
+            <button data-install-tab="bun" class="install-tab-btn text-xs px-3 py-1 rounded-md font-semibold transition-all duration-200">bun</button>
+          </div>
+
+          <div class="relative group">
+            <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[var(--color-bg-elevated)] border border-[var(--color-border)] font-mono text-sm transition-all duration-300 group-hover:border-[rgba(0,229,255,0.2)]">
+              <span class="text-[var(--color-text-muted)]">$</span>
+              <code id="install-command" class="text-[var(--color-text-secondary)] flex-1">npm i @joint-ops/hitlimit</code>
+              <button
+                id="copy-install-btn"
+                class="flex-shrink-0 p-1.5 rounded-md hover:bg-white/10 text-[var(--color-text-muted)] hover:text-white transition-all duration-200"
+                aria-label="Copy install command"
+              >
+                <svg id="copy-icon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <svg id="check-icon" class="w-4 h-4 hidden text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .install-tab-btn {
+    color: var(--color-text-muted);
+    background: transparent;
+  }
+  .install-tab-btn.active {
+    color: var(--color-accent);
+    background: rgba(0, 229, 255, 0.1);
+  }
+  .install-tab-btn:hover:not(.active) {
+    color: var(--color-text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+  }
+</style>
+
+<script>
+  function initInstallBanner() {
+    const commands: Record<string, string> = {
+      npm: 'npm i @joint-ops/hitlimit',
+      pnpm: 'pnpm add @joint-ops/hitlimit',
+      yarn: 'yarn add @joint-ops/hitlimit',
+      bun: 'bun add @joint-ops/hitlimit-bun',
+    };
+
+    const tabs = document.querySelectorAll('.install-tab-btn');
+    const commandEl = document.getElementById('install-command');
+    const copyBtn = document.getElementById('copy-install-btn');
+    const copyIcon = document.getElementById('copy-icon');
+    const checkIcon = document.getElementById('check-icon');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const pm = (tab as HTMLElement).dataset.installTab || 'npm';
+        tabs.forEach((t) => t.classList.remove('active'));
+        tab.classList.add('active');
+        if (commandEl) commandEl.textContent = commands[pm] || commands.npm;
+      });
+    });
+
+    copyBtn?.addEventListener('click', async () => {
+      const text = commandEl?.textContent || '';
+      try {
+        await navigator.clipboard.writeText(text);
+        copyIcon?.classList.add('hidden');
+        checkIcon?.classList.remove('hidden');
+        setTimeout(() => {
+          copyIcon?.classList.remove('hidden');
+          checkIcon?.classList.add('hidden');
+        }, 2000);
+      } catch {
+        // Fallback: select text
+        if (commandEl) {
+          const range = document.createRange();
+          range.selectNodeContents(commandEl);
+          window.getSelection()?.removeAllRanges();
+          window.getSelection()?.addRange(range);
+        }
+      }
+    });
+  }
+
+  initInstallBanner();
+  document.addEventListener('astro:after-swap', initInstallBanner);
+</script>

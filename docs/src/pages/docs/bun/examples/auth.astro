@@ -1,0 +1,235 @@
+---
+import DocsLayout from '../../../../layouts/DocsLayout.astro';
+import RuntimeBanner from '../../../../components/RuntimeBanner.astro';
+---
+
+<DocsLayout
+  title="Authentication Rate Limiting (Bun) - hitlimit-bun | Brute Force Protection"
+  description="Protect login, registration, and password reset endpoints from brute force attacks on Bun. Production-ready auth rate limiting with Redis."
+  keywords="bun login rate limit, bun brute force protection, bun auth rate limit, hitlimit-bun auth, bun password reset rate limit"
+>
+  <h1>Authentication Rate Limiting (Bun)</h1>
+
+  <RuntimeBanner
+    currentRuntime="bun"
+    counterpartHref="/docs/examples/auth"
+    counterpartLabel="Node.js Auth Example"
+  />
+
+  <p>
+    Protecting authentication endpoints is critical. This example shows how to implement
+    layered rate limiting on Bun that prevents credential stuffing, brute force attacks,
+    and account takeover attempts.
+  </p>
+
+  <h2 id="scenario">Scenario</h2>
+
+  <ul>
+    <li><strong>Login:</strong> 5 attempts per 15 minutes (per email + IP)</li>
+    <li><strong>Registration:</strong> 3 accounts per hour (per IP)</li>
+    <li><strong>Password reset:</strong> 3 requests per hour (prevents enumeration)</li>
+  </ul>
+
+  <h2 id="implementation">Implementation</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/rate-limits/auth.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/redis'</span>
+
+<span class="kw">const</span> redis = <span class="fn">redisStore</span>({"{"}
+  url: Bun.env.REDIS_URL,
+  keyPrefix: <span class="str">'auth:rl:'</span>
+{"}"})
+
+<span class="cm">// Login - strict limits per email + IP</span>
+<span class="kw">export const</span> loginLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">5</span>,
+  window: <span class="str">'15m'</span>,
+  key: <span class="kw">async</span> (req) => {"{"}
+    <span class="kw">const</span> body = <span class="kw">await</span> req.<span class="fn">clone</span>().<span class="fn">json</span>()
+    <span class="kw">const</span> email = body.email?.<span class="fn">toLowerCase</span>() ?? <span class="str">''</span>
+    <span class="kw">const</span> ip = req.headers.<span class="fn">get</span>(<span class="str">'x-forwarded-for'</span>) ?? <span class="str">'unknown'</span>
+    <span class="kw">return</span> <span class="str">`login:</span>${"{"}email{"}"}<span class="str">:</span>${"{"}ip{"}"}<span class="str">`</span>
+  {"}"},
+  response: (info) => ({"{"}
+    error: <span class="str">'LOGIN_RATE_LIMITED'</span>,
+    message: <span class="str">`Too many login attempts. Try again in </span>${"{"}Math.<span class="fn">ceil</span>(info.resetIn / <span class="num">60</span>){"}"}<span class="str"> minutes.`</span>,
+    resetIn: info.resetIn
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span> <span class="cm">// Security-critical: always fail closed</span>
+{"}"})
+
+<span class="cm">// Registration - prevent spam accounts</span>
+<span class="kw">export const</span> registrationLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">3</span>,
+  window: <span class="str">'1h'</span>,
+  key: (req) => {"{"}
+    <span class="kw">const</span> ip = req.headers.<span class="fn">get</span>(<span class="str">'x-forwarded-for'</span>) ?? <span class="str">'unknown'</span>
+    <span class="kw">return</span> <span class="str">`register:</span>${"{"}ip{"}"}<span class="str">`</span>
+  {"}"},
+  response: () => ({"{"}
+    error: <span class="str">'REGISTRATION_LIMIT'</span>,
+    message: <span class="str">'Too many registration attempts. Please try again later.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})
+
+<span class="cm">// Password reset - strict (prevent enumeration + spam)</span>
+<span class="kw">export const</span> passwordResetLimit = <span class="fn">hitlimit</span>({"{"}
+  store: redis,
+  limit: <span class="num">3</span>,
+  window: <span class="str">'1h'</span>,
+  key: <span class="kw">async</span> (req) => {"{"}
+    <span class="kw">const</span> body = <span class="kw">await</span> req.<span class="fn">clone</span>().<span class="fn">json</span>()
+    <span class="kw">const</span> email = body.email?.<span class="fn">toLowerCase</span>() ?? <span class="str">''</span>
+    <span class="kw">const</span> ip = req.headers.<span class="fn">get</span>(<span class="str">'x-forwarded-for'</span>) ?? <span class="str">'unknown'</span>
+    <span class="kw">return</span> <span class="str">`password-reset:</span>${"{"}email{"}"}<span class="str">:</span>${"{"}ip{"}"}<span class="str">`</span>
+  {"}"},
+  response: () => ({"{"}
+    <span class="cm">// Intentionally vague to prevent email enumeration</span>
+    message: <span class="str">'If an account exists with that email, a reset link has been sent.'</span>
+  {"}"}),
+  onStoreError: () => <span class="str">'deny'</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="route-handling">Route Handling</h2>
+
+  <p>
+    Apply the rate limiters inside a <code>Bun.serve</code> fetch handler, routing by URL pathname:
+  </p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">src/server.ts</span></div>
+    <pre><code><span class="kw">import</span> {"{"} loginLimit, registrationLimit, passwordResetLimit {"}"} <span class="kw">from</span> <span class="str">'./rate-limits/auth'</span>
+
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> url = <span class="kw">new</span> <span class="fn">URL</span>(req.url)
+
+    <span class="cm">// POST /auth/login</span>
+    <span class="kw">if</span> (url.pathname === <span class="str">'/auth/login'</span> && req.method === <span class="str">'POST'</span>) {"{"}
+      <span class="kw">const</span> limited = <span class="kw">await</span> <span class="fn">loginLimit</span>(req)
+      <span class="kw">if</span> (limited) <span class="kw">return</span> limited
+      <span class="cm">// ... handle login</span>
+      <span class="kw">return</span> Response.<span class="fn">json</span>({"{"} ok: <span class="kw">true</span> {"}"})
+    {"}"}
+
+    <span class="cm">// POST /auth/register</span>
+    <span class="kw">if</span> (url.pathname === <span class="str">'/auth/register'</span> && req.method === <span class="str">'POST'</span>) {"{"}
+      <span class="kw">const</span> limited = <span class="kw">await</span> <span class="fn">registrationLimit</span>(req)
+      <span class="kw">if</span> (limited) <span class="kw">return</span> limited
+      <span class="cm">// ... handle registration</span>
+      <span class="kw">return</span> Response.<span class="fn">json</span>({"{"} ok: <span class="kw">true</span> {"}"})
+    {"}"}
+
+    <span class="cm">// POST /auth/password/forgot</span>
+    <span class="kw">if</span> (url.pathname === <span class="str">'/auth/password/forgot'</span> && req.method === <span class="str">'POST'</span>) {"{"}
+      <span class="kw">const</span> limited = <span class="kw">await</span> <span class="fn">passwordResetLimit</span>(req)
+      <span class="kw">if</span> (limited) <span class="kw">return</span> limited
+      <span class="cm">// ... handle password reset</span>
+      <span class="kw">return</span> Response.<span class="fn">json</span>({"{"} ok: <span class="kw">true</span> {"}"})
+    {"}"}
+
+    <span class="kw">return new</span> <span class="fn">Response</span>(<span class="str">'Not Found'</span>, {"{"} status: <span class="num">404</span> {"}"})
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="key-points">Key Points</h2>
+
+  <ul>
+    <li>
+      <strong>Always fail closed for auth:</strong> Every limiter uses <code>onStoreError: () =&gt; 'deny'</code>.
+      If your Redis store is unavailable, it is safer to reject requests than to allow unlimited login attempts.
+    </li>
+    <li>
+      <strong>Clone the request before reading the body:</strong> <code>req.clone().json()</code> ensures the
+      original request body remains available for your route handler.
+    </li>
+    <li>
+      <strong>Combine email + IP keys for login:</strong> This prevents both credential stuffing (many emails
+      from one IP) and targeted brute force (many IPs targeting one email).
+    </li>
+    <li>
+      <strong>Use vague password reset messages:</strong> A generic "If an account exists..." response prevents
+      attackers from using the endpoint to enumerate valid email addresses.
+    </li>
+    <li>
+      <strong>Use <code>Bun.env</code> for configuration:</strong> Access environment variables natively through
+      <code>Bun.env.REDIS_URL</code> instead of <code>process.env</code>.
+    </li>
+    <li>
+      <strong>Separate key prefixes per endpoint:</strong> Each limiter targets a specific action (login, register,
+      password-reset), so one endpoint being rate limited does not affect the others.
+    </li>
+  </ul>
+
+</DocsLayout>
+
+<style>
+  .warning-box {
+    margin: 1.5rem 0;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  .warning-box h4 {
+    margin: 0 0 0.5rem 0;
+    color: #ef4444;
+    font-size: 1rem;
+  }
+
+  .warning-box p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+
+  .code-header {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+
+  .code-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .code-block pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: #71717a; }
+</style>

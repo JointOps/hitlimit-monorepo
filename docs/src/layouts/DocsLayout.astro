@@ -22,8 +22,12 @@ const siteUrl = 'https://hitlimit.jointops.dev';
 const ogImage = `${siteUrl}/og-image.png`;
 const canonical = `${siteUrl}${Astro.url.pathname}`;
 
+// Detect runtime from URL path for server-side rendering
+const currentPath = Astro.url.pathname;
+const runtime = currentPath.startsWith('/docs/bun') ? 'bun' : 'node';
+
 // Get prev/next navigation
-const { prev, next } = getPageNavigation(Astro.url.pathname);
+const { prev, next } = getPageNavigation(Astro.url.pathname, runtime as 'node' | 'bun');
 ---
 
 <!DOCTYPE html>
@@ -31,6 +35,17 @@ const { prev, next } = getPageNavigation(Astro.url.pathname);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline>
+      document.documentElement.dataset.runtime = localStorage.getItem('hitlimit-runtime') || 'node';
+    </script>
+    <noscript>
+      <style>
+        [data-runtime-nav] { display: flex !important; }
+        .runtime-tab-content { display: block !important; }
+        .runtime-switcher-container { display: none !important; }
+        .runtime-tabs-header { display: none !important; }
+      </style>
+    </noscript>
     <meta name="description" content={description} />
     <meta name="keywords" content={keywords} />
     <meta name="author" content="JointOps" />
@@ -250,6 +265,12 @@ const { prev, next } = getPageNavigation(Astro.url.pathname);
 </html>
 
 <style is:global>
+  /* Runtime content switching — any page can use data-runtime-content="node|bun" */
+  [data-runtime-content] { display: none; }
+  html[data-runtime="node"] [data-runtime-content="node"],
+  html[data-runtime="bun"] [data-runtime-content="bun"] { display: block; }
+  html:not([data-runtime]) [data-runtime-content="node"] { display: block; }
+
   /* Prose overrides for docs */
   .prose {
     --tw-prose-body: var(--color-text-secondary);
@@ -350,9 +371,7 @@ const { prev, next } = getPageNavigation(Astro.url.pathname);
     border-spacing: 0;
     border: 1px solid var(--color-border);
     border-radius: 12px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    display: block;
+    overflow: hidden;
     margin: 2rem 0;
   }
 
