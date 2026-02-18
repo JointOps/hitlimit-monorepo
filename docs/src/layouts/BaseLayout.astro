@@ -129,7 +129,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "Is hitlimit faster than express-rate-limit?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, hitlimit is approximately 3x faster than express-rate-limit in high-traffic benchmarks. It achieves 3.26 million operations per second compared to 1.17 million for express-rate-limit (10K unique IPs). The Node.js package is ~6KB, compared to ~66KB for express-rate-limit."
+            "text": "Yes, hitlimit is approximately 3x faster than express-rate-limit in high-traffic benchmarks. It achieves 3.25 million operations per second compared to 957K for express-rate-limit (10K unique IPs, memory store). Both have zero runtime dependencies."
           }
         },
         {
@@ -169,7 +169,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "What is the difference between hitlimit and rate-limiter-flexible?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "hitlimit is faster (3.26M ops/sec vs 1.64M in high-traffic scenarios), has a smaller bundle (~6KB vs ~155KB), and offers simpler configuration. rate-limiter-flexible has more features but hitlimit covers common use cases with better performance."
+            "text": "hitlimit is faster (3.25M ops/sec vs 1.84M in high-traffic scenarios) and offers simpler configuration with built-in framework adapters. rate-limiter-flexible has more storage backends (14 vs 3) and weighted requests, but hitlimit covers common use cases with better performance and a simpler API."
           }
         },
         {
@@ -323,3 +323,28 @@ const ogImage = `${siteUrl}/og-image.png`;
     }
   }
 </style>
+
+<script>
+  function initScrollReveal() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    document.querySelectorAll('.reveal, .reveal-stagger, .reveal-scale').forEach((el) => {
+      observer.observe(el);
+    });
+  }
+
+  initScrollReveal();
+  document.addEventListener('astro:after-swap', initScrollReveal);
+</script>
