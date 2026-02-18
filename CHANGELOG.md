@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.3] - 2026-02-17
+
+### Performance
+
+- **Atomic Redis Lua scripts** — combine ban check + hit + violation tracking in a single `EVALSHA` round-trip
+  - `HIT_SCRIPT`: atomic INCR + PTTL + PEXPIRE (1 round-trip, down from 1-2)
+  - `HIT_WITH_BAN_SCRIPT`: atomic ban check + hit + violation + auto-ban (1 round-trip, down from 3-4)
+- **EVALSHA with NOSCRIPT recovery** — scripts loaded once via `SCRIPT LOAD`, called by SHA hash. Auto-reload on Redis restart or script eviction
+- Eliminates race conditions between separate ban check and hit calls
+
+### Added
+
+- `HitWithBanResult` interface on `HitLimitStore` — stores can declare atomic hit+ban support
+- `hitWithBan` optional method on store interface — enables single round-trip path
+- Dual-path limiter: atomic path (stores with `hitWithBan`) vs fallback path (separate calls)
+
+### Internal
+
+- Limiter detects `hitWithBan` on store and uses atomic path automatically
+- Custom stores without `hitWithBan` continue to work via fallback path
+- Legacy methods (`isBanned`, `ban`, `recordViolation`) preserved for backward compatibility
+- Zero breaking changes — all existing code works identically
+
+### Tests
+
+- Added 12 new Redis Lua script tests per package (both Node.js and Bun):
+  - Atomic hit counting, violation tracking, ban triggering
+  - Already-banned detection, key independence, resetAt correctness
+  - Legacy method round-trips, reset clearing all keys
+  - Concurrent atomicity: parallel hits → sequential counts
+
 ## [1.1.2] - 2026-02-17
 
 ### Internal

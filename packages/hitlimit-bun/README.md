@@ -31,7 +31,7 @@
 - **Bun Native** - Built specifically for Bun's runtime, not a Node.js port
 - **Zero Config** - Works out of the box with sensible defaults
 - **Framework Support** - First-class Elysia and Hono integration
-- **Optional Persistence** - SQLite (383K ops/sec) or Redis (6.6K ops/sec) when needed
+- **Optional Persistence** - SQLite (383K ops/sec) or Redis (6.8K ops/sec) when needed
 - **TypeScript First** - Full type safety and IntelliSense support
 - **Auto-Ban** - Automatically ban repeat offenders after threshold violations
 - **Shared Limits** - Group rate limits via groupId for teams/tenants
@@ -358,7 +358,7 @@ hitlimit-bun is optimized for Bun's runtime with native performance:
 |-------|----------------|------------|
 | **Memory** | 5,620,000+ | +68% faster |
 | **bun:sqlite** | 383,000+ | ~same |
-| **Redis** | 6,600+ | ~same |
+| **Redis** | 6,800+ | ~same |
 
 ### HTTP Throughput
 
