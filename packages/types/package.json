@@ -7,6 +7,24 @@
     "email": "shayanhussain48@gmail.com",
     "url": "https://github.com/ShayanHussainSB"
   },
+  "contributors": [
+    {
+      "name": "tanv33",
+      "url": "https://github.com/tanv33"
+    },
+    {
+      "name": "builtbyali",
+      "url": "https://github.com/builtbyali"
+    },
+    {
+      "name": "MuhammadRehanRasool",
+      "url": "https://github.com/MuhammadRehanRasool"
+    },
+    {
+      "name": "sultandilaram",
+      "url": "https://github.com/sultandilaram"
+    }
+  ],
   "license": "MIT",
   "homepage": "https://hitlimit.jointops.dev",
   "repository": {
