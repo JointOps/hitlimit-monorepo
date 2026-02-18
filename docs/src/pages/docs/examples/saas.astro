@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeBanner from '../../../components/RuntimeBanner.astro';
 ---
 
 <DocsLayout
@@ -8,6 +9,11 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   keywords="saas rate limit, api tier limits, subscription rate limiting, per workspace rate limit, express rate limit saas, nestjs rate limit saas"
 >
   <h1>SaaS API Rate Limiting</h1>
+  <RuntimeBanner
+    currentRuntime="node"
+    counterpartHref="/docs/bun/examples/saas"
+    counterpartLabel="Bun SaaS Example"
+  />
 
   <p>
     A complete example for a project management tool like Linear or Asana with tiered rate limits

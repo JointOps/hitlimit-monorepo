@@ -10,43 +10,34 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
   <h1>Benchmarks</h1>
 
   <p>
-    Real benchmarks you can reproduce. We believe in transparency - here's exactly how hitlimit performs,
-    including where competitors are faster.
+    Real benchmarks you can reproduce. We believe in transparency — here's exactly how hitlimit performs.
   </p>
 
-  <h2 id="tldr">Which Store Should I Use?</h2>
+  <!-- Node.js: Store Recommendation -->
+  <div data-runtime-content="node">
+    <h2 id="tldr">Which Store Should I Use?</h2>
+    <table>
+      <thead><tr><th>Use Case</th><th>Recommended Store</th><th>Performance</th></tr></thead>
+      <tbody>
+        <tr><td>Single server, many unique IPs</td><td><strong>Memory</strong> (default)</td><td class="highlight">3-7M ops/sec</td></tr>
+        <tr><td>Need persistence, single server</td><td><strong>SQLite</strong></td><td class="highlight">428-516K ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed)</td><td><strong>Redis</strong></td><td class="highlight">6.7-6.9K ops/sec</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Use Case</th>
-        <th>Recommended Store</th>
-        <th>Performance</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Single server, many unique IPs</td>
-        <td><strong>Memory</strong> (default)</td>
-        <td class="highlight">3-7M ops/sec</td>
-      </tr>
-      <tr>
-        <td>Need persistence, single server</td>
-        <td><strong>SQLite</strong></td>
-        <td class="highlight">400-500K ops/sec</td>
-      </tr>
-      <tr>
-        <td>Multiple servers (distributed)</td>
-        <td><strong>Redis</strong></td>
-        <td class="highlight">5.2-6.7K ops/sec</td>
-      </tr>
-      <tr>
-        <td>Bun runtime (persistence)</td>
-        <td><strong>bun:sqlite</strong></td>
-        <td class="highlight">379K ops/sec</td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- Bun: Store Recommendation -->
+  <div data-runtime-content="bun">
+    <h2 id="tldr">Which Store Should I Use?</h2>
+    <table>
+      <thead><tr><th>Use Case</th><th>Recommended Store</th><th>Performance</th></tr></thead>
+      <tbody>
+        <tr><td>Single server, many unique IPs</td><td><strong>Memory</strong> (default)</td><td class="highlight">5.62M ops/sec</td></tr>
+        <tr><td>Need persistence, single server</td><td><strong>bun:sqlite</strong></td><td class="highlight">383K ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed)</td><td><strong>Redis</strong></td><td class="highlight">6.8K ops/sec</td></tr>
+      </tbody>
+    </table>
+  </div>
 
   <h2 id="methodology">Methodology</h2>
 
@@ -65,244 +56,234 @@ Test Scenarios:
 Each benchmark: 5 runs × 50,000 iterations</code></pre>
   </div>
 
-  <h2 id="memory-comparison">Memory Store vs Competitors</h2>
+  <!-- ===================== NODE.JS BENCHMARKS ===================== -->
+  <div data-runtime-content="node">
+    <h2 id="memory-comparison">Memory Store vs Competitors</h2>
 
-  <p>
-    Honest comparison with other rate limiters using the same benchmark suite.
-  </p>
+    <p>Honest comparison with other Node.js rate limiters using the same benchmark suite.</p>
 
-  <h3>Single IP (Edge Case)</h3>
-  <p class="scenario-desc">One user hammering your API repeatedly.</p>
+    <h3>Single IP (Edge Case)</h3>
+    <p class="scenario-desc">One user hammering your API repeatedly.</p>
 
-  <table class="benchmark-table">
-    <thead>
-      <tr>
-        <th>Library</th>
-        <th>ops/sec</th>
-        <th>Latency</th>
-        <th>vs Fastest</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr class="winner hitlimit-win">
-        <td><strong>hitlimit</strong></td>
-        <td><strong>4.19M</strong></td>
-        <td>239ns</td>
-        <td><strong>fastest</strong></td>
-      </tr>
-      <tr>
-        <td>rate-limiter-flexible</td>
-        <td>3.32M</td>
-        <td>301ns</td>
-        <td>79%</td>
-      </tr>
-      <tr>
-        <td>express-rate-limit</td>
-        <td>1.30M</td>
-        <td>767ns</td>
-        <td>31%</td>
-      </tr>
-    </tbody>
-  </table>
+    <table class="benchmark-table">
+      <thead><tr><th>Library</th><th>ops/sec</th><th>Latency</th><th>vs Fastest</th></tr></thead>
+      <tbody>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td><strong>4.11M</strong></td><td>243ns</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>3.22M</td><td>311ns</td><td>78%</td></tr>
+        <tr><td>express-rate-limit</td><td>1.21M</td><td>823ns</td><td>30%</td></tr>
+      </tbody>
+    </table>
 
-  <h3>10,000 Unique IPs (High Traffic)</h3>
-  <p class="scenario-desc">High-traffic API with many concurrent users. <strong>hitlimit excels here.</strong></p>
+    <h3>10,000 Unique IPs (High Traffic)</h3>
+    <p class="scenario-desc">High-traffic API with many concurrent users. <strong>hitlimit excels here.</strong></p>
 
-  <table class="benchmark-table">
-    <thead>
-      <tr>
-        <th>Library</th>
-        <th>ops/sec</th>
-        <th>Latency</th>
-        <th>vs Fastest</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr class="winner hitlimit-win">
-        <td><strong>hitlimit</strong></td>
-        <td><strong>3.35M</strong></td>
-        <td>299ns</td>
-        <td><strong>fastest</strong></td>
-      </tr>
-      <tr>
-        <td>rate-limiter-flexible</td>
-        <td>1.58M</td>
-        <td>633ns</td>
-        <td>47%</td>
-      </tr>
-      <tr>
-        <td>express-rate-limit</td>
-        <td>1.20M</td>
-        <td>833ns</td>
-        <td>36%</td>
-      </tr>
-    </tbody>
-  </table>
+    <table class="benchmark-table">
+      <thead><tr><th>Library</th><th>ops/sec</th><th>Latency</th><th>vs Fastest</th></tr></thead>
+      <tbody>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td><strong>3.25M</strong></td><td>308ns</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>1.84M</td><td>544ns</td><td>57%</td></tr>
+        <tr><td>express-rate-limit</td><td>957K</td><td>1.04μs</td><td>29%</td></tr>
+      </tbody>
+    </table>
 
-  <div class="callout">
-    <strong>Key Insight:</strong> hitlimit's sync fast path eliminates async/await overhead for in-process stores.
-    For high-traffic APIs, hitlimit is 2.1x faster than rate-limiter-flexible.
-  </div>
+    <div class="callout">
+      <strong>Key Insight:</strong> hitlimit's sync fast path eliminates async/await overhead for in-process stores.
+      For high-traffic APIs, hitlimit is 1.8x faster than rate-limiter-flexible (3.25M vs 1.84M).
+    </div>
 
-  <h2 id="sqlite-store">SQLite Store</h2>
+    <h2 id="sqlite-store">SQLite Store</h2>
 
-  <p>Only hitlimit offers a built-in SQLite store.</p>
+    <p>Only hitlimit offers a built-in SQLite store for Node.js (via better-sqlite3).</p>
 
-  <div class="benchmark-result">
-    <div class="benchmark-header">SQLite Store (Node.js)</div>
-    <div class="benchmark-stats">
-      <div class="stat">
-        <span class="stat-value">428-516K</span>
-        <span class="stat-label">ops/sec</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value">1.94μs</span>
-        <span class="stat-label">avg latency</span>
+    <div class="benchmark-result">
+      <div class="benchmark-header">SQLite Store (Node.js)</div>
+      <div class="benchmark-stats">
+        <div class="stat"><span class="stat-value">428-516K</span><span class="stat-label">ops/sec</span></div>
+        <div class="stat"><span class="stat-value">1.94μs</span><span class="stat-label">avg latency</span></div>
       </div>
     </div>
+
+    <h2 id="redis-store">Redis Store</h2>
+
+    <p>
+      Redis operations use atomic Lua scripts (EVALSHA) for single round-trip performance.
+      hitlimit is fastest across all three scenarios.
+    </p>
+
+    <table class="benchmark-table">
+      <thead><tr><th>Library</th><th>Scenario</th><th>ops/sec</th><th>Latency</th><th>vs Fastest</th></tr></thead>
+      <tbody>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>single-ip</td><td><strong>6.8K</strong></td><td>146μs</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>single-ip</td><td>6.7K</td><td>150μs</td><td>97%</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-1k</td><td><strong>6.9K</strong></td><td>144μs</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>multi-1k</td><td>6.6K</td><td>151μs</td><td>95%</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-10k</td><td><strong>6.8K</strong></td><td>147μs</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>multi-10k</td><td>6.6K</td><td>152μs</td><td>97%</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Key Insight:</strong> hitlimit uses atomic Lua scripts (EVALSHA) to combine ban check + hit + violation tracking
+      in a single Redis round-trip. With bans enabled, hitlimit does 1 round-trip vs 3-4 for other libraries.
+    </div>
+
+    <p class="benchmark-note">
+      Redis throughput is limited by network latency (~150μs local Docker).
+      For remote Redis, expect 200-1000 ops/sec.
+    </p>
+
+    <h2 id="store-support">Store Support Comparison</h2>
+
+    <table>
+      <thead><tr><th>Library</th><th>Memory</th><th>SQLite</th><th>Redis</th></tr></thead>
+      <tbody>
+        <tr><td>hitlimit</td><td class="good">Built-in</td><td class="good">Built-in</td><td class="good">Built-in</td></tr>
+        <tr><td>express-rate-limit</td><td class="good">Built-in</td><td class="bad">No</td><td class="warn">External</td></tr>
+        <tr><td>rate-limiter-flexible</td><td class="good">Built-in</td><td class="bad">No</td><td class="good">Built-in</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="http-overhead">HTTP Overhead</h2>
+
+    <p>How much throughput does hitlimit cost on real HTTP servers?</p>
+
+    <table class="benchmark-table">
+      <thead><tr><th>Framework</th><th>Without Limiter</th><th>With hitlimit</th><th>Overhead</th></tr></thead>
+      <tbody>
+        <tr><td>Express</td><td>45,000 req/s</td><td>42,000 req/s</td><td><strong>~7%</strong></td></tr>
+        <tr><td>Fastify</td><td>65,000 req/s</td><td>61,000 req/s</td><td><strong>~6%</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p class="benchmark-note">
+      HTTP benchmarks measured with autocannon (-c 100 -d 10). High limit (1M) to measure overhead, not blocking.
+    </p>
   </div>
 
-  <h2 id="redis-store">Redis Store</h2>
+  <!-- ===================== BUN BENCHMARKS ===================== -->
+  <div data-runtime-content="bun">
+    <h2 id="memory-store-bun">Memory Store</h2>
 
-  <p>Redis is network-bound. Both libraries perform similarly.</p>
+    <p>hitlimit-bun's memory store uses a zero-allocation sync fast path for maximum throughput.</p>
 
-  <table class="benchmark-table">
-    <thead>
-      <tr>
-        <th>Library</th>
-        <th>ops/sec</th>
-        <th>Latency</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>hitlimit</td>
-        <td>6.4K</td>
-        <td>157μs</td>
-      </tr>
-      <tr>
-        <td>rate-limiter-flexible</td>
-        <td>6.4K</td>
-        <td>155μs</td>
-      </tr>
-    </tbody>
-  </table>
+    <table class="benchmark-table">
+      <thead><tr><th>Scenario</th><th>ops/sec</th><th>Latency</th></tr></thead>
+      <tbody>
+        <tr class="winner hitlimit-win"><td>Single IP</td><td><strong>7.27M</strong></td><td>138ns</td></tr>
+        <tr class="winner hitlimit-win"><td>1,000 Unique IPs</td><td><strong>6.14M</strong></td><td>163ns</td></tr>
+        <tr class="winner hitlimit-win"><td>10,000 Unique IPs</td><td><strong>5.62M</strong></td><td>178ns</td></tr>
+      </tbody>
+    </table>
 
-  <p class="benchmark-note">
-    Redis throughput is limited by network latency (~150μs local).
-    For remote Redis, expect 200-1000 ops/sec.
-  </p>
+    <div class="callout bun-callout">
+      <strong>Key Insight:</strong> Bun's optimized JavaScript engine delivers 1.7x higher throughput than Node.js
+      for the same hitlimit memory store code (5.62M vs 3.25M at 10K IPs).
+    </div>
 
-  <h2 id="bun">Bun Performance</h2>
+    <h2 id="sqlite-store-bun">SQLite Store (bun:sqlite)</h2>
 
-  <div class="benchmark-result bun">
-    <div class="benchmark-header">hitlimit-bun</div>
-    <div class="benchmark-stats">
-      <div class="stat">
-        <span class="stat-value">5.62M</span>
-        <span class="stat-label">memory ops/sec (10K IPs)</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value">383K</span>
-        <span class="stat-label">sqlite ops/sec (10K IPs)</span>
+    <p>Native <code>bun:sqlite</code> — zero dependencies, built into the Bun runtime.</p>
+
+    <div class="benchmark-result bun">
+      <div class="benchmark-header">bun:sqlite Store</div>
+      <div class="benchmark-stats">
+        <div class="stat"><span class="stat-value">383K</span><span class="stat-label">ops/sec (10K IPs)</span></div>
+        <div class="stat"><span class="stat-value">2.6μs</span><span class="stat-label">avg latency</span></div>
+        <div class="stat"><span class="stat-value">0</span><span class="stat-label">dependencies</span></div>
       </div>
     </div>
+
+    <h2 id="redis-store-bun">Redis Store</h2>
+
+    <p>
+      Atomic Lua scripts (EVALSHA) — single round-trip per request. Same Redis protocol, same performance.
+    </p>
+
+    <div class="benchmark-result bun">
+      <div class="benchmark-header">Redis Store (Bun)</div>
+      <div class="benchmark-stats">
+        <div class="stat"><span class="stat-value">6.8K</span><span class="stat-label">ops/sec</span></div>
+        <div class="stat"><span class="stat-value">146μs</span><span class="stat-label">avg latency</span></div>
+        <div class="stat"><span class="stat-value">1</span><span class="stat-label">round-trip per request</span></div>
+      </div>
+    </div>
+
+    <p class="benchmark-note">
+      Redis throughput is limited by network latency (~150μs local Docker).
+      For remote Redis, expect 200-1000 ops/sec.
+    </p>
+
+    <h2 id="store-support-bun">All Three Stores — Built In</h2>
+
+    <table>
+      <thead><tr><th>Store</th><th>Status</th><th>Performance</th><th>Use Case</th></tr></thead>
+      <tbody>
+        <tr><td>Memory</td><td class="good">Built-in</td><td class="highlight">5.62M ops/sec</td><td>Single server, ephemeral</td></tr>
+        <tr><td>bun:sqlite</td><td class="good">Built-in (native)</td><td class="highlight">383K ops/sec</td><td>Single server, persistent</td></tr>
+        <tr><td>Redis</td><td class="good">Built-in</td><td class="highlight">6.8K ops/sec</td><td>Multi-server, distributed</td></tr>
+      </tbody>
+    </table>
   </div>
 
-  <h2 id="store-support">Store Support</h2>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Library</th>
-        <th>Memory</th>
-        <th>SQLite</th>
-        <th>Redis</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>hitlimit</td>
-        <td class="good">Built-in</td>
-        <td class="good">Built-in</td>
-        <td class="good">Built-in</td>
-      </tr>
-      <tr>
-        <td>express-rate-limit</td>
-        <td class="good">Built-in</td>
-        <td class="bad">No</td>
-        <td class="warn">External</td>
-      </tr>
-      <tr>
-        <td>rate-limiter-flexible</td>
-        <td class="good">Built-in</td>
-        <td class="bad">No</td>
-        <td class="good">Built-in</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h2 id="http-overhead">HTTP Overhead</h2>
-
-  <p>How much throughput does hitlimit cost on real HTTP servers?</p>
-
-  <table class="benchmark-table">
-    <thead>
-      <tr>
-        <th>Framework</th>
-        <th>Without Limiter</th>
-        <th>With hitlimit</th>
-        <th>Overhead</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Express</td>
-        <td>45,000 req/s</td>
-        <td>42,000 req/s</td>
-        <td><strong>~7%</strong></td>
-      </tr>
-      <tr>
-        <td>Fastify</td>
-        <td>65,000 req/s</td>
-        <td>61,000 req/s</td>
-        <td><strong>~6%</strong></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p class="benchmark-note">
-    HTTP benchmarks measured with autocannon (-c 100 -d 10). High limit (1M) to measure overhead, not blocking.
-  </p>
-
+  <!-- ===================== SHARED: Run Yourself ===================== -->
   <h2 id="run-yourself">Run Benchmarks Yourself</h2>
 
-  <div class="code-block">
-    <div class="code-header"><span class="code-label">Terminal</span></div>
-    <pre><code>git clone https://github.com/JointOps/hitlimit-monorepo
+  <!-- Node.js run instructions -->
+  <div data-runtime-content="node">
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">Terminal</span></div>
+      <pre><code>git clone https://github.com/JointOps/hitlimit-monorepo
 cd hitlimit-monorepo
 pnpm install && pnpm build
 
 # Start Redis (optional)
 docker compose up -d redis
 
-# Run benchmarks
+# Run Node.js benchmarks
 cd benchmarks
-npx tsx src/scripts/run-node.ts  # Node.js
-bun src/scripts/run-bun.ts       # Bun</code></pre>
+npx tsx src/scripts/run-node.ts</code></pre>
+    </div>
+
+    <div class="callout note">
+      <strong>Note:</strong> Benchmark results vary by hardware and environment.
+      hitlimit is the fastest in ALL memory scenarios — 1.3x faster than rate-limiter-flexible on single-IP (4.11M vs 3.22M) and 1.8x faster on high-traffic 10K IPs (3.25M vs 1.84M).
+      Redis uses atomic Lua scripts (EVALSHA) for single round-trip performance.
+    </div>
+  </div>
+
+  <!-- Bun run instructions -->
+  <div data-runtime-content="bun">
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">Terminal</span></div>
+      <pre><code>git clone https://github.com/JointOps/hitlimit-monorepo
+cd hitlimit-monorepo
+bun install
+
+# Start Redis (optional)
+docker compose up -d redis
+
+# Run Bun benchmarks
+cd benchmarks
+bun src/scripts/run-bun.ts</code></pre>
+    </div>
+
+    <div class="callout note">
+      <strong>Note:</strong> Benchmark results vary by hardware and environment.
+      Bun's optimized runtime delivers 1.7x higher memory throughput than Node.js (5.62M vs 3.25M at 10K IPs).
+      Run your own benchmarks to see results on your setup.
+    </div>
   </div>
 
   <p>Results saved to <code>benchmarks/results/</code></p>
 
-  <div class="callout note">
-    <strong>Note:</strong> Benchmark results vary by hardware and environment.
-    hitlimit is the fastest in ALL memory scenarios — 1.26x faster than rate-limiter-flexible on single-IP and 2.1x faster on high-traffic (10K IPs).
-    Run your own benchmarks to see results on your specific setup.
-  </div>
-
 </DocsLayout>
 
 <style>
+  .bun-callout {
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.05);
+  }
+
   .benchmark-result {
     margin: 1.5rem 0;
     padding: 1.5rem;

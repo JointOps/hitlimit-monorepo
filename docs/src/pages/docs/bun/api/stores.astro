@@ -1,0 +1,405 @@
+---
+import DocsLayout from '../../../../layouts/DocsLayout.astro';
+import RuntimeBanner from '../../../../components/RuntimeBanner.astro';
+---
+
+<DocsLayout
+  title="Stores API (Bun) - hitlimit-bun | Memory, SQLite, Redis Store Reference"
+  description="API reference for hitlimit-bun storage backends. HitLimitStore interface, memoryStore(), sqliteStore(), and redisStore() function signatures and options."
+  keywords="hitlimit-bun store api, bun rate limit store, bun memory store api, bun sqlite store api, bun redis store api, hitlimit store interface"
+>
+  <h1>Stores API (Bun)</h1>
+
+  <RuntimeBanner
+    currentRuntime="bun"
+    counterpartHref="/docs/api/stores"
+    counterpartLabel="Node.js Stores API"
+  />
+
+  <p>
+    Stores manage rate limit data persistence in hitlimit-bun. Every store implements
+    the <code>HitLimitStore</code> interface. Synchronous stores (memory, SQLite) set
+    <code>isSync = true</code> so the limiter can skip <code>await</code> on the hot path
+    for maximum throughput.
+  </p>
+
+  <h2 id="interface">HitLimitStore Interface</h2>
+
+  <p>All stores implement this interface from <code>@joint-ops/hitlimit-types</code>:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">types.ts</span>
+    </div>
+    <pre><code><span class="kw">interface</span> <span class="fn">HitLimitStore</span> {"{"}
+  <span class="cm">/** If true, hit() returns StoreResult synchronously (not a Promise) */</span>
+  isSync?: <span class="kw">boolean</span>
+
+  <span class="cm">/** Increment the counter for a key. Returns count and reset timestamp. */</span>
+  <span class="fn">hit</span>(key: <span class="kw">string</span>, windowMs: <span class="kw">number</span>, limit: <span class="kw">number</span>): Promise&lt;StoreResult&gt; | StoreResult
+
+  <span class="cm">/** Reset all rate limit data for a key. */</span>
+  <span class="fn">reset</span>(key: <span class="kw">string</span>): Promise&lt;<span class="kw">void</span>&gt; | <span class="kw">void</span>
+
+  <span class="cm">/** Cleanup resources (close connections, clear timers). */</span>
+  <span class="fn">shutdown</span>?(): Promise&lt;<span class="kw">void</span>&gt; | <span class="kw">void</span>
+
+  <span class="cm">/** Check if a key is currently banned. */</span>
+  <span class="fn">isBanned</span>?(key: <span class="kw">string</span>): Promise&lt;<span class="kw">boolean</span>&gt; | <span class="kw">boolean</span>
+
+  <span class="cm">/** Ban a key for the given duration in milliseconds. */</span>
+  <span class="fn">ban</span>?(key: <span class="kw">string</span>, durationMs: <span class="kw">number</span>): Promise&lt;<span class="kw">void</span>&gt; | <span class="kw">void</span>
+
+  <span class="cm">/** Record a violation and return the current violation count. */</span>
+  <span class="fn">recordViolation</span>?(key: <span class="kw">string</span>, windowMs: <span class="kw">number</span>): Promise&lt;<span class="kw">number</span>&gt; | <span class="kw">number</span>
+
+  <span class="cm">/** Atomic hit + ban check in a single round-trip (Redis Lua). */</span>
+  <span class="fn">hitWithBan</span>?(key: <span class="kw">string</span>, windowMs: <span class="kw">number</span>, limit: <span class="kw">number</span>,
+    banThreshold: <span class="kw">number</span>, banDurationMs: <span class="kw">number</span>): Promise&lt;HitWithBanResult&gt;
+{"}"}</code></pre>
+  </div>
+
+  <h3>StoreResult</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">interface</span> <span class="fn">StoreResult</span> {"{"}
+  count: <span class="kw">number</span>    <span class="cm">// Current request count in this window</span>
+  resetAt: <span class="kw">number</span>  <span class="cm">// Timestamp (ms) when the window resets</span>
+{"}"}</code></pre>
+  </div>
+
+  <h2 id="memory-store">memoryStore()</h2>
+
+  <p>
+    In-memory storage using a <code>Map</code>. Default store since v1.1.0.
+    Synchronous hot path (<code>isSync = true</code>) for maximum throughput.
+    Expired entries are swept every 10 seconds.
+  </p>
+
+  <h3>Signature</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">function</span> <span class="fn">memoryStore</span>(): HitLimitStore</code></pre>
+  </div>
+
+  <p>No options. Returns a <code>HitLimitStore</code> instance.</p>
+
+  <h3>Import</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} memoryStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span></code></pre>
+  </div>
+
+  <h3>Usage</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">memory.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">memoryStore</span>()  <span class="cm">// Default — can be omitted</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="sqlite-store">sqliteStore()</h2>
+
+  <p>
+    Persistent storage using Bun's native <code>bun:sqlite</code>.
+    Synchronous hot path (<code>isSync = true</code>) with prepared statements for
+    optimal query performance. Expired entries are cleaned every 60 seconds.
+  </p>
+
+  <h3>Signature</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">function</span> <span class="fn">sqliteStore</span>(options?: SqliteStoreOptions): HitLimitStore</code></pre>
+  </div>
+
+  <h3>Import</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/sqlite'</span></code></pre>
+  </div>
+
+  <h3>Options</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Option</th>
+        <th>Type</th>
+        <th>Default</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>path</code></td>
+        <td><code>string</code></td>
+        <td><code>':memory:'</code></td>
+        <td>Path to the SQLite database file. Use <code>':memory:'</code> for in-memory storage.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Usage</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">sqlite.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/sqlite'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">sqliteStore</span>({"{"}
+    path: <span class="str">'./rate-limits.db'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="redis-store">redisStore()</h2>
+
+  <p>
+    Redis-backed storage for distributed deployments. Uses Lua scripts for atomic
+    operations (single round-trip per request). Supports atomic
+    <code>hitWithBan()</code> for combined rate limiting and ban tracking in one call.
+  </p>
+
+  <h3>Signature</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">function</span> <span class="fn">redisStore</span>(options?: RedisStoreOptions): HitLimitStore</code></pre>
+  </div>
+
+  <h3>Import</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/redis'</span></code></pre>
+  </div>
+
+  <h3>Options</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Option</th>
+        <th>Type</th>
+        <th>Default</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>url</code></td>
+        <td><code>string</code></td>
+        <td><code>'redis://localhost:6379'</code></td>
+        <td>Redis connection URL.</td>
+      </tr>
+      <tr>
+        <td><code>keyPrefix</code></td>
+        <td><code>string</code></td>
+        <td><code>'hitlimit:'</code></td>
+        <td>Prefix prepended to all Redis keys.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Usage</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">redis.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/redis'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">redisStore</span>({"{"}
+    url: <span class="str">'redis://localhost:6379'</span>,
+    keyPrefix: <span class="str">'rl:'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="custom-stores">Custom Stores</h2>
+
+  <p>
+    Implement the <code>HitLimitStore</code> interface to create a custom storage backend.
+    At minimum, provide <code>hit()</code> and <code>reset()</code> methods.
+  </p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">custom-store.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} HitLimitStore, StoreResult {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-types'</span>
+
+<span class="kw">class</span> MyStore <span class="kw">implements</span> HitLimitStore {"{"}
+  isSync = <span class="kw">true</span> <span class="kw">as const</span>
+  <span class="kw">private</span> data = <span class="kw">new</span> <span class="fn">Map</span>&lt;<span class="kw">string</span>, {"{"} count: <span class="kw">number</span>; resetAt: <span class="kw">number</span> {"}"}&gt;()
+
+  <span class="fn">hit</span>(key: <span class="kw">string</span>, windowMs: <span class="kw">number</span>, _limit: <span class="kw">number</span>): StoreResult {"{"}
+    <span class="kw">const</span> now = Date.<span class="fn">now</span>()
+    <span class="kw">const</span> entry = <span class="kw">this</span>.data.<span class="fn">get</span>(key)
+
+    <span class="kw">if</span> (entry && now &lt; entry.resetAt) {"{"}
+      entry.count++
+      <span class="kw">return</span> {"{"} count: entry.count, resetAt: entry.resetAt {"}"}
+    {"}"}
+
+    <span class="kw">const</span> resetAt = now + windowMs
+    <span class="kw">this</span>.data.<span class="fn">set</span>(key, {"{"} count: <span class="num">1</span>, resetAt {"}"})
+    <span class="kw">return</span> {"{"} count: <span class="num">1</span>, resetAt {"}"}
+  {"}"}
+
+  <span class="fn">reset</span>(key: <span class="kw">string</span>): <span class="kw">void</span> {"{"}
+    <span class="kw">this</span>.data.<span class="fn">delete</span>(key)
+  {"}"}
+
+  <span class="fn">shutdown</span>(): <span class="kw">void</span> {"{"}
+    <span class="kw">this</span>.data.<span class="fn">clear</span>()
+  {"}"}
+{"}"}</code></pre>
+  </div>
+
+  <p>
+    Set <code>isSync = true</code> if your store's <code>hit()</code> method returns
+    a <code>StoreResult</code> directly (not a <code>Promise</code>). This lets the
+    limiter skip <code>await</code> on the hot path for better performance.
+  </p>
+
+  <h2 id="store-comparison">Store Comparison</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Store</th>
+        <th>Throughput</th>
+        <th>Latency</th>
+        <th>Persistent</th>
+        <th>Distributed</th>
+        <th>Sync</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Memory</strong></td>
+        <td>5.62M ops/sec</td>
+        <td>~178ns</td>
+        <td>No</td>
+        <td>No</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td><strong>SQLite</strong></td>
+        <td>383K ops/sec</td>
+        <td>~2.6&mu;s</td>
+        <td>Yes</td>
+        <td>No</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td><strong>Redis</strong></td>
+        <td>6.8K ops/sec</td>
+        <td>~146&mu;s</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>No</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    Memory and SQLite stores run synchronously on Bun's main thread, avoiding
+    Promise overhead entirely. Redis requires network I/O, so it returns Promises.
+    Choose based on whether you need persistence or distribution.
+  </p>
+</DocsLayout>
+
+<style>
+  .code-block {
+    margin: 1.5rem 0;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-elevated);
+  }
+  .code-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+  }
+  .dot.red { background: rgba(239, 68, 68, 0.8); }
+  .dot.yellow { background: rgba(234, 179, 8, 0.8); }
+  .dot.green { background: rgba(34, 197, 94, 0.8); }
+  .code-filename {
+    margin-left: 1rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+  .code-block pre {
+    padding: 1.5rem;
+    margin: 0;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+  .code-block code {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: var(--color-text-muted); }
+</style>

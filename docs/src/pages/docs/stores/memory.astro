@@ -1,81 +1,87 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 ---
 
 <DocsLayout
-  title="Memory Store - hitlimit | In-Memory Rate Limiting for Node.js"
+  title="Memory Store - hitlimit | In-Memory Rate Limiting"
   description="Fast in-memory rate limiting storage. Zero configuration, automatic cleanup, ideal for development and single-instance deployments. The default hitlimit store."
-  keywords="memory store rate limit, in-memory rate limiter, nodejs memory store, fast rate limit store, development rate limiter, single instance rate limit, zero config rate limit"
+  keywords="memory store rate limit, in-memory rate limiter, nodejs memory store, bun memory store, fast rate limit store, development rate limiter, single instance rate limit, zero config rate limit"
 >
   <h1>Memory Store</h1>
 
-  <p>The memory store is the default storage backend. It keeps rate limit data in memory, making it fast but non-persistent.</p>
+  <p>The memory store is the default storage backend. It keeps rate limit data in memory, making it the fastest option available.</p>
 
   <h2 id="usage">Usage</h2>
 
   <p>The memory store is used by default when no store is specified:</p>
 
-  <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
-
-<span class="cm">// Memory store is the default</span>
-app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"}))</code></pre>
-  </div>
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n\n<span class="cm">// Memory store is the default</span>\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span> {"}"}))'
+    bun='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n\n<span class="cm">// Memory store is the default</span>\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span> {"}"})'
+  />
 
   <p>Or explicitly configure it:</p>
 
-  <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">memoryStore</span>({"{"}\n    cleanupInterval: <span class="num">60000</span>  <span class="cm">// Clean expired entries every 60s</span>\n  {"}"})\n{"}"}))'
+    bun='<span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">memoryStore</span>()  <span class="cm">// No options needed — Bun handles cleanup internally</span>\n{"}"})'
+  />
 
-app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">100</span>,
-  window: <span class="str">'1m'</span>,
-  store: <span class="fn">memoryStore</span>({"{"}
-    cleanupInterval: <span class="num">60000</span>  <span class="cm">// Clean expired entries every 60s</span>
-  {"}"})
-{"}"}))</code></pre>
+  <div data-runtime-content="node">
+    <h2 id="options">Options</h2>
+
+    <table class="options-table">
+      <thead>
+        <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>cleanupInterval</code></td><td>number</td><td>60000</td><td>Interval (ms) to clean expired entries</td></tr>
+      </tbody>
+    </table>
   </div>
-
-  <h2 id="options">Options</h2>
-
-  <table class="options-table">
-    <thead>
-      <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><code>cleanupInterval</code></td><td>number</td><td>60000</td><td>Interval (ms) to clean expired entries</td></tr>
-    </tbody>
-  </table>
 
   <h2 id="characteristics">Characteristics</h2>
 
-  <ul>
-    <li><strong>Speed:</strong> Fastest option - no I/O overhead</li>
-    <li><strong>Persistence:</strong> Data is lost on restart</li>
-    <li><strong>Scalability:</strong> Not shared between instances</li>
-    <li><strong>Memory:</strong> Grows with unique keys; auto-cleanup removes expired entries</li>
-  </ul>
+  <div data-runtime-content="node">
+    <ul>
+      <li><strong>Speed:</strong> Fastest option — 3.14M ops/sec, no I/O overhead</li>
+      <li><strong>Persistence:</strong> Data is lost on restart</li>
+      <li><strong>Scalability:</strong> Not shared between instances</li>
+      <li><strong>Memory:</strong> Grows with unique keys; auto-cleanup removes expired entries</li>
+    </ul>
+  </div>
+
+  <div data-runtime-content="bun">
+    <ul>
+      <li><strong>Speed:</strong> 5.62M ops/sec (~178ns latency) — the fastest store available</li>
+      <li><strong>Zero dependencies:</strong> Built into the runtime</li>
+      <li><strong>Persistence:</strong> None — data is lost on restart</li>
+      <li><strong>Scalability:</strong> Single instance only — not shared between processes</li>
+      <li><strong>Memory:</strong> Grows with unique keys; auto-cleanup via internal sweep timer</li>
+    </ul>
+  </div>
 
   <h2 id="when-to-use">When to Use</h2>
 
   <ul>
-    <li>Development and testing</li>
+    <li>Development and testing environments</li>
     <li>Single-instance deployments</li>
-    <li>When persistence is not required</li>
-    <li>Low-traffic applications</li>
+    <li>When persistence across restarts is not required</li>
+    <li>Maximum throughput applications where every nanosecond counts</li>
   </ul>
 
   <h2 id="limitations">Limitations</h2>
 
   <ul>
     <li>Rate limits reset on server restart</li>
-    <li>Not suitable for multi-server deployments</li>
-    <li>Memory usage increases with unique client keys</li>
+    <li>Not suitable for multi-server or distributed deployments — use <a href="/docs/stores/redis">Redis</a> instead</li>
+    <li>Memory usage increases with the number of unique client keys</li>
   </ul>
 </DocsLayout>
 
 <style>
-  .options-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow-x: auto; }
+  .options-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
   .options-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
   .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
   .options-table tr:last-child td { border-bottom: none; }

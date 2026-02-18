@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeBanner from '../../../components/RuntimeBanner.astro';
 ---
 
 <DocsLayout
@@ -8,6 +9,11 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   keywords="rate limit examples, express rate limit example, fastify rate limit example, fastify rate limiter example, nestjs rate limit example, api rate limiting patterns, production rate limiting, saas rate limit, ecommerce rate limit, hono"
 >
   <h1>Real-World Examples</h1>
+  <RuntimeBanner
+    currentRuntime="node"
+    counterpartHref="/docs/bun/examples"
+    counterpartLabel="Bun Examples"
+  />
 
   <p>
     Production-ready rate limiting patterns for common use cases. Each example includes complete,

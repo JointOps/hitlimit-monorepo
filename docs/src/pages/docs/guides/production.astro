@@ -1,11 +1,12 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 ---
 
 <DocsLayout
   title="Production Rate Limiting - hitlimit | Deploy to Production Guide"
-  description="Best practices for deploying rate limiters in production. Redis setup, environment config, graceful shutdown, load balancer configuration, and security headers."
-  keywords="production rate limit, deploy rate limiter, redis production, rate limit best practices, nodejs production deployment, api rate limit production, load balancer rate limit, trust proxy rate limit"
+  description="Best practices for deploying rate limiters in production. Redis setup, environment config, graceful shutdown, load balancer configuration, error handling, and security checklist."
+  keywords="production rate limit, deploy rate limiter, redis production, rate limit best practices, nodejs production deployment, bun production deployment, api rate limit production, load balancer rate limit"
 >
   <h1>Production Deployment</h1>
 
@@ -28,41 +29,32 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 
   <h2 id="redis-setup">Redis Setup for Production</h2>
 
-  <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
-<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
-
-<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">100</span>,
-  window: <span class="str">'1m'</span>,
-  store: <span class="fn">redisStore</span>({"{"}
-    url: process.env.REDIS_URL,
-    prefix: <span class="str">'api:rl:'</span>
-  {"}"})
-{"}"})</code></pre>
-  </div>
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/redis&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({"{"}\n    url: process.env.REDIS_URL,\n    prefix: <span class="str">&#39;api:rl:&#39;</span>\n  {"}"})\n{"}"})'
+    bun='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/redis&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({"{"}\n    url: Bun.env.REDIS_URL,\n    prefix: <span class="str">&#39;api:rl:&#39;</span>\n  {"}"})\n{"}"})'
+  />
 
   <h2 id="environment-config">Environment-Based Configuration</h2>
 
-  <div class="code-block">
-    <pre><code><span class="kw">const</span> isProd = process.env.NODE_ENV === <span class="str">'production'</span>
+  <RuntimeCodeTabs
+    node='<span class="kw">const</span> isProd = process.env.NODE_ENV === <span class="str">&#39;production&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}\n  limit: isProd ? <span class="num">100</span> : <span class="num">1000</span>,  <span class="cm">// Relaxed in dev</span>\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: isProd\n    ? <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"})\n    : <span class="fn">memoryStore</span>(),\n  skip: (req) => !isProd &amp;&amp; req.headers[<span class="str">&#39;x-skip-ratelimit&#39;</span>]\n{"}"})'
+    bun='<span class="kw">const</span> isProd = Bun.env.NODE_ENV === <span class="str">&#39;production&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}\n  limit: isProd ? <span class="num">100</span> : <span class="num">1000</span>,  <span class="cm">// Relaxed in dev</span>\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: isProd\n    ? <span class="fn">redisStore</span>({"{"} url: Bun.env.REDIS_URL {"}"})\n    : <span class="fn">memoryStore</span>(),\n  skip: (req) => !isProd &amp;&amp; req.headers.<span class="fn">get</span>(<span class="str">&#39;x-skip-ratelimit&#39;</span>)\n{"}"})'
+  />
 
-<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
-  limit: isProd ? <span class="num">100</span> : <span class="num">1000</span>,  <span class="cm">// Relaxed in dev</span>
-  window: <span class="str">'1m'</span>,
-  store: isProd
-    ? <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"})
-    : <span class="fn">memoryStore</span>(),
-  skip: (req) => !isProd && req.headers[<span class="str">'x-skip-ratelimit'</span>]
-{"}"})</code></pre>
+  <div data-runtime-content="bun">
+    <p class="note">
+      <strong>Tip:</strong> Bun automatically loads <code>.env</code> files without additional packages.
+      Place your <code>.env</code> file in the project root and access variables via <code>Bun.env</code>.
+    </p>
   </div>
 
   <h2 id="graceful-shutdown">Graceful Shutdown</h2>
 
   <p>Clean up store connections on shutdown:</p>
 
-  <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
+  <div data-runtime-content="node">
+    <div class="code-block">
+      <pre><code><span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
 
 <span class="kw">const</span> store = <span class="fn">redisStore</span>({"{"} url: process.env.REDIS_URL {"}"})
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span>, store {"}"})
@@ -71,7 +63,69 @@ process.<span class="fn">on</span>(<span class="str">'SIGTERM'</span>, <span cla
   <span class="kw">await</span> store.<span class="fn">close</span>()
   process.<span class="fn">exit</span>(<span class="num">0</span>)
 {"}"})</code></pre>
+    </div>
   </div>
+
+  <div data-runtime-content="bun">
+    <div class="code-block">
+      <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/redis'</span>
+
+<span class="kw">const</span> store = <span class="fn">redisStore</span>({"{"} url: Bun.env.REDIS_URL {"}"})
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span>, store {"}"})
+
+<span class="kw">const</span> server = Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(req)
+    <span class="kw">if</span> (!result.allowed) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Rate limited'</span>, {"{"} status: <span class="num">429</span> {"}"})
+    {"}"}
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'OK'</span>)
+  {"}"}
+{"}"})
+
+<span class="cm">// Graceful shutdown on SIGINT (Ctrl+C)</span>
+process.<span class="fn">on</span>(<span class="str">'SIGINT'</span>, <span class="kw">async</span> () => {"{"}
+  server.<span class="fn">stop</span>()
+  <span class="kw">await</span> store.<span class="fn">close</span>()
+  process.<span class="fn">exit</span>(<span class="num">0</span>)
+{"}"})</code></pre>
+    </div>
+  </div>
+
+  <h2 id="error-handling">Error Handling</h2>
+
+  <p>Configure fail-open or fail-closed behavior when the store encounters errors:</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// Fail-open: Allow requests when Redis is down</span>
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store,
+  <span class="fn">onError</span>(err) {"{"}
+    console.<span class="fn">error</span>(<span class="str">'Rate limiter error:'</span>, err)
+    <span class="kw">return</span> <span class="str">'allow'</span>  <span class="cm">// Let request through</span>
+  {"}"}
+{"}"})
+
+<span class="cm">// Fail-closed: Block requests when store is unavailable</span>
+<span class="kw">const</span> strictLimiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">10</span>,
+  window: <span class="str">'1m'</span>,
+  store,
+  <span class="fn">onError</span>(err) {"{"}
+    console.<span class="fn">error</span>(<span class="str">'Rate limiter error:'</span>, err)
+    <span class="kw">return</span> <span class="str">'deny'</span>  <span class="cm">// Block request</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <p class="note">
+    <strong>Recommendation:</strong> Use fail-open (<code>'allow'</code>) for most APIs to prioritize availability.
+    Use fail-closed (<code>'deny'</code>) for sensitive endpoints like authentication or payment processing.
+  </p>
 
   <h2 id="headers">Security Headers</h2>
 
@@ -84,7 +138,7 @@ RateLimit-Reset: <span class="num">1640000060</span>
 Retry-After: <span class="num">27</span>  <span class="cm">// Only when limited</span></code></pre>
   </div>
 
-  <h2 id="error-handling">Custom Error Responses</h2>
+  <h2 id="custom-response">Custom Error Responses</h2>
 
   <div class="code-block">
     <pre><code><span class="fn">hitlimit</span>({"{"}
@@ -103,8 +157,9 @@ Retry-After: <span class="num">27</span>  <span class="cm">// Only when limited<
 
   <p>When behind a proxy, use the correct IP source:</p>
 
-  <div class="code-block">
-    <pre><code><span class="cm">// Trust X-Forwarded-For header</span>
+  <div data-runtime-content="node">
+    <div class="code-block">
+      <pre><code><span class="cm">// Trust X-Forwarded-For header</span>
 app.<span class="fn">set</span>(<span class="str">'trust proxy'</span>, <span class="kw">true</span>)
 
 <span class="cm">// Or use custom key extraction</span>
@@ -116,17 +171,37 @@ app.<span class="fn">set</span>(<span class="str">'trust proxy'</span>, <span cl
     <span class="kw">return</span> forwarded?.split(<span class="str">','</span>)[<span class="num">0</span>].trim() || req.ip
   {"}"}
 {"}"})</code></pre>
+    </div>
+  </div>
+
+  <div data-runtime-content="bun">
+    <div class="code-block">
+      <pre><code><span class="cm">// Use server.requestIP() or X-Forwarded-For</span>
+Bun.<span class="fn">serve</span>({"{"}
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> forwarded = req.headers.<span class="fn">get</span>(<span class="str">'x-forwarded-for'</span>)
+    <span class="kw">const</span> ip = forwarded?.split(<span class="str">','</span>)[<span class="num">0</span>].trim()
+      || <span class="kw">this</span>.<span class="fn">requestIP</span>(req)?.address
+      || <span class="str">'127.0.0.1'</span>
+
+    <span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(ip)
+    <span class="cm">// ...</span>
+  {"}"}
+{"}"})</code></pre>
+    </div>
   </div>
 
   <h2 id="checklist">Production Checklist</h2>
 
-  <ul>
-    <li>Use Redis or persistent store for multi-instance deployments</li>
-    <li>Configure appropriate limits for your API</li>
-    <li>Set up graceful shutdown handlers</li>
-    <li>Enable rate limit headers for client visibility</li>
-    <li>Configure trust proxy if behind a load balancer</li>
-    <li>Monitor rate limit metrics</li>
+  <ul class="checklist">
+    <li><strong>Use Redis for distributed deployments</strong> — memory store limits are per-process and can be bypassed across instances</li>
+    <li><strong>Extract the real client IP</strong> — behind a reverse proxy, use <code>X-Forwarded-For</code> to avoid rate limiting the proxy itself</li>
+    <li><strong>Set appropriate limits per endpoint</strong> — authentication routes need stricter limits than read-only APIs</li>
+    <li><strong>Never expose internal error details</strong> — return generic 429 responses to clients, log details server-side</li>
+    <li><strong>Monitor for bypass attempts</strong> — log rate limit events and watch for patterns like rotating IPs</li>
+    <li><strong>Keep Redis credentials secure</strong> — store <code>REDIS_URL</code> in environment variables, never hardcode</li>
+    <li><strong>Enable rate limit headers</strong> — send <code>RateLimit-Remaining</code> and <code>Retry-After</code> so clients can back off gracefully</li>
+    <li><strong>Skip internal health checks</strong> — exclude <code>/health</code> and monitoring endpoints from rate limiting</li>
   </ul>
 </DocsLayout>
 
@@ -139,4 +214,11 @@ app.<span class="fn">set</span>(<span class="str">'trust proxy'</span>, <span cl
   .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
   .code-block code { background: none !important; border: none !important; padding: 0 !important; }
   .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+  .note { font-size: 0.875rem; color: var(--color-text-muted); margin: 1rem 0; padding: 0.75rem 1rem; border-left: 3px solid var(--color-border); background: var(--color-bg-surface); border-radius: 0 0.5rem 0.5rem 0; }
+  .note strong { color: var(--color-text-secondary); }
+  .checklist { list-style: none; padding-left: 0; margin: 1.5rem 0; }
+  .checklist li { position: relative; padding: 0.5rem 0 0.5rem 1.75rem; color: var(--color-text-secondary); line-height: 1.6; }
+  .checklist li::before { content: ''; position: absolute; left: 0; top: 0.85rem; width: 0.75rem; height: 0.75rem; border: 2px solid var(--color-border); border-radius: 3px; }
+  .checklist li strong { color: var(--color-text-primary); }
+  .checklist li code { font-size: 0.8125rem; }
 </style>

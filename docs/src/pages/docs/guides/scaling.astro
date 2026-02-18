@@ -1,11 +1,12 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 ---
 
 <DocsLayout
   title="Scaling Rate Limiters - hitlimit | Horizontal Scaling & Redis Cluster"
-  description="Scale rate limiting from single server to distributed architecture. Redis cluster setup, horizontal scaling, multi-tier limits, sliding window algorithm, and performance benchmarks."
-  keywords="scale rate limiter, distributed rate limiting, redis cluster rate limit, horizontal scaling rate limit, multi-tier rate limiting, sliding window algorithm, rate limit performance, high availability rate limit"
+  description="Scale rate limiting from single server to distributed architecture. Redis cluster setup, horizontal scaling, multi-tier limits, store migration, and performance benchmarks."
+  keywords="scale rate limiter, distributed rate limiting, redis cluster rate limit, horizontal scaling rate limit, multi-tier rate limiting, bun scaling rate limit, rate limit performance"
 >
   <h1>Scaling Guide</h1>
 
@@ -15,57 +16,32 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 
   <p>For small deployments, the memory store works well:</p>
 
-  <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
-
-<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">100</span>,
-  window: <span class="str">'1m'</span>,
-  store: <span class="fn">memoryStore</span>({"{"}
-    cleanupInterval: <span class="num">60000</span>
-  {"}"})
-{"}"})</code></pre>
-  </div>
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">memoryStore</span>({"{"}\n    cleanupInterval: <span class="num">60000</span>\n  {"}"})\n{"}"})'
+    bun='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>\n{"}"})'
+  />
 
   <h2 id="horizontal-scaling">Horizontal Scaling with Redis</h2>
 
   <p>For multiple instances, use Redis to share state:</p>
 
-  <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
-<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
-
-<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">1000</span>,
-  window: <span class="str">'1m'</span>,
-  store: <span class="fn">redisStore</span>({"{"}
-    url: <span class="str">'redis://redis-cluster:6379'</span>,
-    prefix: <span class="str">'api:ratelimit:'</span>
-  {"}"})
-{"}"})</code></pre>
-  </div>
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/redis&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">1000</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({"{"}\n    url: <span class="str">&#39;redis://redis-cluster:6379&#39;</span>,\n    prefix: <span class="str">&#39;api:ratelimit:&#39;</span>\n  {"}"})\n{"}"})'
+    bun='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/redis&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">1000</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({"{"}\n    url: <span class="str">&#39;redis://redis-cluster:6379&#39;</span>,\n    prefix: <span class="str">&#39;api:ratelimit:&#39;</span>\n  {"}"})\n{"}"})'
+  />
 
   <h2 id="redis-cluster">Redis Cluster Configuration</h2>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} createCluster {"}"} <span class="kw">from</span> <span class="str">'redis'</span>
-<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
+    <pre><code><span class="kw">import</span> Redis <span class="kw">from</span> <span class="str">'ioredis'</span>
 
-<span class="kw">const</span> cluster = <span class="fn">createCluster</span>({"{"}
-  rootNodes: [
-    {"{"} url: <span class="str">'redis://node1:6379'</span> {"}"},
-    {"{"} url: <span class="str">'redis://node2:6379'</span> {"}"},
-    {"{"} url: <span class="str">'redis://node3:6379'</span> {"}"}
-  ]
-{"}"})
+<span class="kw">const</span> cluster = <span class="kw">new</span> Redis.<span class="fn">Cluster</span>([
+  {"{"} host: <span class="str">'node1'</span>, port: <span class="num">6379</span> {"}"},
+  {"{"} host: <span class="str">'node2'</span>, port: <span class="num">6379</span> {"}"},
+  {"{"} host: <span class="str">'node3'</span>, port: <span class="num">6379</span> {"}"}
+])
 
-<span class="kw">await</span> cluster.<span class="fn">connect</span>()
-
-<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">1000</span>,
-  window: <span class="str">'1m'</span>,
-  store: <span class="fn">redisStore</span>({"{"} client: cluster {"}"})
-{"}"})</code></pre>
+<span class="fn">redisStore</span>({"{"} client: cluster {"}"})</code></pre>
   </div>
 
   <h2 id="multi-tier">Multi-Tier Rate Limiting</h2>
@@ -94,62 +70,68 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   window: <span class="str">'1m'</span>,
   store,
   key: (req) => <span class="str">`read:</span>${"{"}req.ip{"}"}<span class="str">`</span>
-{"}"})
-
-app.<span class="fn">use</span>(globalLimiter)
-app.<span class="fn">use</span>(<span class="str">'/auth'</span>, authLimiter)
-app.<span class="fn">use</span>(<span class="str">'/api/read'</span>, readLimiter)</code></pre>
-  </div>
-
-  <h2 id="sliding-window">Sliding Window Algorithm</h2>
-
-  <p>hitlimit uses a sliding window for accurate rate limiting:</p>
-
-  <div class="code-block">
-    <pre><code><span class="cm">// Fixed window: Resets at exact intervals</span>
-<span class="cm">// User could make 100 requests at :59 and 100 at :00</span>
-
-<span class="cm">// Sliding window: Smooths out bursts</span>
-<span class="cm">// hitlimit tracks requests across window boundaries</span>
-<span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">100</span>,
-  window: <span class="str">'1m'</span>,
-  algorithm: <span class="str">'sliding'</span>  <span class="cm">// Default</span>
 {"}"})</code></pre>
   </div>
 
-  <h2 id="performance">Performance Tips</h2>
+  <h2 id="performance">Performance by Store</h2>
+
+  <div data-runtime-content="node">
+    <table class="options-table">
+      <thead>
+        <tr><th>Store</th><th>Ops/sec</th><th>Multi-Instance</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>memoryStore</td><td>3,140,000+</td><td>No</td></tr>
+        <tr><td>sqliteStore</td><td>280,000+</td><td>No</td></tr>
+        <tr><td>redisStore</td><td>6,800+</td><td>Yes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div data-runtime-content="bun">
+    <table class="options-table">
+      <thead>
+        <tr><th>Store</th><th>Ops/sec</th><th>Latency</th><th>Multi-Instance</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>memoryStore</td><td class="highlight">5,620,000+</td><td>~178ns</td><td>No</td></tr>
+        <tr><td>sqliteStore</td><td>383,000+</td><td>~2.6&micro;s</td><td>No</td></tr>
+        <tr><td>redisStore</td><td>6,800+</td><td>~146&micro;s</td><td>Yes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="migration">Migrating Between Stores</h2>
+
+  <p>Swapping stores requires changing only the <code>store</code> option. Your application code stays the same:</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// Stage 1: Start with memory (fastest, no deps)</span>
+<span class="kw">const</span> store = <span class="fn">memoryStore</span>()
+
+<span class="cm">// Stage 2: Add persistence (survives restarts)</span>
+<span class="cm">// const store = sqliteStore({"{"} path: './data/rate-limits.db' {"}"})</span>
+
+<span class="cm">// Stage 3: Go distributed (shared state across instances)</span>
+<span class="cm">// const store = redisStore({"{"} url: process.env.REDIS_URL {"}"})</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="tips">Optimization Tips</h2>
 
   <ul>
-    <li><strong>Key design</strong>: Keep keys short to reduce memory usage</li>
-    <li><strong>Cleanup</strong>: Configure appropriate cleanup intervals</li>
-    <li><strong>Connection pooling</strong>: Reuse Redis connections</li>
-    <li><strong>Skip paths</strong>: Exclude health checks and static assets</li>
+    <li><strong>Start with memory</strong> — It's the default and fastest option. Only move to SQLite or Redis when you actually need persistence or multi-instance support.</li>
+    <li><strong>Keep keys short</strong> — Shorter keys reduce memory and storage overhead.</li>
+    <li><strong>Reuse Redis connections</strong> — Create one <code>redisStore</code> and share it across multiple limiters.</li>
+    <li><strong>Skip health checks</strong> — Exclude <code>/health</code> and monitoring endpoints from rate limiting.</li>
+    <li><strong>Set prefix per service</strong> — When multiple services share Redis, use distinct prefixes to avoid key collisions.</li>
+    <li><strong>Fail open in production</strong> — Configure <code>onError</code> to return <code>'allow'</code> so a Redis outage doesn't block all requests.</li>
   </ul>
-
-  <div class="code-block">
-    <pre><code><span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">100</span>,
-  window: <span class="str">'1m'</span>,
-  skip: (req) => {"{"}
-    <span class="kw">return</span> req.path === <span class="str">'/health'</span> ||
-           req.path.<span class="fn">startsWith</span>(<span class="str">'/static'</span>)
-  {"}"}
-{"}"})</code></pre>
-  </div>
-
-  <h2 id="benchmarks">Performance Benchmarks</h2>
-
-  <table class="options-table">
-    <thead>
-      <tr><th>Store</th><th>Ops/sec</th><th>Latency (p99)</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>memoryStore</td><td>3,350,000+</td><td>&lt;1μs</td></tr>
-      <tr><td>sqliteStore</td><td>516,000+</td><td>&lt;3μs</td></tr>
-      <tr><td>redisStore</td><td>6,600+</td><td>&lt;450μs</td></tr>
-    </tbody>
-  </table>
 </DocsLayout>
 
 <style>
@@ -157,6 +139,7 @@ app.<span class="fn">use</span>(<span class="str">'/api/read'</span>, readLimite
   .options-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
   .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
   .options-table tr:last-child td { border-bottom: none; }
+  .options-table .highlight { color: var(--color-accent); font-family: var(--font-mono); font-weight: 600; }
   .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
   .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
   .code-block code { background: none !important; border: none !important; padding: 0 !important; }

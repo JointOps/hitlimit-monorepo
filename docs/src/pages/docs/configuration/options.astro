@@ -1,11 +1,12 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 ---
 
 <DocsLayout
   title="Rate Limiter Configuration Options - hitlimit | Complete API Reference"
   description="Complete configuration reference for hitlimit rate limiter. All options for limit, window, key, store, skip, headers, and custom responses. Examples for Express, NestJS, and Bun."
-  keywords="rate limit configuration, hitlimit options, rate limiter settings, api rate limit config, express rate limit options, nodejs rate limit configuration, middleware options, throttle settings"
+  keywords="rate limit configuration, hitlimit options, rate limiter settings, api rate limit config, express rate limit options, nodejs rate limit configuration, bun rate limit config, middleware options, throttle settings"
 >
   <h1>Configuration Options</h1>
 
@@ -91,6 +92,41 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 {"}"})</code></pre>
   </div>
 
+  <h2 id="stores">Store Configuration</h2>
+
+  <p>hitlimit supports three storage backends. Memory is the default and fastest option:</p>
+
+  <div data-runtime-content="node">
+    <table class="options-table">
+      <thead>
+        <tr><th>Store</th><th>Best For</th><th>Throughput</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">3.14M ops/s</td></tr>
+        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts</td><td>280K ops/s</td></tr>
+        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>6.8K ops/s</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div data-runtime-content="bun">
+    <table class="options-table">
+      <thead>
+        <tr><th>Store</th><th>Best For</th><th>Throughput</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">5.62M ops/s</td></tr>
+        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts (bun:sqlite)</td><td>383K ops/s</td></tr>
+        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>6.7K ops/s</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/sqlite&#39;</span>\n<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/redis&#39;</span>\n\n<span class="cmt">// Memory (default) — no config needed</span>\n<span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span> {"}"})\n\n<span class="cmt">// SQLite — persistent storage</span>\n<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">sqliteStore</span>({"{"} path: <span class="str">&#39;./limits.db&#39;</span> {"}"})\n{"}"})\n\n<span class="cmt">// Redis — distributed</span>\n<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({"{"} url: <span class="str">&#39;redis://localhost:6379&#39;</span> {"}"})\n{"}"})'
+    bun='<span class="kw">import</span> {"{"} hitlimit, sqliteStore, redisStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n\n<span class="cmt">// Memory (default) — no config needed</span>\n<span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span> {"}"})\n\n<span class="cmt">// SQLite — persistent storage via bun:sqlite</span>\n<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">sqliteStore</span>({"{"} path: <span class="str">&#39;./limits.db&#39;</span> {"}"})\n{"}"})\n\n<span class="cmt">// Redis — distributed</span>\n<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({"{"} url: <span class="str">&#39;redis://localhost:6379&#39;</span> {"}"})\n{"}"})'
+  />
+
   <h2 id="example">Full Example</h2>
 
   <div class="code-block">
@@ -115,6 +151,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
   .options-table tr:last-child td { border-bottom: none; }
   .options-table code { background: var(--color-bg-elevated); color: var(--color-accent); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; }
+  .options-table .highlight { color: var(--color-accent); font-family: var(--font-mono); font-weight: 600; }
   .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
   .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
   .code-block code { background: none !important; border: none !important; padding: 0 !important; }

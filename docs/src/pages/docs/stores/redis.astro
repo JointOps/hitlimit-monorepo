@@ -1,12 +1,12 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
-import Tabs from '../../../components/Tabs.astro';
+import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 ---
 
 <DocsLayout
   title="Redis Rate Limiting Store - hitlimit | Distributed Rate Limiter"
-  description="Redis store for hitlimit distributed rate limiting. Scale your rate limiter across multiple servers with Redis. ioredis support, cluster mode, and high availability."
-  keywords="redis rate limit, redis rate limiter, distributed rate limiting, redis throttle, ioredis rate limit, redis api protection, multi-server rate limit, redis cluster rate limit, redis express rate limit"
+  description="Redis store for hitlimit distributed rate limiting. Scale your rate limiter across multiple servers with Redis. ioredis support, Lua scripts, cluster mode, and high availability."
+  keywords="redis rate limit, redis rate limiter, distributed rate limiting, redis throttle, ioredis rate limit, redis api protection, multi-server rate limit, redis cluster rate limit, bun redis rate limit"
 >
   <h1>Redis Store</h1>
 
@@ -16,29 +16,17 @@ import Tabs from '../../../components/Tabs.astro';
 
   <p>The Redis store requires <code>ioredis</code> as a peer dependency:</p>
 
-  <Tabs
-    tabs={[
-      { label: 'npm', content: 'npm install ioredis' },
-      { label: 'pnpm', content: 'pnpm add ioredis' },
-      { label: 'yarn', content: 'yarn add ioredis' },
-      { label: 'bun', content: 'bun add ioredis' },
-    ]}
+  <RuntimeCodeTabs
+    node='npm install ioredis\n<span class="cm"># or: pnpm add ioredis</span>\n<span class="cm"># or: yarn add ioredis</span>'
+    bun='bun add ioredis'
   />
 
   <h2 id="usage">Usage</h2>
 
-  <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
-<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
-
-app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">100</span>,
-  window: <span class="str">'1m'</span>,
-  store: <span class="fn">redisStore</span>({"{"}
-    url: <span class="str">'redis://localhost:6379'</span>
-  {"}"})
-{"}"}))</code></pre>
-  </div>
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/redis&#39;</span>\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({"{"}\n    url: <span class="str">&#39;redis://localhost:6379&#39;</span>\n  {"}"})\n{"}"}))'
+    bun='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/redis&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({"{"}\n    url: <span class="str">&#39;redis://localhost:6379&#39;</span>\n  {"}"})\n{"}"})'
+  />
 
   <h2 id="options">Options</h2>
 
@@ -92,13 +80,34 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
 <span class="fn">redisStore</span>({"{"} client: cluster {"}"})</code></pre>
   </div>
 
+  <h2 id="lua-scripts">Lua Scripts</h2>
+
+  <p>
+    As of <strong>v1.1.3</strong>, the Redis store uses atomic Lua scripts to combine multiple Redis
+    commands into a single call. Instead of issuing separate <code>INCR</code>, <code>PEXPIRE</code>,
+    and <code>PTTL</code> commands (3 round trips), a single Lua script executes all three atomically
+    on the Redis server — <strong>reducing round trips from 3 to 1</strong>.
+  </p>
+
+  <p>This provides two key benefits:</p>
+
+  <ul>
+    <li><strong>Lower latency</strong> — one network round trip instead of three</li>
+    <li><strong>True atomicity</strong> — no race conditions between increment and expiry operations</li>
+  </ul>
+
+  <p>
+    For endpoints with ban detection enabled, the <code>hitWithBan</code> Lua script handles
+    increment, expiry, TTL retrieval, and ban threshold checking in a single atomic call.
+  </p>
+
   <h2 id="characteristics">Characteristics</h2>
 
   <ul>
-    <li><strong>Speed:</strong> Fast with low latency</li>
-    <li><strong>Persistence:</strong> Configurable via Redis settings</li>
+    <li><strong>Speed:</strong> ~6.8K ops/sec, ~146&micro;s latency (network-bound)</li>
+    <li><strong>Persistence:</strong> Configurable via Redis persistence settings (RDB/AOF)</li>
     <li><strong>Scalability:</strong> Shared across all server instances</li>
-    <li><strong>Atomic:</strong> Uses Lua scripts for race-condition-free increments</li>
+    <li><strong>Atomic:</strong> Lua scripts ensure race-condition-free increments</li>
   </ul>
 
   <h2 id="when-to-use">When to Use</h2>

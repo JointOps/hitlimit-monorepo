@@ -1,0 +1,387 @@
+---
+import DocsLayout from '../../../../layouts/DocsLayout.astro';
+import RuntimeBanner from '../../../../components/RuntimeBanner.astro';
+---
+
+<DocsLayout
+  title="hitlimit() API (Bun) - hitlimit-bun | Function Reference"
+  description="API reference for the hitlimit-bun hitlimit() function. Function signature, options, return value, check() method, and Bun.serve integration examples."
+  keywords="hitlimit-bun api, bun rate limit function, hitlimit-bun options, bun rate limiter api, hitlimit check method"
+>
+  <h1>hitlimit() Function (Bun)</h1>
+
+  <RuntimeBanner
+    currentRuntime="bun"
+    counterpartHref="/docs/api/hitlimit"
+    counterpartLabel="Node.js hitlimit() API"
+  />
+
+  <p>
+    The main function to create a rate limiter for Bun applications.
+    Unlike the Node.js version which returns middleware, the Bun version returns a <code>Limiter</code> object
+    with a <code>check(key)</code> method you call directly.
+  </p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>(options)
+<span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(ip)
+<span class="cm">// result: {"{"} allowed, limit, remaining, resetIn, resetAt {"}"}</span></code></pre>
+  </div>
+
+  <h2 id="signature">Function Signature</h2>
+
+  <div class="code-block">
+    <pre><code><span class="kw">function</span> <span class="fn">hitlimit</span>(options: HitLimitOptions): Limiter</code></pre>
+  </div>
+
+  <p>
+    Accepts an options object and returns a <code>Limiter</code> instance.
+    The limiter does <strong>not</strong> act as middleware — instead, call <code>limiter.check(key)</code>
+    inside your request handler to perform rate limit checks.
+  </p>
+
+  <h2 id="options">Options Object</h2>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>limit</code></td><td>number</td><td>100</td><td>Maximum requests per window</td></tr>
+      <tr><td><code>window</code></td><td>string | number</td><td>'1m'</td><td>Time window duration (e.g., <code>'1m'</code>, <code>'1h'</code>, <code>'1d'</code>, or milliseconds)</td></tr>
+      <tr><td><code>key</code></td><td>(req) =&gt; string</td><td>-</td><td>Key extraction function (used by adapters; not needed with <code>check(key)</code> directly)</td></tr>
+      <tr><td><code>store</code></td><td>Store</td><td>memoryStore()</td><td>Storage backend (memory, sqlite, redis)</td></tr>
+      <tr><td><code>skip</code></td><td>(req) =&gt; boolean</td><td>undefined</td><td>Skip rate limiting for certain requests (used by adapters)</td></tr>
+      <tr><td><code>headers</code></td><td>boolean | HeadersConfig</td><td>true</td><td>Include rate limit headers in adapter responses</td></tr>
+      <tr><td><code>statusCode</code></td><td>number</td><td>429</td><td>HTTP status code when rate limited (used by adapters)</td></tr>
+      <tr><td><code>response</code></td><td>object | function</td><td>-</td><td>Custom error response body</td></tr>
+      <tr><td><code>tiers</code></td><td>Record&lt;string, TierConfig&gt;</td><td>-</td><td>Named tier configurations with per-tier <code>limit</code> and <code>window</code></td></tr>
+      <tr><td><code>tier</code></td><td>(req) =&gt; string</td><td>-</td><td>Function to resolve which tier a request belongs to</td></tr>
+      <tr><td><code>ban</code></td><td>BanConfig</td><td>-</td><td>Auto-ban clients after repeated violations (<code>threshold</code> + <code>duration</code>)</td></tr>
+      <tr><td><code>onStoreError</code></td><td>(error, req) =&gt; 'allow' | 'deny'</td><td>'allow'</td><td>Error handler when the store fails; return <code>'allow'</code> or <code>'deny'</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="return-value">Return Value</h2>
+
+  <p>
+    Returns a <code>Limiter</code> object. The primary method is <code>check(key)</code>, which performs
+    a rate limit check for the given key and returns a result object.
+  </p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">interface</span> <span class="fn">Limiter</span> {"{"}
+  <span class="fn">check</span>(key: <span class="kw">string</span>): <span class="kw">Promise</span>&lt;CheckResult&gt;
+{"}"}</code></pre>
+  </div>
+
+  <p>
+    The <code>key</code> parameter is typically the client's IP address, API key, or user ID.
+    You extract the key yourself and pass it in — this gives you full control
+    without framework-specific abstractions.
+  </p>
+
+  <h2 id="check-result">Check Result</h2>
+
+  <p>The object returned by <code>limiter.check(key)</code>:</p>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>allowed</code></td><td>boolean</td><td><code>true</code> if the request is within the rate limit</td></tr>
+      <tr><td><code>limit</code></td><td>number</td><td>Maximum requests allowed in the window</td></tr>
+      <tr><td><code>remaining</code></td><td>number</td><td>Remaining requests in the current window</td></tr>
+      <tr><td><code>resetIn</code></td><td>number</td><td>Seconds until the window resets</td></tr>
+      <tr><td><code>resetAt</code></td><td>number</td><td>Unix timestamp (ms) when the window resets</td></tr>
+      <tr><td><code>banned</code></td><td>boolean?</td><td>Present and <code>true</code> if the client is banned (requires <code>ban</code> option)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="basic-example">Basic Example</h2>
+
+  <p>Rate limit a <code>Bun.serve</code> application using <code>limiter.check()</code> directly:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">server.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+{"}"})
+
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> ip = <span class="kw">this</span>.<span class="fn">requestIP</span>(req)?.address ?? <span class="str">'127.0.0.1'</span>
+    <span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(ip)
+
+    <span class="kw">if</span> (!result.allowed) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(
+        JSON.<span class="fn">stringify</span>({"{"} error: <span class="str">'Too Many Requests'</span> {"}"}),
+        {"{"}
+          status: <span class="num">429</span>,
+          headers: {"{"}
+            <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span>,
+            <span class="str">'Retry-After'</span>: String(result.resetIn)
+          {"}"}
+        {"}"}
+      )
+    {"}"}
+
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Hello!'</span>)
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="adapter-usage">Adapter Usage</h2>
+
+  <p>
+    Instead of calling <code>check()</code> manually, you can use the built-in adapters
+    for Bun.serve, Elysia, and Hono. Adapters handle key extraction, headers, and error responses automatically.
+  </p>
+
+  <h3>Bun.serve Adapter</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">bun-serve-adapter.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/serve'</span>
+
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> limited = <span class="kw">await</span> <span class="fn">hitlimit</span>(req, <span class="kw">this</span>, {"{"}
+      limit: <span class="num">100</span>,
+      window: <span class="str">'1m'</span>
+    {"}"})
+    <span class="kw">if</span> (limited) <span class="kw">return</span> limited
+
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Hello!'</span>)
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h3>Elysia Plugin</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">elysia-plugin.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} Elysia {"}"} <span class="kw">from</span> <span class="str">'elysia'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/elysia'</span>
+
+<span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Elysia</span>()
+  .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"}))
+  .<span class="fn">get</span>(<span class="str">'/'</span>, () => <span class="str">'Hello!'</span>)
+  .<span class="fn">listen</span>(<span class="num">3000</span>)</code></pre>
+  </div>
+
+  <h3>Hono Middleware</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">hono-middleware.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} Hono {"}"} <span class="kw">from</span> <span class="str">'hono'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/hono'</span>
+
+<span class="kw">const</span> app = <span class="kw">new</span> <span class="fn">Hono</span>()
+app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"}))
+app.<span class="fn">get</span>(<span class="str">'/'</span>, (c) => c.<span class="fn">text</span>(<span class="str">'Hello!'</span>))
+
+Bun.<span class="fn">serve</span>({"{"} port: <span class="num">3000</span>, fetch: app.fetch {"}"})</code></pre>
+  </div>
+
+  <p>
+    For full adapter documentation, see
+    <a href="/docs/bun/bun-serve">Bun.serve</a>,
+    <a href="/docs/bun/elysia">Elysia Plugin</a>, and
+    <a href="/docs/bun/hono">Hono Middleware</a>.
+  </p>
+
+  <h2 id="advanced">Advanced Usage</h2>
+
+  <h3>Tiered Limits</h3>
+
+  <p>Apply different rate limits based on user plans using the <code>tiers</code> and <code>tier</code> options:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">tiered.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  tiers: {"{"}
+    free:       {"{"} limit: <span class="num">100</span>,      window: <span class="str">'1h'</span>  {"}"},
+    pro:        {"{"} limit: <span class="num">1000</span>,     window: <span class="str">'1m'</span>  {"}"},
+    enterprise: {"{"} limit: <span class="num">10000</span>,    window: <span class="str">'1m'</span>  {"}"}
+  {"}"},
+  tier: (req) => req.headers.<span class="fn">get</span>(<span class="str">'x-plan'</span>) || <span class="str">'free'</span>
+{"}"})
+
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> ip = <span class="kw">this</span>.<span class="fn">requestIP</span>(req)?.address ?? <span class="str">'127.0.0.1'</span>
+    <span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(ip)
+
+    <span class="kw">if</span> (!result.allowed) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Rate limit exceeded'</span>, {"{"} status: <span class="num">429</span> {"}"})
+    {"}"}
+
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'OK'</span>)
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h3>Ban Configuration</h3>
+
+  <p>Automatically ban clients that repeatedly exceed rate limits:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">ban.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">10</span>,
+  window: <span class="str">'1m'</span>,
+  ban: {"{"}
+    threshold: <span class="num">5</span>,   <span class="cm">// Ban after 5 violations</span>
+    duration: <span class="str">'1h'</span>    <span class="cm">// Ban lasts 1 hour</span>
+  {"}"}
+{"}"})
+
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> ip = <span class="kw">this</span>.<span class="fn">requestIP</span>(req)?.address ?? <span class="str">'127.0.0.1'</span>
+    <span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(ip)
+
+    <span class="kw">if</span> (!result.allowed) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Too Many Requests'</span>, {"{"}
+        status: <span class="num">429</span>,
+        headers: {"{"} <span class="str">'Retry-After'</span>: String(result.resetIn) {"}"}
+      {"}"})
+    {"}"}
+
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Hello!'</span>)
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h3>Redis Store</h3>
+
+  <p>Use Redis for distributed rate limiting across multiple servers:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">redis.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit, redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">500</span>,
+  window: <span class="str">'5m'</span>,
+  store: <span class="fn">redisStore</span>({"{"} url: <span class="str">'redis://localhost:6379'</span> {"}"})
+{"}"})
+
+Bun.<span class="fn">serve</span>({"{"}
+  port: <span class="num">3000</span>,
+  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <span class="kw">const</span> ip = <span class="kw">this</span>.<span class="fn">requestIP</span>(req)?.address ?? <span class="str">'127.0.0.1'</span>
+    <span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(ip)
+
+    <span class="kw">if</span> (!result.allowed) {"{"}
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Too Many Requests'</span>, {"{"} status: <span class="num">429</span> {"}"})
+    {"}"}
+
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'OK'</span>)
+  {"}"}
+{"}"})</code></pre>
+  </div>
+
+  <h3>Store Error Handling</h3>
+
+  <p>Control behavior when the store is unavailable:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">redisStore</span>({"{"} url: <span class="str">'redis://localhost:6379'</span> {"}"}),
+  <span class="fn">onStoreError</span>(error, req) {"{"}
+    console.<span class="fn">error</span>(<span class="str">'Store error:'</span>, error.message)
+    <span class="kw">return</span> <span class="str">'allow'</span>  <span class="cm">// fail open — or 'deny' to fail closed</span>
+  {"}"}
+{"}"})</code></pre>
+  </div>
+</DocsLayout>
+
+<style>
+  .options-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .options-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .options-table tr:last-child td { border-bottom: none; }
+  .options-table code { background: var(--color-bg-elevated); color: var(--color-accent); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; }
+  .code-block { margin: 1.5rem 0; border-radius: 1rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); background: var(--color-bg-elevated); }
+  .code-dots { display: flex; gap: 0.5rem; }
+  .dot { width: 0.75rem; height: 0.75rem; border-radius: 50%; }
+  .dot.red { background: rgba(239, 68, 68, 0.8); }
+  .dot.yellow { background: rgba(234, 179, 8, 0.8); }
+  .dot.green { background: rgba(34, 197, 94, 0.8); }
+  .code-filename { margin-left: 1rem; font-size: 0.75rem; color: var(--color-text-muted); font-family: var(--font-mono); }
+  .code-block pre { padding: 1.5rem; margin: 0; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; }
+  .str { color: #a6e22e; }
+  .num { color: #fd971f; }
+  .fn { color: #66d9ef; }
+  .cm { color: #75715e; }
+</style>

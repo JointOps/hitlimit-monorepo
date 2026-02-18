@@ -1,12 +1,12 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
-import Tabs from '../../../components/Tabs.astro';
+import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 ---
 
 <DocsLayout
-  title="SQLite Store - hitlimit | Persistent Rate Limiting with better-sqlite3"
-  description="Persistent rate limiting with SQLite. Data survives restarts, no external dependencies, WAL mode for performance. Perfect for single-server production deployments."
-  keywords="sqlite rate limit, better-sqlite3 rate limiter, persistent rate limiting, local database rate limit, serverless rate limit, edge rate limiting, sqlite3 nodejs"
+  title="SQLite Store - hitlimit | Persistent Rate Limiting with SQLite"
+  description="Persistent rate limiting with SQLite. Data survives restarts, WAL mode for performance. better-sqlite3 on Node.js, native bun:sqlite on Bun. Perfect for single-server production deployments."
+  keywords="sqlite rate limit, better-sqlite3 rate limiter, bun:sqlite rate limit, persistent rate limiting, local database rate limit, serverless rate limit"
 >
   <h1>SQLite Store</h1>
 
@@ -14,71 +14,98 @@ import Tabs from '../../../components/Tabs.astro';
 
   <h2 id="installation">Installation</h2>
 
-  <p>The SQLite store requires <code>better-sqlite3</code> as a peer dependency:</p>
+  <div data-runtime-content="node">
+    <p>The SQLite store requires <code>better-sqlite3</code> as a peer dependency:</p>
 
-  <Tabs
-    tabs={[
-      { label: 'npm', content: 'npm install better-sqlite3' },
-      { label: 'pnpm', content: 'pnpm add better-sqlite3' },
-      { label: 'yarn', content: 'yarn add better-sqlite3' },
-      { label: 'bun', content: 'bun add better-sqlite3' },
-    ]}
-  />
+    <div class="code-block">
+      <pre><code>npm install better-sqlite3
+<span class="cm"># or: pnpm add better-sqlite3</span>
+<span class="cm"># or: yarn add better-sqlite3</span></code></pre>
+    </div>
+  </div>
+
+  <div data-runtime-content="bun">
+    <p>
+      No installation needed! Bun includes <code>bun:sqlite</code> natively. There are no peer dependencies
+      to install — just import and use.
+    </p>
+  </div>
 
   <h2 id="usage">Usage</h2>
 
-  <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
-<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/sqlite'</span>
-
-app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">100</span>,
-  window: <span class="str">'1m'</span>,
-  store: <span class="fn">sqliteStore</span>({"{"}
-    path: <span class="str">'./rate-limits.db'</span>
-  {"}"})
-{"}"}))</code></pre>
-  </div>
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/sqlite&#39;</span>\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">sqliteStore</span>({"{"}\n    path: <span class="str">&#39;./rate-limits.db&#39;</span>\n  {"}"})\n{"}"}))'
+    bun='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/sqlite&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">sqliteStore</span>({"{"}\n    path: <span class="str">&#39;./rate-limits.db&#39;</span>\n  {"}"})\n{"}"})'
+  />
 
   <h2 id="options">Options</h2>
 
-  <table class="options-table">
-    <thead>
-      <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><code>path</code></td><td>string</td><td>':memory:'</td><td>Path to SQLite database file</td></tr>
-      <tr><td><code>tableName</code></td><td>string</td><td>'hitlimit'</td><td>Name of the rate limit table</td></tr>
-      <tr><td><code>cleanupInterval</code></td><td>number</td><td>60000</td><td>Interval (ms) to clean expired entries</td></tr>
-    </tbody>
-  </table>
+  <div data-runtime-content="node">
+    <table class="options-table">
+      <thead>
+        <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>path</code></td><td>string</td><td>':memory:'</td><td>Path to SQLite database file</td></tr>
+        <tr><td><code>tableName</code></td><td>string</td><td>'hitlimit'</td><td>Name of the rate limit table</td></tr>
+        <tr><td><code>cleanupInterval</code></td><td>number</td><td>60000</td><td>Interval (ms) to clean expired entries</td></tr>
+      </tbody>
+    </table>
 
-  <h2 id="example-with-all-options">Full Configuration</h2>
+    <h3 id="full-config">Full Configuration</h3>
 
-  <div class="code-block">
-    <pre><code><span class="fn">sqliteStore</span>({"{"}
+    <div class="code-block">
+      <pre><code><span class="fn">sqliteStore</span>({"{"}
   path: <span class="str">'./data/rate-limits.db'</span>,
   tableName: <span class="str">'api_limits'</span>,
   cleanupInterval: <span class="num">300000</span>  <span class="cm">// Clean every 5 minutes</span>
 {"}"})</code></pre>
+    </div>
+  </div>
+
+  <div data-runtime-content="bun">
+    <table class="options-table">
+      <thead>
+        <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>path</code></td><td>string</td><td>':memory:'</td><td>Path to SQLite database file. Use <code>':memory:'</code> for in-memory storage.</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      The Bun SQLite store keeps the API minimal — only the <code>path</code> option is exposed.
+      Table creation, cleanup, and WAL mode are all handled internally.
+    </p>
   </div>
 
   <h2 id="characteristics">Characteristics</h2>
 
-  <ul>
-    <li><strong>Speed:</strong> Fast - local file I/O with WAL mode</li>
-    <li><strong>Persistence:</strong> Data survives restarts</li>
-    <li><strong>Scalability:</strong> Single server only</li>
-    <li><strong>Dependencies:</strong> Requires <code>better-sqlite3</code></li>
-  </ul>
+  <div data-runtime-content="node">
+    <ul>
+      <li><strong>Speed:</strong> Fast — local file I/O with WAL mode (~280K ops/sec)</li>
+      <li><strong>Persistence:</strong> Data survives restarts</li>
+      <li><strong>Scalability:</strong> Single server only</li>
+      <li><strong>Dependencies:</strong> Requires <code>better-sqlite3</code></li>
+    </ul>
+  </div>
+
+  <div data-runtime-content="bun">
+    <ul>
+      <li><strong>Speed:</strong> 383K ops/sec (~2.6&micro;s latency) — near-memory performance</li>
+      <li><strong>Zero dependencies:</strong> Uses native <code>bun:sqlite</code>, no packages to install</li>
+      <li><strong>WAL mode:</strong> Write-Ahead Logging enabled automatically for concurrent read/write performance</li>
+      <li><strong>Synchronous operations:</strong> Uses <code>isSync = true</code> for maximum Bun performance</li>
+    </ul>
+  </div>
 
   <h2 id="when-to-use">When to Use</h2>
 
   <ul>
     <li>Single-server production deployments</li>
     <li>When rate limits must persist across restarts</li>
+    <li>Edge or embedded environments where Redis is not available</li>
     <li>Serverless functions with persistent storage</li>
-    <li>Edge deployments where Redis is not available</li>
   </ul>
 
   <h2 id="schema">Database Schema</h2>

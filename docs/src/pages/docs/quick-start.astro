@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '../../layouts/DocsLayout.astro';
+import RuntimeBanner from '../../components/RuntimeBanner.astro';
 ---
 
 <DocsLayout
@@ -8,6 +9,12 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
   keywords="rate limit tutorial, api rate limiting guide, express rate limit tutorial, fastify rate limit tutorial, fastify rate limiter setup, hono rate limit tutorial, hono middleware setup, nodejs rate limit example, rate limiter setup, quick start rate limiting, api throttling guide"
 >
   <h1>Quick Start</h1>
+
+  <RuntimeBanner
+    currentRuntime="node"
+    counterpartHref="/docs/bun/quick-start"
+    counterpartLabel="Bun Quick Start"
+  />
 
   <p>Get up and running with hitlimit in under 5 minutes.</p>
 
