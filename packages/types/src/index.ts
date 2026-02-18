@@ -72,11 +72,19 @@ export interface HitLimitStore {
   ban?(key: string, durationMs: number): Promise<void> | void
   /** Record a violation and return the current violation count within the window. */
   recordViolation?(key: string, windowMs: number): Promise<number> | number
+  /** Atomic hit + ban check in a single round-trip. Stores that support this avoid multiple round-trips. */
+  hitWithBan?(key: string, windowMs: number, limit: number, banThreshold: number, banDurationMs: number): Promise<HitWithBanResult>
 }
 
 export interface StoreResult {
   count: number
   resetAt: number
+}
+
+export interface HitWithBanResult extends StoreResult {
+  banned: boolean
+  violations: number
+  banExpiresAt: number
 }
 
 export interface HitLimitLogger {
