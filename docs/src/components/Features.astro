@@ -2,8 +2,8 @@
 const features = [
   {
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    title: 'Blazing Fast',
-    description: '5M+ ops/sec with memory store on Bun (10K IPs). Sub-millisecond latency. Zero runtime dependencies.',
+    title: 'Every Runtime',
+    description: 'First-class support for Node.js (3.2M ops/sec) and Bun (5.6M ops/sec). Same API, same config. One library for every JavaScript runtime.',
     color: 'cyan',
   },
   {
@@ -26,8 +26,8 @@ const features = [
   },
   {
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`,
-    title: 'Every Framework',
-    description: 'Express, Fastify, Hono, NestJS, Node.js HTTP, Bun.serve, Elysia. One API that works everywhere you do.',
+    title: '8 Framework Adapters',
+    description: 'Express, Fastify, Hono, NestJS, Node.js HTTP, Bun.serve, Elysia. Built-in adapters that work out of the box.',
     color: 'cyan',
   },
   {
@@ -42,7 +42,7 @@ const features = [
 <section class="py-24 px-4">
   <div class="max-w-7xl mx-auto">
     <!-- Section header -->
-    <div class="text-center mb-16">
+    <div class="text-center mb-16 reveal">
       <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
         Everything you need to <span class="gradient-text">protect your APIs</span>
       </h2>
@@ -52,9 +52,9 @@ const features = [
     </div>
 
     <!-- Features grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 reveal-stagger">
       {features.map((feature, i) => (
-        <div class={`group relative p-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] transition-all duration-500 hover:border-${feature.color === 'cyan' ? '[rgba(0,229,255,0.3)]' : '[rgba(168,85,247,0.3)]'} hover:-translate-y-2 hover:shadow-2xl`}>
+        <div class={`reveal-child group relative p-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] transition-all duration-500 hover:border-${feature.color === 'cyan' ? '[rgba(0,229,255,0.3)]' : '[rgba(168,85,247,0.3)]'} hover:-translate-y-2 hover:shadow-2xl`}>
           <!-- Gradient background on hover -->
           <div class={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.color === 'cyan' ? 'from-[rgba(0,229,255,0.1)]' : 'from-[rgba(168,85,247,0.1)]'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
 

@@ -1,36 +1,47 @@
 ---
 // Real benchmarks from benchmarks/results/bun-latest.md & node-latest.md
 const stats = [
-  { value: '5M+', label: 'ops/sec', sublabel: 'Bun memory (10K IPs)' },
-  { value: '<1ms', label: 'Latency', sublabel: 'p95 response time' },
-  { value: '0', label: 'Dependencies', sublabel: 'for core module' },
-  { value: '100%', label: 'TypeScript', sublabel: 'fully typed' },
+  { numericValue: 3.2, decimals: 1, suffix: 'M+', label: 'ops/sec', sublabel: 'Node.js (10K IPs)' },
+  { numericValue: 5.6, decimals: 1, suffix: 'M+', label: 'ops/sec', sublabel: 'Bun (10K IPs)' },
+  { numericValue: 1, decimals: 0, prefix: '<', suffix: 'ms', label: 'Latency', sublabel: 'p95 response time' },
+  { numericValue: 0, decimals: 0, suffix: '', label: 'Dependencies', sublabel: 'for core module' },
 ];
 
-// Real benchmarks - Bun v1.1.2 numbers (10K IPs) from benchmarks/results/bun-latest.md
+// Real benchmarks from benchmarks/results/ (10K IPs scenario)
 const benchmarks = [
-  { store: 'Memory', throughput: '5.62M', latency: '~178ns', note: 'Fastest for high-traffic', color: 'cyan' },
-  { store: 'SQLite', throughput: '383K', latency: '~2.6μs', note: 'Persistent storage', color: 'purple' },
-  { store: 'Redis', throughput: '6.6K', latency: '~152μs', note: 'Distributed systems', color: 'cyan' },
+  { store: 'Memory', nodeOps: '3.2M', bunOps: '5.6M', nodeLatency: '~308ns', bunLatency: '~178ns', note: 'Highest throughput', color: 'cyan' },
+  { store: 'SQLite', nodeOps: '401K', bunOps: '377K', nodeLatency: '~2.5μs', bunLatency: '~2.6μs', note: 'Persistent storage', color: 'purple' },
+  { store: 'Redis', nodeOps: '6.8K', bunOps: '6.7K', nodeLatency: '~147μs', bunLatency: '~149μs', note: 'Distributed', color: 'cyan' },
 ];
 ---
 
-<section class="py-24 px-4 border-t border-[var(--color-border)]">
+<section class="py-24 px-4 section-divider">
   <div class="max-w-7xl mx-auto">
-    <!-- Stats -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-24">
-      {stats.map((stat) => (
-        <div class="text-center">
-          <div class="text-4xl sm:text-5xl font-black gradient-text mb-2">{stat.value}</div>
-          <div class="text-lg font-semibold text-white mb-1">{stat.label}</div>
-          <div class="text-sm text-[var(--color-text-muted)]">{stat.sublabel}</div>
-        </div>
-      ))}
+    <!-- Stats counters in glass panel -->
+    <div class="relative rounded-3xl border border-[var(--color-border)] bg-white/[0.02] backdrop-blur-sm p-8 sm:p-12 mb-24 overflow-hidden reveal-scale">
+      <div class="absolute inset-0 rounded-3xl bg-gradient-to-br from-[var(--color-accent)]/5 to-[var(--color-accent-secondary)]/5 pointer-events-none"></div>
+      <div class="relative grid grid-cols-2 lg:grid-cols-4 gap-8" id="stat-counters">
+        {stats.map((stat) => (
+          <div class="text-center">
+            <div
+              class="text-4xl sm:text-5xl lg:text-6xl font-black gradient-text mb-2 stat-counter"
+              data-target={stat.numericValue}
+              data-prefix={stat.prefix || ''}
+              data-suffix={stat.suffix}
+              data-decimals={stat.decimals}
+            >
+              {stat.prefix || ''}{stat.numericValue === 0 ? '0' : (stat.decimals ? '0.0' : '0')}{stat.suffix}
+            </div>
+            <div class="text-lg font-semibold text-white mb-1">{stat.label}</div>
+            <div class="text-sm text-[var(--color-text-muted)]">{stat.sublabel}</div>
+          </div>
+        ))}
+      </div>
     </div>
 
     <!-- Benchmark section -->
     <div class="max-w-4xl mx-auto">
-      <div class="text-center mb-12">
+      <div class="text-center mb-12 reveal">
         <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
           Real <span class="gradient-text">benchmarks</span>
         </h2>
@@ -40,39 +51,120 @@ const benchmarks = [
       </div>
 
       <!-- Benchmark table -->
-      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] overflow-hidden">
-        <!-- Header -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 sm:p-6 bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
-          <div class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Store</div>
-          <div class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider text-center">Throughput</div>
-          <div class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider text-center">Latency</div>
-          <div class="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider text-right">Best For</div>
+      <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] overflow-hidden reveal">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[600px]">
+            <thead>
+              <tr class="bg-[var(--color-bg-elevated)] border-b border-[var(--color-border)]">
+                <th class="text-left p-4 sm:p-6 text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Store</th>
+                <th class="text-center p-4 sm:p-6 text-sm font-semibold uppercase tracking-wider">
+                  <span class="flex items-center justify-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-[var(--color-runtime-node)]" viewBox="0 0 24 24" fill="currentColor"><path d="M11.998 24c-.321 0-.641-.084-.922-.247l-2.936-1.737c-.438-.245-.224-.332-.08-.383.585-.203.703-.25 1.328-.604.065-.037.151-.023.218.017l2.256 1.339c.082.045.197.045.272 0l8.795-5.076c.082-.047.134-.141.134-.238V6.921c0-.099-.053-.192-.137-.242l-8.791-5.072c-.081-.047-.189-.047-.271 0L3.075 6.68c-.084.049-.137.142-.137.24v10.15c0 .097.054.189.139.235l2.409 1.392c1.307.654 2.108-.116 2.108-.89V7.787c0-.142.114-.253.256-.253h1.115c.139 0 .255.112.255.253v10.021c0 1.745-.95 2.745-2.604 2.745-.508 0-.909 0-2.026-.551L2.28 18.675c-.57-.329-.922-.945-.922-1.604V6.921c0-.659.353-1.275.922-1.603l8.795-5.082c.557-.315 1.296-.315 1.848 0l8.794 5.082c.57.329.924.944.924 1.603v10.15c0 .659-.354 1.273-.924 1.604l-8.794 5.078C12.643 23.916 12.324 24 11.998 24z"/></svg>
+                    <span class="text-[var(--color-runtime-node)]">Node.js</span>
+                  </span>
+                </th>
+                <th class="text-center p-4 sm:p-6 text-sm font-semibold uppercase tracking-wider">
+                  <span class="flex items-center justify-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-[var(--color-runtime-bun)]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22.596c6.628 0 12-4.338 12-9.688 0-3.318-2.057-6.248-5.219-7.986-1.286-.715-2.297-1.357-3.139-1.89C14.058 2.025 13.08 1.404 12 1.404c-1.097 0-2.334.785-3.966 1.821a49.92 49.92 0 0 1-2.816 1.697C2.057 6.66 0 9.59 0 12.908c0 5.35 5.372 9.687 12 9.687v.001Z"/></svg>
+                    <span class="text-[var(--color-runtime-bun)]">Bun</span>
+                  </span>
+                </th>
+                <th class="text-right p-4 sm:p-6 text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Best For</th>
+              </tr>
+            </thead>
+            <tbody>
+              {benchmarks.map((bench, i) => (
+                <tr class={`${i !== benchmarks.length - 1 ? 'border-b border-[var(--color-border)]' : ''} transition-colors duration-200 hover:bg-[var(--color-bg-elevated)]`}>
+                  <td class="p-4 sm:p-6">
+                    <div class="flex items-center gap-3">
+                      <div class={`w-3 h-3 rounded-full ${bench.color === 'cyan' ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-accent-secondary)]'}`}></div>
+                      <span class="font-medium text-white">{bench.store}</span>
+                    </div>
+                  </td>
+                  <td class="p-4 sm:p-6 text-center">
+                    <span class="font-mono font-bold text-white">{bench.nodeOps}</span>
+                    <span class="text-[var(--color-text-muted)]"> ops/s</span>
+                  </td>
+                  <td class="p-4 sm:p-6 text-center">
+                    <span class="font-mono font-bold text-white">{bench.bunOps}</span>
+                    <span class="text-[var(--color-text-muted)]"> ops/s</span>
+                  </td>
+                  <td class="p-4 sm:p-6 text-right text-sm text-[var(--color-text-muted)]">
+                    {bench.note}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-
-        <!-- Rows -->
-        {benchmarks.map((bench, i) => (
-          <div class={`grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 sm:p-6 ${i !== benchmarks.length - 1 ? 'border-b border-[var(--color-border)]' : ''} transition-colors duration-200 hover:bg-[var(--color-bg-elevated)]`}>
-            <div class="flex items-center gap-3">
-              <div class={`w-3 h-3 rounded-full ${bench.color === 'cyan' ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-accent-secondary)]'}`}></div>
-              <span class="font-medium text-white">{bench.store}</span>
-            </div>
-            <div class="text-center">
-              <span class="font-mono font-bold text-white">{bench.throughput}</span>
-              <span class="text-[var(--color-text-muted)]"> ops/s</span>
-            </div>
-            <div class="text-center">
-              <span class="font-mono font-bold text-white">{bench.latency}</span>
-            </div>
-            <div class="text-right text-sm text-[var(--color-text-muted)]">
-              {bench.note}
-            </div>
-          </div>
-        ))}
       </div>
 
       <p class="text-center text-sm text-[var(--color-text-muted)] mt-4">
-        Benchmarks from Bun v1.3.7 on Apple M2. Redis throughput is network-bound. Memory and SQLite run in-process.
+        10K unique IPs. Node.js v24 / Bun v1.3.7, Apple M2. Redis is network-bound. <a href="/docs/benchmarks" class="text-[var(--color-accent)] hover:underline">Full results →</a>
       </p>
     </div>
   </div>
 </section>
+
+<script>
+  function initStatCounters() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const counters = document.querySelectorAll('.stat-counter');
+    if (!counters.length) return;
+
+    let hasAnimated = false;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            hasAnimated = true;
+            counters.forEach((el) => animateCounter(el as HTMLElement));
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+
+    const grid = document.getElementById('stat-counters');
+    if (grid) observer.observe(grid);
+
+    function easeOutExpo(t: number): number {
+      return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+    }
+
+    function animateCounter(el: HTMLElement) {
+      const target = parseFloat(el.dataset.target || '0');
+      const prefix = el.dataset.prefix || '';
+      const suffix = el.dataset.suffix || '';
+      const decimals = parseInt(el.dataset.decimals || '0', 10);
+      const duration = 2000;
+      const startTime = performance.now();
+
+      if (target === 0) {
+        el.textContent = prefix + '0' + suffix;
+        return;
+      }
+
+      function update(currentTime: number) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easedProgress = easeOutExpo(progress);
+        const currentValue = easedProgress * target;
+
+        el.textContent = prefix + currentValue.toFixed(decimals) + suffix;
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+  }
+
+  initStatCounters();
+  document.addEventListener('astro:after-swap', initStatCounters);
+</script>

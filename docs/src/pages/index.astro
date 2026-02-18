@@ -1,24 +1,24 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
-import Features from '../components/Features.astro';
-import CodeComparison from '../components/CodeComparison.astro';
-import ComparisonTable from '../components/ComparisonTable.astro';
+import RuntimeCards from '../components/RuntimeCards.astro';
 import Stats from '../components/Stats.astro';
+import CodeComparison from '../components/CodeComparison.astro';
+import Features from '../components/Features.astro';
+import ComparisonTable from '../components/ComparisonTable.astro';
 import UseCases from '../components/UseCases.astro';
-import CTA from '../components/CTA.astro';
 ---
 
 <BaseLayout
   title="hitlimit - Fastest Rate Limiter for Node.js & Bun | Express, Fastify, Hono, NestJS | express-rate-limit Alternative"
-  description="High-performance rate limiting middleware for Express, Fastify, Hono, NestJS, Bun & Elysia. 2x faster than express-rate-limit, smaller bundle (~6KB Node.js / ~18KB Bun). Tiered limits, Redis/SQLite stores, zero config. The modern alternative to express-rate-limit, @fastify/rate-limit, hono-rate-limiter, and rate-limiter-flexible."
+  description="High-performance rate limiting middleware for Express, Fastify, Hono, NestJS, Bun & Elysia. 3x faster than express-rate-limit in high-traffic scenarios. Zero dependencies, tiered limits, Redis/SQLite stores, zero config. The modern alternative to express-rate-limit, @fastify/rate-limit, hono-rate-limiter, and rate-limiter-flexible."
   keywords="rate limit, rate limiter, express-rate-limit alternative, @fastify/rate-limit alternative, hono-rate-limiter alternative, fastify rate limit, fastify rate limiter, fastify plugin, hono rate limit, hono rate limiter, hono middleware, rate-limiter-flexible alternative, nodejs rate limit, bun rate limit, express rate limit, nestjs throttler, elysia rate limit, api rate limiting, ddos protection, brute force protection"
 >
   <Hero />
-  <Features />
-  <CodeComparison />
-  <ComparisonTable />
+  <RuntimeCards />
   <Stats />
+  <CodeComparison />
+  <Features />
+  <ComparisonTable />
   <UseCases />
-  <CTA />
 </BaseLayout>

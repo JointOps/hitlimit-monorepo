@@ -5,30 +5,29 @@
   <div class="max-w-7xl mx-auto">
     <div class="text-center max-w-4xl mx-auto">
       <!-- Badge -->
-      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[var(--color-border)] bg-[var(--color-bg-surface)] mb-8 animate-fade-in">
+      <a href="https://github.com/JointOps/hitlimit-monorepo/releases" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[var(--color-border)] bg-[var(--color-bg-surface)] mb-8 animate-fade-in hover:border-[var(--color-border-hover)] hover:bg-white/5 transition-all duration-300 no-underline">
         <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-        <span class="text-sm text-[var(--color-text-secondary)]">v1.1.0 — Memory-first + Hono</span>
+        <span class="text-sm text-[var(--color-text-secondary)]">v1.1.3 — One library, every runtime</span>
         <svg class="w-4 h-4 text-[var(--color-text-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-      </div>
+      </a>
 
       <!-- Heading -->
       <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight mb-6 animate-fade-in-up">
         <span class="block">The fastest way</span>
-        <span class="block gradient-text animate-gradient">to say no</span>
+        <span class="block gradient-text animate-gradient">to rate limit</span>
       </h1>
 
       <!-- Subheading -->
       <p class="text-lg sm:text-xl text-[var(--color-text-secondary)] max-w-2xl mx-auto mb-10 animate-fade-in-up animation-delay-100">
-        Lightning-fast rate limiting for Express, Fastify, Hono, NestJS, Bun & Elysia.
-        Protect your APIs with <span class="text-white font-medium">sub-millisecond</span> performance.
+        One library for Node.js and Bun. Express, Fastify, Hono, NestJS, Bun.serve, Elysia. <span class="text-white font-medium">Sub-millisecond</span> performance, zero dependencies.
       </p>
 
       <!-- CTA Buttons -->
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-fade-in-up animation-delay-200">
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6 animate-fade-in-up animation-delay-200">
         <a
-          href="/docs/quick-start"
+          href="/docs"
           class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-secondary)] text-black font-semibold text-lg transition-all duration-300 hover:shadow-[0_0_40px_rgba(0,229,255,0.5)] hover:-translate-y-1 flex items-center justify-center gap-2"
         >
           Get Started
@@ -49,32 +48,101 @@
         </a>
       </div>
 
-      <!-- Code Preview -->
+      <!-- Trust signals -->
+      <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-[var(--color-text-muted)] mb-16 animate-fade-in-up animation-delay-200">
+        <span class="flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          MIT License
+        </span>
+        <span class="w-1 h-1 rounded-full bg-[var(--color-text-muted)] hidden sm:block"></span>
+        <span>TypeScript-first</span>
+        <span class="w-1 h-1 rounded-full bg-[var(--color-text-muted)] hidden sm:block"></span>
+        <span>Zero dependencies</span>
+      </div>
+
+      <!-- Code Preview with Runtime Tabs -->
       <div class="relative max-w-3xl mx-auto animate-fade-in-up animation-delay-300">
         <!-- Glow effect behind code block -->
         <div class="absolute -inset-4 bg-gradient-to-r from-[var(--color-accent)]/20 to-[var(--color-accent-secondary)]/20 rounded-3xl blur-2xl opacity-50 animate-pulse-glow"></div>
 
         <div class="relative rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-surface)] overflow-hidden shadow-2xl">
-          <!-- Window controls -->
-          <div class="flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
-            <div class="flex gap-2">
-              <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
-              <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-              <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+          <!-- Window controls + Runtime tabs -->
+          <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
+            <div class="flex items-center gap-2">
+              <div class="flex gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+              </div>
             </div>
-            <span class="ml-4 text-xs text-[var(--color-text-muted)] font-mono">index.ts</span>
+            <!-- Runtime toggle tabs -->
+            <div class="flex items-center gap-1 p-1 rounded-lg bg-white/5 border border-[var(--color-border)]" id="hero-runtime-tabs">
+              <button data-hero-tab="node" class="hero-tab-btn active flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M11.998 24c-.321 0-.641-.084-.922-.247l-2.936-1.737c-.438-.245-.224-.332-.08-.383.585-.203.703-.25 1.328-.604.065-.037.151-.023.218.017l2.256 1.339c.082.045.197.045.272 0l8.795-5.076c.082-.047.134-.141.134-.238V6.921c0-.099-.053-.192-.137-.242l-8.791-5.072c-.081-.047-.189-.047-.271 0L3.075 6.68c-.084.049-.137.142-.137.24v10.15c0 .097.054.189.139.235l2.409 1.392c1.307.654 2.108-.116 2.108-.89V7.787c0-.142.114-.253.256-.253h1.115c.139 0 .255.112.255.253v10.021c0 1.745-.95 2.745-2.604 2.745-.508 0-.909 0-2.026-.551L2.28 18.675c-.57-.329-.922-.945-.922-1.604V6.921c0-.659.353-1.275.922-1.603l8.795-5.082c.557-.315 1.296-.315 1.848 0l8.794 5.082c.57.329.924.944.924 1.603v10.15c0 .659-.354 1.273-.924 1.604l-8.794 5.078C12.643 23.916 12.324 24 11.998 24zM19.099 13.993c0-1.9-1.284-2.406-3.987-2.763-2.731-.361-3.009-.548-3.009-1.187 0-.528.235-1.233 2.258-1.233 1.807 0 2.473.389 2.747 1.607.024.115.129.199.247.199h1.141c.071 0 .138-.031.186-.081.048-.054.074-.123.067-.196-.177-2.098-1.571-3.076-4.388-3.076-2.508 0-4.004 1.058-4.004 2.833 0 1.925 1.488 2.457 3.895 2.695 2.88.282 3.103.703 3.103 1.269 0 .983-.789 1.402-2.642 1.402-2.327 0-2.839-.584-3.011-1.742-.02-.124-.126-.215-.253-.215h-1.137c-.141 0-.254.112-.254.253 0 1.482.806 3.248 4.655 3.248 2.855 0 4.453-1.097 4.453-2.98z"/></svg>
+                Node.js
+              </button>
+              <button data-hero-tab="bun" class="hero-tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22.596c6.628 0 12-4.338 12-9.688 0-3.318-2.057-6.248-5.219-7.986-1.286-.715-2.297-1.357-3.139-1.89C14.058 2.025 13.08 1.404 12 1.404c-1.097 0-2.334.785-3.966 1.821a49.92 49.92 0 0 1-2.816 1.697C2.057 6.66 0 9.59 0 12.908c0 5.35 5.372 9.687 12 9.687v.001ZM10.599 4.715c.334-.759.503-1.58.498-2.409 0-.145.202-.187.23-.029.658 2.783-.902 4.162-2.057 4.624-.124.048-.199-.121-.103-.209a5.763 5.763 0 0 0 1.432-1.977Zm2.058-.102a5.82 5.82 0 0 0-.782-2.306v-.016c-.069-.123.086-.263.185-.172 1.962 2.111 1.307 4.067.556 5.051-.082.103-.23-.003-.189-.126a5.85 5.85 0 0 0 .23-2.431Zm1.776-.561a5.727 5.727 0 0 0-1.612-1.806v-.014c-.112-.085-.024-.274.114-.218 2.595 1.087 2.774 3.18 2.459 4.407a.116.116 0 0 1-.049.071.11.11 0 0 1-.153-.026.122.122 0 0 1-.022-.083 5.891 5.891 0 0 0-.737-2.331Zm-5.087.561c-.617.546-1.282.76-2.063 1-.117 0-.195-.078-.156-.181 1.752-.909 2.376-1.649 2.999-2.778 0 0 .155-.118.188.085 0 .304-.349 1.329-.968 1.874Zm4.945 11.237a2.957 2.957 0 0 1-.937 1.553c-.346.346-.8.565-1.286.62a2.178 2.178 0 0 1-1.327-.62 2.955 2.955 0 0 1-.925-1.553.244.244 0 0 1 .064-.198.234.234 0 0 1 .193-.069h3.965a.226.226 0 0 1 .19.07c.05.053.073.125.063.197Zm-5.458-2.176a1.862 1.862 0 0 1-2.384-.245 1.98 1.98 0 0 1-.233-2.447c.207-.319.503-.566.848-.713a1.84 1.84 0 0 1 1.092-.11c.366.075.703.261.967.531a1.98 1.98 0 0 1 .408 2.114 1.931 1.931 0 0 1-.698.869v.001Zm8.495.005a1.86 1.86 0 0 1-2.381-.253 1.964 1.964 0 0 1-.547-1.366c0-.384.11-.76.32-1.079.207-.319.503-.567.849-.713a1.844 1.844 0 0 1 1.093-.108c.367.076.704.262.968.534a1.98 1.98 0 0 1 .4 2.117 1.932 1.932 0 0 1-.702.868Z"/></svg>
+                Bun
+              </button>
+            </div>
+            <span class="text-xs text-[var(--color-text-muted)] font-mono">server.ts</span>
           </div>
 
-          <!-- Code content -->
-          <div class="p-6 font-mono text-sm text-left overflow-x-auto">
+          <!-- Node.js code -->
+          <div id="hero-code-node" class="hero-code-panel p-6 font-mono text-sm text-left overflow-x-auto">
             <pre class="code-text"><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+<span class="kw">import</span> express <span class="kw">from</span> <span class="str">'express'</span>
 
-<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+<span class="kw">const</span> app = <span class="fn">express</span>()
+
+app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
   window: <span class="str">'1m'</span>
-{"}"})
+{"}"})) <span class="cm">// That's it!</span></code></pre>
+          </div>
 
-app.<span class="fn">use</span>(limiter) <span class="cm">// That's it!</span></code></pre>
+          <!-- Bun code -->
+          <div id="hero-code-bun" class="hero-code-panel hidden p-6 font-mono text-sm text-left overflow-x-auto">
+            <pre class="code-text"><code><span class="kw">import</span> {"{"} <span class="fn">Elysia</span> {"}"} <span class="kw">from</span> <span class="str">'elysia'</span>
+<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/elysia'</span>
+
+<span class="kw">new</span> <span class="fn">Elysia</span>()
+  .<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+    limit: <span class="num">100</span>,
+    window: <span class="str">'1m'</span>
+  {"}"}))
+  .<span class="fn">get</span>(<span class="str">'/'</span>, () => <span class="str">'Hello!'</span>)
+  .<span class="fn">listen</span>(<span class="num">3000</span>) <span class="cm">// That's it!</span></code></pre>
+          </div>
+
+          <!-- Install bar -->
+          <div class="flex items-center gap-3 px-4 py-3 border-t border-[var(--color-border)] bg-[var(--color-bg-elevated)]">
+            <div class="flex items-center gap-1" id="hero-install-tabs">
+              <button data-install-tab="npm" class="install-tab-btn active text-[10px] px-2 py-0.5 rounded font-semibold transition-all duration-200">npm</button>
+              <button data-install-tab="pnpm" class="install-tab-btn text-[10px] px-2 py-0.5 rounded font-semibold transition-all duration-200">pnpm</button>
+              <button data-install-tab="yarn" class="install-tab-btn text-[10px] px-2 py-0.5 rounded font-semibold transition-all duration-200">yarn</button>
+              <button data-install-tab="bun" class="install-tab-btn text-[10px] px-2 py-0.5 rounded font-semibold transition-all duration-200">bun</button>
+            </div>
+            <div class="flex-1 flex items-center gap-2 font-mono text-sm">
+              <span class="text-[var(--color-text-muted)]">$</span>
+              <code id="hero-install-command" class="text-[var(--color-text-secondary)]">npm i @joint-ops/hitlimit</code>
+            </div>
+            <button
+              id="hero-copy-btn"
+              class="flex-shrink-0 p-1.5 rounded-md hover:bg-white/10 text-[var(--color-text-muted)] hover:text-white transition-all duration-200"
+              aria-label="Copy install command"
+            >
+              <svg id="hero-copy-icon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <svg id="hero-check-icon" class="w-4 h-4 hidden text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -131,4 +199,106 @@ app.<span class="fn">use</span>(limiter) <span class="cm">// That's it!</span></
   .num { color: #fd971f; }
   .fn { color: #66d9ef; }
   .cm { color: #71717a; }
+
+  .hero-tab-btn {
+    color: var(--color-text-muted);
+  }
+  .hero-tab-btn.active[data-hero-tab="node"] {
+    background: var(--color-runtime-node-bg);
+    color: var(--color-runtime-node);
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.15);
+  }
+  .hero-tab-btn.active[data-hero-tab="bun"] {
+    background: var(--color-runtime-bun-bg);
+    color: var(--color-runtime-bun);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+  }
+  .hero-tab-btn:hover:not(.active) {
+    color: var(--color-text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .install-tab-btn {
+    color: var(--color-text-muted);
+    background: transparent;
+  }
+  .install-tab-btn.active {
+    color: var(--color-accent);
+    background: rgba(0, 229, 255, 0.1);
+  }
+  .install-tab-btn:hover:not(.active) {
+    color: var(--color-text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+  }
 </style>
+
+<script>
+  function initHeroTabs() {
+    const tabs = document.querySelectorAll('.hero-tab-btn');
+    const nodePanel = document.getElementById('hero-code-node');
+    const bunPanel = document.getElementById('hero-code-bun');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const runtime = tab.getAttribute('data-hero-tab');
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        if (runtime === 'node') {
+          nodePanel?.classList.remove('hidden');
+          bunPanel?.classList.add('hidden');
+        } else {
+          bunPanel?.classList.remove('hidden');
+          nodePanel?.classList.add('hidden');
+        }
+      });
+    });
+  }
+
+  function initInstallBar() {
+    const commands: Record<string, string> = {
+      npm: 'npm i @joint-ops/hitlimit',
+      pnpm: 'pnpm add @joint-ops/hitlimit',
+      yarn: 'yarn add @joint-ops/hitlimit',
+      bun: 'bun add @joint-ops/hitlimit-bun',
+    };
+
+    const tabs = document.querySelectorAll('#hero-install-tabs .install-tab-btn');
+    const commandEl = document.getElementById('hero-install-command');
+    const copyBtn = document.getElementById('hero-copy-btn');
+    const copyIcon = document.getElementById('hero-copy-icon');
+    const checkIcon = document.getElementById('hero-check-icon');
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const pm = (tab as HTMLElement).dataset.installTab || 'npm';
+        tabs.forEach((t) => t.classList.remove('active'));
+        tab.classList.add('active');
+        if (commandEl) commandEl.textContent = commands[pm] || commands.npm;
+      });
+    });
+
+    copyBtn?.addEventListener('click', async () => {
+      const text = commandEl?.textContent || '';
+      try {
+        await navigator.clipboard.writeText(text);
+        copyIcon?.classList.add('hidden');
+        checkIcon?.classList.remove('hidden');
+        setTimeout(() => {
+          copyIcon?.classList.remove('hidden');
+          checkIcon?.classList.add('hidden');
+        }, 2000);
+      } catch {
+        if (commandEl) {
+          const range = document.createRange();
+          range.selectNodeContents(commandEl);
+          window.getSelection()?.removeAllRanges();
+          window.getSelection()?.addRange(range);
+        }
+      }
+    });
+  }
+
+  initHeroTabs();
+  initInstallBar();
+  document.addEventListener('astro:after-swap', () => { initHeroTabs(); initInstallBar(); });
+</script>
