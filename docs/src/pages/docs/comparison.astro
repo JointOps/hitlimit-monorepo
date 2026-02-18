@@ -11,7 +11,7 @@ const faqSchema = {
       "name": "How fast is hitlimit compared to express-rate-limit?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "hitlimit achieves 3.35M ops/sec vs 1.20M for express-rate-limit in high-traffic scenarios (10k unique IPs), making it nearly 3x faster. hitlimit is also 1.26x faster than rate-limiter-flexible on single-IP scenarios."
+        "text": "hitlimit achieves 3.25M ops/sec vs 957K for express-rate-limit in high-traffic scenarios (10k unique IPs), making it over 3x faster. hitlimit is also 1.3x faster than rate-limiter-flexible on single-IP scenarios."
       }
     },
     {
@@ -19,7 +19,7 @@ const faqSchema = {
       "name": "What is the bundle size of hitlimit?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "hitlimit's Node.js package is approximately 6KB (core entry point), and the Bun package is approximately 18KB (self-contained bundle). Both are the smallest among major rate limiters. Compare to express-rate-limit (~66KB) and rate-limiter-flexible (~155KB)."
+        "text": "hitlimit's Node.js core entry point is approximately 6KB, and the Bun package core entry is approximately 18KB. Both have zero runtime dependencies."
       }
     },
     {
@@ -73,176 +73,113 @@ const faqSchema = {
     This guide provides an honest comparison to help you choose the right tool.
   </p>
 
-  <h2 id="quick-comparison">Quick Comparison</h2>
+  <!-- ===================== NODE.JS COMPARISON ===================== -->
+  <div data-runtime-content="node">
+    <h2 id="quick-comparison">Quick Comparison</h2>
 
-  <div class="comparison-table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>Feature</th>
-          <th class="highlight-col">hitlimit</th>
-          <th>express-rate-limit</th>
-          <th>@fastify/rate-limit</th>
-          <th>rate-limiter-flexible</th>
-          <th>@nestjs/throttler</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Bundle Size</td>
-          <td class="highlight-col good">~6KB</td>
-          <td>~66KB</td>
-          <td>~15KB</td>
-          <td>~155KB</td>
-          <td>~22KB</td>
-        </tr>
-        <tr>
-          <td>Zero Dependencies</td>
-          <td class="highlight-col good">Yes</td>
-          <td>No</td>
-          <td>No (3 deps)</td>
-          <td>No</td>
-          <td>No</td>
-        </tr>
-        <tr>
-          <td>TypeScript</td>
-          <td class="highlight-col good">Native</td>
-          <td>@types</td>
-          <td>Native</td>
-          <td>@types</td>
-          <td>Native</td>
-        </tr>
-        <tr>
-          <td>ESM Support</td>
-          <td class="highlight-col good">Native</td>
-          <td>Yes</td>
-          <td>Yes</td>
-          <td>Yes</td>
-          <td>Yes</td>
-        </tr>
-        <tr>
-          <td>Memory Store (high-traffic)</td>
-          <td class="highlight-col good">3.35M ops/s</td>
-          <td>1.20M ops/s</td>
-          <td>N/A</td>
-          <td>1.58M ops/s</td>
-          <td>N/A</td>
-        </tr>
-        <tr>
-          <td>SQLite Store</td>
-          <td class="highlight-col good">Built-in</td>
-          <td>External</td>
-          <td>No</td>
-          <td>No</td>
-          <td>No</td>
-        </tr>
-        <tr>
-          <td>Redis Store</td>
-          <td class="highlight-col">Built-in</td>
-          <td>External</td>
-          <td>Built-in</td>
-          <td>Built-in</td>
-          <td>External</td>
-        </tr>
-        <tr>
-          <td>Bun Native</td>
-          <td class="highlight-col good">Yes</td>
-          <td>No</td>
-          <td>No</td>
-          <td>No</td>
-          <td>No</td>
-        </tr>
-        <tr>
-          <td>Express</td>
-          <td class="highlight-col good">Yes</td>
-          <td>Yes</td>
-          <td>No</td>
-          <td>Yes</td>
-          <td>Via adapter</td>
-        </tr>
-        <tr>
-          <td>Fastify</td>
-          <td class="highlight-col good">Native</td>
-          <td>No</td>
-          <td class="good">Native</td>
-          <td>Yes</td>
-          <td>No</td>
-        </tr>
-        <tr>
-          <td>NestJS</td>
-          <td class="highlight-col good">Native</td>
-          <td>Via wrapper</td>
-          <td>No</td>
-          <td>Yes</td>
-          <td>Native</td>
-        </tr>
-        <tr>
-          <td>Elysia</td>
-          <td class="highlight-col good">Native</td>
-          <td>No</td>
-          <td>No</td>
-          <td>No</td>
-          <td>No</td>
-        </tr>
-        <tr>
-          <td>Hono</td>
-          <td class="highlight-col good">Native</td>
-          <td>No</td>
-          <td>No</td>
-          <td>No</td>
-          <td>No</td>
-        </tr>
-        <tr>
-          <td>Human-readable Windows</td>
-          <td class="highlight-col good">'1m', '1h'</td>
-          <td>ms only</td>
-          <td>'1 minute'</td>
-          <td>seconds</td>
-          <td>seconds</td>
-        </tr>
-        <tr>
-          <td>Tiered Limits</td>
-          <td class="highlight-col good">Built-in</td>
-          <td>Manual</td>
-          <td>Via dynamic max</td>
-          <td>Manual</td>
-          <td>Manual</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <div class="comparison-table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th class="highlight-col">hitlimit</th>
+            <th>express-rate-limit</th>
+            <th>@fastify/rate-limit</th>
+            <th>rate-limiter-flexible</th>
+            <th>@nestjs/throttler</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Zero Dependencies</td>
+            <td class="highlight-col good">Yes</td>
+            <td>1 dep</td>
+            <td>3 deps</td>
+            <td>Yes</td>
+            <td>Peer only</td>
+          </tr>
+          <tr>
+            <td>TypeScript</td>
+            <td class="highlight-col good">Native</td>
+            <td>Native</td>
+            <td>Native</td>
+            <td>Native</td>
+            <td>Native</td>
+          </tr>
+          <tr>
+            <td>Memory Store (high-traffic)</td>
+            <td class="highlight-col good">3.25M ops/s</td>
+            <td>957K ops/s</td>
+            <td>N/A</td>
+            <td>1.84M ops/s</td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td>SQLite Store</td>
+            <td class="highlight-col good">Built-in</td>
+            <td>External</td>
+            <td>No</td>
+            <td>No</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>Redis Store</td>
+            <td class="highlight-col">Built-in</td>
+            <td>External</td>
+            <td>Built-in</td>
+            <td>Built-in</td>
+            <td>External</td>
+          </tr>
+          <tr>
+            <td>Human-readable Windows</td>
+            <td class="highlight-col good">'1m', '1h'</td>
+            <td>ms only</td>
+            <td>'1 minute'</td>
+            <td>seconds</td>
+            <td>ms (+ helpers)</td>
+          </tr>
+          <tr>
+            <td>Tiered Limits</td>
+            <td class="highlight-col good">Built-in</td>
+            <td>Manual</td>
+            <td>Via dynamic max</td>
+            <td>Manual</td>
+            <td>Manual</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <h2 id="vs-express-rate-limit">hitlimit vs express-rate-limit</h2>
+    <h2 id="vs-express-rate-limit">hitlimit vs express-rate-limit</h2>
 
-  <p>
-    <strong>express-rate-limit</strong> is the most popular rate limiter with 3M+ weekly downloads.
-    It's a solid choice for basic Express rate limiting.
-  </p>
+    <p>
+      <strong>express-rate-limit</strong> is the most popular rate limiter with 3M+ weekly downloads.
+      It's a solid choice for basic Express rate limiting.
+    </p>
 
-  <div class="comparison-box">
-    <h3>Choose hitlimit if you need:</h3>
-    <ul>
-      <li>Better high-traffic performance (2x faster with many unique IPs)</li>
-      <li>Built-in SQLite support for persistence</li>
-      <li>Human-readable time windows (<code>'1m'</code> vs <code>60000</code>)</li>
-      <li>NestJS native support without wrappers</li>
-      <li>Bun runtime support</li>
-      <li>Smaller bundle size</li>
-    </ul>
+    <div class="comparison-box">
+      <h3>Choose hitlimit if you need:</h3>
+      <ul>
+        <li>Better high-traffic performance (3x faster with many unique IPs)</li>
+        <li>Built-in SQLite support for persistence</li>
+        <li>Human-readable time windows (<code>'1m'</code> vs <code>60000</code>)</li>
+        <li>Multi-framework support (Express, Fastify, NestJS, Hono, Bun)</li>
+        <li>Built-in tiered limits for SaaS</li>
+      </ul>
 
-    <h3>Choose express-rate-limit if you need:</h3>
-    <ul>
-      <li>Battle-tested library with massive community</li>
-      <li>Extensive documentation and examples</li>
-      <li>Wide variety of external stores</li>
-    </ul>
-  </div>
+      <h3>Choose express-rate-limit if you need:</h3>
+      <ul>
+        <li>Battle-tested library with massive community</li>
+        <li>Extensive documentation and examples</li>
+        <li>Wide variety of external stores</li>
+      </ul>
+    </div>
 
-  <h3>Migration from express-rate-limit</h3>
+    <h3>Migration from express-rate-limit</h3>
 
-  <div class="code-block">
-    <div class="code-header"><span class="code-label">Before (express-rate-limit)</span></div>
-    <pre><code><span class="kw">import</span> rateLimit <span class="kw">from</span> <span class="str">'express-rate-limit'</span>
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">Before (express-rate-limit)</span></div>
+      <pre><code><span class="kw">import</span> rateLimit <span class="kw">from</span> <span class="str">'express-rate-limit'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">rateLimit</span>({"{"}
   windowMs: <span class="num">60000</span>,  <span class="cm">// 1 minute in ms</span>
@@ -250,74 +187,73 @@ const faqSchema = {
   standardHeaders: <span class="kw">true</span>,
   legacyHeaders: <span class="kw">false</span>
 {"}"})</code></pre>
-  </div>
+    </div>
 
-  <div class="code-block">
-    <div class="code-header"><span class="code-label">After (hitlimit)</span></div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">After (hitlimit)</span></div>
+      <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
   window: <span class="str">'1m'</span>  <span class="cm">// Human-readable!</span>
 {"}"})</code></pre>
-  </div>
+    </div>
 
-  <h2 id="vs-rate-limiter-flexible">hitlimit vs rate-limiter-flexible</h2>
+    <h2 id="vs-rate-limiter-flexible">hitlimit vs rate-limiter-flexible</h2>
 
-  <p>
-    <strong>rate-limiter-flexible</strong> is a feature-rich library with support for many backends.
-    It's great for complex rate limiting scenarios.
-  </p>
+    <p>
+      <strong>rate-limiter-flexible</strong> is a feature-rich library with support for many backends.
+      It's great for complex rate limiting scenarios.
+    </p>
 
-  <div class="comparison-box">
-    <h3>Choose hitlimit if you need:</h3>
-    <ul>
-      <li>Simpler API with less configuration</li>
-      <li>26x smaller bundle size (~6KB vs ~155KB)</li>
-      <li>Native TypeScript without @types packages</li>
-      <li>Built-in SQLite store</li>
-      <li>Bun runtime with native bun:sqlite</li>
-      <li>Elysia framework support</li>
-    </ul>
+    <div class="comparison-box">
+      <h3>Choose hitlimit if you need:</h3>
+      <ul>
+        <li>Simpler API with less configuration</li>
+        <li>Built-in framework adapters (Express, Fastify, NestJS, Hono, Elysia, Bun.serve)</li>
+        <li>Built-in SQLite store</li>
+        <li>Native Bun support</li>
+      </ul>
 
-    <h3>Choose rate-limiter-flexible if you need:</h3>
-    <ul>
-      <li>PostgreSQL, MySQL, or MongoDB backends</li>
-      <li>Cluster mode support</li>
-      <li>Insurance limiter (fallback when store fails)</li>
-      <li>Block duration after limit exceeded</li>
-    </ul>
-  </div>
+      <h3>Choose rate-limiter-flexible if you need:</h3>
+      <ul>
+        <li>PostgreSQL, MySQL, MongoDB, DynamoDB, or Memcached backends (14 stores total)</li>
+        <li>Cluster mode support</li>
+        <li>Insurance limiter (fallback when store fails)</li>
+        <li>Weighted/points-based rate limiting</li>
+      </ul>
+    </div>
 
-  <h2 id="vs-nestjs-throttler">hitlimit vs @nestjs/throttler</h2>
+    <h2 id="vs-nestjs-throttler">hitlimit vs @nestjs/throttler</h2>
 
-  <p>
-    <strong>@nestjs/throttler</strong> is the official NestJS rate limiting module.
-    It integrates deeply with NestJS decorators and DI system.
-  </p>
+    <p>
+      <strong>@nestjs/throttler</strong> is the official NestJS rate limiting module.
+      It integrates deeply with NestJS decorators and DI system.
+    </p>
 
-  <div class="comparison-box">
-    <h3>Choose hitlimit if you need:</h3>
-    <ul>
-      <li>Built-in SQLite and Redis stores</li>
-      <li>Use same library across Express, NestJS, and Bun</li>
-      <li>Human-readable time windows</li>
-      <li>Smaller bundle size</li>
-    </ul>
+    <div class="comparison-box">
+      <h3>Choose hitlimit if you need:</h3>
+      <ul>
+        <li>Built-in SQLite and Redis stores</li>
+        <li>Use same library across Express, NestJS, and Bun</li>
+        <li>Human-readable time windows</li>
+        <li>Built-in tiered limits for SaaS</li>
+      </ul>
 
-    <h3>Choose @nestjs/throttler if you need:</h3>
-    <ul>
-      <li>Deep NestJS integration with decorators</li>
-      <li>Official Nest team support</li>
-      <li>Guard-based approach for route protection</li>
-    </ul>
-  </div>
+      <h3>Choose @nestjs/throttler if you need:</h3>
+      <ul>
+        <li>Deep NestJS integration with decorators</li>
+        <li>Official Nest team support</li>
+        <li>Guard-based approach with per-route configuration</li>
+        <li>Named throttler groups (short/medium/long)</li>
+      </ul>
+    </div>
 
-  <h3>Migration from @nestjs/throttler</h3>
+    <h3>Migration from @nestjs/throttler</h3>
 
-  <div class="code-block">
-    <div class="code-header"><span class="code-label">Before (@nestjs/throttler)</span></div>
-    <pre><code><span class="kw">import</span> {"{"} ThrottlerModule {"}"} <span class="kw">from</span> <span class="str">'@nestjs/throttler'</span>
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">Before (@nestjs/throttler)</span></div>
+      <pre><code><span class="kw">import</span> {"{"} ThrottlerModule {"}"} <span class="kw">from</span> <span class="str">'@nestjs/throttler'</span>
 
 @<span class="fn">Module</span>({"{"}
   imports: [
@@ -327,11 +263,11 @@ const faqSchema = {
     {"}"}])
   ]
 {"}"})</code></pre>
-  </div>
+    </div>
 
-  <div class="code-block">
-    <div class="code-header"><span class="code-label">After (hitlimit)</span></div>
-    <pre><code><span class="kw">import</span> {"{"} HitlimitModule {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">After (hitlimit)</span></div>
+      <pre><code><span class="kw">import</span> {"{"} HitlimitModule {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
 
 @<span class="fn">Module</span>({"{"}
   imports: [
@@ -341,91 +277,243 @@ const faqSchema = {
     {"}"})
   ]
 {"}"})</code></pre>
-  </div>
+    </div>
 
-  <h2 id="vs-fastify-rate-limit">hitlimit vs @fastify/rate-limit</h2>
+    <h2 id="vs-fastify-rate-limit">hitlimit vs @fastify/rate-limit</h2>
 
-  <p>
-    <strong>@fastify/rate-limit</strong> is the official Fastify rate limiter plugin maintained by the Fastify team.
-    It's the default choice for Fastify-only projects.
-  </p>
+    <p>
+      <strong>@fastify/rate-limit</strong> is the official Fastify rate limiter plugin maintained by the Fastify team.
+      It's the default choice for Fastify-only projects.
+    </p>
 
-  <div class="comparison-box">
-    <h3>Choose hitlimit if you need:</h3>
-    <ul>
-      <li>Auto-ban after threshold violations (new!)</li>
-      <li>Shared rate limits via groupId (new!)</li>
-      <li>Built-in tiered rate limits (Free/Pro/Enterprise tiers in 8 lines)</li>
-      <li>Per-request error handling (<code>onStoreError</code> callback)</li>
-      <li>Built-in SQLite store for persistence without Redis</li>
-      <li>Same library across Express, Fastify, NestJS, and Bun</li>
-      <li>Zero runtime dependencies (~6KB vs ~15KB)</li>
-      <li>Bun runtime support</li>
-    </ul>
+    <div class="comparison-box">
+      <h3>Choose hitlimit if you need:</h3>
+      <ul>
+        <li>Auto-ban after threshold violations</li>
+        <li>Shared rate limits via groupId</li>
+        <li>Built-in tiered rate limits (Free/Pro/Enterprise tiers in 8 lines)</li>
+        <li>Per-request error handling (<code>onStoreError</code> callback)</li>
+        <li>Built-in SQLite store for persistence without Redis</li>
+        <li>Same library across Express, Fastify, NestJS, and Bun</li>
+        <li>Zero runtime dependencies</li>
+      </ul>
 
-    <h3>Choose @fastify/rate-limit if you need:</h3>
-    <ul>
-      <li>Official Fastify team maintenance and support</li>
-      <li>IP allowList built-in</li>
-      <li>Fastify-only project (tighter integration)</li>
-    </ul>
-  </div>
+      <h3>Choose @fastify/rate-limit if you need:</h3>
+      <ul>
+        <li>Official Fastify team maintenance and support</li>
+        <li>IP allowList built-in</li>
+        <li>Fastify-only project (tighter integration)</li>
+      </ul>
+    </div>
 
-  <h3>Migration from @fastify/rate-limit</h3>
+    <h3>Migration from @fastify/rate-limit</h3>
 
-  <div class="code-block">
-    <div class="code-header"><span class="code-label">Before (@fastify/rate-limit)</span></div>
-    <pre><code><span class="kw">import</span> rateLimit <span class="kw">from</span> <span class="str">'@fastify/rate-limit'</span>
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">Before (@fastify/rate-limit)</span></div>
+      <pre><code><span class="kw">import</span> rateLimit <span class="kw">from</span> <span class="str">'@fastify/rate-limit'</span>
 
 <span class="kw">await</span> app.<span class="fn">register</span>(rateLimit, {"{"}
   max: <span class="num">100</span>,
   timeWindow: <span class="str">'1 minute'</span>
 {"}"})</code></pre>
-  </div>
+    </div>
 
-  <div class="code-block">
-    <div class="code-header"><span class="code-label">After (hitlimit)</span></div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/fastify'</span>
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">After (hitlimit)</span></div>
+      <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/fastify'</span>
 
 <span class="kw">await</span> app.<span class="fn">register</span>(hitlimit, {"{"}
   limit: <span class="num">100</span>,
   window: <span class="str">'1m'</span>
 {"}"})</code></pre>
+    </div>
+
+    <h2 id="performance">Performance Comparison</h2>
+
+    <p>High-traffic scenario (10,000 unique IPs) - where hitlimit excels.</p>
+
+    <div class="benchmark-comparison">
+      <div class="benchmark-item">
+        <div class="benchmark-bar hitlimit" style="width: 100%;"></div>
+        <div class="benchmark-info">
+          <span class="benchmark-name">hitlimit</span>
+          <span class="benchmark-value">3.25M ops/s</span>
+        </div>
+      </div>
+      <div class="benchmark-item">
+        <div class="benchmark-bar other" style="width: 57%;"></div>
+        <div class="benchmark-info">
+          <span class="benchmark-name">rate-limiter-flexible</span>
+          <span class="benchmark-value">1.84M ops/s</span>
+        </div>
+      </div>
+      <div class="benchmark-item">
+        <div class="benchmark-bar other" style="width: 29%;"></div>
+        <div class="benchmark-info">
+          <span class="benchmark-name">express-rate-limit</span>
+          <span class="benchmark-value">957K ops/s</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="benchmark-note">
+      Memory store, 10k unique keys. hitlimit is also fastest on single-IP (4.11M vs 3.22M for rate-limiter-flexible).
+      <a href="/docs/benchmarks">See full benchmarks</a>
+    </p>
   </div>
 
-  <h2 id="performance">Performance Comparison</h2>
+  <!-- ===================== BUN COMPARISON ===================== -->
+  <div data-runtime-content="bun">
+    <h2 id="quick-comparison">Feature Overview</h2>
 
-  <p>High-traffic scenario (10,000 unique IPs) - where hitlimit excels.</p>
+    <p>
+      hitlimit-bun is the only dedicated rate limiting library built for the Bun runtime.
+      Here's what you get out of the box.
+    </p>
 
-  <div class="benchmark-comparison">
-    <div class="benchmark-item">
-      <div class="benchmark-bar hitlimit" style="width: 100%;"></div>
-      <div class="benchmark-info">
-        <span class="benchmark-name">hitlimit</span>
-        <span class="benchmark-value">3.35M ops/s</span>
+    <div class="comparison-table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th class="highlight-col">hitlimit-bun</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Bundle Size</td>
+            <td class="highlight-col good">~18KB</td>
+          </tr>
+          <tr>
+            <td>Zero Dependencies</td>
+            <td class="highlight-col good">Yes</td>
+          </tr>
+          <tr>
+            <td>TypeScript</td>
+            <td class="highlight-col good">Native</td>
+          </tr>
+          <tr>
+            <td>Memory Store</td>
+            <td class="highlight-col good">5.62M ops/s (10K IPs)</td>
+          </tr>
+          <tr>
+            <td>bun:sqlite Store</td>
+            <td class="highlight-col good">Built-in (native, 0 deps)</td>
+          </tr>
+          <tr>
+            <td>Redis Store</td>
+            <td class="highlight-col good">Built-in (Lua scripts)</td>
+          </tr>
+          <tr>
+            <td>Bun.serve</td>
+            <td class="highlight-col good">Native adapter</td>
+          </tr>
+          <tr>
+            <td>Elysia</td>
+            <td class="highlight-col good">Native plugin</td>
+          </tr>
+          <tr>
+            <td>Hono</td>
+            <td class="highlight-col good">Native middleware</td>
+          </tr>
+          <tr>
+            <td>Human-readable Windows</td>
+            <td class="highlight-col good">'1m', '1h'</td>
+          </tr>
+          <tr>
+            <td>Tiered Limits</td>
+            <td class="highlight-col good">Built-in</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="vs-hono-rate-limiter-bun">hitlimit-bun vs hono-rate-limiter</h2>
+
+    <p>
+      <strong>hono-rate-limiter</strong> is a community-maintained rate limiter for Hono (rhinobase/hono-rate-limiter).
+      It works on Bun via Hono, but isn't Bun-native.
+    </p>
+
+    <div class="comparison-box">
+      <h3>Choose hitlimit-bun if you need:</h3>
+      <ul>
+        <li><strong>Zero runtime dependencies</strong> — no external packages needed</li>
+        <li><strong>Native bun:sqlite</strong> — Zero-dependency persistence at 383K ops/sec</li>
+        <li><strong>Multiple frameworks</strong> — Bun.serve, Elysia, and Hono from one package</li>
+        <li><strong>Human-readable time windows</strong> — <code>'1m'</code> vs milliseconds</li>
+        <li><strong>Built-in tiered limits</strong> — Free/Pro/Enterprise tiers in 8 lines</li>
+        <li><strong>Built-in Redis store</strong> — Atomic Lua scripts, no separate package</li>
+        <li><strong>Zero runtime dependencies</strong></li>
+      </ul>
+
+      <h3>Choose hono-rate-limiter if you need:</h3>
+      <ul>
+        <li>Cloudflare KV store support (via separate package)</li>
+        <li>Familiar express-rate-limit-like API</li>
+        <li>Community-driven development</li>
+      </ul>
+    </div>
+
+    <h3>Migration from hono-rate-limiter</h3>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">Before (hono-rate-limiter)</span></div>
+      <pre><code><span class="kw">import</span> {"{"} rateLimiter {"}"} <span class="kw">from</span> <span class="str">'hono-rate-limiter'</span>
+
+app.<span class="fn">use</span>(<span class="fn">rateLimiter</span>({"{"}
+  windowMs: <span class="num">60000</span>, <span class="cm">// milliseconds</span>
+  limit: <span class="num">100</span>,
+  keyGenerator: (c) => c.req.<span class="fn">header</span>(<span class="str">'x-api-key'</span>)
+{"}"}))</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header"><span class="code-label">After (hitlimit-bun)</span></div>
+      <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/hono'</span>
+
+app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
+  window: <span class="str">'1m'</span>, <span class="cm">// human-readable!</span>
+  limit: <span class="num">100</span>,
+  key: (c) => c.req.<span class="fn">header</span>(<span class="str">'x-api-key'</span>) || <span class="str">'anonymous'</span>
+{"}"}))</code></pre>
+    </div>
+
+    <h2 id="performance">Performance</h2>
+
+    <p>hitlimit-bun raw throughput — memory store, 10,000 unique IPs.</p>
+
+    <div class="benchmark-comparison">
+      <div class="benchmark-item">
+        <div class="benchmark-bar hitlimit" style="width: 100%;"></div>
+        <div class="benchmark-info">
+          <span class="benchmark-name">Memory Store</span>
+          <span class="benchmark-value">5.62M ops/s</span>
+        </div>
+      </div>
+      <div class="benchmark-item">
+        <div class="benchmark-bar hitlimit" style="width: 7%;"></div>
+        <div class="benchmark-info">
+          <span class="benchmark-name">bun:sqlite Store</span>
+          <span class="benchmark-value">383K ops/s</span>
+        </div>
+      </div>
+      <div class="benchmark-item">
+        <div class="benchmark-bar hitlimit" style="width: 0.2%;"></div>
+        <div class="benchmark-info">
+          <span class="benchmark-name">Redis Store</span>
+          <span class="benchmark-value">6.8K ops/s</span>
+        </div>
       </div>
     </div>
-    <div class="benchmark-item">
-      <div class="benchmark-bar other" style="width: 50%;"></div>
-      <div class="benchmark-info">
-        <span class="benchmark-name">rate-limiter-flexible</span>
-        <span class="benchmark-value">1.58M ops/s</span>
-      </div>
-    </div>
-    <div class="benchmark-item">
-      <div class="benchmark-bar other" style="width: 36%;"></div>
-      <div class="benchmark-info">
-        <span class="benchmark-name">express-rate-limit</span>
-        <span class="benchmark-value">1.20M ops/s</span>
-      </div>
-    </div>
+
+    <p class="benchmark-note">
+      1.7x faster than the same code on Node.js (5.62M vs 3.25M at 10K IPs).
+      <a href="/docs/benchmarks">See full benchmarks</a>
+    </p>
   </div>
 
-  <p class="benchmark-note">
-    Memory store, 10k unique keys. hitlimit is also fastest on single-IP (4.19M vs 3.32M for rate-limiter-flexible).
-    <a href="/docs/benchmarks">See full benchmarks</a>
-  </p>
-
+  <!-- ===================== SHARED SECTIONS ===================== -->
   <h2 id="genuine-advantages">Why hitlimit?</h2>
 
   <p>Key advantages that set hitlimit apart:</p>
@@ -448,8 +536,8 @@ const faqSchema = {
     </div>
     <div class="advantage">
       <div class="advantage-icon">📦</div>
-      <h4>Smallest bundle</h4>
-      <p>~6KB Node.js / ~18KB Bun, zero runtime dependencies</p>
+      <h4>Zero dependencies</h4>
+      <p>No runtime dependencies for the core module</p>
     </div>
     <div class="advantage">
       <div class="advantage-icon">🔋</div>
@@ -463,177 +551,170 @@ const faqSchema = {
     </div>
   </div>
 
-  <h2 id="when-to-use">When to Use Each</h2>
+  <!-- Node.js: When to Use -->
+  <div data-runtime-content="node">
+    <h2 id="when-to-use">When to Use Each</h2>
 
-  <div class="use-case-table">
-    <table>
-      <thead>
-        <tr>
-          <th>Use Case</th>
-          <th>Recommendation</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>New Express/Node.js project</td>
-          <td class="good">hitlimit - Fast, clean API</td>
-        </tr>
-        <tr>
-          <td>New Bun project</td>
-          <td class="good">hitlimit-bun - Native bun:sqlite support</td>
-        </tr>
-        <tr>
-          <td>SaaS with tiered limits</td>
-          <td class="good">hitlimit - Built-in tier support</td>
-        </tr>
-        <tr>
-          <td>Bundle size matters</td>
-          <td class="good">hitlimit - Smallest option (~6KB Node.js / ~18KB Bun)</td>
-        </tr>
-        <tr>
-          <td>New Fastify project</td>
-          <td class="good">hitlimit - Tiered limits + multi-framework</td>
-        </tr>
-        <tr>
-          <td>Fastify-only, need allowList</td>
-          <td>@fastify/rate-limit - Official plugin, tighter integration</td>
-        </tr>
-        <tr>
-          <td>Need Redis clustering</td>
-          <td>rate-limiter-flexible - More mature Redis support</td>
-        </tr>
-        <tr>
-          <td>PostgreSQL/MySQL/MongoDB backend</td>
-          <td>rate-limiter-flexible - More database options</td>
-        </tr>
-        <tr>
-          <td>Deep NestJS decorators</td>
-          <td>@nestjs/throttler - Official Nest module</td>
-        </tr>
-        <tr>
-          <td>Maximum community support</td>
-          <td>express-rate-limit - 3M+ weekly downloads</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <div class="use-case-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Use Case</th>
+            <th>Recommendation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>New Express/Node.js project</td>
+            <td class="good">hitlimit - Fast, clean API</td>
+          </tr>
+          <tr>
+            <td>SaaS with tiered limits</td>
+            <td class="good">hitlimit - Built-in tier support</td>
+          </tr>
+          <tr>
+            <td>Zero dependencies matters</td>
+            <td class="good">hitlimit - Zero runtime deps</td>
+          </tr>
+          <tr>
+            <td>New Fastify project</td>
+            <td class="good">hitlimit - Tiered limits + multi-framework</td>
+          </tr>
+          <tr>
+            <td>Fastify-only, need allowList</td>
+            <td>@fastify/rate-limit - Official plugin</td>
+          </tr>
+          <tr>
+            <td>PostgreSQL/MySQL/MongoDB backend</td>
+            <td>rate-limiter-flexible - More database options</td>
+          </tr>
+          <tr>
+            <td>Deep NestJS decorators</td>
+            <td>@nestjs/throttler - Official Nest module</td>
+          </tr>
+          <tr>
+            <td>Maximum community support</td>
+            <td>express-rate-limit - 3M+ weekly downloads</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-  <div class="use-case-grid">
-    <div class="use-case">
-      <h3>Use hitlimit for</h3>
-      <ul>
-        <li>New projects (Node.js or Bun)</li>
-        <li>Performance-critical APIs</li>
-        <li>Multi-framework consistency</li>
-        <li>SQLite-based persistence</li>
-        <li>Elysia applications</li>
-        <li>Minimal bundle size</li>
-      </ul>
-    </div>
-    <div class="use-case">
-      <h3>Use express-rate-limit for</h3>
-      <ul>
-        <li>Existing Express projects</li>
-        <li>Need specific external stores</li>
-        <li>Maximum community support</li>
-      </ul>
-    </div>
-    <div class="use-case">
-      <h3>Use rate-limiter-flexible for</h3>
-      <ul>
-        <li>Complex rate limiting rules</li>
-        <li>PostgreSQL/MySQL/MongoDB</li>
-        <li>Insurance/fallback patterns</li>
-      </ul>
-    </div>
-    <div class="use-case">
-      <h3>Use @nestjs/throttler for</h3>
-      <ul>
-        <li>Deep NestJS integration</li>
-        <li>Decorator-based approach</li>
-        <li>Official Nest support</li>
-      </ul>
+    <div class="use-case-grid">
+      <div class="use-case">
+        <h3>Use hitlimit for</h3>
+        <ul>
+          <li>New projects (Node.js or Bun)</li>
+          <li>Performance-critical APIs</li>
+          <li>Multi-framework consistency</li>
+          <li>SQLite-based persistence</li>
+          <li>SaaS tiered rate limits</li>
+        </ul>
+      </div>
+      <div class="use-case">
+        <h3>Use express-rate-limit for</h3>
+        <ul>
+          <li>Existing Express projects</li>
+          <li>Need specific external stores</li>
+          <li>Maximum community support</li>
+        </ul>
+      </div>
+      <div class="use-case">
+        <h3>Use rate-limiter-flexible for</h3>
+        <ul>
+          <li>14 storage backends</li>
+          <li>Weighted/points-based limits</li>
+          <li>Insurance/fallback patterns</li>
+        </ul>
+      </div>
+      <div class="use-case">
+        <h3>Use @nestjs/throttler for</h3>
+        <ul>
+          <li>Deep NestJS integration</li>
+          <li>Decorator-based approach</li>
+          <li>Official Nest support</li>
+        </ul>
+      </div>
     </div>
   </div>
 
-  <h2 id="vs-hono-rate-limiter">hitlimit vs hono-rate-limiter</h2>
+  <!-- Bun: When to Use -->
+  <div data-runtime-content="bun">
+    <h2 id="when-to-use">When to Use hitlimit-bun</h2>
 
-  <p>
-    <strong>hono-rate-limiter</strong> is a community-maintained rate limiter for the Hono framework (rhinobase/hono-rate-limiter).
-    Currently at v0.5.x, it's an early-stage project inspired by express-rate-limit.
-  </p>
+    <div class="use-case-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Use Case</th>
+            <th>Store</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Single server, maximum speed</td>
+            <td class="good">Memory (default) — 5.62M ops/sec</td>
+          </tr>
+          <tr>
+            <td>Need persistence, single server</td>
+            <td class="good">bun:sqlite — 383K ops/sec, 0 deps</td>
+          </tr>
+          <tr>
+            <td>Multi-server / distributed</td>
+            <td class="good">Redis — 6.8K ops/sec, Lua scripts</td>
+          </tr>
+          <tr>
+            <td>Elysia plugin</td>
+            <td class="good">Any store — native plugin API</td>
+          </tr>
+          <tr>
+            <td>Hono middleware</td>
+            <td class="good">Any store — native middleware</td>
+          </tr>
+          <tr>
+            <td>SaaS with tiered limits</td>
+            <td class="good">Any store — built-in tier support</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-  <div class="comparison-box">
-    <h3>Choose hitlimit if you need:</h3>
+  <!-- Node.js: Get Started -->
+  <div data-runtime-content="node">
+    <h2 id="next-steps">Get Started</h2>
+
+    <p>Ready to try hitlimit?</p>
+
+    <div class="code-block">
+      <pre><code>npm install @joint-ops/hitlimit</code></pre>
+    </div>
+
     <ul>
-      <li><strong>Smaller bundle</strong> - ~6KB vs ~88.5KB (15x smaller)</li>
-      <li><strong>Human-readable time windows</strong> - <code>'1m'</code> vs milliseconds (<code>60000</code>)</li>
-      <li><strong>Built-in tiered limits</strong> - Free/Pro/Enterprise tiers without manual routing</li>
-      <li><strong>Per-request error handling</strong> - <code>onStoreError</code> callback for granular control</li>
-      <li><strong>Built-in SQLite store</strong> - Persistence without Redis setup</li>
-      <li><strong>Built-in Redis store</strong> - No separate package required</li>
-      <li><strong>Bun-native package</strong> - Uses bun:sqlite for 6M+ ops/sec performance</li>
-      <li><strong>Multi-framework support</strong> - Same API for Hono, Express, Fastify, NestJS</li>
-      <li><strong>Zero runtime dependencies</strong> - Smaller, more secure</li>
+      <li><a href="/docs/quick-start">Quick Start Guide</a></li>
+      <li><a href="/docs/adapters/express">Express Adapter</a></li>
+      <li><a href="/docs/benchmarks">Full Benchmarks</a></li>
+      <li><a href="/docs/configuration/options">Configuration Options</a></li>
     </ul>
+  </div>
 
-    <h3>Choose hono-rate-limiter if you need:</h3>
+  <!-- Bun: Get Started -->
+  <div data-runtime-content="bun">
+    <h2 id="next-steps">Get Started</h2>
+
+    <p>Ready to try hitlimit-bun?</p>
+
+    <div class="code-block">
+      <pre><code>bun add @joint-ops/hitlimit-bun</code></pre>
+    </div>
+
     <ul>
-      <li>Community-driven development with open governance</li>
-      <li>Cloudflare KV store support (via separate package)</li>
-      <li>Familiar express-rate-limit-like API</li>
+      <li><a href="/docs/bun/quick-start">Bun Quick Start</a></li>
+      <li><a href="/docs/bun/elysia">Elysia Plugin</a></li>
+      <li><a href="/docs/benchmarks">Full Benchmarks</a></li>
+      <li><a href="/docs/bun/configuration">Configuration Options</a></li>
     </ul>
   </div>
-
-  <h3>Migration from hono-rate-limiter</h3>
-
-  <div class="code-block">
-    <div class="code-header"><span class="code-label">Before (hono-rate-limiter)</span></div>
-    <pre><code><span class="kw">import</span> {"{"} rateLimiter {"}"} <span class="kw">from</span> <span class="str">'hono-rate-limiter'</span>
-
-app.<span class="fn">use</span>(<span class="fn">rateLimiter</span>({"{"}
-  windowMs: <span class="num">60000</span>, <span class="cm">// milliseconds</span>
-  limit: <span class="num">100</span>,
-  keyGenerator: (c) => c.req.<span class="fn">header</span>(<span class="str">'x-api-key'</span>)
-{"}"}))</code></pre>
-  </div>
-
-  <div class="code-block">
-    <div class="code-header"><span class="code-label">After (hitlimit - Node.js)</span></div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/hono'</span>
-
-app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
-  window: <span class="str">'1m'</span>, <span class="cm">// human-readable!</span>
-  limit: <span class="num">100</span>,
-  key: (c) => c.req.<span class="fn">header</span>(<span class="str">'x-api-key'</span>) || <span class="str">'anonymous'</span>
-{"}"}))</code></pre>
-  </div>
-
-  <div class="code-block">
-    <div class="code-header"><span class="code-label">After (hitlimit - Bun)</span></div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/hono'</span>
-
-app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
-  window: <span class="str">'1m'</span>,
-  limit: <span class="num">100</span>,
-  key: (c) => c.req.<span class="fn">header</span>(<span class="str">'x-api-key'</span>) || <span class="str">'anonymous'</span>
-{"}"}))</code></pre>
-  </div>
-
-  <h2 id="next-steps">Get Started</h2>
-
-  <p>Ready to try hitlimit?</p>
-
-  <div class="code-block">
-    <pre><code>npm install @joint-ops/hitlimit</code></pre>
-  </div>
-
-  <ul>
-    <li><a href="/docs/quick-start">Quick Start Guide</a></li>
-    <li><a href="/docs/adapters/hono">Hono Adapter Documentation</a></li>
-    <li><a href="/docs/benchmarks">Full Benchmarks</a></li>
-    <li><a href="/docs/configuration/options">Configuration Options</a></li>
-  </ul>
 </DocsLayout>
 
 <style>
