@@ -66,6 +66,8 @@ bun src/scripts/run-bun.ts
 
 > hitlimit is the fastest in ALL memory scenarios — 1.3x on single-IP (4.11M vs 3.22M) and 1.8x on 10K IPs (3.25M vs 1.84M).
 
+> **Fair play:** These are our benchmarks and we've done our best to keep them fair and reproducible. We encourage you to clone this repo and run them yourself. They're not set in stone — there's always room for improvement. If you spot issues or have suggestions, please open an issue or PR.
+
 ## Redis Setup
 
 ```bash

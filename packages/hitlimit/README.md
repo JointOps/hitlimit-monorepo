@@ -44,7 +44,7 @@
 | rate-limiter-flexible | 1,840,000 | Yes | DIY |
 | express-rate-limit | 957,000 | No (1 dep) | 1 |
 
-> 3.4x faster than express-rate-limit, 1.8x faster than rate-limiter-flexible under high-traffic load. Results vary by hardware — [run the benchmarks yourself](https://github.com/JointOps/hitlimit-monorepo).
+> 3.4x faster than express-rate-limit, 1.8x faster than rate-limiter-flexible under high-traffic load. Results vary by hardware — [run the benchmarks yourself](https://github.com/JointOps/hitlimit-monorepo). These are our benchmarks and we've done our best to keep them fair and reproducible. They're not set in stone — there's always room for improvement. If you find issues or have suggestions, please open an issue or PR.
 
 ### HTTP Overhead
 

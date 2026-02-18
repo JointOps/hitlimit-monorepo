@@ -245,9 +245,10 @@ npx tsx src/scripts/run-node.ts</code></pre>
     </div>
 
     <div class="callout note">
-      <strong>Note:</strong> Benchmark results vary by hardware and environment.
+      <strong>Note:</strong> These are our benchmarks and we've done our best to keep them fair and reproducible. Results vary by hardware and environment.
       hitlimit is the fastest in ALL memory scenarios — 1.3x faster than rate-limiter-flexible on single-IP (4.11M vs 3.22M) and 1.8x faster on high-traffic 10K IPs (3.25M vs 1.84M).
       Redis uses atomic Lua scripts (EVALSHA) for single round-trip performance.
+      They're not set in stone — there's always room for improvement. If you spot issues or have suggestions, please <a href="https://github.com/JointOps/hitlimit-monorepo/issues">open an issue</a>.
     </div>
   </div>
 
@@ -268,9 +269,9 @@ bun src/scripts/run-bun.ts</code></pre>
     </div>
 
     <div class="callout note">
-      <strong>Note:</strong> Benchmark results vary by hardware and environment.
+      <strong>Note:</strong> These are our benchmarks and we've done our best to keep them fair and reproducible. Results vary by hardware and environment.
       Bun's optimized runtime delivers 1.7x higher memory throughput than Node.js (5.62M vs 3.25M at 10K IPs).
-      Run your own benchmarks to see results on your setup.
+      Clone the repo and run them yourself — they're not set in stone. If you spot issues or have suggestions, please <a href="https://github.com/JointOps/hitlimit-monorepo/issues">open an issue</a>.
     </div>
   </div>
 
