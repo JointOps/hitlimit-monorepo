@@ -8,16 +8,16 @@
 
 > The fastest rate limiter for Node.js — Express, Fastify, Hono, NestJS & native HTTP
 
-**hitlimit** is a high-performance rate limiting middleware for Node.js. 3.4x faster than express-rate-limit under real-world load. Atomic Redis Lua scripts for distributed systems. Zero runtime dependencies.
+**hitlimit** is a high-performance rate limiting middleware for Node.js. 2x faster than express-rate-limit under real-world load. Atomic Redis Lua scripts for distributed systems. Zero runtime dependencies.
 
 **[Documentation](https://hitlimit.jointops.dev)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[npm](https://www.npmjs.com/package/@joint-ops/hitlimit)**
 
 ## Why hitlimit?
 
-- **3.25M+ ops/sec** under real-world load (10K unique IPs), ~7% HTTP overhead
+- **1.85M+ ops/sec** under real-world load (10K unique IPs), ~7% HTTP overhead
 - **8 framework adapters** — Express, Fastify, Hono, NestJS, native HTTP
 - **Zero runtime dependencies** — nothing extra to install
-- **3 storage backends** — Memory, Redis (atomic Lua scripts), SQLite
+- **4 storage backends** — Memory, Redis (atomic Lua scripts), SQLite, Postgres
 - **Atomic Redis** — Single-roundtrip Lua scripts with EVALSHA caching
 - **TypeScript native** — Full type safety and IntelliSense
 - **Human-readable windows** — `'1m'`, `'15m'`, `'1h'` instead of milliseconds
@@ -32,19 +32,20 @@
 
 | Store | Operations/sec | Avg Latency | Use Case |
 |-------|----------------|-------------|----------|
-| **Memory** | 4,110,000+ | 0.24μs | Single instance, no persistence |
-| **SQLite** | 490,000+ | 2.04μs | Single instance, persistence needed |
-| **Redis** | 6,800+ | 146μs | Multi-instance, distributed |
+| **Memory** | 2,770,000+ | 0.36μs | Single instance, no persistence |
+| **SQLite** | 413,000+ | 2.42μs | Single instance, persistence needed |
+| **Redis** | 6,800+ | 148μs | Multi-instance, distributed |
+| **Postgres** | 2,700+ | 376μs | Multi-instance, distributed |
 
 ### vs Competitors (Memory Store, 10K IPs)
 
 | Library | ops/sec | Zero Deps | Framework Adapters |
 |---------|---------|-----------|-------------------|
-| **hitlimit** | **3,250,000** | Yes | 8 built-in |
-| rate-limiter-flexible | 1,840,000 | Yes | DIY |
-| express-rate-limit | 957,000 | No (1 dep) | 1 |
+| **hitlimit** | **1,850,000** | Yes | 8 built-in |
+| rate-limiter-flexible | 1,210,000 | Yes | DIY |
+| express-rate-limit | 892,000 | No (1 dep) | 1 |
 
-> 3.4x faster than express-rate-limit, 1.8x faster than rate-limiter-flexible under high-traffic load. Results vary by hardware — [run the benchmarks yourself](https://github.com/JointOps/hitlimit-monorepo). These are our benchmarks and we've done our best to keep them fair and reproducible. They're not set in stone — there's always room for improvement. If you find issues or have suggestions, please open an issue or PR.
+> 2x faster than express-rate-limit, 1.5x faster than rate-limiter-flexible under high-traffic load. Results vary by hardware — [run the benchmarks yourself](https://github.com/JointOps/hitlimit-monorepo). These are our benchmarks and we've done our best to keep them fair and reproducible. They're not set in stone — there's always room for improvement. If you find issues or have suggestions, please open an issue or PR.
 
 ### HTTP Overhead
 
@@ -376,6 +377,19 @@ app.use(hitlimit({
 }))
 ```
 
+### Postgres Store
+
+Best for distributed systems with PostgreSQL. Atomic upserts for consistency.
+
+```javascript
+import { hitlimit } from '@joint-ops/hitlimit'
+import { postgresStore } from '@joint-ops/hitlimit/stores/postgres'
+
+app.use(hitlimit({
+  store: postgresStore({ url: 'postgres://localhost:5432/mydb' })
+}))
+```
+
 ## Response Headers
 
 Every response includes rate limit information:
@@ -445,7 +459,7 @@ export class AppController {
 import rateLimit from 'express-rate-limit'
 app.use(rateLimit({ windowMs: 60000, max: 100 }))
 
-// After (hitlimit) — 3x faster with many unique IPs, zero deps
+// After (hitlimit) — 2x faster with many unique IPs, zero deps
 import { hitlimit } from '@joint-ops/hitlimit'
 app.use(hitlimit({ window: '1m', limit: 100 }))
 ```

@@ -11,7 +11,7 @@ const faqSchema = {
       "name": "How fast is hitlimit compared to express-rate-limit?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "hitlimit achieves 3.25M ops/sec vs 957K for express-rate-limit in high-traffic scenarios (10k unique IPs), making it over 3x faster. hitlimit is also 1.3x faster than rate-limiter-flexible on single-IP scenarios."
+        "text": "hitlimit achieves 1.85M ops/sec vs 892K for express-rate-limit in high-traffic scenarios (10k unique IPs), making it over 2x faster. hitlimit is also 1.2x faster than rate-limiter-flexible on single-IP scenarios."
       }
     },
     {
@@ -108,10 +108,10 @@ const faqSchema = {
           </tr>
           <tr>
             <td>Memory Store (high-traffic)</td>
-            <td class="highlight-col good">3.25M ops/s</td>
-            <td>957K ops/s</td>
+            <td class="highlight-col good">1.85M ops/s</td>
+            <td>892K ops/s</td>
             <td>N/A</td>
-            <td>1.84M ops/s</td>
+            <td>1.21M ops/s</td>
             <td>N/A</td>
           </tr>
           <tr>
@@ -129,6 +129,14 @@ const faqSchema = {
             <td>Built-in</td>
             <td>Built-in</td>
             <td>External</td>
+          </tr>
+          <tr>
+            <td>Postgres Store</td>
+            <td class="highlight-col">Built-in</td>
+            <td>No</td>
+            <td>No</td>
+            <td>Built-in</td>
+            <td>No</td>
           </tr>
           <tr>
             <td>Human-readable Windows</td>
@@ -160,7 +168,7 @@ const faqSchema = {
     <div class="comparison-box">
       <h3>Choose hitlimit if you need:</h3>
       <ul>
-        <li>Better high-traffic performance (3x faster with many unique IPs)</li>
+        <li>Better high-traffic performance (2x faster with many unique IPs)</li>
         <li>Built-in SQLite support for persistence</li>
         <li>Human-readable time windows (<code>'1m'</code> vs <code>60000</code>)</li>
         <li>Multi-framework support (Express, Fastify, NestJS, Hono, Bun)</li>
@@ -337,27 +345,27 @@ const faqSchema = {
         <div class="benchmark-bar hitlimit" style="width: 100%;"></div>
         <div class="benchmark-info">
           <span class="benchmark-name">hitlimit</span>
-          <span class="benchmark-value">3.25M ops/s</span>
+          <span class="benchmark-value">1.85M ops/s</span>
         </div>
       </div>
       <div class="benchmark-item">
-        <div class="benchmark-bar other" style="width: 57%;"></div>
+        <div class="benchmark-bar other" style="width: 66%;"></div>
         <div class="benchmark-info">
           <span class="benchmark-name">rate-limiter-flexible</span>
-          <span class="benchmark-value">1.84M ops/s</span>
+          <span class="benchmark-value">1.21M ops/s</span>
         </div>
       </div>
       <div class="benchmark-item">
-        <div class="benchmark-bar other" style="width: 29%;"></div>
+        <div class="benchmark-bar other" style="width: 48%;"></div>
         <div class="benchmark-info">
           <span class="benchmark-name">express-rate-limit</span>
-          <span class="benchmark-value">957K ops/s</span>
+          <span class="benchmark-value">892K ops/s</span>
         </div>
       </div>
     </div>
 
     <p class="benchmark-note">
-      Memory store, 10k unique keys. hitlimit is also fastest on single-IP (4.11M vs 3.22M for rate-limiter-flexible).
+      Memory store, 10k unique keys. hitlimit is also fastest on single-IP (2.77M vs 2.29M for rate-limiter-flexible).
       These are our benchmarks — we've done our best to keep them fair and reproducible. They're not set in stone; there's always room for improvement.
       <a href="/docs/benchmarks">See full benchmarks</a> or <a href="https://github.com/JointOps/hitlimit-monorepo">clone and run them yourself</a>.
     </p>
@@ -395,7 +403,7 @@ const faqSchema = {
           </tr>
           <tr>
             <td>Memory Store</td>
-            <td class="highlight-col good">5.62M ops/s (10K IPs)</td>
+            <td class="highlight-col good">2.86M ops/s (10K IPs)</td>
           </tr>
           <tr>
             <td>bun:sqlite Store</td>
@@ -404,6 +412,10 @@ const faqSchema = {
           <tr>
             <td>Redis Store</td>
             <td class="highlight-col good">Built-in (Lua scripts)</td>
+          </tr>
+          <tr>
+            <td>Postgres Store</td>
+            <td class="highlight-col good">Built-in</td>
           </tr>
           <tr>
             <td>Bun.serve</td>
@@ -440,7 +452,7 @@ const faqSchema = {
       <h3>Choose hitlimit-bun if you need:</h3>
       <ul>
         <li><strong>Zero runtime dependencies</strong> — no external packages needed</li>
-        <li><strong>Native bun:sqlite</strong> — Zero-dependency persistence at 383K ops/sec</li>
+        <li><strong>Native bun:sqlite</strong> — Zero-dependency persistence at 317K ops/sec</li>
         <li><strong>Multiple frameworks</strong> — Bun.serve, Elysia, and Hono from one package</li>
         <li><strong>Human-readable time windows</strong> — <code>'1m'</code> vs milliseconds</li>
         <li><strong>Built-in tiered limits</strong> — Free/Pro/Enterprise tiers in 8 lines</li>
@@ -489,14 +501,14 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
         <div class="benchmark-bar hitlimit" style="width: 100%;"></div>
         <div class="benchmark-info">
           <span class="benchmark-name">Memory Store</span>
-          <span class="benchmark-value">5.62M ops/s</span>
+          <span class="benchmark-value">2.86M ops/s</span>
         </div>
       </div>
       <div class="benchmark-item">
         <div class="benchmark-bar hitlimit" style="width: 7%;"></div>
         <div class="benchmark-info">
           <span class="benchmark-name">bun:sqlite Store</span>
-          <span class="benchmark-value">383K ops/s</span>
+          <span class="benchmark-value">317K ops/s</span>
         </div>
       </div>
       <div class="benchmark-item">
@@ -506,10 +518,17 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
           <span class="benchmark-value">6.8K ops/s</span>
         </div>
       </div>
+      <div class="benchmark-item">
+        <div class="benchmark-bar hitlimit" style="width: 0.1%;"></div>
+        <div class="benchmark-info">
+          <span class="benchmark-name">Postgres Store</span>
+          <span class="benchmark-value">2.9K ops/s</span>
+        </div>
+      </div>
     </div>
 
     <p class="benchmark-note">
-      1.7x faster than the same code on Node.js (5.62M vs 3.25M at 10K IPs).
+      1.5x faster than the same code on Node.js (2.86M vs 1.85M at 10K IPs).
       These are our benchmarks — we've done our best to keep them fair. They're not set in stone; there's always room for improvement.
       <a href="/docs/benchmarks">See full benchmarks</a> or <a href="https://github.com/JointOps/hitlimit-monorepo">clone and run them yourself</a>.
     </p>
@@ -655,15 +674,19 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
         <tbody>
           <tr>
             <td>Single server, maximum speed</td>
-            <td class="good">Memory (default) — 5.62M ops/sec</td>
+            <td class="good">Memory (default) — 2.86M ops/sec</td>
           </tr>
           <tr>
             <td>Need persistence, single server</td>
-            <td class="good">bun:sqlite — 383K ops/sec, 0 deps</td>
+            <td class="good">bun:sqlite — 317K ops/sec, 0 deps</td>
           </tr>
           <tr>
             <td>Multi-server / distributed</td>
             <td class="good">Redis — 6.8K ops/sec, Lua scripts</td>
+          </tr>
+          <tr>
+            <td>Multi-server / distributed (SQL)</td>
+            <td class="good">Postgres — 2.9K ops/sec</td>
           </tr>
           <tr>
             <td>Elysia plugin</td>

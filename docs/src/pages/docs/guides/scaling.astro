@@ -81,9 +81,10 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><th>Store</th><th>Ops/sec</th><th>Multi-Instance</th></tr>
       </thead>
       <tbody>
-        <tr><td>memoryStore</td><td>3,140,000+</td><td>No</td></tr>
-        <tr><td>sqliteStore</td><td>280,000+</td><td>No</td></tr>
+        <tr><td>memoryStore</td><td>1,850,000+</td><td>No</td></tr>
+        <tr><td>sqliteStore</td><td>352,000+</td><td>No</td></tr>
         <tr><td>redisStore</td><td>6,800+</td><td>Yes</td></tr>
+        <tr><td>postgresStore</td><td>2,700+</td><td>Yes</td></tr>
       </tbody>
     </table>
   </div>
@@ -94,9 +95,10 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><th>Store</th><th>Ops/sec</th><th>Latency</th><th>Multi-Instance</th></tr>
       </thead>
       <tbody>
-        <tr><td>memoryStore</td><td class="highlight">5,620,000+</td><td>~178ns</td><td>No</td></tr>
-        <tr><td>sqliteStore</td><td>383,000+</td><td>~2.6&micro;s</td><td>No</td></tr>
-        <tr><td>redisStore</td><td>6,800+</td><td>~146&micro;s</td><td>Yes</td></tr>
+        <tr><td>memoryStore</td><td class="highlight">2,860,000+</td><td>~350ns</td><td>No</td></tr>
+        <tr><td>sqliteStore</td><td>317,000+</td><td>~3.2&micro;s</td><td>No</td></tr>
+        <tr><td>redisStore</td><td>6,800+</td><td>~147&micro;s</td><td>Yes</td></tr>
+        <tr><td>postgresStore</td><td>2,900+</td><td>~350&micro;s</td><td>Yes</td></tr>
       </tbody>
     </table>
   </div>
