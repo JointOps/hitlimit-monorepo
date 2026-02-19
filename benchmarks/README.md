@@ -22,11 +22,34 @@ bun benchmarks/src/scripts/run-bun.ts
 
 ## Test Environment
 
+### Hardware
+
+All published results were measured on this exact machine:
+
+- **Machine**: MacBook Air (M1, 2020)
+- **Chip**: Apple M1 — 8 cores (4 performance + 4 efficiency)
+- **Memory**: 8 GB unified
+- **OS**: macOS (Darwin, ARM64)
+
+Your numbers will differ based on your hardware. A desktop i9 or Ryzen 9 will likely produce higher throughput. A smaller cloud VM will produce lower numbers. The relative comparisons (hitlimit vs competitors) should stay roughly similar on any hardware since all libraries run under identical conditions.
+
+### Software
+
 - **Node.js**: v24 (primary), v18/v20/v22 also supported
 - **Bun**: v1.3+
-- **Redis**: 7.x via Docker (optional — Redis benchmarks skip gracefully if unavailable)
-- **PostgreSQL**: 16.x via Docker (optional — Postgres benchmarks skip gracefully if unavailable)
-- **Machine**: Apple M2 (ARM64)
+- **Redis**: 7.x via Docker (local container on port 6379)
+- **PostgreSQL**: 16.x via Docker (local container on port 5433)
+
+### Docker Overhead (Redis & Postgres)
+
+Redis and Postgres benchmarks run against **local Docker containers** — not remote servers. This means network latency is minimal (loopback), but Docker still adds overhead compared to bare-metal installs. We mitigate this by:
+
+- Running Docker containers **before** starting benchmarks (no cold-start penalty)
+- Using the same Docker setup for all competitors (same overhead for everyone)
+- Reporting Redis/Postgres numbers separately from Memory/SQLite (no mixing in-process and networked stores)
+- Adding **500ms cooldown between competitors** so one library's Docker cleanup doesn't bleed into the next
+
+If you're running benchmarks on bare-metal Redis/Postgres (no Docker), expect slightly higher numbers across the board — but the relative comparison between libraries should hold.
 
 ## Methodology
 
@@ -98,7 +121,9 @@ When comparing Redis or Postgres stores, all competitors connect to the same loc
 | **Postgres** | single-ip | 2.9K | 350μs |
 | **Postgres** | 10k IPs | 2.6K | 392μs |
 
-### Comparison with Competitors (Memory Store, 10K IPs)
+### Comparison with Competitors (Node.js, 10K IPs)
+
+**Memory Store**
 
 | Library | Ops/sec | vs Fastest |
 |---------|---------|------------|
@@ -106,7 +131,23 @@ When comparing Redis or Postgres stores, all competitors connect to the same loc
 | rate-limiter-flexible | 1.21M | 66% |
 | express-rate-limit | 892K | 48% |
 
-> hitlimit is the fastest in ALL memory scenarios — 1.5x on single-IP (2.77M vs 2.29M) and 1.5x on 10K IPs (1.85M vs 1.21M).
+**Redis Store**
+
+| Library | Ops/sec | vs Fastest |
+|---------|---------|------------|
+| **hitlimit** | **6.8K** | **fastest** |
+| rate-limiter-flexible | 6.3K | 93% |
+
+> Redis is network-bound (~150μs latency). Both libraries use atomic Lua scripts. Results are within margin of error. RLF edges out on multi-1k (6.3K vs 6.2K).
+
+**Postgres Store**
+
+| Library | Ops/sec | vs Fastest |
+|---------|---------|------------|
+| **rate-limiter-flexible** | **3.0K** | **fastest** |
+| hitlimit | 2.5K | 84% |
+
+> RLF wins all Postgres scenarios by ~16%. We report this honestly.
 
 > **Fair play:** These are our benchmarks and we've done our best to keep them fair and reproducible. We encourage you to clone this repo and run them yourself. They're not set in stone — there's always room for improvement. If you spot issues or have suggestions, please open an issue or PR.
 
@@ -182,10 +223,19 @@ benchmarks/results/
 
 ## Think We Can Do Better?
 
-These benchmarks aren't perfect — no benchmark suite is. If you spot something unfair, have a better methodology idea, or think we're measuring the wrong thing, we genuinely want to hear from you:
+These benchmarks aren't perfect — no benchmark suite is. If you spot something unfair, have a better methodology idea, or think we're measuring the wrong thing, we genuinely want to hear from you.
 
-- **[Open an issue](https://github.com/JointOps/hitlimit-monorepo/issues)** — describe what you'd change and why
-- **Submit a PR** — the benchmark runners are in `benchmarks/src/scripts/` and we welcome improvements
-- **Run them yourself** — clone this repo, tweak the parameters, and share your results
+**How to discuss benchmark methodology:**
+
+- **[Open an issue](https://github.com/JointOps/hitlimit-monorepo/issues)** — describe what you'd change and why. Include your hardware, runtime version, and what numbers you're seeing. Methodology discussions are welcome — we take them seriously.
+- **Submit a PR** — the benchmark runners are in `benchmarks/src/scripts/` (`run-node.ts` and `run-bun.ts`). If you have a concrete improvement, send a PR and we'll review it.
+- **Run them yourself** — clone this repo, run the benchmarks on your hardware, and share your results. Different CPUs, OSes, and Docker setups produce different absolute numbers. We want to know how hitlimit performs outside our test machine.
+
+**Things we'd especially love feedback on:**
+- Is the warmup count (5K) sufficient for your runtime/hardware?
+- Are the cooldowns (200ms between runs, 500ms between competitors) appropriate?
+- Should we add more scenarios (e.g., burst patterns, mixed read/write)?
+- Is there a competitor we should include that we're missing?
+- Are the Docker-based Redis/Postgres benchmarks representative of your production setup?
 
 We'd rather have honest benchmarks where we lose some scenarios than inflated numbers that don't reflect reality.
