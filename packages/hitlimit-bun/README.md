@@ -6,18 +6,18 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-Native-black.svg)](https://bun.sh)
 
-> The fastest rate limiter for Bun — 5.6M+ ops/sec | Bun.serve, Elysia & Hono
+> The fastest rate limiter for Bun — 5M+ ops/sec | Bun.serve, Elysia & Hono
 
-**hitlimit-bun** is a Bun-native rate limiting library. Memory-first with 5.62M ops/sec under real-world load. Atomic Redis Lua scripts for distributed systems. Native bun:sqlite for persistence. Zero runtime dependencies.
+**hitlimit-bun** is a Bun-native rate limiting library. Memory-first with 5.09M+ ops/sec under real-world load. Atomic Redis Lua scripts for distributed systems. Native bun:sqlite for persistence. Postgres for distributed SQL. Zero runtime dependencies.
 
 **[Documentation](https://hitlimit.jointops.dev/docs/bun)** | **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** | **[npm](https://www.npmjs.com/package/@joint-ops/hitlimit-bun)**
 
 ## Why hitlimit-bun?
 
-- **5.62M ops/sec** under real-world load (10K IPs), ~15x faster than SQLite
+- **2.86M ops/sec** under real-world load (10K IPs), 5.09M single-IP peak
 - **Bun native** — built for Bun's runtime, not a Node.js port
 - **3 frameworks** — Bun.serve, Elysia, Hono from one package
-- **3 storage backends** — Memory, bun:sqlite, Redis (atomic Lua scripts)
+- **4 storage backends** — Memory, bun:sqlite, Redis (atomic Lua scripts), Postgres
 - **Atomic Redis** — Single-roundtrip Lua scripts with EVALSHA caching
 - **Zero runtime dependencies** — nothing extra to install
 - **Human-readable windows** — `'1m'`, `'15m'`, `'1h'` instead of milliseconds
@@ -305,6 +305,21 @@ Bun.serve({
 })
 ```
 
+### Postgres Store
+
+For distributed systems using PostgreSQL. Atomic upserts for consistency.
+
+```typescript
+import { hitlimit } from '@joint-ops/hitlimit-bun'
+import { postgresStore } from '@joint-ops/hitlimit-bun/stores/postgres'
+
+Bun.serve({
+  fetch: hitlimit({
+    store: postgresStore({ url: 'postgres://localhost:5432/mydb' })
+  }, handler)
+})
+```
+
 ## Response Headers
 
 Every response includes rate limit information:
@@ -344,9 +359,10 @@ hitlimit-bun is optimized for Bun's runtime with native performance:
 
 | Store | Operations/sec | vs Node.js |
 |-------|----------------|------------|
-| **Memory** | 5,620,000+ | +68% faster |
-| **bun:sqlite** | 383,000+ | ~same |
-| **Redis** | 6,800+ | ~same |
+| **Memory** | 5,090,000+ | +84% faster |
+| **bun:sqlite** | 428,000+ | ~same |
+| **Redis** | 6,600+ | ~same |
+| **Postgres** | 2,900+ | ~same |
 
 ### HTTP Throughput
 
@@ -355,7 +371,7 @@ hitlimit-bun is optimized for Bun's runtime with native performance:
 | **Bun.serve** | 105,000 req/s | 12% |
 | **Elysia** | 115,000 req/s | 11% |
 
-> **Note:** These are our benchmarks and we've done our best to keep them fair and reproducible. Results vary by hardware and environment — clone the repo and run them yourself. They're not set in stone — if you find issues or have suggestions for improvement, please open an issue or PR.
+> **Note:** Memory store on Bun is 1.5x faster than the same code on Node.js (2.86M vs 1.85M ops/sec at 10K IPs). These are our benchmarks and we've done our best to keep them fair and reproducible. Results vary by hardware and environment — clone the repo and run them yourself. They're not set in stone — if you find issues or have suggestions for improvement, please open an issue or PR.
 
 ### Why bun:sqlite is So Fast
 
