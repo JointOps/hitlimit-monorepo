@@ -1,6 +1,6 @@
 # hitlimit Benchmarks
 
-Reproducible benchmarks for hitlimit rate limiting library.
+Controlled-environment microbenchmarks for the hitlimit rate limiting library. These measure the raw throughput and latency of the rate limiting logic itself — not HTTP servers, not real network traffic, not production load. The goal is an apples-to-apples comparison of the core algorithms under identical, reproducible conditions.
 
 We believe benchmarks should be transparent, reproducible, and honest. This document explains exactly how we run them and why we made each decision. If you think something is unfair or could be improved, [open an issue](https://github.com/JointOps/hitlimit-monorepo/issues) — we want to get this right.
 
@@ -142,12 +142,34 @@ node --expose-gc node_modules/.bin/tsx benchmarks/src/scripts/run-node.ts
 bun benchmarks/src/scripts/run-bun.ts
 ```
 
-## Results
+## Results Structure
 
-Results are saved to `benchmarks/results/`:
-- `node-latest.json` / `node-latest.md` — Node.js results
-- `bun-latest.json` / `bun-latest.md` — Bun results
-- `v{version}/` — Versioned snapshots for each release
+Every benchmark run writes to `benchmarks/results/latest/`. At release time, `latest/` is copied to a versioned folder to preserve the historical record.
+
+```
+benchmarks/results/
+├── latest/              ← runners always write here
+│   ├── node.json        ← raw data (ops/sec, latencies, memory, CI)
+│   ├── node.md          ← human-readable report
+│   ├── bun.json
+│   └── bun.md
+├── v1.2.0/              ← snapshot from v1.2.0 release
+│   ├── node.json
+│   ├── node.md
+│   ├── bun.json
+│   └── bun.md
+├── v1.1.3/              ← snapshot from v1.1.3 release
+│   └── ...
+├── v1.1.2/
+│   └── ...
+└── v1.1.1/
+    └── ...
+```
+
+**Why this structure?**
+- `latest/` is always the most recent run — overwritten every time you run benchmarks. No confusion about which file is "current."
+- Versioned folders (`v1.2.0/`, `v1.1.3/`, etc.) are immutable snapshots. They let you compare performance across releases and catch regressions.
+- Four files per folder, consistent naming: `node.json`, `node.md`, `bun.json`, `bun.md`. The folder name tells you the version, the filename tells you the runtime. That's it.
 
 ## Key Insights
 

@@ -551,52 +551,29 @@ Platform: ${process.platform} ${process.arch}
   // Generate reports
   console.log(generateReport(results, storeSupport))
 
-  // Save results
-  if (!existsSync(resultsDir)) {
-    mkdirSync(resultsDir, { recursive: true })
+  // Save results to latest/
+  const latestDir = join(resultsDir, 'latest')
+  if (!existsSync(latestDir)) {
+    mkdirSync(latestDir, { recursive: true })
   }
 
-  writeFileSync(
-    join(resultsDir, 'node-latest.json'),
-    JSON.stringify({
-      metadata: {
-        nodeVersion: process.version,
-        platform: `${process.platform} ${process.arch}`,
-        date: new Date().toISOString()
-      },
-      storeSupport: Object.fromEntries(storeSupport),
-      results
-    }, null, 2)
-  )
+  const resultData = JSON.stringify({
+    metadata: {
+      nodeVersion: process.version,
+      platform: `${process.platform} ${process.arch}`,
+      date: new Date().toISOString()
+    },
+    storeSupport: Object.fromEntries(storeSupport),
+    results
+  }, null, 2)
 
-  writeFileSync(
-    join(resultsDir, 'node-latest.md'),
-    generateMarkdown(results, storeSupport)
-  )
+  const resultMd = generateMarkdown(results, storeSupport)
 
-  // Save to versioned directory
-  const versionDir = join(resultsDir, 'v1.2.0')
-  if (!existsSync(versionDir)) {
-    mkdirSync(versionDir, { recursive: true })
-  }
-  writeFileSync(
-    join(versionDir, 'node-results.json'),
-    JSON.stringify({
-      metadata: {
-        nodeVersion: process.version,
-        platform: `${process.platform} ${process.arch}`,
-        date: new Date().toISOString()
-      },
-      storeSupport: Object.fromEntries(storeSupport),
-      results
-    }, null, 2)
-  )
-  writeFileSync(
-    join(versionDir, 'node-results.md'),
-    generateMarkdown(results, storeSupport)
-  )
+  writeFileSync(join(latestDir, 'node.json'), resultData)
+  writeFileSync(join(latestDir, 'node.md'), resultMd)
 
-  console.log(`\nResults saved to ${resultsDir}`)
+  console.log(`\nResults saved to ${latestDir}/node.{json,md}`)
+  console.log(`To snapshot for a release, copy latest/ to v{version}/`)
 }
 
 main().catch(console.error)
