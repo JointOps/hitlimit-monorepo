@@ -5,12 +5,13 @@
  * 100% honest results - only reports what actually runs
  */
 
-import { writeFileSync, mkdirSync, existsSync } from 'fs'
+import { writeFileSync, readFileSync, mkdirSync, existsSync, cpSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const resultsDir = join(__dirname, '..', '..', 'results')
+const rootDir = join(__dirname, '..', '..', '..')
 
 interface BenchmarkResult {
   name: string
@@ -572,8 +573,22 @@ Platform: ${process.platform} ${process.arch}
   writeFileSync(join(latestDir, 'node.json'), resultData)
   writeFileSync(join(latestDir, 'node.md'), resultMd)
 
-  console.log(`\nResults saved to ${latestDir}/node.{json,md}`)
-  console.log(`To snapshot for a release, copy latest/ to v{version}/`)
+  // Auto-snapshot to versioned folder from VERSION file
+  const versionFile = join(rootDir, 'VERSION')
+  if (existsSync(versionFile)) {
+    const version = readFileSync(versionFile, 'utf-8').trim()
+    if (version) {
+      const versionDir = join(resultsDir, `v${version}`)
+      if (!existsSync(versionDir)) {
+        mkdirSync(versionDir, { recursive: true })
+      }
+      writeFileSync(join(versionDir, 'node.json'), resultData)
+      writeFileSync(join(versionDir, 'node.md'), resultMd)
+      console.log(`\nResults saved to latest/ and v${version}/`)
+    }
+  } else {
+    console.log(`\nResults saved to latest/ (no VERSION file found — skipped versioned snapshot)`)
+  }
 }
 
 main().catch(console.error)
