@@ -5,7 +5,6 @@
  * 100% honest results - only reports what actually runs
  */
 
-import { performance } from 'perf_hooks'
 import { writeFileSync, mkdirSync, existsSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -37,6 +36,7 @@ interface StoreSupport {
   memory: boolean
   sqlite: boolean
   redis: boolean
+  postgres: boolean
 }
 
 interface Competitor {
@@ -55,7 +55,7 @@ interface Scenario {
 }
 
 // Store types to test
-const STORES: (keyof StoreSupport)[] = ['memory', 'sqlite', 'redis']
+const STORES: (keyof StoreSupport)[] = ['memory', 'sqlite', 'redis', 'postgres']
 
 // Scenarios
 const scenarios: Scenario[] = [
@@ -145,7 +145,7 @@ function formatLatency(ns: number): string {
 const competitors: Competitor[] = [
   {
     name: 'hitlimit',
-    stores: { memory: true, sqlite: true, redis: true },
+    stores: { memory: true, sqlite: true, redis: true, postgres: true },
     setup: async (store) => {
       try {
         if (store === 'memory') {
@@ -188,6 +188,26 @@ const competitors: Competitor[] = [
             }
           }
         }
+        if (store === 'postgres') {
+          const pg = await import('pg')
+          const { postgresStore } = await import('../../../packages/hitlimit/dist/stores/postgres.js')
+          const { hitlimit } = await import('../../../packages/hitlimit/dist/index.js')
+          const pgUrl = process.env.POSTGRES_URL || 'postgres://hitlimit:hitlimit@localhost:5433/hitlimit_test'
+          const pool = new pg.default.Pool({ connectionString: pgUrl, max: 20 })
+          // Test connection
+          await pool.query('SELECT 1')
+          const storeInstance = postgresStore({ pool, tablePrefix: 'bench_hitlimit' })
+          return {
+            fn: hitlimit({ limit: 1_000_000, window: '1m', store: storeInstance }),
+            cleanup: async () => {
+              storeInstance.shutdown?.()
+              await pool.query('DROP TABLE IF EXISTS bench_hitlimit_hits')
+              await pool.query('DROP TABLE IF EXISTS bench_hitlimit_bans')
+              await pool.query('DROP TABLE IF EXISTS bench_hitlimit_violations')
+              await pool.end()
+            }
+          }
+        }
       } catch (e: any) {
         console.log(`      Setup failed: ${e.message}`)
         return null
@@ -197,7 +217,7 @@ const competitors: Competitor[] = [
   },
   {
     name: 'express-rate-limit',
-    stores: { memory: true, sqlite: false, redis: false },
+    stores: { memory: true, sqlite: false, redis: false, postgres: false },
     setup: async (store) => {
       if (store !== 'memory') return null
       try {
@@ -219,7 +239,7 @@ const competitors: Competitor[] = [
   },
   {
     name: 'rate-limiter-flexible',
-    stores: { memory: true, sqlite: false, redis: true },
+    stores: { memory: true, sqlite: false, redis: true, postgres: true },
     setup: async (store) => {
       try {
         if (store === 'memory') {
@@ -266,6 +286,40 @@ const competitors: Competitor[] = [
             }
           }
         }
+        if (store === 'postgres') {
+          const pg = await import('pg')
+          const { RateLimiterPostgres } = await import('rate-limiter-flexible')
+          const pgUrl = process.env.POSTGRES_URL || 'postgres://hitlimit:hitlimit@localhost:5433/hitlimit_test'
+          const pool = new pg.default.Pool({ connectionString: pgUrl, max: 20 })
+          // Test connection
+          await pool.query('SELECT 1')
+          // RateLimiterPostgres requires a ready callback for table creation
+          const limiter = await new Promise<any>((resolve, reject) => {
+            const rl = new RateLimiterPostgres({
+              storeClient: pool,
+              points: 1_000_000,
+              duration: 60,
+              tableName: 'bench_rlf_limits'
+            }, (err: Error | undefined) => {
+              if (err) reject(err)
+              else resolve(rl)
+            })
+          })
+          return {
+            fn: async (req: any, res: any, next: () => void) => {
+              try {
+                await limiter.consume(req.ip)
+                next()
+              } catch {
+                res.status(429)
+              }
+            },
+            cleanup: async () => {
+              await pool.query('DROP TABLE IF EXISTS bench_rlf_limits')
+              await pool.end()
+            }
+          }
+        }
       } catch {
         return null
       }
@@ -295,13 +349,18 @@ async function runBenchmark(
   const allLatencies: number[] = []
 
   for (let run = 0; run < options.runs; run++) {
+    // GC before each run for normalized state
+    if (global.gc) global.gc()
+    // Cooldown between runs to prevent thermal throttling
+    if (run > 0) await new Promise(r => setTimeout(r, 200))
+
     console.log(`      Run ${run + 1}/${options.runs}...`)
     for (let i = 0; i < options.iterations; i++) {
       const { req, res, next } = scenario.generateRequest(i)
-      const start = performance.now()
+      const start = process.hrtime.bigint()
       await fn(req, res, next)
-      const end = performance.now()
-      allLatencies.push((end - start) * 1_000_000)
+      const end = process.hrtime.bigint()
+      allLatencies.push(Number(end - start))
     }
   }
 
@@ -396,11 +455,11 @@ function generateMarkdown(results: BenchmarkResult[], storeSupport: Map<string, 
 
 ## Store Support Matrix
 
-| Library | Memory | SQLite | Redis |
-|---------|--------|--------|-------|
+| Library | Memory | SQLite | Redis | Postgres |
+|---------|--------|--------|-------|----------|
 `
   for (const comp of competitors) {
-    md += `| ${comp.name} | ${comp.stores.memory ? '✓' : '✗'} | ${comp.stores.sqlite ? '✓' : '✗'} | ${comp.stores.redis ? '✓' : '✗'} |\n`
+    md += `| ${comp.name} | ${comp.stores.memory ? '✓' : '✗'} | ${comp.stores.sqlite ? '✓' : '✗'} | ${comp.stores.redis ? '✓' : '✗'} | ${comp.stores.postgres ? '✓' : '✗'} |\n`
   }
 
   // Group by store
@@ -480,6 +539,8 @@ Platform: ${process.platform} ${process.arch}
           console.log(`    ${formatOps(result.opsPerSec)} ops/sec, avg: ${formatLatency(result.avgLatencyNs)}`)
 
           if (cleanup) await cleanup()
+          // Cooldown between competitors to prevent thermal throttling
+          await new Promise(r => setTimeout(r, 500))
         } catch (error: any) {
           console.log(`    Error: ${error.message}`)
         }
@@ -510,6 +571,28 @@ Platform: ${process.platform} ${process.arch}
 
   writeFileSync(
     join(resultsDir, 'node-latest.md'),
+    generateMarkdown(results, storeSupport)
+  )
+
+  // Save to versioned directory
+  const versionDir = join(resultsDir, 'v1.2.0')
+  if (!existsSync(versionDir)) {
+    mkdirSync(versionDir, { recursive: true })
+  }
+  writeFileSync(
+    join(versionDir, 'node-results.json'),
+    JSON.stringify({
+      metadata: {
+        nodeVersion: process.version,
+        platform: `${process.platform} ${process.arch}`,
+        date: new Date().toISOString()
+      },
+      storeSupport: Object.fromEntries(storeSupport),
+      results
+    }, null, 2)
+  )
+  writeFileSync(
+    join(versionDir, 'node-results.md'),
     generateMarkdown(results, storeSupport)
   )
 
