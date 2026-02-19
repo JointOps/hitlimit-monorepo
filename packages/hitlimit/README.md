@@ -142,7 +142,7 @@ app.use(hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' 
 
 ## Performance
 
-### vs Competitors (10K unique IPs — real-world load)
+### vs Competitors (Memory Store, 10K unique IPs)
 
 | Library | Ops/sec | |
 |---------|---------|---|
@@ -150,7 +150,7 @@ app.use(hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' 
 | rate-limiter-flexible | 1,210,000 | █████████████ |
 | express-rate-limit | 892,000 | █████████ |
 
-[Controlled-environment microbenchmarks](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks) — transparent methodology, reproducible results. We report scenarios where competitors beat us. Run them yourself.
+This is the **memory store** comparison — the default for all three libraries. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. We report scenarios where competitors beat us. Run them yourself.
 
 ---
 
