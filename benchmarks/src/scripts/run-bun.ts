@@ -5,12 +5,13 @@
  * 100% honest results - only reports what actually runs
  */
 
-import { writeFileSync, mkdirSync, existsSync } from 'fs'
+import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'fs'
 import { join, dirname } from 'path'
 
 // @ts-ignore - Bun globals
 const __dirname = dirname(Bun.main)
 const resultsDir = join(__dirname, '..', '..', 'results')
+const rootDir = join(__dirname, '..', '..', '..')
 
 interface BenchmarkResult {
   name: string
@@ -429,8 +430,22 @@ Platform: ${process.platform} ${process.arch}
   writeFileSync(join(latestDir, 'bun.json'), resultData)
   writeFileSync(join(latestDir, 'bun.md'), resultMd)
 
-  console.log(`\nResults saved to ${latestDir}/bun.{json,md}`)
-  console.log(`To snapshot for a release, copy latest/ to v{version}/`)
+  // Auto-snapshot to versioned folder from VERSION file
+  const versionFile = join(rootDir, 'VERSION')
+  if (existsSync(versionFile)) {
+    const version = readFileSync(versionFile, 'utf-8').trim()
+    if (version) {
+      const versionDir = join(resultsDir, `v${version}`)
+      if (!existsSync(versionDir)) {
+        mkdirSync(versionDir, { recursive: true })
+      }
+      writeFileSync(join(versionDir, 'bun.json'), resultData)
+      writeFileSync(join(versionDir, 'bun.md'), resultMd)
+      console.log(`\nResults saved to latest/ and v${version}/`)
+    }
+  } else {
+    console.log(`\nResults saved to latest/ (no VERSION file found — skipped versioned snapshot)`)
+  }
 }
 
 main().catch(console.error)

@@ -144,7 +144,7 @@ bun benchmarks/src/scripts/run-bun.ts
 
 ## Results Structure
 
-Every benchmark run writes to `benchmarks/results/latest/`. At release time, `latest/` is copied to a versioned folder to preserve the historical record.
+Every benchmark run writes to `benchmarks/results/latest/` and automatically snapshots to `benchmarks/results/v{version}/` by reading the `VERSION` file in the repo root. No manual copying needed — just make sure `VERSION` is set before running benchmarks.
 
 ```
 benchmarks/results/
