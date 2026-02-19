@@ -24,6 +24,22 @@ services:
     profiles:
       - persistent
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: hitlimit-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: hitlimit_test
+      POSTGRES_USER: hitlimit
+      POSTGRES_PASSWORD: hitlimit
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hitlimit -d hitlimit_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
   redis-commander:
     image: rediscommander/redis-commander:latest
     container_name: hitlimit-redis-ui
