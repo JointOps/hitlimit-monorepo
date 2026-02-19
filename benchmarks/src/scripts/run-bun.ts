@@ -36,6 +36,7 @@ interface StoreSupport {
   memory: boolean
   sqlite: boolean
   redis: boolean
+  postgres: boolean
 }
 
 interface Competitor {
@@ -54,7 +55,7 @@ interface Scenario {
 }
 
 // Store types to test
-const STORES: (keyof StoreSupport)[] = ['memory', 'sqlite', 'redis']
+const STORES: (keyof StoreSupport)[] = ['memory', 'sqlite', 'redis', 'postgres']
 
 // Scenarios
 const scenarios: Scenario[] = [
@@ -116,7 +117,7 @@ function formatLatency(ns: number): string {
 const competitors: Competitor[] = [
   {
     name: 'hitlimit-bun',
-    stores: { memory: true, sqlite: true, redis: true },
+    stores: { memory: true, sqlite: true, redis: true, postgres: true },
     setup: async (store) => {
       try {
         if (store === 'memory') {
@@ -156,6 +157,24 @@ const competitors: Competitor[] = [
             }
           }
         }
+        if (store === 'postgres') {
+          const pg = await import('pg')
+          const { postgresStore } = await import('../../../packages/hitlimit-bun/dist/stores/postgres.js')
+          const pgUrl = process.env.POSTGRES_URL || 'postgres://hitlimit:hitlimit@localhost:5433/hitlimit_test'
+          const pool = new pg.default.Pool({ connectionString: pgUrl, max: 20 })
+          await pool.query('SELECT 1')
+          const storeInstance = postgresStore({ pool, tablePrefix: 'bench_bun_hitlimit' })
+          return {
+            hit: (key: string) => storeInstance.hit(key, 60000, 1_000_000),
+            cleanup: async () => {
+              storeInstance.shutdown?.()
+              await pool.query('DROP TABLE IF EXISTS bench_bun_hitlimit_hits')
+              await pool.query('DROP TABLE IF EXISTS bench_bun_hitlimit_bans')
+              await pool.query('DROP TABLE IF EXISTS bench_bun_hitlimit_violations')
+              await pool.end()
+            }
+          }
+        }
       } catch (e: any) {
         console.log(`      Setup failed: ${e.message}`)
         return null
@@ -170,10 +189,10 @@ async function runBenchmark(
   scenario: Scenario,
   store: string,
   hit: (key: string) => any,
-  options = { iterations: 10_000, warmupIterations: 1_000, runs: 3 }
+  options = { iterations: 50_000, warmupIterations: 5_000, runs: 5 }
 ): Promise<BenchmarkResult> {
   // Warmup
-  console.log(`      Warming up...`)
+  console.log(`      Warming up (${options.warmupIterations} iterations)...`)
   for (let i = 0; i < options.warmupIterations; i++) {
     const key = scenario.generateKey(i)
     await hit(key)
@@ -186,6 +205,11 @@ async function runBenchmark(
   const allLatencies: number[] = []
 
   for (let run = 0; run < options.runs; run++) {
+    // GC before each run for normalized state
+    Bun.gc(true)
+    // Cooldown between runs to prevent thermal throttling
+    if (run > 0) await new Promise(r => setTimeout(r, 200))
+
     console.log(`      Run ${run + 1}/${options.runs}...`)
 
     for (let i = 0; i < options.iterations; i++) {
@@ -290,11 +314,11 @@ function generateMarkdown(results: BenchmarkResult[]): string {
 
 ## Store Support Matrix
 
-| Library | Memory | SQLite | Redis |
-|---------|--------|--------|-------|
+| Library | Memory | SQLite | Redis | Postgres |
+|---------|--------|--------|-------|----------|
 `
   for (const comp of competitors) {
-    md += `| ${comp.name} | ${comp.stores.memory ? '✓' : '✗'} | ${comp.stores.sqlite ? '✓' : '✗'} | ${comp.stores.redis ? '✓' : '✗'} |\n`
+    md += `| ${comp.name} | ${comp.stores.memory ? '✓' : '✗'} | ${comp.stores.sqlite ? '✓' : '✗'} | ${comp.stores.redis ? '✓' : '✗'} | ${comp.stores.postgres ? '✓' : '✗'} |\n`
   }
 
   // Group by store
@@ -367,6 +391,8 @@ Platform: ${process.platform} ${process.arch}
           console.log(`    ${formatOps(result.opsPerSec)} ops/sec, avg: ${formatLatency(result.avgLatencyNs)}`)
 
           if (cleanup) await cleanup()
+          // Cooldown between competitors to prevent thermal throttling
+          await new Promise(r => setTimeout(r, 500))
         } catch (error: any) {
           console.log(`    Error: ${error.message}`)
         }
@@ -402,6 +428,28 @@ Platform: ${process.platform} ${process.arch}
 
   writeFileSync(
     join(resultsDir, 'bun-latest.md'),
+    generateMarkdown(results)
+  )
+
+  // Save to versioned directory
+  const versionDir = join(resultsDir, 'v1.2.0')
+  if (!existsSync(versionDir)) {
+    mkdirSync(versionDir, { recursive: true })
+  }
+  writeFileSync(
+    join(versionDir, 'bun-results.json'),
+    JSON.stringify({
+      metadata: {
+        bunVersion: Bun.version,
+        platform: `${process.platform} ${process.arch}`,
+        date: new Date().toISOString()
+      },
+      storeSupport,
+      results
+    }, null, 2)
+  )
+  writeFileSync(
+    join(versionDir, 'bun-results.md'),
     generateMarkdown(results)
   )
 
