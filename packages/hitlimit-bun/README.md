@@ -128,16 +128,14 @@ Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: 'postgres://localhost:
 
 ## Performance
 
-### Bun vs Node.js (hitlimit, 10K unique IPs)
+### Bun vs Node.js — Memory Store, 10K unique IPs
 
 | Runtime | Ops/sec | |
 |---------|---------|---|
 | **Bun** | **2,860,000** | ████████████████████ |
 | Node.js | 1,850,000 | ████████████ |
 
-84% faster on Bun. Same library, same algorithm — Bun's runtime does the heavy lifting.
-
-[Controlled-environment microbenchmarks](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks) — transparent methodology, reproducible results. Run them yourself.
+84% faster on Bun. Same library, same algorithm, **memory store** — Bun's runtime does the heavy lifting. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. Run them yourself.
 
 ### Why bun:sqlite is faster than better-sqlite3
 
