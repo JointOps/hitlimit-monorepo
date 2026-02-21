@@ -83,7 +83,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 
   <div data-runtime-content="node">
     <ul>
-      <li><strong>Speed:</strong> Fast — local file I/O with WAL mode (~280K ops/sec)</li>
+      <li><strong>Speed:</strong> Fast — local file I/O with WAL mode (~376K ops/sec)</li>
       <li><strong>Persistence:</strong> Data survives restarts</li>
       <li><strong>Scalability:</strong> Single server only</li>
       <li><strong>Dependencies:</strong> Requires <code>better-sqlite3</code></li>
@@ -92,7 +92,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 
   <div data-runtime-content="bun">
     <ul>
-      <li><strong>Speed:</strong> 383K ops/sec (~2.6&micro;s latency) — near-memory performance</li>
+      <li><strong>Speed:</strong> 331K ops/sec (~3.0&micro;s latency) — near-memory performance</li>
       <li><strong>Zero dependencies:</strong> Uses native <code>bun:sqlite</code>, no packages to install</li>
       <li><strong>WAL mode:</strong> Write-Ahead Logging enabled automatically for concurrent read/write performance</li>
       <li><strong>Synchronous operations:</strong> Uses <code>isSync = true</code> for maximum Bun performance</li>

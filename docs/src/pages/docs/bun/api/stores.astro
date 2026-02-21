@@ -318,24 +318,32 @@ import RuntimeBanner from '../../../../components/RuntimeBanner.astro';
     <tbody>
       <tr>
         <td><strong>Memory</strong></td>
-        <td>5.62M ops/sec</td>
-        <td>~178ns</td>
+        <td>5.57M ops/sec</td>
+        <td>~180ns</td>
         <td>No</td>
         <td>No</td>
         <td>Yes</td>
       </tr>
       <tr>
         <td><strong>SQLite</strong></td>
-        <td>383K ops/sec</td>
-        <td>~2.6&mu;s</td>
+        <td>331K ops/sec</td>
+        <td>~3.0&mu;s</td>
         <td>Yes</td>
         <td>No</td>
         <td>Yes</td>
       </tr>
       <tr>
         <td><strong>Redis</strong></td>
-        <td>6.8K ops/sec</td>
-        <td>~146&mu;s</td>
+        <td>6.7K ops/sec</td>
+        <td>~148&mu;s</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td><strong>Postgres</strong></td>
+        <td>3.7K ops/sec</td>
+        <td>~273&mu;s</td>
         <td>Yes</td>
         <td>Yes</td>
         <td>No</td>
@@ -345,7 +353,7 @@ import RuntimeBanner from '../../../../components/RuntimeBanner.astro';
 
   <p>
     Memory and SQLite stores run synchronously on Bun's main thread, avoiding
-    Promise overhead entirely. Redis requires network I/O, so it returns Promises.
+    Promise overhead entirely. Redis and Postgres require network I/O, so they return Promises.
     Choose based on whether you need persistence or distribution.
   </p>
 </DocsLayout>

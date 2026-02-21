@@ -94,7 +94,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 
   <h2 id="stores">Store Configuration</h2>
 
-  <p>hitlimit supports three storage backends. Memory is the default and fastest option:</p>
+  <p>hitlimit supports four storage backends. Memory is the default and fastest option:</p>
 
   <div data-runtime-content="node">
     <table class="options-table">
@@ -102,9 +102,10 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><th>Store</th><th>Best For</th><th>Throughput</th></tr>
       </thead>
       <tbody>
-        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">3.14M ops/s</td></tr>
-        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts</td><td>280K ops/s</td></tr>
-        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>6.8K ops/s</td></tr>
+        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">2.90M ops/s</td></tr>
+        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts</td><td>376K ops/s</td></tr>
+        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>6.5K ops/s</td></tr>
+        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>3.5K ops/s</td></tr>
       </tbody>
     </table>
   </div>
@@ -115,9 +116,10 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><th>Store</th><th>Best For</th><th>Throughput</th></tr>
       </thead>
       <tbody>
-        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">5.62M ops/s</td></tr>
-        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts (bun:sqlite)</td><td>383K ops/s</td></tr>
+        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">2.90M ops/s</td></tr>
+        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts (bun:sqlite)</td><td>331K ops/s</td></tr>
         <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>6.7K ops/s</td></tr>
+        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>3.7K ops/s</td></tr>
       </tbody>
     </table>
   </div>
