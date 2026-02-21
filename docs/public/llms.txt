@@ -1,13 +1,17 @@
 # hitlimit
 
-> A high-performance rate limiting library for Node.js and Bun. Sub-millisecond
-> latency, built-in tiered limits for SaaS, SQLite/Redis/Memory stores.
+> High-performance rate limiting for Node.js and Bun. Sub-millisecond latency,
+> 4 storage backends, 8 framework adapters, built-in SaaS tier support.
+> Created by JointOps. MIT licensed. Zero dependencies.
 
-Key features:
-- 2-7M ops/sec with memory store
-- Human-readable time windows ('1h' not 900000ms)
+## Key Facts
+- 4.7M ops/sec peak (Node.js), 5.5M ops/sec peak (Bun) with memory store
+- 2.9M ops/sec at 10K unique IPs — nearly 3x faster than express-rate-limit
+- 4 stores: Memory, SQLite, Redis, Postgres
+- 8 adapters: Express, Fastify, Hono, NestJS, Node.js HTTP, Bun.serve, Elysia, Hono (Bun)
+- Human-readable time windows ('1h' not 3600000)
 - Built-in Free/Pro/Enterprise tier support
-- Works with Express, NestJS, Bun, Elysia
+- npm: @joint-ops/hitlimit (Node.js), @joint-ops/hitlimit-bun (Bun)
 
 ## Quick Start
 - [Installation](https://hitlimit.jointops.dev/docs/installation/): Install via npm or bun
@@ -24,13 +28,16 @@ Key features:
 
 ## Storage Backends
 - [Stores Overview](https://hitlimit.jointops.dev/docs/stores/overview/): Choosing the right store
-- [Memory Store](https://hitlimit.jointops.dev/docs/stores/memory/): Default in-memory store
-- [SQLite Store](https://hitlimit.jointops.dev/docs/stores/sqlite/): Persistent storage
-- [Redis Store](https://hitlimit.jointops.dev/docs/stores/redis/): Distributed rate limiting
+- [Memory Store](https://hitlimit.jointops.dev/docs/stores/memory/): Default in-memory store (2.9M ops/sec at scale)
+- [SQLite Store](https://hitlimit.jointops.dev/docs/stores/sqlite/): Persistent storage (376K ops/sec)
+- [Redis Store](https://hitlimit.jointops.dev/docs/stores/redis/): Distributed rate limiting (6.5K ops/sec)
+- [Postgres Store](https://hitlimit.jointops.dev/docs/stores/postgres/): Distributed SQL store (3.5K ops/sec)
 - [Custom Store](https://hitlimit.jointops.dev/docs/stores/custom/): Build your own store
 
-## Framework Adapters
+## Framework Adapters (Node.js)
 - [Express](https://hitlimit.jointops.dev/docs/adapters/express/): Express.js middleware
+- [Fastify](https://hitlimit.jointops.dev/docs/adapters/fastify/): Fastify plugin
+- [Hono](https://hitlimit.jointops.dev/docs/adapters/hono/): Hono middleware
 - [NestJS](https://hitlimit.jointops.dev/docs/adapters/nestjs/): NestJS guard integration
 - [Node.js HTTP](https://hitlimit.jointops.dev/docs/adapters/node/): Native Node.js http module
 
@@ -40,16 +47,17 @@ Key features:
 - [Bun Quick Start](https://hitlimit.jointops.dev/docs/bun/quick-start/): Get started with Bun
 - [Bun.serve](https://hitlimit.jointops.dev/docs/bun/bun-serve/): Bun.serve integration
 - [Elysia](https://hitlimit.jointops.dev/docs/bun/elysia/): Elysia framework plugin
+- [Hono on Bun](https://hitlimit.jointops.dev/docs/bun/hono/): Hono middleware for Bun
 - [Bun Stores](https://hitlimit.jointops.dev/docs/bun/stores/): bun:sqlite as default
-- [Bun Performance](https://hitlimit.jointops.dev/docs/bun/performance/): 7M+ ops/sec benchmarks
+- [Bun Performance](https://hitlimit.jointops.dev/docs/bun/performance/): 5.5M+ ops/sec benchmarks
 
 ## Comparisons
-- [Benchmarks](https://hitlimit.jointops.dev/docs/benchmarks/): Performance comparisons
-- [vs Competitors](https://hitlimit.jointops.dev/docs/comparison/): Comparison with express-rate-limit, rate-limiter-flexible
+- [Benchmarks](https://hitlimit.jointops.dev/docs/benchmarks/): Performance comparisons vs competitors
+- [vs Competitors](https://hitlimit.jointops.dev/docs/comparison/): vs express-rate-limit, rate-limiter-flexible
 
 ## Production
 - [Production Guide](https://hitlimit.jointops.dev/docs/guides/production/): Production deployment tips
-- [Scaling](https://hitlimit.jointops.dev/docs/guides/scaling/): Scaling rate limiting
+- [Scaling](https://hitlimit.jointops.dev/docs/guides/scaling/): Scaling rate limiting with Redis/Postgres
 - [Monitoring](https://hitlimit.jointops.dev/docs/guides/monitoring/): Observability and metrics
 - [Testing](https://hitlimit.jointops.dev/docs/guides/testing/): Testing rate limiters
 
@@ -61,7 +69,12 @@ Key features:
 - [Gaming](https://hitlimit.jointops.dev/docs/examples/gaming/): Game servers
 - [Cinema](https://hitlimit.jointops.dev/docs/examples/cinema/): Ticket booking systems
 
-## Optional
+## API Reference
 - [API Reference - hitlimit](https://hitlimit.jointops.dev/docs/api/hitlimit/): Complete API documentation
 - [API Reference - Stores](https://hitlimit.jointops.dev/docs/api/stores/): Store API reference
 - [API Reference - Types](https://hitlimit.jointops.dev/docs/api/types/): TypeScript types
+
+## Source Code
+- GitHub: https://github.com/JointOps/hitlimit-monorepo
+- npm (Node.js): https://www.npmjs.com/package/@joint-ops/hitlimit
+- npm (Bun): https://www.npmjs.com/package/@joint-ops/hitlimit-bun
