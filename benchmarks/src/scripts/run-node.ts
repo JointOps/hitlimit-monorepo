@@ -64,7 +64,7 @@ const scenarios: Scenario[] = [
     name: 'single-ip',
     description: 'Single IP hammering the API (worst case for that IP)',
     generateRequest: (i: number) => ({
-      req: { ip: '192.168.1.1', socket: { remoteAddress: '192.168.1.1' } },
+      req: createMockRequest('192.168.1.1'),
       res: createMockResponse(),
       next: () => {}
     })
@@ -76,7 +76,7 @@ const scenarios: Scenario[] = [
       const idx = i % 1000
       const ip = `10.0.${Math.floor(idx / 256)}.${idx % 256}`
       return {
-        req: { ip, socket: { remoteAddress: ip } },
+        req: createMockRequest(ip),
         res: createMockResponse(),
         next: () => {}
       }
@@ -89,13 +89,22 @@ const scenarios: Scenario[] = [
       const idx = i % 10000
       const ip = `10.${Math.floor(idx / 65536) % 256}.${Math.floor(idx / 256) % 256}.${idx % 256}`
       return {
-        req: { ip, socket: { remoteAddress: ip } },
+        req: createMockRequest(ip),
         res: createMockResponse(),
         next: () => {}
       }
     }
   }
 ]
+
+function createMockRequest(ip: string) {
+  return {
+    ip,
+    socket: { remoteAddress: ip },
+    headers: {} as Record<string, string | undefined>,
+    app: { get: () => undefined }
+  }
+}
 
 function createMockResponse() {
   const headers: Record<string, any> = {}
@@ -154,7 +163,9 @@ const competitors: Competitor[] = [
           const { hitlimit } = await import('../../../packages/hitlimit/dist/index.js')
           const storeInstance = memoryStore()
           return {
-            fn: hitlimit({ limit: 1_000_000, window: '1m', store: storeInstance }),
+            // Headers disabled — benchmark measures rate-limiting logic, not HTTP formatting
+            // RLF's consume() sets 0 headers, so we disable ours for apples-to-apples
+            fn: hitlimit({ limit: 1_000_000, window: '1m', store: storeInstance, headers: { standard: false, legacy: false } }),
             cleanup: () => storeInstance.shutdown?.()
           }
         }
@@ -163,7 +174,8 @@ const competitors: Competitor[] = [
           const { hitlimit } = await import('../../../packages/hitlimit/dist/index.js')
           const storeInstance = sqliteStore({ path: ':memory:' })
           return {
-            fn: hitlimit({ limit: 1_000_000, window: '1m', store: storeInstance }),
+            // Headers disabled — benchmark measures rate-limiting logic, not HTTP formatting
+            fn: hitlimit({ limit: 1_000_000, window: '1m', store: storeInstance, headers: { standard: false, legacy: false } }),
             cleanup: () => storeInstance.shutdown?.()
           }
         }
@@ -179,7 +191,8 @@ const competitors: Competitor[] = [
           // Create store
           const storeInstance = redisStore({ url: 'redis://localhost:6379', keyPrefix: 'bench:hitlimit:' })
           return {
-            fn: hitlimit({ limit: 1_000_000, window: '1m', store: storeInstance }),
+            // Headers disabled — benchmark measures rate-limiting logic, not HTTP formatting
+            fn: hitlimit({ limit: 1_000_000, window: '1m', store: storeInstance, headers: { standard: false, legacy: false } }),
             cleanup: async () => {
               const cleanupRedis = new Redis({ host: 'localhost', port: 6379 })
               const keys = await cleanupRedis.keys('bench:hitlimit:*')
@@ -199,7 +212,8 @@ const competitors: Competitor[] = [
           await pool.query('SELECT 1')
           const storeInstance = postgresStore({ pool, tablePrefix: 'bench_hitlimit' })
           return {
-            fn: hitlimit({ limit: 1_000_000, window: '1m', store: storeInstance }),
+            // Headers disabled — benchmark measures rate-limiting logic, not HTTP formatting
+            fn: hitlimit({ limit: 1_000_000, window: '1m', store: storeInstance, headers: { standard: false, legacy: false } }),
             cleanup: async () => {
               storeInstance.shutdown?.()
               await pool.query('DROP TABLE IF EXISTS bench_hitlimit_hits')
@@ -226,7 +240,8 @@ const competitors: Competitor[] = [
         const limiter = rateLimit({
           windowMs: 60_000,
           max: 1_000_000,
-          standardHeaders: true,
+          // Headers disabled — benchmark measures rate-limiting logic, not HTTP formatting
+          standardHeaders: false,
           legacyHeaders: false
         })
         return {
