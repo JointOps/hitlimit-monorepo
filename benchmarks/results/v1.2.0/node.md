@@ -1,6 +1,6 @@
 # Node.js Benchmark Results
 
-**Generated:** 2026-02-19T02:23:25.264Z
+**Generated:** 2026-02-21T14:18:54.651Z
 **Node.js:** v24.4.1
 **Platform:** darwin arm64
 
@@ -18,25 +18,25 @@
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| hitlimit | 2.77M | 361ns | 333ns | 583ns | 708ns | **fastest** |
-| rate-limiter-flexible | 2.29M | 436ns | 375ns | 667ns | 917ns | 83% |
-| express-rate-limit | 792.2K | 1.26us | 833ns | 1.83us | 2.75us | 29% |
+| hitlimit | 4.71M | 212ns | 208ns | 333ns | 458ns | **fastest** |
+| rate-limiter-flexible | 2.31M | 433ns | 333ns | 1.00us | 1.54us | 49% |
+| express-rate-limit | 1.43M | 698ns | 583ns | 1.00us | 1.42us | 30% |
 
 ### multi-ip-1k
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| hitlimit | 2.06M | 486ns | 417ns | 916ns | 1.17us | **fastest** |
-| rate-limiter-flexible | 1.63M | 612ns | 459ns | 1.21us | 1.79us | 79% |
-| express-rate-limit | 987.1K | 1.01us | 875ns | 1.83us | 2.46us | 48% |
+| hitlimit | 1.90M | 528ns | 250ns | 833ns | 1.50us | **fastest** |
+| rate-limiter-flexible | 1.51M | 664ns | 500ns | 1.29us | 2.04us | 79% |
+| express-rate-limit | 1.24M | 804ns | 625ns | 1.42us | 2.71us | 66% |
 
 ### multi-ip-10k
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| hitlimit | 1.85M | 542ns | 458ns | 1.00us | 1.63us | **fastest** |
-| rate-limiter-flexible | 1.21M | 824ns | 666ns | 1.63us | 2.63us | 66% |
-| express-rate-limit | 891.9K | 1.12us | 916ns | 2.17us | 3.00us | 48% |
+| hitlimit | 2.90M | 345ns | 291ns | 667ns | 1.00us | **fastest** |
+| rate-limiter-flexible | 1.08M | 926ns | 584ns | 1.67us | 2.63us | 37% |
+| express-rate-limit | 1.04M | 960ns | 750ns | 1.96us | 3.08us | 36% |
 
 
 ## Sqlite Store
@@ -45,19 +45,19 @@
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| hitlimit | 413.4K | 2.42us | 2.04us | 4.17us | 6.00us | **fastest** |
+| hitlimit | 451.6K | 2.21us | 1.92us | 3.50us | 4.71us | **fastest** |
 
 ### multi-ip-1k
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| hitlimit | 358.1K | 2.79us | 2.42us | 4.46us | 6.75us | **fastest** |
+| hitlimit | 398.9K | 2.51us | 2.29us | 3.63us | 6.42us | **fastest** |
 
 ### multi-ip-10k
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| hitlimit | 351.9K | 2.84us | 2.50us | 4.54us | 7.00us | **fastest** |
+| hitlimit | 375.8K | 2.66us | 2.33us | 4.29us | 6.63us | **fastest** |
 
 
 ## Redis Store
@@ -66,22 +66,22 @@
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| hitlimit | 6.1K | 164.28us | 146.88us | 199.04us | 454.67us | **fastest** |
-| rate-limiter-flexible | 3.2K | 313.67us | 157.50us | 739.50us | 2.41ms | 52% |
+| rate-limiter-flexible | 6.2K | 160.97us | 150.46us | 195.58us | 414.38us | **fastest** |
+| hitlimit | 6.1K | 164.73us | 148.25us | 224.54us | 484.00us | 98% |
 
 ### multi-ip-1k
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| rate-limiter-flexible | 6.3K | 158.25us | 149.92us | 193.46us | 391.58us | **fastest** |
-| hitlimit | 6.2K | 161.31us | 147.71us | 224.08us | 458.79us | 98% |
+| hitlimit | 6.5K | 154.06us | 147.79us | 182.58us | 313.46us | **fastest** |
+| rate-limiter-flexible | 6.3K | 158.31us | 151.38us | 185.42us | 296.21us | 97% |
 
 ### multi-ip-10k
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| hitlimit | 6.8K | 147.82us | 145.79us | 170.00us | 209.17us | **fastest** |
-| rate-limiter-flexible | 6.3K | 159.32us | 148.54us | 188.88us | 419.13us | 93% |
+| rate-limiter-flexible | 6.5K | 155.00us | 150.08us | 180.08us | 265.75us | **fastest** |
+| hitlimit | 5.9K | 168.89us | 148.83us | 236.79us | 536.46us | 92% |
 
 
 ## Postgres Store
@@ -90,20 +90,20 @@
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| rate-limiter-flexible | 3.2K | 314.39us | 301.00us | 407.50us | 584.04us | **fastest** |
-| hitlimit | 2.7K | 375.59us | 345.25us | 465.54us | 790.38us | 84% |
+| hitlimit | 3.5K | 285.94us | 281.38us | 343.13us | 629.88us | **fastest** |
+| rate-limiter-flexible | 3.5K | 288.61us | 285.96us | 338.79us | 498.42us | 99% |
 
 ### multi-ip-1k
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| rate-limiter-flexible | 3.0K | 331.61us | 308.04us | 441.88us | 799.88us | **fastest** |
-| hitlimit | 2.6K | 388.51us | 349.67us | 488.83us | 1.09ms | 85% |
+| rate-limiter-flexible | 3.4K | 291.11us | 289.13us | 359.92us | 491.67us | **fastest** |
+| hitlimit | 3.3K | 299.08us | 290.42us | 370.50us | 545.42us | 97% |
 
 ### multi-ip-10k
 
 | Library | ops/sec | avg | p50 | p95 | p99 | vs fastest |
 |---------|---------|-----|-----|-----|-----|------------|
-| rate-limiter-flexible | 3.0K | 330.61us | 309.25us | 424.58us | 720.63us | **fastest** |
-| hitlimit | 2.5K | 392.68us | 358.29us | 492.38us | 983.00us | 84% |
+| rate-limiter-flexible | 3.3K | 300.07us | 288.13us | 381.83us | 674.08us | **fastest** |
+| hitlimit | 3.3K | 304.15us | 290.33us | 386.75us | 634.42us | 99% |
 
