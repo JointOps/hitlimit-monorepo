@@ -16,8 +16,8 @@ const siteUrl = 'https://hitlimit.jointops.dev';
 
 const {
   title = 'hitlimit - The Fastest Rate Limiter for Node.js, Bun, Express, Fastify, Hono & NestJS | express-rate-limit alternative',
-  description = 'Lightning-fast rate limiting middleware for Node.js, Bun, Express, Fastify, Hono, NestJS, and Elysia. A faster, lighter alternative to express-rate-limit, @fastify/rate-limit, hono-rate-limiter, and rate-limiter-flexible. Sub-millisecond performance, memory/SQLite/Redis stores, zero config.',
-  keywords = 'rate limit, rate limiter, rate limiting, express rate limit, express-rate-limit, express-rate-limit alternative, fastify rate limit, fastify rate limiter, fastify plugin, @fastify/rate-limit, @fastify/rate-limit alternative, hono rate limit, hono rate limiter, hono middleware, hono-rate-limiter, hono-rate-limiter alternative, rate-limiter-flexible, rate-limiter-flexible alternative, express middleware, nestjs rate limit, nestjs throttler, @nestjs/throttler, bun rate limit, bun rate limiter, elysia rate limit, elysia plugin, nodejs rate limiter, node rate limit, api rate limiting, throttle requests, request throttling, ddos protection, brute force protection, login protection, redis rate limit, sqlite rate limit, api throttling, request limiting, npm rate limit, sliding window, fixed window, token bucket, api security, request limiter',
+  description = 'Lightning-fast rate limiting middleware for Node.js, Bun, Express, Fastify, Hono, NestJS, and Elysia. A faster, lighter alternative to express-rate-limit, @fastify/rate-limit, hono-rate-limiter, and rate-limiter-flexible. Sub-millisecond performance, memory/SQLite/Redis/Postgres stores, zero config.',
+  keywords = 'rate limit, rate limiter, rate limiting, express rate limit, express-rate-limit, express-rate-limit alternative, fastify rate limit, fastify rate limiter, fastify plugin, @fastify/rate-limit, @fastify/rate-limit alternative, hono rate limit, hono rate limiter, hono middleware, hono-rate-limiter, hono-rate-limiter alternative, rate-limiter-flexible, rate-limiter-flexible alternative, express middleware, nestjs rate limit, nestjs throttler, @nestjs/throttler, bun rate limit, bun rate limiter, elysia rate limit, elysia plugin, nodejs rate limiter, node rate limit, api rate limiting, throttle requests, request throttling, ddos protection, brute force protection, login protection, redis rate limit, sqlite rate limit, postgres rate limit, postgres rate limiter, api throttling, request limiting, npm rate limit, sliding window, fixed window, token bucket, api security, request limiter',
   canonical = `${siteUrl}${Astro.url.pathname}`,
   ogType = 'website'
 } = Astro.props;
@@ -121,7 +121,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "What is hitlimit?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "hitlimit is an open-source rate limiting library for Node.js and Bun created by JointOps. It provides sub-millisecond performance, is 3x faster than express-rate-limit in high-traffic scenarios, and has a ~6KB bundle (Node.js) or ~18KB (Bun). It supports Express, Fastify, Hono, NestJS, Bun.serve, and Elysia frameworks with memory, SQLite, and Redis stores."
+            "text": "hitlimit is an open-source rate limiting library for Node.js and Bun created by JointOps. It provides sub-millisecond performance with 4.7M ops/sec (Node.js) and 5.5M ops/sec (Bun), nearly 3x faster than express-rate-limit. It has a ~6KB bundle (Node.js) or ~18KB (Bun) with zero runtime dependencies. It supports Express, Fastify, Hono, NestJS, Bun.serve, and Elysia frameworks with 4 storage backends: memory, SQLite, Redis, and Postgres."
           }
         },
         {
@@ -129,7 +129,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "Is hitlimit faster than express-rate-limit?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, hitlimit is approximately 3x faster than express-rate-limit in high-traffic benchmarks. It achieves 3.25 million operations per second compared to 957K for express-rate-limit (10K unique IPs, memory store). Both have zero runtime dependencies."
+            "text": "Yes, hitlimit is approximately 3x faster than express-rate-limit in high-traffic benchmarks. It achieves 2.9 million operations per second compared to 1.08 million for express-rate-limit (10K unique IPs, memory store, Node.js). Both have zero runtime dependencies."
           }
         },
         {
@@ -145,7 +145,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "Does hitlimit support Redis?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, hitlimit supports Redis for distributed rate limiting across multiple servers. Configure it with: hitlimit({ store: 'redis', redis: { host: 'localhost', port: 6379 } }). It also supports memory (default) and SQLite stores."
+            "text": "Yes, hitlimit supports Redis for distributed rate limiting across multiple servers using atomic Lua scripts via ioredis defineCommand(). Import redisStore from '@joint-ops/hitlimit/stores/redis' and pass it as the store option. hitlimit supports 4 stores: memory (default), SQLite, Redis, and Postgres."
           }
         },
         {
@@ -169,7 +169,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "What is the difference between hitlimit and rate-limiter-flexible?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "hitlimit is faster (3.25M ops/sec vs 1.84M in high-traffic scenarios) and offers simpler configuration with built-in framework adapters. rate-limiter-flexible has more storage backends (14 vs 3) and weighted requests, but hitlimit covers common use cases with better performance and a simpler API."
+            "text": "hitlimit is faster in memory benchmarks (2.9M ops/sec vs 1.04M at 10K IPs). Redis and Postgres performance is comparable between the two. rate-limiter-flexible has more storage backends (14 vs 4) and weighted requests. hitlimit offers simpler configuration, built-in SaaS tier support, 8 framework adapters, and human-readable time windows."
           }
         },
         {
@@ -177,7 +177,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "Does hitlimit work with Bun?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, hitlimit has a dedicated Bun package (@joint-ops/hitlimit-bun) optimized for Bun runtime. It works with Bun.serve() directly and with Elysia framework, achieving even faster performance than the Node.js version."
+            "text": "Yes, hitlimit has a dedicated Bun package (@joint-ops/hitlimit-bun) optimized for Bun runtime. It works with Bun.serve(), Elysia, and Hono frameworks, achieving 5.5M+ ops/sec peak performance. It includes native bun:sqlite integration and supports all 4 storage backends."
           }
         }
       ]
