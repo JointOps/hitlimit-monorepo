@@ -45,7 +45,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 
   <div data-runtime-content="node">
     <ul>
-      <li><strong>Speed:</strong> Fastest option — 3.14M ops/sec, no I/O overhead</li>
+      <li><strong>Speed:</strong> Fastest option — 4.71M ops/sec peak, no I/O overhead</li>
       <li><strong>Persistence:</strong> Data is lost on restart</li>
       <li><strong>Scalability:</strong> Not shared between instances</li>
       <li><strong>Memory:</strong> Grows with unique keys; auto-cleanup removes expired entries</li>
@@ -54,7 +54,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 
   <div data-runtime-content="bun">
     <ul>
-      <li><strong>Speed:</strong> 5.62M ops/sec (~178ns latency) — the fastest store available</li>
+      <li><strong>Speed:</strong> 5.57M ops/sec (~180ns latency) — the fastest store available</li>
       <li><strong>Zero dependencies:</strong> Built into the runtime</li>
       <li><strong>Persistence:</strong> None — data is lost on restart</li>
       <li><strong>Scalability:</strong> Single instance only — not shared between processes</li>
