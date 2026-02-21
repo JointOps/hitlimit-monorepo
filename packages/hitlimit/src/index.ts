@@ -79,7 +79,51 @@ export function hitlimit(options: HitLimitOptions<Request> = {}) {
     }
   }
 
-  // Async fast path: no skip, no tiers, no ban, no group (async store or custom key)
+  // Async fast path: async store + default (sync) key — inline key to avoid microtask overhead
+  if (!hasSkip && !hasTiers && !hasBan && !hasGroup && isSyncKey) {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const key = req.ip || req.socket?.remoteAddress || 'unknown'
+        const result = await config.store.hit(key, windowMs, limit)
+        const allowed = result.count <= limit
+        const remaining = Math.max(0, limit - result.count)
+        const resetIn = Math.ceil((result.resetAt - Date.now()) / 1000)
+
+        if (standardHeaders) {
+          res.setHeader('RateLimit-Limit', limit)
+          res.setHeader('RateLimit-Remaining', remaining)
+          res.setHeader('RateLimit-Reset', resetIn)
+        }
+        if (legacyHeaders) {
+          res.setHeader('X-RateLimit-Limit', limit)
+          res.setHeader('X-RateLimit-Remaining', remaining)
+          res.setHeader('X-RateLimit-Reset', Math.ceil(result.resetAt / 1000))
+        }
+
+        if (!allowed) {
+          if (retryAfterHeader) {
+            res.setHeader('Retry-After', resetIn)
+          }
+          const body = buildResponseBody(responseConfig, {
+            limit, remaining: 0, resetIn, resetAt: result.resetAt, key
+          })
+          res.status(429).json(body)
+          return
+        }
+
+        next()
+      } catch (error) {
+        const action = await config.onStoreError(error as Error, req)
+        if (action === 'deny') {
+          res.status(429).json({ hitlimit: true, message: 'Rate limit error' })
+          return
+        }
+        next()
+      }
+    }
+  }
+
+  // Async path: custom key function — must await key generation
   if (!hasSkip && !hasTiers && !hasBan && !hasGroup) {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
