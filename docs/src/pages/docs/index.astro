@@ -34,7 +34,7 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
           </div>
         </div>
         <p class="text-sm text-[var(--color-text-secondary)] mb-4">
-          Express, Fastify, Hono, NestJS, and raw Node.js HTTP. 3.2M+ ops/sec.
+          Express, Fastify, Hono, NestJS, and raw Node.js HTTP. 4.7M+ ops/sec.
         </p>
         <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--color-bg-elevated)] font-mono text-xs text-[var(--color-text-muted)] mb-4">
           <span>$</span> npm i @joint-ops/hitlimit
@@ -65,7 +65,7 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
           </div>
         </div>
         <p class="text-sm text-[var(--color-text-secondary)] mb-4">
-          Bun.serve, Elysia, and Hono on Bun. 5.6M+ ops/sec with native bun:sqlite.
+          Bun.serve, Elysia, and Hono on Bun. 5.5M+ ops/sec with native bun:sqlite.
         </p>
         <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--color-bg-elevated)] font-mono text-xs text-[var(--color-text-muted)] mb-4">
           <span>$</span> bun add @joint-ops/hitlimit-bun
@@ -87,7 +87,7 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
     <h2 class="text-2xl font-semibold mb-4">What is hitlimit?</h2>
     <p class="text-[var(--color-text-secondary)] mb-6">
       hitlimit is a high-performance rate limiting library for JavaScript. It provides sub-millisecond
-      request throttling with built-in support for tiered limits, multiple storage backends (Memory, SQLite, Redis),
+      request throttling with built-in support for tiered limits, multiple storage backends (Memory, SQLite, Redis, Postgres),
       and 8 framework adapters across Node.js and Bun.
     </p>
 
@@ -95,7 +95,7 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
     <ul class="space-y-2 text-[var(--color-text-secondary)] mb-8">
       <li class="flex items-start gap-2">
         <svg class="w-5 h-5 text-[var(--color-accent)] mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span><strong class="text-white">Blazing fast</strong> — 3.2M ops/sec (Node.js) to 5.6M ops/sec (Bun)</span>
+        <span><strong class="text-white">Blazing fast</strong> — 4.7M ops/sec (Node.js) to 5.5M ops/sec (Bun)</span>
       </li>
       <li class="flex items-start gap-2">
         <svg class="w-5 h-5 text-[var(--color-accent)] mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -103,7 +103,7 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
       </li>
       <li class="flex items-start gap-2">
         <svg class="w-5 h-5 text-[var(--color-accent)] mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span><strong class="text-white">3 storage backends</strong> — Memory, SQLite, and Redis with atomic Lua scripts</span>
+        <span><strong class="text-white">4 storage backends</strong> — Memory, SQLite, Redis, and Postgres</span>
       </li>
       <li class="flex items-start gap-2">
         <svg class="w-5 h-5 text-[var(--color-accent)] mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/></svg>
