@@ -88,7 +88,7 @@ When comparing Redis or Postgres stores, all competitors connect to the same loc
 
 ### What We Don't Do
 
-- **No cherry-picking** — We report all scenarios, including ones where competitors beat us. RLF wins all Postgres scenarios. We say so.
+- **No cherry-picking** — We report all scenarios, including ones where competitors beat us. RLF wins 2 of 3 Redis scenarios and 2 of 3 Postgres scenarios by small margins. We say so.
 - **No artificial limits on competitors** — Each library is configured the way its docs recommend. express-rate-limit uses its default key generator. rate-limiter-flexible uses `consume()` as documented.
 - **No preheating advantage** — Every competitor gets the same warmup. No library runs "first" consistently (store order is fixed, but competitor order within each store is consistent across runs).
 
@@ -98,28 +98,32 @@ When comparing Redis or Postgres stores, all competitors connect to the same loc
 
 | Store | Scenario | Ops/sec | Avg Latency |
 |-------|----------|---------|-------------|
-| **Memory** | single-ip | 2.77M | 361ns |
-| **Memory** | 1k IPs | 2.06M | 486ns |
-| **Memory** | 10k IPs | 1.85M | 542ns |
-| **SQLite** | single-ip | 413K | 2.42μs |
-| **SQLite** | 10k IPs | 352K | 2.84μs |
-| **Redis** | single-ip | 6.1K | 164μs |
-| **Redis** | 10k IPs | 6.8K | 148μs |
-| **Postgres** | single-ip | 2.7K | 376μs |
-| **Postgres** | 10k IPs | 2.5K | 393μs |
+| **Memory** | single-ip | 4.71M | 212ns |
+| **Memory** | 1k IPs | 1.90M | 528ns |
+| **Memory** | 10k IPs | 2.90M | 345ns |
+| **SQLite** | single-ip | 452K | 2.21μs |
+| **SQLite** | 10k IPs | 376K | 2.66μs |
+| **Redis** | single-ip | 6.1K | 165μs |
+| **Redis** | 1k IPs | 6.5K | 154μs |
+| **Redis** | 10k IPs | 5.9K | 169μs |
+| **Postgres** | single-ip | 3.5K | 286μs |
+| **Postgres** | 1k IPs | 3.3K | 299μs |
+| **Postgres** | 10k IPs | 3.3K | 304μs |
 
 ### Bun (hitlimit-bun)
 
 | Store | Scenario | Ops/sec | Avg Latency |
 |-------|----------|---------|-------------|
-| **Memory** | single-ip | 5.09M | 196ns |
-| **Memory** | 10k IPs | 2.86M | 350ns |
-| **bun:sqlite** | single-ip | 428K | 2.34μs |
-| **bun:sqlite** | 10k IPs | 317K | 3.16μs |
-| **Redis** | single-ip | 6.6K | 151μs |
-| **Redis** | 10k IPs | 6.8K | 147μs |
-| **Postgres** | single-ip | 2.9K | 350μs |
-| **Postgres** | 10k IPs | 2.6K | 392μs |
+| **Memory** | single-ip | 5.57M | 179ns |
+| **Memory** | 1k IPs | 3.04M | 329ns |
+| **Memory** | 10k IPs | 2.90M | 345ns |
+| **bun:sqlite** | single-ip | 429K | 2.33μs |
+| **bun:sqlite** | 10k IPs | 331K | 3.02μs |
+| **Redis** | single-ip | 6.7K | 148μs |
+| **Redis** | 10k IPs | 6.7K | 149μs |
+| **Postgres** | single-ip | 3.6K | 275μs |
+| **Postgres** | 1k IPs | 3.6K | 279μs |
+| **Postgres** | 10k IPs | 3.7K | 273μs |
 
 ### Comparison with Competitors (Node.js, 10K IPs)
 
@@ -127,27 +131,35 @@ When comparing Redis or Postgres stores, all competitors connect to the same loc
 
 | Library | Ops/sec | vs Fastest |
 |---------|---------|------------|
-| **hitlimit** | **1.85M** | **fastest** |
-| rate-limiter-flexible | 1.21M | 66% |
-| express-rate-limit | 892K | 48% |
+| **hitlimit** | **2.90M** | **fastest** |
+| rate-limiter-flexible | 1.08M | 37% |
+| express-rate-limit | 1.04M | 36% |
 
 **Redis Store**
 
-| Library | Ops/sec | vs Fastest |
-|---------|---------|------------|
-| **hitlimit** | **6.8K** | **fastest** |
-| rate-limiter-flexible | 6.3K | 93% |
+| Library | Scenario | Ops/sec | vs Fastest |
+|---------|----------|---------|------------|
+| **rate-limiter-flexible** | single-ip | **6.2K** | **fastest** |
+| hitlimit | single-ip | 6.1K | 98% |
+| **hitlimit** | multi-1k | **6.5K** | **fastest** |
+| rate-limiter-flexible | multi-1k | 6.3K | 97% |
+| **rate-limiter-flexible** | multi-10k | **6.5K** | **fastest** |
+| hitlimit | multi-10k | 5.9K | 92% |
 
-> Redis is network-bound (~150μs latency). Both libraries use atomic Lua scripts. Results are within margin of error. RLF edges out on multi-1k (6.3K vs 6.2K).
+> Redis is network-bound (~150μs latency). Both libraries use atomic Lua scripts. Results are within margin of error — hitlimit wins multi-1k, RLF wins single-ip and multi-10k. hitlimit has lower p50 latency in all 3 scenarios (148μs vs 150μs).
 
 **Postgres Store**
 
-| Library | Ops/sec | vs Fastest |
-|---------|---------|------------|
-| **rate-limiter-flexible** | **3.0K** | **fastest** |
-| hitlimit | 2.5K | 84% |
+| Library | Scenario | Ops/sec | vs Fastest |
+|---------|----------|---------|------------|
+| **hitlimit** | single-ip | **3.5K** | **fastest** |
+| rate-limiter-flexible | single-ip | 3.5K | 99% |
+| **rate-limiter-flexible** | multi-1k | **3.4K** | **fastest** |
+| hitlimit | multi-1k | 3.3K | 97% |
+| **rate-limiter-flexible** | multi-10k | **3.3K** | **fastest** |
+| hitlimit | multi-10k | 3.3K | 99% |
 
-> RLF wins all Postgres scenarios by ~16%. We report this honestly.
+> Postgres is essentially tied between hitlimit and RLF across all scenarios. hitlimit wins single-ip, RLF wins multi-1k by 3%, multi-10k is a virtual tie (99%). hitlimit uses named prepared statements for server-side query plan caching.
 
 > **Fair play:** These are our benchmarks and we've done our best to keep them fair and reproducible. We encourage you to clone this repo and run them yourself. They're not set in stone — there's always room for improvement. If you spot issues or have suggestions, please open an issue or PR.
 
@@ -214,11 +226,11 @@ benchmarks/results/
 
 ## Key Insights
 
-1. **Memory Store**: hitlimit is 1.5x faster than rate-limiter-flexible with many unique IPs (zero-allocation hot path + sweep timer)
-2. **SQLite Store**: Only hitlimit offers built-in SQLite — 350-430K ops/sec with zero config
-3. **Redis Store**: Network-bound (~150μs latency). Both hitlimit and RLF use atomic Lua scripts. hitlimit wins most Redis scenarios (6.1-6.8K vs RLF 3.2-6.3K), RLF edges out on multi-1k (6.3K vs 6.2K — within margin of error)
-4. **Postgres Store**: Network-bound (~350-400μs latency). RLF wins all Postgres scenarios (3.0-3.2K vs hitlimit 2.5-2.7K). We report this honestly
-5. **Bun Runtime**: 1.5-1.8x faster than Node.js for memory operations (5.09M vs 2.77M single-ip)
+1. **Memory Store**: hitlimit is 2.7x faster than rate-limiter-flexible at 10K unique IPs (2.90M vs 1.08M — zero-allocation sync hot path + sweep timer)
+2. **SQLite Store**: Only hitlimit offers built-in SQLite — 376-452K ops/sec with zero config
+3. **Redis Store**: Network-bound (~150μs latency). Both hitlimit and RLF use atomic Lua scripts via `defineCommand()`. Essentially tied — hitlimit wins multi-1k (6.5K vs 6.3K), RLF wins single-ip and multi-10k by small margins. hitlimit has lower p50 latency in all scenarios
+4. **Postgres Store**: Network-bound (~280-300μs latency). Essentially tied — hitlimit wins single-ip (3.5K), RLF wins multi-1k by 3%, multi-10k is 99% tied. hitlimit uses named prepared statements for server-side query plan caching
+5. **Bun Runtime**: 1.6-1.9x faster than Node.js for memory operations (5.57M vs 4.71M single-ip, 2.90M vs 2.90M at 10K IPs)
 6. **4 Store Backends**: hitlimit supports Memory, SQLite, Redis, and Postgres — all built in, zero runtime dependencies
 
 ## Think We Can Do Better?

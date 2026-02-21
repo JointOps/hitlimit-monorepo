@@ -2,7 +2,7 @@
 
 > Rate limiting that doesn't slow you down.
 
-**1.85M ops/sec** at 10K unique IPs. Zero dependencies. One line to protect any Node.js API.
+**2.90M ops/sec** at 10K unique IPs. Zero dependencies. One line to protect any Node.js API.
 
 ```bash
 npm install @joint-ops/hitlimit
@@ -133,10 +133,10 @@ app.use(hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' 
 
 | Store | Ops/sec | Latency | When to use |
 |-------|---------|---------|-------------|
-| Memory | 1,850,000 | 0.5μs | Single server, no persistence needed |
-| SQLite | 352,000 | 2.8μs | Single server, need persistence |
-| Redis | 6,800 | 148μs | Multi-server / distributed |
-| Postgres | 2,700 | 376μs | Multi-server / already using Postgres |
+| Memory | 2,900,000 | 345ns | Single server, no persistence needed |
+| SQLite | 376,000 | 2.7μs | Single server, need persistence |
+| Redis | 6,500 | 154μs | Multi-server / distributed |
+| Postgres | 3,500 | 286μs | Multi-server / already using Postgres |
 
 ---
 
@@ -146,9 +146,9 @@ app.use(hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' 
 
 | Library | Ops/sec | |
 |---------|---------|---|
-| **hitlimit** | **1,850,000** | ████████████████████ |
-| rate-limiter-flexible | 1,210,000 | █████████████ |
-| express-rate-limit | 892,000 | █████████ |
+| **hitlimit** | **2,900,000** | ████████████████████ |
+| rate-limiter-flexible | 1,080,000 | ███████ |
+| express-rate-limit | 1,040,000 | ███████ |
 
 This is the **memory store** comparison — the default for all three libraries. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. We report scenarios where competitors beat us. Run them yourself.
 
