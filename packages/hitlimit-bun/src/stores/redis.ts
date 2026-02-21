@@ -65,49 +65,27 @@ class RedisStore implements HitLimitStore {
   private prefix: string
   private banPrefix: string
   private violationPrefix: string
-  private hitSHA: string | null = null
-  private hitWithBanSHA: string | null = null
 
   constructor(options: RedisStoreOptions = {}) {
     this.redis = new Redis(options.url ?? 'redis://localhost:6379')
     this.prefix = options.keyPrefix ?? 'hitlimit:'
     this.banPrefix = (options.keyPrefix ?? 'hitlimit:') + 'ban:'
     this.violationPrefix = (options.keyPrefix ?? 'hitlimit:') + 'violations:'
-  }
 
-  private async loadScripts(): Promise<void> {
-    if (!this.hitSHA) {
-      this.hitSHA = await this.redis.script('LOAD', HIT_SCRIPT) as string
-    }
-    if (!this.hitWithBanSHA) {
-      this.hitWithBanSHA = await this.redis.script('LOAD', HIT_WITH_BAN_SCRIPT) as string
-    }
-  }
-
-  private async evalScript(sha: string, script: string, keys: string[], args: (string | number)[]): Promise<any> {
-    try {
-      return await this.redis.evalsha(sha, keys.length, ...keys, ...args)
-    } catch (err: any) {
-      if (err.message && err.message.includes('NOSCRIPT')) {
-        // Script evicted or Redis restarted — reload and retry
-        const newSHA = await this.redis.script('LOAD', script) as string
-        if (script === HIT_SCRIPT) this.hitSHA = newSHA
-        else if (script === HIT_WITH_BAN_SCRIPT) this.hitWithBanSHA = newSHA
-        return await this.redis.evalsha(newSHA, keys.length, ...keys, ...args)
-      }
-      throw err
-    }
+    // Register Lua scripts as custom commands — ioredis handles SHA caching + NOSCRIPT recovery
+    this.redis.defineCommand('hitlimitHit', {
+      numberOfKeys: 1,
+      lua: HIT_SCRIPT
+    })
+    this.redis.defineCommand('hitlimitHitWithBan', {
+      numberOfKeys: 3,
+      lua: HIT_WITH_BAN_SCRIPT
+    })
   }
 
   async hit(key: string, windowMs: number, _limit: number): Promise<StoreResult> {
-    await this.loadScripts()
-
     const redisKey = this.prefix + key
-    const result = await this.evalScript(
-      this.hitSHA!, HIT_SCRIPT,
-      [redisKey],
-      [windowMs]
-    )
+    const result = await (this.redis as any).hitlimitHit(redisKey, windowMs)
 
     const count = result[0] as number
     const ttl = result[1] as number
@@ -115,16 +93,13 @@ class RedisStore implements HitLimitStore {
   }
 
   async hitWithBan(key: string, windowMs: number, limit: number, banThreshold: number, banDurationMs: number): Promise<HitWithBanResult> {
-    await this.loadScripts()
-
     const hitKey = this.prefix + key
     const banKey = this.banPrefix + key
     const violationKey = this.violationPrefix + key
 
-    const result = await this.evalScript(
-      this.hitWithBanSHA!, HIT_WITH_BAN_SCRIPT,
-      [hitKey, banKey, violationKey],
-      [windowMs, limit, banThreshold, banDurationMs]
+    const result = await (this.redis as any).hitlimitHitWithBan(
+      hitKey, banKey, violationKey,
+      windowMs, limit, banThreshold, banDurationMs
     )
 
     const count = result[0] as number
@@ -133,7 +108,6 @@ class RedisStore implements HitLimitStore {
     const violations = result[3] as number
 
     if (count === -1) {
-      // Currently banned — ttl is the ban's remaining TTL
       return { count: 0, resetAt: Date.now() + ttl, banned: true, violations: 0, banExpiresAt: Date.now() + ttl }
     }
 
