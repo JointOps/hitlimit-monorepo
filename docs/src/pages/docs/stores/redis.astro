@@ -83,7 +83,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
   <h2 id="lua-scripts">Lua Scripts</h2>
 
   <p>
-    As of <strong>v1.1.3</strong>, the Redis store uses atomic Lua scripts to combine multiple Redis
+    As of <strong>v1.2.0</strong>, the Redis store uses <code>defineCommand()</code> to register Lua scripts with native SHA caching, combining multiple Redis
     commands into a single call. Instead of issuing separate <code>INCR</code>, <code>PEXPIRE</code>,
     and <code>PTTL</code> commands (3 round trips), a single Lua script executes all three atomically
     on the Redis server — <strong>reducing round trips from 3 to 1</strong>.
