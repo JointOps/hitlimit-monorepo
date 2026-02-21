@@ -1,6 +1,6 @@
 # Bun Benchmark Results
 
-**Generated:** 2026-02-19T02:31:30.224Z
+**Generated:** 2026-02-21T13:39:20.411Z
 **Bun:** 1.3.7
 **Platform:** darwin arm64
 
@@ -16,19 +16,19 @@
 
 | Library | ops/sec | avg | p50 | p95 | p99 |
 |---------|---------|-----|-----|-----|-----|
-| hitlimit-bun | 5.09M | 196ns | 167ns | 292ns | 375ns |
+| hitlimit-bun | 5.57M | 179ns | 167ns | 292ns | 375ns |
 
 ### multi-ip-1k
 
 | Library | ops/sec | avg | p50 | p95 | p99 |
 |---------|---------|-----|-----|-----|-----|
-| hitlimit-bun | 3.41M | 293ns | 291ns | 417ns | 542ns |
+| hitlimit-bun | 3.04M | 329ns | 292ns | 542ns | 750ns |
 
 ### multi-ip-10k
 
 | Library | ops/sec | avg | p50 | p95 | p99 |
 |---------|---------|-----|-----|-----|-----|
-| hitlimit-bun | 2.86M | 350ns | 333ns | 541ns | 834ns |
+| hitlimit-bun | 2.90M | 345ns | 333ns | 542ns | 1.38us |
 
 
 ## Sqlite Store
@@ -37,19 +37,19 @@
 
 | Library | ops/sec | avg | p50 | p95 | p99 |
 |---------|---------|-----|-----|-----|-----|
-| hitlimit-bun | 427.7K | 2.34us | 2.04us | 3.54us | 5.67us |
+| hitlimit-bun | 428.6K | 2.33us | 2.04us | 3.67us | 6.00us |
 
 ### multi-ip-1k
 
 | Library | ops/sec | avg | p50 | p95 | p99 |
 |---------|---------|-----|-----|-----|-----|
-| hitlimit-bun | 349.0K | 2.87us | 2.46us | 4.88us | 7.17us |
+| hitlimit-bun | 340.4K | 2.94us | 2.50us | 4.92us | 9.04us |
 
 ### multi-ip-10k
 
 | Library | ops/sec | avg | p50 | p95 | p99 |
 |---------|---------|-----|-----|-----|-----|
-| hitlimit-bun | 316.5K | 3.16us | 2.63us | 5.67us | 8.04us |
+| hitlimit-bun | 331.1K | 3.02us | 2.58us | 5.38us | 8.88us |
 
 
 ## Redis Store
@@ -58,19 +58,19 @@
 
 | Library | ops/sec | avg | p50 | p95 | p99 |
 |---------|---------|-----|-----|-----|-----|
-| hitlimit-bun | 6.6K | 150.92us | 141.04us | 188.25us | 412.63us |
+| hitlimit-bun | 6.7K | 148.33us | 140.54us | 182.04us | 388.25us |
 
 ### multi-ip-1k
 
 | Library | ops/sec | avg | p50 | p95 | p99 |
 |---------|---------|-----|-----|-----|-----|
-| hitlimit-bun | 6.4K | 156.54us | 143.13us | 201.04us | 451.96us |
+| hitlimit-bun | 6.5K | 153.82us | 140.63us | 207.29us | 451.71us |
 
 ### multi-ip-10k
 
 | Library | ops/sec | avg | p50 | p95 | p99 |
 |---------|---------|-----|-----|-----|-----|
-| hitlimit-bun | 6.8K | 147.01us | 139.92us | 179.71us | 384.33us |
+| hitlimit-bun | 6.7K | 149.38us | 141.21us | 186.17us | 386.79us |
 
 
 ## Postgres Store
@@ -79,17 +79,17 @@
 
 | Library | ops/sec | avg | p50 | p95 | p99 |
 |---------|---------|-----|-----|-----|-----|
-| hitlimit-bun | 2.9K | 349.73us | 322.96us | 455.17us | 980.58us |
+| hitlimit-bun | 3.6K | 274.84us | 261.54us | 348.46us | 582.00us |
 
 ### multi-ip-1k
 
 | Library | ops/sec | avg | p50 | p95 | p99 |
 |---------|---------|-----|-----|-----|-----|
-| hitlimit-bun | 2.7K | 368.34us | 330.92us | 507.54us | 1.09ms |
+| hitlimit-bun | 3.6K | 279.10us | 263.00us | 350.58us | 652.58us |
 
 ### multi-ip-10k
 
 | Library | ops/sec | avg | p50 | p95 | p99 |
 |---------|---------|-----|-----|-----|-----|
-| hitlimit-bun | 2.6K | 392.05us | 337.92us | 558.33us | 1.43ms |
+| hitlimit-bun | 3.7K | 273.41us | 262.88us | 336.21us | 562.29us |
 
