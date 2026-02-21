@@ -2,7 +2,7 @@
 
 > Rate limiting built for Bun. Not ported — built.
 
-**5M+ ops/sec** on memory. **2.86M at 10K IPs**. Native bun:sqlite. Atomic Redis Lua. Postgres. Zero dependencies.
+**5.5M+ ops/sec** on memory. **2.90M at 10K IPs**. Native bun:sqlite. Atomic Redis Lua. Postgres. Zero dependencies.
 
 ```bash
 bun add @joint-ops/hitlimit-bun
@@ -119,10 +119,10 @@ Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: 'postgres://localhost:
 
 | Store | Ops/sec | Latency | When to use |
 |-------|---------|---------|-------------|
-| Memory | 5,090,000 | 196ns | Single server, maximum speed |
-| bun:sqlite | 428,000 | 2.3μs | Single server, need persistence |
-| Redis | 6,800 | 147μs | Multi-server / distributed |
-| Postgres | 2,900 | 350μs | Multi-server / already using Postgres |
+| Memory | 5,570,000 | 179ns | Single server, maximum speed |
+| bun:sqlite | 429,000 | 2.3μs | Single server, need persistence |
+| Redis | 6,700 | 148μs | Multi-server / distributed |
+| Postgres | 3,700 | 273μs | Multi-server / already using Postgres |
 
 ---
 
@@ -132,10 +132,10 @@ Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: 'postgres://localhost:
 
 | Runtime | Ops/sec | |
 |---------|---------|---|
-| **Bun** | **2,860,000** | ████████████████████ |
-| Node.js | 1,850,000 | ████████████ |
+| **Bun** | **2,900,000** | ████████████████████ |
+| Node.js | 2,900,000 | ████████████████████ |
 
-84% faster on Bun. Same library, same algorithm, **memory store** — Bun's runtime does the heavy lifting. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. Run them yourself.
+Bun and Node.js are neck-and-neck at 10K IPs (2.90M each). Bun pulls ahead on single-IP (5.57M vs 4.71M). Same library, same algorithm, **memory store**. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. Run them yourself.
 
 ### Why bun:sqlite is faster than better-sqlite3
 

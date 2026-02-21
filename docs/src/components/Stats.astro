@@ -1,18 +1,18 @@
 ---
 // Real benchmarks from benchmarks/results/bun-latest.md & node-latest.md
 const stats = [
-  { numericValue: 1.85, decimals: 2, suffix: 'M+', label: 'ops/sec', sublabel: 'Node.js (10K IPs)' },
-  { numericValue: 2.86, decimals: 2, suffix: 'M+', label: 'ops/sec', sublabel: 'Bun (10K IPs)' },
+  { numericValue: 2.90, decimals: 2, suffix: 'M+', label: 'ops/sec', sublabel: 'Node.js (10K IPs)' },
+  { numericValue: 2.90, decimals: 2, suffix: 'M+', label: 'ops/sec', sublabel: 'Bun (10K IPs)' },
   { numericValue: 1, decimals: 0, prefix: '<', suffix: 'ms', label: 'Latency', sublabel: 'p95 response time' },
   { numericValue: 0, decimals: 0, suffix: '', label: 'Dependencies', sublabel: 'for core module' },
 ];
 
 // Real benchmarks from benchmarks/results/ (10K IPs scenario)
 const benchmarks = [
-  { store: 'Memory', nodeOps: '1.85M', bunOps: '2.86M', nodeLatency: '~542ns', bunLatency: '~350ns', note: 'Highest throughput', color: 'cyan' },
-  { store: 'SQLite', nodeOps: '413K', bunOps: '428K', nodeLatency: '~2.4μs', bunLatency: '~2.3μs', note: 'Persistent storage', color: 'purple' },
-  { store: 'Redis', nodeOps: '6.8K', bunOps: '6.8K', nodeLatency: '~148μs', bunLatency: '~147μs', note: 'Distributed', color: 'cyan' },
-  { store: 'Postgres', nodeOps: '2.7K', bunOps: '2.9K', nodeLatency: '~376μs', bunLatency: '~350μs', note: 'Distributed (SQL)', color: 'purple' },
+  { store: 'Memory', nodeOps: '2.90M', bunOps: '2.90M', nodeLatency: '~345ns', bunLatency: '~345ns', note: 'Highest throughput', color: 'cyan' },
+  { store: 'SQLite', nodeOps: '376K', bunOps: '331K', nodeLatency: '~2.7μs', bunLatency: '~3.0μs', note: 'Persistent storage', color: 'purple' },
+  { store: 'Redis', nodeOps: '6.5K', bunOps: '6.7K', nodeLatency: '~154μs', bunLatency: '~148μs', note: 'Distributed', color: 'cyan' },
+  { store: 'Postgres', nodeOps: '3.5K', bunOps: '3.7K', nodeLatency: '~286μs', bunLatency: '~273μs', note: 'Distributed (SQL)', color: 'purple' },
 ];
 ---
 
@@ -47,7 +47,7 @@ const benchmarks = [
           Real <span class="gradient-text">benchmarks</span>
         </h2>
         <p class="text-lg text-[var(--color-text-secondary)]">
-          Tested on Apple M2. <a href="/docs/benchmarks" class="text-[var(--color-accent)] hover:underline">Run them yourself →</a>
+          Tested on Apple M1. <a href="/docs/benchmarks" class="text-[var(--color-accent)] hover:underline">Run them yourself →</a>
         </p>
       </div>
 
@@ -101,7 +101,7 @@ const benchmarks = [
       </div>
 
       <p class="text-center text-sm text-[var(--color-text-muted)] mt-4">
-        10K unique IPs. Node.js v24 / Bun v1.3.7, Apple M2. Redis is network-bound. Our benchmarks — done our best to keep them fair. <a href="/docs/benchmarks" class="text-[var(--color-accent)] hover:underline">Full results →</a> · <a href="https://github.com/JointOps/hitlimit-monorepo" class="text-[var(--color-accent)] hover:underline">Run them yourself</a>
+        10K unique IPs. Node.js v24 / Bun v1.3.7, Apple M1. Redis is network-bound. Our benchmarks — done our best to keep them fair. <a href="/docs/benchmarks" class="text-[var(--color-accent)] hover:underline">Full results →</a> · <a href="https://github.com/JointOps/hitlimit-monorepo" class="text-[var(--color-accent)] hover:underline">Run them yourself</a>
       </p>
     </div>
   </div>
