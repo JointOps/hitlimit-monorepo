@@ -4,9 +4,9 @@ import RuntimeBanner from '../../../../components/RuntimeBanner.astro';
 ---
 
 <DocsLayout
-  title="Stores API (Bun) - hitlimit-bun | Memory, SQLite, Redis Store Reference"
-  description="API reference for hitlimit-bun storage backends. HitLimitStore interface, memoryStore(), sqliteStore(), and redisStore() function signatures and options."
-  keywords="hitlimit-bun store api, bun rate limit store, bun memory store api, bun sqlite store api, bun redis store api, hitlimit store interface"
+  title="Stores API (Bun) - hitlimit-bun | Memory, SQLite, Redis, Postgres Store Reference"
+  description="API reference for hitlimit-bun storage backends. HitLimitStore interface, memoryStore(), sqliteStore(), redisStore(), and postgresStore() function signatures and options."
+  keywords="hitlimit-bun store api, bun rate limit store, bun memory store api, bun sqlite store api, bun redis store api, bun postgres store api, hitlimit store interface"
 >
   <h1>Stores API (Bun)</h1>
 
@@ -250,6 +250,88 @@ import RuntimeBanner from '../../../../components/RuntimeBanner.astro';
 {"}"})</code></pre>
   </div>
 
+  <h2 id="postgres-store">postgresStore()</h2>
+
+  <p>
+    PostgreSQL-backed storage for distributed deployments. Uses named prepared statements
+    for query plan caching and atomic upserts for race-condition-free increments.
+  </p>
+
+  <h3>Signature</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">function</span> <span class="fn">postgresStore</span>(options: PostgresStoreOptions): HitLimitStore</code></pre>
+  </div>
+
+  <h3>Import</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} postgresStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/postgres'</span></code></pre>
+  </div>
+
+  <h3>Options</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Option</th>
+        <th>Type</th>
+        <th>Default</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>pool</code></td>
+        <td><code>Pool</code></td>
+        <td>—</td>
+        <td>A <code>pg.Pool</code> instance (required).</td>
+      </tr>
+      <tr>
+        <td><code>tablePrefix</code></td>
+        <td><code>string</code></td>
+        <td><code>'hitlimit'</code></td>
+        <td>Prefix for rate limit table names.</td>
+      </tr>
+      <tr>
+        <td><code>cleanupInterval</code></td>
+        <td><code>number</code></td>
+        <td><code>60000</code></td>
+        <td>Interval (ms) to clean expired entries.</td>
+      </tr>
+      <tr>
+        <td><code>skipTableCreation</code></td>
+        <td><code>boolean</code></td>
+        <td><code>false</code></td>
+        <td>Skip automatic table creation on startup.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Usage</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">postgres.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+<span class="kw">import</span> {"{"} postgresStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/postgres'</span>
+<span class="kw">import</span> {"{"} Pool {"}"} <span class="kw">from</span> <span class="str">'pg'</span>
+
+<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({"{"} connectionString: <span class="str">'postgres://localhost:5432/mydb'</span> {"}"})
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">postgresStore</span>({"{"} pool {"}"})
+{"}"})</code></pre>
+  </div>
+
   <h2 id="custom-stores">Custom Stores</h2>
 
   <p>
@@ -318,16 +400,16 @@ import RuntimeBanner from '../../../../components/RuntimeBanner.astro';
     <tbody>
       <tr>
         <td><strong>Memory</strong></td>
-        <td>5.57M ops/sec</td>
-        <td>~180ns</td>
+        <td>12.38M ops/sec</td>
+        <td>~81ns</td>
         <td>No</td>
         <td>No</td>
         <td>Yes</td>
       </tr>
       <tr>
         <td><strong>SQLite</strong></td>
-        <td>331K ops/sec</td>
-        <td>~3.0&mu;s</td>
+        <td>325K ops/sec</td>
+        <td>~3.1&mu;s</td>
         <td>Yes</td>
         <td>No</td>
         <td>Yes</td>

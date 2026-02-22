@@ -102,10 +102,10 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><th>Store</th><th>Best For</th><th>Throughput</th></tr>
       </thead>
       <tbody>
-        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">2.90M ops/s</td></tr>
-        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts</td><td>376K ops/s</td></tr>
-        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>6.5K ops/s</td></tr>
-        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>3.5K ops/s</td></tr>
+        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">3.16M ops/s</td></tr>
+        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts</td><td>352K ops/s</td></tr>
+        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>6.7K ops/s</td></tr>
+        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>3.0K ops/s</td></tr>
       </tbody>
     </table>
   </div>
@@ -116,8 +116,8 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><th>Store</th><th>Best For</th><th>Throughput</th></tr>
       </thead>
       <tbody>
-        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">2.90M ops/s</td></tr>
-        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts (bun:sqlite)</td><td>331K ops/s</td></tr>
+        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">8.32M ops/s</td></tr>
+        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts (bun:sqlite)</td><td>325K ops/s</td></tr>
         <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>6.7K ops/s</td></tr>
         <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>3.7K ops/s</td></tr>
       </tbody>
@@ -125,8 +125,8 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
   </div>
 
   <RuntimeCodeTabs
-    node='<span class="kw">import</span> {"{"} hitlimit, memoryStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/sqlite&#39;</span>\n<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/redis&#39;</span>\n\n<span class="cmt">// Memory (default) — no config needed</span>\n<span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span> {"}"})\n\n<span class="cmt">// SQLite — persistent storage</span>\n<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">sqliteStore</span>({"{"} path: <span class="str">&#39;./limits.db&#39;</span> {"}"})\n{"}"})\n\n<span class="cmt">// Redis — distributed</span>\n<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({"{"} url: <span class="str">&#39;redis://localhost:6379&#39;</span> {"}"})\n{"}"})'
-    bun='<span class="kw">import</span> {"{"} hitlimit, sqliteStore, redisStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n\n<span class="cmt">// Memory (default) — no config needed</span>\n<span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span> {"}"})\n\n<span class="cmt">// SQLite — persistent storage via bun:sqlite</span>\n<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">sqliteStore</span>({"{"} path: <span class="str">&#39;./limits.db&#39;</span> {"}"})\n{"}"})\n\n<span class="cmt">// Redis — distributed</span>\n<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({"{"} url: <span class="str">&#39;redis://localhost:6379&#39;</span> {"}"})\n{"}"})'
+    node='<span class="kw">import</span> { hitlimit, memoryStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> { sqliteStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/sqlite&#39;</span>\n<span class="kw">import</span> { redisStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/redis&#39;</span>\n\n<span class="cmt">// Memory (default) — no config needed</span>\n<span class="fn">hitlimit</span>({ limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span> })\n\n<span class="cmt">// SQLite — persistent storage</span>\n<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">sqliteStore</span>({ path: <span class="str">&#39;./limits.db&#39;</span> })\n})\n\n<span class="cmt">// Redis — distributed</span>\n<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({ url: <span class="str">&#39;redis://localhost:6379&#39;</span> })\n})'
+    bun='<span class="kw">import</span> { hitlimit, sqliteStore, redisStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n\n<span class="cmt">// Memory (default) — no config needed</span>\n<span class="fn">hitlimit</span>({ limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span> })\n\n<span class="cmt">// SQLite — persistent storage via bun:sqlite</span>\n<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">sqliteStore</span>({ path: <span class="str">&#39;./limits.db&#39;</span> })\n})\n\n<span class="cmt">// Redis — distributed</span>\n<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({ url: <span class="str">&#39;redis://localhost:6379&#39;</span> })\n})'
   />
 
   <h2 id="example">Full Example</h2>

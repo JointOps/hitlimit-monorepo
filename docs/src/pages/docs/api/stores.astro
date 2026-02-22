@@ -4,9 +4,9 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
 ---
 
 <DocsLayout
-  title="Store API Reference - hitlimit | Memory, SQLite, Redis Store Interfaces"
-  description="API reference for hitlimit storage backends. Store interface methods (get, increment, reset, close), built-in stores, and how to create custom stores."
-  keywords="hitlimit store api, rate limit store interface, memory store api, sqlite store api, redis store api, custom rate limit store, store methods, rate limit storage"
+  title="Store API Reference - hitlimit | Memory, SQLite, Redis, Postgres Store Interfaces"
+  description="API reference for hitlimit storage backends. Store interface methods (get, increment, reset, close), built-in stores (Memory, SQLite, Redis, Postgres), and how to create custom stores."
+  keywords="hitlimit store api, rate limit store interface, memory store api, sqlite store api, redis store api, postgres store api, custom rate limit store, store methods, rate limit storage"
 >
   <h1>Store API</h1>
   <RuntimeBanner
@@ -94,6 +94,22 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
 <span class="kw">const</span> store = <span class="fn">redisStore</span>({"{"}
   url: <span class="str">'redis://localhost:6379'</span>,
   prefix: <span class="str">'rl:'</span>  <span class="cm">// Key prefix</span>
+{"}"})</code></pre>
+  </div>
+
+  <h3>postgresStore()</h3>
+  <p>PostgreSQL storage for distributed deployments using your existing database.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} postgresStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/postgres'</span>
+<span class="kw">import</span> {"{"} Pool {"}"} <span class="kw">from</span> <span class="str">'pg'</span>
+
+<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({"{"} connectionString: <span class="str">'postgres://localhost:5432/mydb'</span> {"}"})
+
+<span class="kw">const</span> store = <span class="fn">postgresStore</span>({"{"}
+  pool,
+  tablePrefix: <span class="str">'hitlimit'</span>,  <span class="cm">// Table name prefix</span>
+  cleanupInterval: <span class="num">60000</span>    <span class="cm">// Cleanup every 60s</span>
 {"}"})</code></pre>
   </div>
 

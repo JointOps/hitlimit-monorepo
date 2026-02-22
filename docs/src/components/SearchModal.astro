@@ -25,10 +25,11 @@ const searchData: SearchItem[] = [
   { title: 'Skip/Whitelist', section: 'Configuration', href: '/docs/configuration/skip', content: 'skip whitelist bypass exclude admin routes health check', headings: ['Skip Function', 'Whitelist IPs'], runtime: 'both' },
 
   // Stores
-  { title: 'Overview', section: 'Stores', href: '/docs/stores/overview', content: 'stores storage backend memory redis sqlite persistence distributed', headings: ['Memory', 'Redis', 'SQLite'], runtime: 'both' },
+  { title: 'Overview', section: 'Stores', href: '/docs/stores/overview', content: 'stores storage backend memory redis sqlite postgres persistence distributed', headings: ['Memory', 'Redis', 'SQLite', 'Postgres'], runtime: 'both' },
   { title: 'Memory Store', section: 'Stores', href: '/docs/stores/memory', content: 'memory store in-memory default development local single instance', headings: ['Usage', 'Options', 'Limitations'], runtime: 'both' },
   { title: 'SQLite Store', section: 'Stores', href: '/docs/stores/sqlite', content: 'sqlite store database persistent better-sqlite3 file local', headings: ['Installation', 'Usage', 'Options'], runtime: 'both' },
   { title: 'Redis Store', section: 'Stores', href: '/docs/stores/redis', content: 'redis store distributed cluster ioredis scaling production', headings: ['Installation', 'Usage', 'Cluster', 'Options'], runtime: 'both' },
+  { title: 'Postgres Store', section: 'Stores', href: '/docs/stores/postgres', content: 'postgres postgresql store distributed pg pool prepared statements sql database', headings: ['Installation', 'Usage', 'Options', 'Schema'], runtime: 'both' },
   { title: 'Custom Stores', section: 'Stores', href: '/docs/stores/custom', content: 'custom store implementation interface adapter create own', headings: ['Interface', 'Implementation', 'Example'], runtime: 'both' },
 
   // Adapters
@@ -44,14 +45,15 @@ const searchData: SearchItem[] = [
   { title: 'Quick Start', section: 'Bun', href: '/docs/bun/quick-start', content: 'bun quick start getting started basic', headings: ['Basic Usage'], runtime: 'bun' },
   { title: 'Bun.serve', section: 'Bun', href: '/docs/bun/bun-serve', content: 'bun serve server http native handler fetch', headings: ['Usage', 'Configuration'], runtime: 'bun' },
   { title: 'Elysia Plugin', section: 'Bun', href: '/docs/bun/elysia', content: 'elysia plugin framework web bun fast', headings: ['Installation', 'Usage', 'Options'], runtime: 'bun' },
-  { title: 'Hono (Bun)', section: 'Bun', href: '/docs/bun/hono', content: 'hono bun middleware rate limiting 6M ops/sec high performance', headings: ['Installation', 'Usage', 'Performance', 'Options'], runtime: 'bun' },
-  { title: 'Stores', section: 'Bun', href: '/docs/bun/stores', content: 'bun stores sqlite memory redis native', headings: ['Memory', 'SQLite', 'Redis'], runtime: 'bun' },
+  { title: 'Hono (Bun)', section: 'Bun', href: '/docs/bun/hono', content: 'hono bun middleware rate limiting 12M ops/sec high performance', headings: ['Installation', 'Usage', 'Performance', 'Options'], runtime: 'bun' },
+  { title: 'Stores', section: 'Bun', href: '/docs/bun/stores', content: 'bun stores sqlite memory redis postgres native', headings: ['Memory', 'SQLite', 'Redis', 'Postgres'], runtime: 'bun' },
   { title: 'Performance', section: 'Bun', href: '/docs/bun/performance', content: 'performance benchmarks fast speed optimization', headings: ['Benchmarks', 'Tips'], runtime: 'bun' },
 
   // Bun Stores
-  { title: 'Memory Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/memory', content: 'bun memory store in-memory default 5.57M ops/sec fastest', headings: ['Usage', 'Characteristics', 'Performance'], runtime: 'bun' },
-  { title: 'SQLite Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/sqlite', content: 'bun sqlite bun:sqlite native store persistent 331K ops/sec zero dependencies', headings: ['Installation', 'Usage', 'Options', 'vs Node.js'], runtime: 'bun' },
+  { title: 'Memory Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/memory', content: 'bun memory store in-memory default 12.38M ops/sec fastest', headings: ['Usage', 'Characteristics', 'Performance'], runtime: 'bun' },
+  { title: 'SQLite Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/sqlite', content: 'bun sqlite bun:sqlite native store persistent 325K ops/sec zero dependencies', headings: ['Installation', 'Usage', 'Options', 'vs Node.js'], runtime: 'bun' },
   { title: 'Redis Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/redis', content: 'bun redis store distributed ioredis lua scripts 6.7K ops/sec', headings: ['Installation', 'Usage', 'Options', 'Lua Scripts'], runtime: 'bun' },
+  { title: 'Postgres Store (Bun)', section: 'Bun Stores', href: '/docs/stores/postgres', content: 'bun postgres postgresql store distributed pg pool 3.7K ops/sec', headings: ['Installation', 'Usage', 'Options', 'Schema'], runtime: 'bun' },
 
   // Bun Guides
   { title: 'Configuration (Bun)', section: 'Bun Guides', href: '/docs/bun/configuration', content: 'bun configuration options settings limit window store key skip headers ban', headings: ['Basic Options', 'Advanced Options', 'Ban', 'Tiered Limits'], runtime: 'bun' },

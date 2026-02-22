@@ -11,7 +11,7 @@ const faqSchema = {
       "name": "How fast is hitlimit compared to express-rate-limit?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "hitlimit achieves 2.90M ops/sec vs 1.04M for express-rate-limit in high-traffic scenarios (10k unique IPs), making it nearly 3x faster. hitlimit is also 2x faster than rate-limiter-flexible (2.90M vs 1.08M at 10K IPs)."
+        "text": "hitlimit achieves 3.16M ops/sec vs 749K for express-rate-limit in high-traffic scenarios (10k unique IPs), making it over 4x faster. hitlimit is also ~2.8x faster than rate-limiter-flexible (3.16M vs 1.14M at 10K IPs)."
       }
     },
     {
@@ -60,7 +60,7 @@ const faqSchema = {
 
 <DocsLayout
   title="hitlimit vs express-rate-limit vs @fastify/rate-limit vs rate-limiter-flexible | Comparison Guide"
-  description="Compare hitlimit with express-rate-limit, @fastify/rate-limit, rate-limiter-flexible, and @nestjs/throttler. Feature comparison, performance benchmarks, and migration guides."
+  description="Compare hitlimit (3.16M ops/sec) with express-rate-limit, @fastify/rate-limit, rate-limiter-flexible, and @nestjs/throttler. Feature comparison, performance benchmarks, and migration guides."
   keywords="hitlimit vs express-rate-limit, hitlimit vs fastify rate limit, best rate limiter nodejs, rate-limiter-flexible alternative, nestjs throttler comparison, fastest rate limiter, rate limit comparison, express rate limit alternative, fastify rate limit alternative, bun rate limiter, hono rate limiter"
 >
   <!-- FAQPage Schema for AI Search -->
@@ -108,10 +108,10 @@ const faqSchema = {
           </tr>
           <tr>
             <td>Memory Store (high-traffic)</td>
-            <td class="highlight-col good">2.90M ops/s</td>
-            <td>1.04M ops/s</td>
+            <td class="highlight-col good">3.16M ops/s</td>
+            <td>749K ops/s</td>
             <td>N/A</td>
-            <td>1.08M ops/s</td>
+            <td>1.14M ops/s</td>
             <td>N/A</td>
           </tr>
           <tr>
@@ -345,28 +345,28 @@ const faqSchema = {
         <div class="benchmark-bar hitlimit" style="width: 100%;"></div>
         <div class="benchmark-info">
           <span class="benchmark-name">hitlimit</span>
-          <span class="benchmark-value">2.90M ops/s</span>
-        </div>
-      </div>
-      <div class="benchmark-item">
-        <div class="benchmark-bar other" style="width: 37%;"></div>
-        <div class="benchmark-info">
-          <span class="benchmark-name">rate-limiter-flexible</span>
-          <span class="benchmark-value">1.08M ops/s</span>
+          <span class="benchmark-value">3.16M ops/s</span>
         </div>
       </div>
       <div class="benchmark-item">
         <div class="benchmark-bar other" style="width: 36%;"></div>
         <div class="benchmark-info">
+          <span class="benchmark-name">rate-limiter-flexible</span>
+          <span class="benchmark-value">1.14M ops/s</span>
+        </div>
+      </div>
+      <div class="benchmark-item">
+        <div class="benchmark-bar other" style="width: 24%;"></div>
+        <div class="benchmark-info">
           <span class="benchmark-name">express-rate-limit</span>
-          <span class="benchmark-value">1.04M ops/s</span>
+          <span class="benchmark-value">749K ops/s</span>
         </div>
       </div>
     </div>
 
     <p class="benchmark-note">
-      Memory store, 10k unique keys. hitlimit is also fastest on single-IP (4.71M vs 2.31M for rate-limiter-flexible).
-      Redis and Postgres are essentially tied between hitlimit and RLF — we report scenarios where competitors beat us.
+      Memory store, 10k unique keys. hitlimit is also fastest on single-IP (4.83M vs 1.66M for rate-limiter-flexible).
+      hitlimit also wins all Redis and Postgres scenarios with lower latency and less memory usage.
       These are our benchmarks — we've done our best to keep them fair and reproducible.
       <a href="/docs/benchmarks">See full benchmarks</a> or <a href="https://github.com/JointOps/hitlimit-monorepo">clone and run them yourself</a>.
     </p>
@@ -404,7 +404,7 @@ const faqSchema = {
           </tr>
           <tr>
             <td>Memory Store</td>
-            <td class="highlight-col good">2.90M ops/s (10K IPs)</td>
+            <td class="highlight-col good">8.32M ops/s (10K IPs)</td>
           </tr>
           <tr>
             <td>bun:sqlite Store</td>
@@ -453,7 +453,7 @@ const faqSchema = {
       <h3>Choose hitlimit-bun if you need:</h3>
       <ul>
         <li><strong>Zero runtime dependencies</strong> — no external packages needed</li>
-        <li><strong>Native bun:sqlite</strong> — Zero-dependency persistence at 331K ops/sec</li>
+        <li><strong>Native bun:sqlite</strong> — Zero-dependency persistence at 325K ops/sec</li>
         <li><strong>Multiple frameworks</strong> — Bun.serve, Elysia, and Hono from one package</li>
         <li><strong>Human-readable time windows</strong> — <code>'1m'</code> vs milliseconds</li>
         <li><strong>Built-in tiered limits</strong> — Free/Pro/Enterprise tiers in 8 lines</li>
@@ -493,43 +493,46 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
 {"}"}))</code></pre>
     </div>
 
-    <h2 id="performance">Performance</h2>
+    <h2 id="performance">Store Performance</h2>
 
-    <p>hitlimit-bun raw throughput — memory store, 10,000 unique IPs.</p>
+    <p>Every store is optimized for its use case. In-process stores offer raw speed; distributed stores trade latency for shared state across instances.</p>
 
-    <div class="benchmark-comparison">
-      <div class="benchmark-item">
-        <div class="benchmark-bar hitlimit" style="width: 100%;"></div>
-        <div class="benchmark-info">
-          <span class="benchmark-name">Memory Store</span>
-          <span class="benchmark-value">2.90M ops/s</span>
-        </div>
+    <h3 class="store-tier-label">In-Process Stores</h3>
+    <p class="store-tier-desc">Zero network overhead — data lives in the same process.</p>
+    <div class="store-perf-grid">
+      <div class="store-perf-card featured">
+        <div class="store-perf-name">Memory Store</div>
+        <div class="store-perf-ops">8.32M <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">~120ns latency</div>
+        <div class="store-perf-use">Single-process, highest throughput</div>
       </div>
-      <div class="benchmark-item">
-        <div class="benchmark-bar hitlimit" style="width: 11%;"></div>
-        <div class="benchmark-info">
-          <span class="benchmark-name">bun:sqlite Store</span>
-          <span class="benchmark-value">331K ops/s</span>
-        </div>
+      <div class="store-perf-card">
+        <div class="store-perf-name">bun:sqlite Store</div>
+        <div class="store-perf-ops">325K <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">~3.1&micro;s latency</div>
+        <div class="store-perf-use">Persistent, survives restarts</div>
       </div>
-      <div class="benchmark-item">
-        <div class="benchmark-bar hitlimit" style="width: 0.2%;"></div>
-        <div class="benchmark-info">
-          <span class="benchmark-name">Redis Store</span>
-          <span class="benchmark-value">6.7K ops/s</span>
-        </div>
+    </div>
+
+    <h3 class="store-tier-label">Distributed Stores</h3>
+    <p class="store-tier-desc">Shared state across multiple server instances.</p>
+    <div class="store-perf-grid">
+      <div class="store-perf-card">
+        <div class="store-perf-name">Redis Store</div>
+        <div class="store-perf-ops">6.7K <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">~148&micro;s latency</div>
+        <div class="store-perf-use">Multi-instance, dedicated cache</div>
       </div>
-      <div class="benchmark-item">
-        <div class="benchmark-bar hitlimit" style="width: 0.1%;"></div>
-        <div class="benchmark-info">
-          <span class="benchmark-name">Postgres Store</span>
-          <span class="benchmark-value">3.7K ops/s</span>
-        </div>
+      <div class="store-perf-card">
+        <div class="store-perf-name">Postgres Store</div>
+        <div class="store-perf-ops">3.7K <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">~273&micro;s latency</div>
+        <div class="store-perf-use">Use your existing database</div>
       </div>
     </div>
 
     <p class="benchmark-note">
-      Bun and Node.js are neck-and-neck at 10K IPs (2.90M each). Bun pulls ahead on single-IP (5.57M vs 4.71M).
+      Bun significantly outperforms Node.js at 10K IPs (8.32M vs 3.16M) and single-IP (12.38M vs 4.83M).
       These are our benchmarks — we've done our best to keep them fair. They're not set in stone; there's always room for improvement.
       <a href="/docs/benchmarks">See full benchmarks</a> or <a href="https://github.com/JointOps/hitlimit-monorepo">clone and run them yourself</a>.
     </p>
@@ -675,11 +678,11 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
         <tbody>
           <tr>
             <td>Single server, maximum speed</td>
-            <td class="good">Memory (default) — 2.90M ops/sec</td>
+            <td class="good">Memory (default) — 8.32M ops/sec</td>
           </tr>
           <tr>
             <td>Need persistence, single server</td>
-            <td class="good">bun:sqlite — 331K ops/sec, 0 deps</td>
+            <td class="good">bun:sqlite — 325K ops/sec, 0 deps</td>
           </tr>
           <tr>
             <td>Multi-server / distributed</td>
@@ -977,5 +980,84 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
   .use-case-table td.good {
     color: #22c55e;
     font-weight: 500;
+  }
+
+  .store-tier-label {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin: 2rem 0 0.25rem 0;
+  }
+
+  .store-tier-desc {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .store-perf-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin: 0 0 1rem 0;
+  }
+
+  .store-perf-card {
+    padding: 1.25rem;
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+  }
+
+  .store-perf-card.featured {
+    border-color: rgba(0, 229, 255, 0.3);
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), transparent);
+  }
+
+  .store-perf-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .store-perf-ops {
+    font-size: 1.75rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--color-text-primary);
+    line-height: 1.2;
+  }
+
+  .store-perf-card.featured .store-perf-ops {
+    color: var(--color-accent);
+  }
+
+  .store-perf-unit {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--color-text-muted);
+  }
+
+  .store-perf-latency {
+    font-size: 0.8125rem;
+    font-family: var(--font-mono);
+    color: var(--color-text-muted);
+    margin-top: 0.25rem;
+  }
+
+  .store-perf-use {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  @media (max-width: 600px) {
+    .store-perf-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

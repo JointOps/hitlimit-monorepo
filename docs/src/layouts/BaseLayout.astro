@@ -121,7 +121,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "What is hitlimit?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "hitlimit is an open-source rate limiting library for Node.js and Bun created by JointOps. It provides sub-millisecond performance with 4.7M ops/sec (Node.js) and 5.5M ops/sec (Bun), nearly 3x faster than express-rate-limit. It has a ~6KB bundle (Node.js) or ~18KB (Bun) with zero runtime dependencies. It supports Express, Fastify, Hono, NestJS, Bun.serve, and Elysia frameworks with 4 storage backends: memory, SQLite, Redis, and Postgres."
+            "text": "hitlimit is an open-source rate limiting library for Node.js and Bun created by JointOps. It provides sub-millisecond performance with 4.8M ops/sec (Node.js) and 12.3M ops/sec (Bun), over 4x faster than express-rate-limit. It has a ~6KB bundle (Node.js) or ~18KB (Bun) with zero runtime dependencies. It supports Express, Fastify, Hono, NestJS, Bun.serve, and Elysia frameworks with 4 storage backends: memory, SQLite, Redis, and Postgres."
           }
         },
         {
@@ -129,7 +129,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "Is hitlimit faster than express-rate-limit?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, hitlimit is approximately 3x faster than express-rate-limit in high-traffic benchmarks. It achieves 2.9 million operations per second compared to 1.08 million for express-rate-limit (10K unique IPs, memory store, Node.js). Both have zero runtime dependencies."
+            "text": "Yes, hitlimit is over 4x faster than express-rate-limit in high-traffic benchmarks. It achieves 3.16 million operations per second compared to 749 thousand for express-rate-limit (10K unique IPs, memory store, Node.js). Both have zero runtime dependencies."
           }
         },
         {
@@ -169,7 +169,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "What is the difference between hitlimit and rate-limiter-flexible?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "hitlimit is faster in memory benchmarks (2.9M ops/sec vs 1.04M at 10K IPs). Redis and Postgres performance is comparable between the two. rate-limiter-flexible has more storage backends (14 vs 4) and weighted requests. hitlimit offers simpler configuration, built-in SaaS tier support, 8 framework adapters, and human-readable time windows."
+            "text": "hitlimit is faster in memory benchmarks (3.16M ops/sec vs 1.14M at 10K IPs). hitlimit also wins in Redis and Postgres benchmarks. rate-limiter-flexible has more storage backends (14 vs 4) and weighted requests. hitlimit offers simpler configuration, built-in SaaS tier support, 8 framework adapters, and human-readable time windows."
           }
         },
         {
@@ -177,7 +177,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "Does hitlimit work with Bun?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, hitlimit has a dedicated Bun package (@joint-ops/hitlimit-bun) optimized for Bun runtime. It works with Bun.serve(), Elysia, and Hono frameworks, achieving 5.5M+ ops/sec peak performance. It includes native bun:sqlite integration and supports all 4 storage backends."
+            "text": "Yes, hitlimit has a dedicated Bun package (@joint-ops/hitlimit-bun) optimized for Bun runtime. It works with Bun.serve(), Elysia, and Hono frameworks, achieving 12.3M+ ops/sec peak performance. It includes native bun:sqlite integration and supports all 4 storage backends."
           }
         }
       ]
