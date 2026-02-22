@@ -2,7 +2,7 @@
 
 > Rate limiting built for Bun. Not ported — built.
 
-**5.5M+ ops/sec** on memory. **2.90M at 10K IPs**. Native bun:sqlite. Atomic Redis Lua. Postgres. Zero dependencies.
+**12.38M ops/sec** on memory. **8.32M at 10K IPs**. Native bun:sqlite. Atomic Redis Lua. Postgres. Zero dependencies.
 
 ```bash
 bun add @joint-ops/hitlimit-bun
@@ -119,8 +119,8 @@ Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: 'postgres://localhost:
 
 | Store | Ops/sec | Latency | When to use |
 |-------|---------|---------|-------------|
-| Memory | 5,570,000 | 179ns | Single server, maximum speed |
-| bun:sqlite | 429,000 | 2.3μs | Single server, need persistence |
+| Memory | 8,320,000 | 120ns | Single server, maximum speed |
+| bun:sqlite | 325,000 | 3.1μs | Single server, need persistence |
 | Redis | 6,700 | 148μs | Multi-server / distributed |
 | Postgres | 3,700 | 273μs | Multi-server / already using Postgres |
 
@@ -132,10 +132,10 @@ Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: 'postgres://localhost:
 
 | Runtime | Ops/sec | |
 |---------|---------|---|
-| **Bun** | **2,900,000** | ████████████████████ |
-| Node.js | 2,900,000 | ████████████████████ |
+| **Bun** | **8,320,000** | ████████████████████ |
+| Node.js | 3,160,000 | ████████ |
 
-Bun and Node.js are neck-and-neck at 10K IPs (2.90M each). Bun pulls ahead on single-IP (5.57M vs 4.71M). Same library, same algorithm, **memory store**. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. Run them yourself.
+Bun leads at 10K IPs (8.32M vs 3.16M) and single-IP (12.38M vs 4.83M). Same library, same algorithm, **memory store**. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. Run them yourself.
 
 ### Why bun:sqlite is faster than better-sqlite3
 

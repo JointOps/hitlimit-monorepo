@@ -24,8 +24,8 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
   <h2 id="usage">Usage</h2>
 
   <RuntimeCodeTabs
-    node='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/redis&#39;</span>\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({"{"}\n    url: <span class="str">&#39;redis://localhost:6379&#39;</span>\n  {"}"})\n{"}"}))'
-    bun='<span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/redis&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({"{"}\n    url: <span class="str">&#39;redis://localhost:6379&#39;</span>\n  {"}"})\n{"}"})'
+    node='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> { redisStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/redis&#39;</span>\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({\n    url: <span class="str">&#39;redis://localhost:6379&#39;</span>\n  })\n}))'
+    bun='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n<span class="kw">import</span> { redisStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/redis&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({\n    url: <span class="str">&#39;redis://localhost:6379&#39;</span>\n  })\n})'
   />
 
   <h2 id="options">Options</h2>
@@ -104,7 +104,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
   <h2 id="characteristics">Characteristics</h2>
 
   <ul>
-    <li><strong>Speed:</strong> ~6.5K ops/sec, ~154&micro;s latency (network-bound)</li>
+    <li><strong>Speed:</strong> ~6.7K ops/sec, ~149&micro;s latency (network-bound)</li>
     <li><strong>Persistence:</strong> Configurable via Redis persistence settings (RDB/AOF)</li>
     <li><strong>Scalability:</strong> Shared across all server instances</li>
     <li><strong>Atomic:</strong> Lua scripts ensure race-condition-free increments</li>

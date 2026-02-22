@@ -1,0 +1,183 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
+---
+
+<DocsLayout
+  title="Postgres Store - hitlimit | Distributed Rate Limiting with PostgreSQL"
+  description="PostgreSQL store for hitlimit distributed rate limiting. Named prepared statements for query plan caching, atomic upserts, and automatic cleanup. Scale rate limiting across multiple servers with your existing Postgres database."
+  keywords="postgres rate limit, postgresql rate limiter, distributed rate limiting, pg rate limit, sql rate limiter, multi-server rate limit, postgres api protection, hitlimit postgres store"
+>
+  <h1>Postgres Store</h1>
+
+  <p>The Postgres store enables distributed rate limiting using your existing PostgreSQL database. Ideal for teams that already run Postgres and want to add rate limiting without introducing a new dependency like Redis.</p>
+
+  <h2 id="installation">Installation</h2>
+
+  <p>The Postgres store requires <code>pg</code> as a peer dependency:</p>
+
+  <RuntimeCodeTabs
+    node='npm install pg\n<span class="cm"># or: pnpm add pg</span>\n<span class="cm"># or: yarn add pg</span>'
+    bun='bun add pg'
+  />
+
+  <h2 id="usage">Usage</h2>
+
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> { postgresStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/postgres&#39;</span>\n<span class="kw">import</span> { Pool } <span class="kw">from</span> <span class="str">&#39;pg&#39;</span>\n\n<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({ connectionString: <span class="str">&#39;postgres://localhost:5432/mydb&#39;</span> })\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">postgresStore</span>({ pool })\n}))'
+    bun='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n<span class="kw">import</span> { postgresStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/postgres&#39;</span>\n<span class="kw">import</span> { Pool } <span class="kw">from</span> <span class="str">&#39;pg&#39;</span>\n\n<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({ connectionString: <span class="str">&#39;postgres://localhost:5432/mydb&#39;</span> })\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">postgresStore</span>({ pool })\n})'
+  />
+
+  <h2 id="options">Options</h2>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>pool</code></td><td>Pool</td><td>-</td><td>A <code>pg.Pool</code> instance (required)</td></tr>
+      <tr><td><code>tablePrefix</code></td><td>string</td><td>'hitlimit'</td><td>Prefix for rate limit table names</td></tr>
+      <tr><td><code>cleanupInterval</code></td><td>number</td><td>60000</td><td>Interval (ms) to clean expired entries</td></tr>
+      <tr><td><code>skipTableCreation</code></td><td>boolean</td><td>false</td><td>Skip automatic table creation on startup</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="connection-options">Connection Options</h2>
+
+  <p>Create a pool with a connection string:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} Pool {"}"} <span class="kw">from</span> <span class="str">'pg'</span>
+
+<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({"{"}<span class="cm">
+  </span>connectionString: <span class="str">'postgres://user:password@hostname:5432/mydb'</span>
+{"}"})</code></pre>
+  </div>
+
+  <p>Or use individual connection parameters:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({"{"}<span class="cm">
+  </span>host: <span class="str">'localhost'</span>,
+  port: <span class="num">5432</span>,
+  database: <span class="str">'mydb'</span>,
+  user: <span class="str">'postgres'</span>,
+  password: <span class="str">'secret'</span>,
+  max: <span class="num">20</span>  <span class="cm">// max pool size</span>
+{"}"})
+
+<span class="fn">postgresStore</span>({"{"} pool {"}"})</code></pre>
+  </div>
+
+  <h3 id="full-config">Full Configuration</h3>
+
+  <div class="code-block">
+    <pre><code><span class="fn">postgresStore</span>({"{"}<span class="cm">
+  </span>pool,
+  tablePrefix: <span class="str">'api_limits'</span>,
+  cleanupInterval: <span class="num">300000</span>,  <span class="cm">// Clean every 5 minutes</span>
+  skipTableCreation: <span class="kw">false</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="prepared-statements">Named Prepared Statements</h2>
+
+  <p>
+    The Postgres store uses <strong>named prepared statements</strong> for all hot-path queries.
+    PostgreSQL caches the query plan for named statements, avoiding repeated parsing and planning
+    overhead on every rate limit check.
+  </p>
+
+  <p>This provides two key benefits:</p>
+
+  <ul>
+    <li><strong>Lower latency</strong> — query plans are cached and reused across calls</li>
+    <li><strong>True atomicity</strong> — <code>ON CONFLICT ... DO UPDATE</code> upserts prevent race conditions</li>
+  </ul>
+
+  <p>
+    For endpoints with ban detection enabled, the store handles increment, expiry,
+    violation tracking, and ban threshold checking through dedicated prepared statements.
+  </p>
+
+  <h2 id="characteristics">Characteristics</h2>
+
+  <div data-runtime-content="node">
+    <ul>
+      <li><strong>Speed:</strong> ~3.0K ops/sec, ~336&micro;s latency (network-bound)</li>
+      <li><strong>Persistence:</strong> Full PostgreSQL durability (WAL, replication)</li>
+      <li><strong>Scalability:</strong> Shared across all server instances</li>
+      <li><strong>Atomic:</strong> Upsert queries ensure race-condition-free increments</li>
+      <li><strong>Dependencies:</strong> Requires <code>pg</code> (node-postgres)</li>
+    </ul>
+  </div>
+
+  <div data-runtime-content="bun">
+    <ul>
+      <li><strong>Speed:</strong> ~3.7K ops/sec, ~273&micro;s latency (network-bound)</li>
+      <li><strong>Persistence:</strong> Full PostgreSQL durability (WAL, replication)</li>
+      <li><strong>Scalability:</strong> Shared across all server instances</li>
+      <li><strong>Atomic:</strong> Upsert queries ensure race-condition-free increments</li>
+      <li><strong>Dependencies:</strong> Requires <code>pg</code> (node-postgres)</li>
+    </ul>
+  </div>
+
+  <h2 id="when-to-use">When to Use</h2>
+
+  <ul>
+    <li>Teams already running PostgreSQL in production</li>
+    <li>Multi-server/container deployments without Redis</li>
+    <li>When you want distributed rate limiting with SQL-level observability</li>
+    <li>Environments where adding Redis is not feasible or desired</li>
+  </ul>
+
+  <h2 id="schema">Database Schema</h2>
+
+  <p>The store automatically creates the following tables (prefix defaults to <code>hitlimit</code>):</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">CREATE TABLE IF NOT EXISTS</span> hitlimit_hits (
+  key <span class="str">TEXT PRIMARY KEY</span>,
+  count <span class="str">INTEGER NOT NULL DEFAULT 1</span>,
+  reset_at <span class="str">BIGINT NOT NULL</span>
+)
+
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> hitlimit_bans (
+  key <span class="str">TEXT PRIMARY KEY</span>,
+  expires_at <span class="str">BIGINT NOT NULL</span>
+)
+
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> hitlimit_violations (
+  key <span class="str">TEXT PRIMARY KEY</span>,
+  count <span class="str">INTEGER NOT NULL DEFAULT 1</span>,
+  reset_at <span class="str">BIGINT NOT NULL</span>
+)</code></pre>
+  </div>
+
+  <h2 id="vs-redis">Postgres vs Redis</h2>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Aspect</th><th>Postgres</th><th>Redis</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Latency</strong></td><td>~336&micro;s (Node.js)</td><td>~149&micro;s (Node.js)</td></tr>
+      <tr><td><strong>Throughput</strong></td><td>~3.0K ops/sec</td><td>~6.7K ops/sec</td></tr>
+      <tr><td><strong>Extra infra</strong></td><td>None (use existing DB)</td><td>Requires Redis server</td></tr>
+      <tr><td><strong>Observability</strong></td><td>SQL queries, pg_stat</td><td>Redis CLI, MONITOR</td></tr>
+      <tr><td><strong>Durability</strong></td><td>Full ACID</td><td>Configurable (RDB/AOF)</td></tr>
+    </tbody>
+  </table>
+</DocsLayout>
+
+<style>
+  .options-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .options-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .options-table tr:last-child td { border-bottom: none; }
+  .options-table code { background: var(--color-bg-elevated); color: var(--color-accent); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; }
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

@@ -2,7 +2,7 @@
 
 > Rate limiting that doesn't slow you down.
 
-**2.90M ops/sec** at 10K unique IPs. Zero dependencies. One line to protect any Node.js API.
+**3.16M ops/sec** at 10K unique IPs. Zero dependencies. One line to protect any Node.js API.
 
 ```bash
 npm install @joint-ops/hitlimit
@@ -133,10 +133,10 @@ app.use(hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' 
 
 | Store | Ops/sec | Latency | When to use |
 |-------|---------|---------|-------------|
-| Memory | 2,900,000 | 345ns | Single server, no persistence needed |
-| SQLite | 376,000 | 2.7μs | Single server, need persistence |
-| Redis | 6,500 | 154μs | Multi-server / distributed |
-| Postgres | 3,500 | 286μs | Multi-server / already using Postgres |
+| Memory | 3,160,000 | 316ns | Single server, no persistence needed |
+| SQLite | 352,000 | 2.8μs | Single server, need persistence |
+| Redis | 6,700 | 149μs | Multi-server / distributed |
+| Postgres | 3,000 | 336μs | Multi-server / already using Postgres |
 
 ---
 
@@ -146,9 +146,9 @@ app.use(hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' 
 
 | Library | Ops/sec | |
 |---------|---------|---|
-| **hitlimit** | **2,900,000** | ████████████████████ |
-| rate-limiter-flexible | 1,080,000 | ███████ |
-| express-rate-limit | 1,040,000 | ███████ |
+| **hitlimit** | **3,160,000** | ████████████████████ |
+| rate-limiter-flexible | 1,140,000 | ███████ |
+| express-rate-limit | 749,000 | █████ |
 
 This is the **memory store** comparison — the default for all three libraries. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. We report scenarios where competitors beat us. Run them yourself.
 
@@ -170,7 +170,7 @@ Full [migration guide](https://hitlimit.jointops.dev/docs/guides/migration) in t
 
 ## Related
 
-- **[@joint-ops/hitlimit-bun](https://www.npmjs.com/package/@joint-ops/hitlimit-bun)** — Bun-native variant with bun:sqlite and 5M+ ops/sec
+- **[@joint-ops/hitlimit-bun](https://www.npmjs.com/package/@joint-ops/hitlimit-bun)** — Bun-native variant with bun:sqlite and 12M+ ops/sec
 
 ## License
 

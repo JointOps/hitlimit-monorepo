@@ -5,8 +5,8 @@
 > Created by JointOps. MIT licensed. Zero dependencies.
 
 ## Key Facts
-- 4.7M ops/sec peak (Node.js), 5.5M ops/sec peak (Bun) with memory store
-- 2.9M ops/sec at 10K unique IPs — nearly 3x faster than express-rate-limit
+- 4.8M ops/sec peak (Node.js), 12.3M ops/sec peak (Bun) with memory store
+- 3.16M ops/sec at 10K unique IPs — over 4x faster than express-rate-limit
 - 4 stores: Memory, SQLite, Redis, Postgres
 - 8 adapters: Express, Fastify, Hono, NestJS, Node.js HTTP, Bun.serve, Elysia, Hono (Bun)
 - Human-readable time windows ('1h' not 3600000)
@@ -28,10 +28,10 @@
 
 ## Storage Backends
 - [Stores Overview](https://hitlimit.jointops.dev/docs/stores/overview/): Choosing the right store
-- [Memory Store](https://hitlimit.jointops.dev/docs/stores/memory/): Default in-memory store (2.9M ops/sec at scale)
-- [SQLite Store](https://hitlimit.jointops.dev/docs/stores/sqlite/): Persistent storage (376K ops/sec)
-- [Redis Store](https://hitlimit.jointops.dev/docs/stores/redis/): Distributed rate limiting (6.5K ops/sec)
-- [Postgres Store](https://hitlimit.jointops.dev/docs/stores/postgres/): Distributed SQL store (3.5K ops/sec)
+- [Memory Store](https://hitlimit.jointops.dev/docs/stores/memory/): Default in-memory store (3.16M ops/sec at scale)
+- [SQLite Store](https://hitlimit.jointops.dev/docs/stores/sqlite/): Persistent storage (352K ops/sec)
+- [Redis Store](https://hitlimit.jointops.dev/docs/stores/redis/): Distributed rate limiting (6.7K ops/sec)
+- [Postgres Store](https://hitlimit.jointops.dev/docs/stores/postgres/): Distributed SQL store (3.0K ops/sec)
 - [Custom Store](https://hitlimit.jointops.dev/docs/stores/custom/): Build your own store
 
 ## Framework Adapters (Node.js)
@@ -49,7 +49,7 @@
 - [Elysia](https://hitlimit.jointops.dev/docs/bun/elysia/): Elysia framework plugin
 - [Hono on Bun](https://hitlimit.jointops.dev/docs/bun/hono/): Hono middleware for Bun
 - [Bun Stores](https://hitlimit.jointops.dev/docs/bun/stores/): bun:sqlite as default
-- [Bun Performance](https://hitlimit.jointops.dev/docs/bun/performance/): 5.5M+ ops/sec benchmarks
+- [Bun Performance](https://hitlimit.jointops.dev/docs/bun/performance/): 12.3M+ ops/sec benchmarks
 
 ## Comparisons
 - [Benchmarks](https://hitlimit.jointops.dev/docs/benchmarks/): Performance comparisons vs competitors

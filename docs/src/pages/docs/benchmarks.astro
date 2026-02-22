@@ -19,10 +19,10 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
     <table>
       <thead><tr><th>Use Case</th><th>Recommended Store</th><th>Performance</th></tr></thead>
       <tbody>
-        <tr><td>Single server, many unique IPs</td><td><strong>Memory</strong> (default)</td><td class="highlight">1.90-4.71M ops/sec</td></tr>
-        <tr><td>Need persistence, single server</td><td><strong>SQLite</strong></td><td class="highlight">376-452K ops/sec</td></tr>
-        <tr><td>Multiple servers (distributed)</td><td><strong>Redis</strong></td><td class="highlight">5.9-6.5K ops/sec</td></tr>
-        <tr><td>Multiple servers (distributed, SQL)</td><td><strong>Postgres</strong></td><td class="highlight">3.3-3.5K ops/sec</td></tr>
+        <tr><td>Single server, many unique IPs</td><td><strong>Memory</strong> (default)</td><td class="highlight">3.16-4.83M ops/sec</td></tr>
+        <tr><td>Need persistence, single server</td><td><strong>SQLite</strong></td><td class="highlight">352-455K ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed)</td><td><strong>Redis</strong></td><td class="highlight">6.7-6.9K ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed, SQL)</td><td><strong>Postgres</strong></td><td class="highlight">3.0-3.5K ops/sec</td></tr>
       </tbody>
     </table>
   </div>
@@ -33,10 +33,10 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
     <table>
       <thead><tr><th>Use Case</th><th>Recommended Store</th><th>Performance</th></tr></thead>
       <tbody>
-        <tr><td>Single server, many unique IPs</td><td><strong>Memory</strong> (default)</td><td class="highlight">2.90-5.57M ops/sec</td></tr>
-        <tr><td>Need persistence, single server</td><td><strong>bun:sqlite</strong></td><td class="highlight">331-429K ops/sec</td></tr>
-        <tr><td>Multiple servers (distributed)</td><td><strong>Redis</strong></td><td class="highlight">6.5-6.7K ops/sec</td></tr>
-        <tr><td>Multiple servers (distributed, SQL)</td><td><strong>Postgres</strong></td><td class="highlight">3.6-3.7K ops/sec</td></tr>
+        <tr><td>Single server, many unique IPs</td><td><strong>Memory</strong> (default)</td><td class="highlight">8.32-12.38M ops/sec</td></tr>
+        <tr><td>Need persistence, single server</td><td><strong>bun:sqlite</strong></td><td class="highlight">325-458K ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed)</td><td><strong>Redis</strong></td><td class="highlight">6.7K ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed, SQL)</td><td><strong>Postgres</strong></td><td class="highlight">3.7K ops/sec</td></tr>
       </tbody>
     </table>
   </div>
@@ -71,9 +71,9 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <table class="benchmark-table">
       <thead><tr><th>Library</th><th>ops/sec</th><th>Latency</th><th>vs Fastest</th></tr></thead>
       <tbody>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td><strong>4.71M</strong></td><td>212ns</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>2.31M</td><td>433ns</td><td>49%</td></tr>
-        <tr><td>express-rate-limit</td><td>1.43M</td><td>698ns</td><td>30%</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td><strong>4.83M</strong></td><td>207ns</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>1.66M</td><td>601ns</td><td>34%</td></tr>
+        <tr><td>express-rate-limit</td><td>967K</td><td>1,034ns</td><td>20%</td></tr>
       </tbody>
     </table>
 
@@ -83,15 +83,15 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <table class="benchmark-table">
       <thead><tr><th>Library</th><th>ops/sec</th><th>Latency</th><th>vs Fastest</th></tr></thead>
       <tbody>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td><strong>2.90M</strong></td><td>345ns</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>1.08M</td><td>926ns</td><td>37%</td></tr>
-        <tr><td>express-rate-limit</td><td>1.04M</td><td>960ns</td><td>36%</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td><strong>3.16M</strong></td><td>316ns</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>1.14M</td><td>878ns</td><td>36%</td></tr>
+        <tr><td>express-rate-limit</td><td>749K</td><td>1,335ns</td><td>24%</td></tr>
       </tbody>
     </table>
 
     <div class="callout">
       <strong>Key Insight:</strong> hitlimit's sync fast path eliminates async/await overhead for in-process stores.
-      For high-traffic APIs, hitlimit is 2.7x faster than rate-limiter-flexible (2.90M vs 1.08M at 10K IPs).
+      For high-traffic APIs, hitlimit is ~2.8x faster than rate-limiter-flexible (3.16M vs 1.14M at 10K IPs).
     </div>
 
     <h2 id="sqlite-store">SQLite Store</h2>
@@ -101,8 +101,8 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <div class="benchmark-result">
       <div class="benchmark-header">SQLite Store (Node.js)</div>
       <div class="benchmark-stats">
-        <div class="stat"><span class="stat-value">376-452K</span><span class="stat-label">ops/sec</span></div>
-        <div class="stat"><span class="stat-value">2.21μs</span><span class="stat-label">avg latency</span></div>
+        <div class="stat"><span class="stat-value">352-455K</span><span class="stat-label">ops/sec</span></div>
+        <div class="stat"><span class="stat-value">2.2μs</span><span class="stat-label">avg latency</span></div>
       </div>
     </div>
 
@@ -110,24 +110,24 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
 
     <p>
       Redis operations use atomic Lua scripts via <code>defineCommand()</code> for single round-trip performance.
-      Both libraries are essentially tied — hitlimit wins multi-1k, RLF wins single-ip and multi-10k by small margins.
+      hitlimit wins all three scenarios with lower latency across the board.
     </p>
 
     <table class="benchmark-table">
       <thead><tr><th>Library</th><th>Scenario</th><th>ops/sec</th><th>Latency</th><th>vs Fastest</th></tr></thead>
       <tbody>
-        <tr class="winner"><td><strong>rate-limiter-flexible</strong></td><td>single-ip</td><td><strong>6.2K</strong></td><td>161μs</td><td><strong>fastest</strong></td></tr>
-        <tr><td>hitlimit</td><td>single-ip</td><td>6.1K</td><td>165μs</td><td>98%</td></tr>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-1k</td><td><strong>6.5K</strong></td><td>154μs</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>multi-1k</td><td>6.3K</td><td>158μs</td><td>97%</td></tr>
-        <tr class="winner"><td><strong>rate-limiter-flexible</strong></td><td>multi-10k</td><td><strong>6.5K</strong></td><td>155μs</td><td><strong>fastest</strong></td></tr>
-        <tr><td>hitlimit</td><td>multi-10k</td><td>5.9K</td><td>169μs</td><td>92%</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>single-ip</td><td><strong>6.7K</strong></td><td>150μs</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>single-ip</td><td>5.7K</td><td>176μs</td><td>85%</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-1k</td><td><strong>6.9K</strong></td><td>144μs</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>multi-1k</td><td>5.9K</td><td>171μs</td><td>85%</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-10k</td><td><strong>6.7K</strong></td><td>149μs</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>multi-10k</td><td>6.4K</td><td>156μs</td><td>95%</td></tr>
       </tbody>
     </table>
 
     <div class="callout">
       <strong>Key Insight:</strong> Both libraries use atomic Lua scripts via ioredis <code>defineCommand()</code> for SHA caching and single round-trip performance.
-      hitlimit wins multi-1k, RLF wins single-ip and multi-10k — the two libraries are essentially tied on Redis. hitlimit has lower p50 latency in all 3 scenarios (148μs vs 150μs).
+      hitlimit wins all three scenarios — 18% faster on single-ip and multi-1k, 5% faster on multi-10k. hitlimit also uses significantly less memory (4.9MB vs 29-55MB for RLF).
     </div>
 
     <p class="benchmark-note">
@@ -138,18 +138,18 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <h2 id="postgres-store">Postgres Store</h2>
     <p>
       Postgres operations use atomic INSERT...ON CONFLICT upserts with named prepared statements.
-      Both libraries are essentially tied — hitlimit wins single-ip, RLF wins multi-1k by 3%, multi-10k is a virtual tie.
+      hitlimit wins all three scenarios with lower latency and better memory usage.
     </p>
 
     <table class="benchmark-table">
       <thead><tr><th>Library</th><th>Scenario</th><th>ops/sec</th><th>Latency</th><th>vs Fastest</th></tr></thead>
       <tbody>
         <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>single-ip</td><td><strong>3.5K</strong></td><td>286μs</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>single-ip</td><td>3.5K</td><td>289μs</td><td>99%</td></tr>
-        <tr class="winner"><td><strong>rate-limiter-flexible</strong></td><td>multi-1k</td><td><strong>3.4K</strong></td><td>291μs</td><td><strong>fastest</strong></td></tr>
-        <tr><td>hitlimit</td><td>multi-1k</td><td>3.3K</td><td>299μs</td><td>97%</td></tr>
-        <tr class="winner"><td><strong>rate-limiter-flexible</strong></td><td>multi-10k</td><td><strong>3.3K</strong></td><td>300μs</td><td><strong>fastest</strong></td></tr>
-        <tr><td>hitlimit</td><td>multi-10k</td><td>3.3K</td><td>304μs</td><td>99%</td></tr>
+        <tr><td>rate-limiter-flexible</td><td>single-ip</td><td>3.0K</td><td>334μs</td><td>86%</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-1k</td><td><strong>3.2K</strong></td><td>308μs</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>multi-1k</td><td>3.0K</td><td>330μs</td><td>94%</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-10k</td><td><strong>3.0K</strong></td><td>336μs</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>multi-10k</td><td>2.7K</td><td>365μs</td><td>92%</td></tr>
       </tbody>
     </table>
 
@@ -195,15 +195,15 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <table class="benchmark-table">
       <thead><tr><th>Scenario</th><th>ops/sec</th><th>Latency</th></tr></thead>
       <tbody>
-        <tr class="winner hitlimit-win"><td>Single IP</td><td><strong>5.57M</strong></td><td>179ns</td></tr>
-        <tr class="winner hitlimit-win"><td>1,000 Unique IPs</td><td><strong>3.04M</strong></td><td>329ns</td></tr>
-        <tr class="winner hitlimit-win"><td>10,000 Unique IPs</td><td><strong>2.90M</strong></td><td>345ns</td></tr>
+        <tr class="winner hitlimit-win"><td>Single IP</td><td><strong>12.38M</strong></td><td>81ns</td></tr>
+        <tr class="winner hitlimit-win"><td>1,000 Unique IPs</td><td><strong>5.17M</strong></td><td>193ns</td></tr>
+        <tr class="winner hitlimit-win"><td>10,000 Unique IPs</td><td><strong>8.32M</strong></td><td>120ns</td></tr>
       </tbody>
     </table>
 
     <div class="callout bun-callout">
-      <strong>Key Insight:</strong> Bun and Node.js are neck-and-neck at 10K IPs (2.90M each).
-      Bun pulls ahead on single-IP (5.57M vs 4.71M) thanks to its optimized JavaScript engine.
+      <strong>Key Insight:</strong> Bun significantly outperforms Node.js on memory store — 8.32M vs 3.16M at 10K IPs (2.6x faster).
+      Bun's optimized JavaScript engine shines on synchronous operations like in-memory rate limiting.
     </div>
 
     <h2 id="sqlite-store-bun">SQLite Store (bun:sqlite)</h2>
@@ -213,8 +213,8 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <div class="benchmark-result bun">
       <div class="benchmark-header">bun:sqlite Store</div>
       <div class="benchmark-stats">
-        <div class="stat"><span class="stat-value">331K</span><span class="stat-label">ops/sec (10K IPs)</span></div>
-        <div class="stat"><span class="stat-value">3.0μs</span><span class="stat-label">avg latency</span></div>
+        <div class="stat"><span class="stat-value">325K</span><span class="stat-label">ops/sec (10K IPs)</span></div>
+        <div class="stat"><span class="stat-value">3.1μs</span><span class="stat-label">avg latency</span></div>
         <div class="stat"><span class="stat-value">0</span><span class="stat-label">dependencies</span></div>
       </div>
     </div>
@@ -255,8 +255,8 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <table>
       <thead><tr><th>Store</th><th>Status</th><th>Performance</th><th>Use Case</th></tr></thead>
       <tbody>
-        <tr><td>Memory</td><td class="good">Built-in</td><td class="highlight">2.90M ops/sec</td><td>Single server, ephemeral</td></tr>
-        <tr><td>bun:sqlite</td><td class="good">Built-in (native)</td><td class="highlight">331K ops/sec</td><td>Single server, persistent</td></tr>
+        <tr><td>Memory</td><td class="good">Built-in</td><td class="highlight">8.32M ops/sec</td><td>Single server, ephemeral</td></tr>
+        <tr><td>bun:sqlite</td><td class="good">Built-in (native)</td><td class="highlight">325K ops/sec</td><td>Single server, persistent</td></tr>
         <tr><td>Redis</td><td class="good">Built-in</td><td class="highlight">6.7K ops/sec</td><td>Multi-server, distributed</td></tr>
         <tr><td>Postgres</td><td class="good">Built-in</td><td class="highlight">3.7K ops/sec</td><td>Multi-server, distributed (SQL)</td></tr>
       </tbody>
@@ -279,13 +279,13 @@ docker compose up -d redis
 
 # Run Node.js benchmarks
 cd benchmarks
-npx tsx src/scripts/run-node.ts</code></pre>
+pnpm bench:node</code></pre>
     </div>
 
     <div class="callout note">
       <strong>Note:</strong> These are our benchmarks and we've done our best to keep them fair and reproducible. Results vary by hardware and environment.
-      hitlimit is the fastest in ALL memory scenarios — 2x faster than rate-limiter-flexible on single-IP (4.71M vs 2.31M) and 2.7x faster on high-traffic 10K IPs (2.90M vs 1.08M).
-      Redis and Postgres are essentially tied between hitlimit and RLF — we report all scenarios honestly, including ones where RLF wins.
+      hitlimit is the fastest in ALL memory scenarios — ~2.9x faster than rate-limiter-flexible on single-IP (4.83M vs 1.66M) and ~2.8x faster on high-traffic 10K IPs (3.16M vs 1.14M).
+      hitlimit also wins all Redis and Postgres scenarios — with 18% faster Redis throughput and significantly lower memory usage.
       They're not set in stone — there's always room for improvement. If you spot issues or have suggestions, please <a href="https://github.com/JointOps/hitlimit-monorepo/issues">open an issue</a>.
     </div>
   </div>
@@ -303,12 +303,12 @@ docker compose up -d redis
 
 # Run Bun benchmarks
 cd benchmarks
-bun src/scripts/run-bun.ts</code></pre>
+pnpm bench:bun</code></pre>
     </div>
 
     <div class="callout note">
       <strong>Note:</strong> These are our benchmarks and we've done our best to keep them fair and reproducible. Results vary by hardware and environment.
-      Bun and Node.js are neck-and-neck at 10K IPs (2.90M each). Bun pulls ahead on single-IP (5.57M vs 4.71M).
+      Bun significantly outperforms Node.js on memory store — 8.32M vs 3.16M at 10K IPs. Bun's optimized JS engine shines on synchronous in-memory operations.
       Clone the repo and run them yourself — they're not set in stone. If you spot issues or have suggestions, please <a href="https://github.com/JointOps/hitlimit-monorepo/issues">open an issue</a>.
     </div>
   </div>

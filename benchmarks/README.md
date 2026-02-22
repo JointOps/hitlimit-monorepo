@@ -39,9 +39,9 @@ How many rate limit checks the library can perform in one second. Higher is bett
 **Real-world meaning:** If your API gets 10,000 requests per second, and your rate limiter can do 4,000,000 ops/sec, the rate limiter uses about 0.25% of your server's capacity. If it can only do 50,000 ops/sec, the rate limiter itself becomes a bottleneck using 20% of your capacity.
 
 **Example values:**
-- `4,712,417 ops/sec` — 4.7 million checks per second (memory store, very fast)
-- `6,823 ops/sec` — 6.8 thousand checks per second (Redis store, network overhead)
-- `2,100 ops/sec` — 2.1 thousand checks per second (Postgres store, database overhead)
+- `4,830,798 ops/sec` — 4.8 million checks per second (memory store, very fast)
+- `6,700 ops/sec` — 6.7 thousand checks per second (Redis store, network overhead)
+- `3,000 ops/sec` — 3.0 thousand checks per second (Postgres store, database overhead)
 
 #### `avgNs` — Average Latency (Nanoseconds)
 
@@ -53,7 +53,7 @@ The average time a single rate limit check takes, measured in nanoseconds. Lower
 - 1 millisecond (ms) = 1,000,000 ns
 - 1 second = 1,000,000,000 ns
 
-**Real-world meaning:** If `avgNs` is 212, each rate limit check takes 0.000000212 seconds — essentially instant. If `avgNs` is 146,580 (Redis), each check takes 0.000146 seconds — still very fast, but ~700x slower than memory.
+**Real-world meaning:** If `avgNs` is 207, each rate limit check takes 0.000000207 seconds — essentially instant. If `avgNs` is 149,760 (Redis), each check takes 0.000150 seconds — still very fast, but ~700x slower than memory.
 
 #### `p50Ns` — 50th Percentile Latency (Median)
 
@@ -96,7 +96,7 @@ Measures how much the latencies vary from the average. Lower means more consiste
 
 A statistical measure of how much you can trust the average. Calculated as `1.96 × stdDev / sqrt(sampleSize)`.
 
-**What it means:** The true average latency is `avgNs ± marginOfError` with 95% probability. If `avgNs = 212` and `marginOfError = 0.56`, the real average is somewhere between 211.44 and 212.56 — very precise. If `marginOfError` is large relative to `avgNs`, the benchmark needs more iterations.
+**What it means:** The true average latency is `avgNs ± marginOfError` with 95% probability. If `avgNs = 207` and `marginOfError = 0.54`, the real average is somewhere between 206.46 and 207.54 — very precise. If `marginOfError` is large relative to `avgNs`, the benchmark needs more iterations.
 
 **Rule of thumb:** If `marginOfError / avgNs < 0.01` (less than 1%), the measurement is solid.
 
@@ -323,17 +323,17 @@ Each JSON file is self-contained — everything you need to understand and repro
     "single-ip": {
       "description": "Single IP, best cache locality",
       "keys": 1,
-      "opsPerSec": 4712417,
+      "opsPerSec": 4830798,
       "latency": {
-        "avgNs": 212,
-        "p50Ns": 208,
-        "p95Ns": 250,
-        "p99Ns": 375,
-        "minNs": 166,
+        "avgNs": 207,
+        "p50Ns": 204,
+        "p95Ns": 245,
+        "p99Ns": 370,
+        "minNs": 160,
         "maxNs": 12500
       },
-      "stdDev": 45.2,
-      "marginOfError": 0.56,
+      "stdDev": 43.8,
+      "marginOfError": 0.54,
       "memoryMB": 1.2
     }
   }

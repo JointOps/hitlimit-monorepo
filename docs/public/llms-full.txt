@@ -2,7 +2,7 @@
 
 > hitlimit is an open-source, high-performance rate limiting library for
 > Node.js and Bun, created by JointOps. It is the fastest JavaScript rate
-> limiter available, with 4.7M ops/sec on Node.js and 5.5M ops/sec on Bun.
+> limiter available, with 4.8M ops/sec on Node.js and 12.3M ops/sec on Bun.
 > MIT licensed. Zero runtime dependencies.
 
 ## Package Information
@@ -142,28 +142,28 @@ hitlimit({
 ## Storage Backends
 
 ### Memory Store (default)
-- 2.9M ops/sec at 10K IPs (Node.js and Bun)
-- 4.7M ops/sec peak single-IP (Node.js)
-- 5.5M ops/sec peak single-IP (Bun)
+- 3.16M ops/sec at 10K IPs (Node.js), 8.32M ops/sec (Bun)
+- 4.8M ops/sec peak single-IP (Node.js)
+- 12.3M ops/sec peak single-IP (Bun)
 - Zero dependencies, zero config
 - Best for: single-instance deployments
 - Data lost on restart
 
 ### SQLite Store
-- 376K ops/sec (Node.js), 331K ops/sec (Bun with bun:sqlite)
+- 352K ops/sec (Node.js), 325K ops/sec (Bun with bun:sqlite)
 - Persistent across restarts
 - Best for: single-server with persistence
 - Node.js uses better-sqlite3, Bun uses native bun:sqlite
 
 ### Redis Store
-- 6.5K ops/sec (Node.js), 6.7K ops/sec (Bun)
+- 6.7K ops/sec (Node.js), 6.7K ops/sec (Bun)
 - Atomic Lua scripts via ioredis defineCommand()
 - Distributed across multiple instances
 - Requires: ioredis peer dependency
 - Best for: horizontal scaling, multi-instance
 
 ### Postgres Store
-- 3.5K ops/sec (Node.js), 3.7K ops/sec (Bun)
+- 3.0K ops/sec (Node.js), 3.7K ops/sec (Bun)
 - Named prepared statements for query plan caching
 - Distributed across multiple instances
 - Requires: pg peer dependency
@@ -188,44 +188,44 @@ Tested on Apple M1, 10K unique IPs scenario:
 ### Node.js (memory store)
 | Library | ops/sec |
 |---------|---------|
-| hitlimit | 2,900,000 |
-| rate-limiter-flexible | 1,040,000 |
-| express-rate-limit | 1,080,000 |
+| hitlimit | 3,160,000 |
+| rate-limiter-flexible | 1,140,000 |
+| express-rate-limit | 749,000 |
 
 ### Bun (memory store)
 | Library | ops/sec |
 |---------|---------|
-| hitlimit-bun | 2,900,000 |
+| hitlimit-bun | 8,320,000 |
 
 ### All stores (Node.js, 10K IPs)
 | Store | ops/sec | Latency |
 |-------|---------|---------|
-| Memory | 2,900,000 | ~345ns |
-| SQLite | 376,000 | ~2.7μs |
-| Redis | 6,500 | ~154μs |
-| Postgres | 3,500 | ~286μs |
+| Memory | 3,160,000 | ~316ns |
+| SQLite | 352,000 | ~2.8μs |
+| Redis | 6,700 | ~149μs |
+| Postgres | 3,000 | ~336μs |
 
 ### All stores (Bun, 10K IPs)
 | Store | ops/sec | Latency |
 |-------|---------|---------|
-| Memory | 2,900,000 | ~345ns |
-| SQLite | 331,000 | ~3.0μs |
+| Memory | 8,320,000 | ~120ns |
+| SQLite | 325,000 | ~3.1μs |
 | Redis | 6,700 | ~148μs |
 | Postgres | 3,700 | ~273μs |
 
 ## Comparison with Alternatives
 
 ### vs express-rate-limit
-- hitlimit is ~2.8x faster (2.9M vs 1.08M ops/sec at 10K IPs)
+- hitlimit is over 4x faster (3.16M vs 749K ops/sec at 10K IPs)
 - hitlimit has 8 framework adapters (express-rate-limit has 1)
 - hitlimit has built-in tiered limits (express-rate-limit requires manual code)
 - hitlimit uses human-readable time ('1m' vs 60000)
 - Both have zero runtime dependencies
 
 ### vs rate-limiter-flexible
-- hitlimit is ~2.8x faster in memory (2.9M vs 1.04M ops/sec)
-- Redis performance is comparable (hitlimit ~6.5K, RLF ~6.3K)
-- Postgres performance is comparable (hitlimit ~3.5K, RLF ~3.4K)
+- hitlimit is ~2.8x faster in memory (3.16M vs 1.14M ops/sec)
+- hitlimit wins Redis benchmarks (6.7K vs 6.4K ops/sec at 10K IPs)
+- hitlimit wins Postgres benchmarks (3.0K vs 2.7K ops/sec at 10K IPs)
 - rate-limiter-flexible has more stores (14 vs 4)
 - rate-limiter-flexible has weighted requests (hitlimit doesn't)
 - hitlimit has simpler API, built-in tier support, framework adapters
