@@ -4,20 +4,87 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "bench": "tsx src/scripts/run-node.ts",
-    "bench:node": "tsx src/scripts/run-node.ts",
-    "bench:bun": "bun src/scripts/run-bun.ts",
     "bench:all": "pnpm bench:node && pnpm bench:bun",
-    "check-regression": "tsx src/scripts/check-regression.ts"
+
+    "docker:up": "docker run -d --name bench-redis -p 6379:6379 redis:7-alpine && docker run -d --name bench-postgres -p 5433:5432 -e POSTGRES_USER=hitlimit -e POSTGRES_PASSWORD=hitlimit -e POSTGRES_DB=hitlimit_test postgres:16-alpine && echo 'Waiting for Postgres...' && sleep 3",
+    "docker:down": "docker rm -f bench-redis bench-postgres 2>/dev/null; true",
+    "docker:restart": "pnpm docker:down && pnpm docker:up",
+    "clean:stores": "docker exec bench-redis redis-cli FLUSHDB 2>/dev/null; docker exec bench-postgres psql -U hitlimit -d hitlimit_test -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;' 2>/dev/null; true",
+
+    "bench:node": "pnpm bench:node:store && pnpm bench:node:express && pnpm bench:node:fastify && pnpm bench:node:hono && pnpm bench:node:nestjs",
+    "bench:node:store": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/sqlite.ts && NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/store/rate-limiter-flexible/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/store/rate-limiter-flexible/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/store/rate-limiter-flexible/postgres.ts",
+    "bench:node:store:memory": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/store/rate-limiter-flexible/memory.ts",
+    "bench:node:store:sqlite": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/sqlite.ts",
+    "bench:node:store:redis": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/redis.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/store/rate-limiter-flexible/redis.ts",
+    "bench:node:store:postgres": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/store/rate-limiter-flexible/postgres.ts",
+
+    "bench:node:express": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/sqlite.ts && NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/express/express-rate-limit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/postgres.ts",
+    "bench:node:express:memory": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/express-rate-limit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/memory.ts",
+    "bench:node:express:sqlite": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/sqlite.ts",
+    "bench:node:express:redis": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/redis.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/redis.ts",
+    "bench:node:express:postgres": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/postgres.ts",
+
+    "bench:node:fastify": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/sqlite.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/fastify/fastify-rate-limit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/fastify-rate-limit/redis.ts",
+    "bench:node:fastify:memory": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/fastify-rate-limit/memory.ts",
+    "bench:node:fastify:sqlite": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/sqlite.ts",
+    "bench:node:fastify:redis": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/redis.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/fastify/fastify-rate-limit/redis.ts",
+    "bench:node:fastify:postgres": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/postgres.ts",
+
+    "bench:node:hono": "NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/sqlite.ts && NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/hono/hono-rate-limiter/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/hono/hono-rate-limiter/redis.ts",
+    "bench:node:hono:memory": "NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/hono/hono-rate-limiter/memory.ts",
+    "bench:node:hono:sqlite": "NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/sqlite.ts",
+    "bench:node:hono:redis": "NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/redis.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/hono/hono-rate-limiter/redis.ts",
+    "bench:node:hono:postgres": "NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/postgres.ts",
+
+    "bench:node:nestjs": "NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/sqlite.ts && NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/nestjs/nestjs-throttler/memory.ts",
+    "bench:node:nestjs:memory": "NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/nestjs/nestjs-throttler/memory.ts",
+    "bench:node:nestjs:sqlite": "NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/sqlite.ts",
+    "bench:node:nestjs:redis": "NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/redis.ts",
+    "bench:node:nestjs:postgres": "NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/postgres.ts",
+
+    "bench:bun": "pnpm bench:bun:store && pnpm bench:bun:bun-serve && pnpm bench:bun:elysia && pnpm bench:bun:hono",
+    "bench:bun:store": "bun bun/store/hitlimit/memory.ts && bun bun/store/hitlimit/sqlite.ts && bun bun/store/hitlimit/redis.ts && bun bun/store/hitlimit/postgres.ts && pnpm clean:stores && bun bun/store/rate-limiter-flexible/memory.ts && bun bun/store/rate-limiter-flexible/redis.ts && bun bun/store/rate-limiter-flexible/postgres.ts",
+    "bench:bun:store:memory": "bun bun/store/hitlimit/memory.ts && bun bun/store/rate-limiter-flexible/memory.ts",
+    "bench:bun:store:sqlite": "bun bun/store/hitlimit/sqlite.ts",
+    "bench:bun:store:redis": "bun bun/store/hitlimit/redis.ts && pnpm clean:stores && bun bun/store/rate-limiter-flexible/redis.ts",
+    "bench:bun:store:postgres": "bun bun/store/hitlimit/postgres.ts && pnpm clean:stores && bun bun/store/rate-limiter-flexible/postgres.ts",
+
+    "bench:bun:bun-serve": "bun bun/bun-serve/hitlimit/memory.ts && bun bun/bun-serve/hitlimit/sqlite.ts && bun bun/bun-serve/hitlimit/redis.ts && bun bun/bun-serve/hitlimit/postgres.ts",
+    "bench:bun:bun-serve:memory": "bun bun/bun-serve/hitlimit/memory.ts",
+    "bench:bun:bun-serve:sqlite": "bun bun/bun-serve/hitlimit/sqlite.ts",
+    "bench:bun:bun-serve:redis": "bun bun/bun-serve/hitlimit/redis.ts",
+    "bench:bun:bun-serve:postgres": "bun bun/bun-serve/hitlimit/postgres.ts",
+
+    "bench:bun:elysia": "bun bun/elysia/hitlimit/memory.ts && bun bun/elysia/hitlimit/sqlite.ts && bun bun/elysia/hitlimit/redis.ts && bun bun/elysia/hitlimit/postgres.ts && pnpm clean:stores && bun bun/elysia/elysia-rate-limit/memory.ts",
+    "bench:bun:elysia:memory": "bun bun/elysia/hitlimit/memory.ts && bun bun/elysia/elysia-rate-limit/memory.ts",
+    "bench:bun:elysia:sqlite": "bun bun/elysia/hitlimit/sqlite.ts",
+    "bench:bun:elysia:redis": "bun bun/elysia/hitlimit/redis.ts",
+    "bench:bun:elysia:postgres": "bun bun/elysia/hitlimit/postgres.ts",
+
+    "bench:bun:hono": "bun bun/hono/hitlimit/memory.ts && bun bun/hono/hitlimit/sqlite.ts && bun bun/hono/hitlimit/redis.ts && bun bun/hono/hitlimit/postgres.ts && pnpm clean:stores && bun bun/hono/hono-rate-limiter/memory.ts && bun bun/hono/hono-rate-limiter/redis.ts",
+    "bench:bun:hono:memory": "bun bun/hono/hitlimit/memory.ts && bun bun/hono/hono-rate-limiter/memory.ts",
+    "bench:bun:hono:sqlite": "bun bun/hono/hitlimit/sqlite.ts",
+    "bench:bun:hono:redis": "bun bun/hono/hitlimit/redis.ts && pnpm clean:stores && bun bun/hono/hono-rate-limiter/redis.ts",
+    "bench:bun:hono:postgres": "bun bun/hono/hitlimit/postgres.ts",
+
+    "check-regression": "tsx check-regression.ts"
   },
   "dependencies": {
     "express-rate-limit": "^7.5.0",
-    "rate-limiter-flexible": "^5.0.3"
+    "rate-limiter-flexible": "^5.0.3",
+    "@fastify/rate-limit": "^10.0.0",
+    "fastify": "^5.0.0",
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/testing": "^10.0.0",
+    "@nestjs/throttler": "^6.0.0",
+    "hono": "^4.0.0",
+    "hono-rate-limiter": "^0.5.0",
+    "elysia": "^1.0.0",
+    "elysia-rate-limit": "^4.0.0",
+    "reflect-metadata": "^0.2.0"
   },
   "devDependencies": {
-    "@types/ioredis": "^5.0.0",
-    "@types/node": "^22.10.10",
-    "@types/pg": "^8.11.0",
     "ioredis": "^5.3.0",
     "pg": "^8.13.0",
     "tsx": "^4.19.2",

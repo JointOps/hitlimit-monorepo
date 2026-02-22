@@ -1,253 +1,411 @@
 # hitlimit Benchmarks
 
-Controlled-environment microbenchmarks for the hitlimit rate limiting library. These measure the raw throughput and latency of the rate limiting logic itself — not HTTP servers, not real network traffic, not production load. The goal is an apples-to-apples comparison of the core algorithms under identical, reproducible conditions.
+Performance benchmarks for hitlimit across every supported framework, store, and runtime.
 
-We believe benchmarks should be transparent, reproducible, and honest. This document explains exactly how we run them and why we made each decision. If you think something is unfair or could be improved, [open an issue](https://github.com/JointOps/hitlimit-monorepo/issues) — we want to get this right.
+## What Are These Benchmarks?
 
-## Quick Start
+These benchmarks measure how fast rate limiting libraries process requests. Instead of sending real HTTP traffic over a network, we call the rate limiter's internal function directly — thousands of times per second — and measure how long each call takes.
+
+Think of it like timing how fast a bouncer checks IDs at a club door. We're not measuring how long it takes someone to walk to the club (network latency) — we're measuring how fast the bouncer can look at an ID and say "you're in" or "you're out." That's what a rate limiter does: it checks if a request should be allowed or blocked.
+
+### Why Not Use Real HTTP Requests?
+
+Real HTTP benchmarks (like wrk, autocannon, or k6) measure the entire stack: TCP handshake, TLS negotiation, HTTP parsing, routing, middleware chain, response serialization, and network round-trip. The rate limiter is just one tiny piece of that pipeline. If the total request takes 5ms and the rate limiter takes 0.0002ms, you can't meaningfully measure the rate limiter's performance through HTTP.
+
+By calling the rate limiter directly, we isolate its performance. This is how all serious library benchmarks work (V8 benchmarks don't measure Chrome's rendering pipeline).
+
+### What Does Each Benchmark Test?
+
+Each benchmark file tests ONE specific combination:
+- **One library** (hitlimit, express-rate-limit, rate-limiter-flexible, etc.)
+- **One store** (memory, SQLite, Redis, Postgres)
+- **One framework** (Express, Fastify, Hono, NestJS, Bun.serve, Elysia)
+- **One runtime** (Node.js or Bun)
+
+For example, `node/fastify/hitlimit/redis.ts` tests hitlimit's Fastify plugin using a Redis store on Node.js.
+
+Each benchmark runs 3 scenarios with different numbers of unique IP addresses (explained below).
+
+## Understanding the Results
+
+### Key Metrics
+
+Every result file contains these numbers. Here's what each one means:
+
+#### `opsPerSec` — Operations Per Second (Throughput)
+
+How many rate limit checks the library can perform in one second. Higher is better.
+
+**Real-world meaning:** If your API gets 10,000 requests per second, and your rate limiter can do 4,000,000 ops/sec, the rate limiter uses about 0.25% of your server's capacity. If it can only do 50,000 ops/sec, the rate limiter itself becomes a bottleneck using 20% of your capacity.
+
+**Example values:**
+- `4,712,417 ops/sec` — 4.7 million checks per second (memory store, very fast)
+- `6,823 ops/sec` — 6.8 thousand checks per second (Redis store, network overhead)
+- `2,100 ops/sec` — 2.1 thousand checks per second (Postgres store, database overhead)
+
+#### `avgNs` — Average Latency (Nanoseconds)
+
+The average time a single rate limit check takes, measured in nanoseconds. Lower is better.
+
+**Scale reference:**
+- 1 nanosecond (ns) = 0.000000001 seconds
+- 1 microsecond (μs) = 1,000 ns
+- 1 millisecond (ms) = 1,000,000 ns
+- 1 second = 1,000,000,000 ns
+
+**Real-world meaning:** If `avgNs` is 212, each rate limit check takes 0.000000212 seconds — essentially instant. If `avgNs` is 146,580 (Redis), each check takes 0.000146 seconds — still very fast, but ~700x slower than memory.
+
+#### `p50Ns` — 50th Percentile Latency (Median)
+
+If you sort all measured latencies from fastest to slowest, the p50 is the one right in the middle. 50% of requests were faster than this, 50% were slower.
+
+**Why it matters:** The average (`avgNs`) can be skewed by a few extremely slow requests. The median (p50) tells you what a "typical" request actually experiences. If your average is 500ns but your p50 is 200ns, most requests are fast but a few outliers are pulling the average up.
+
+#### `p95Ns` — 95th Percentile Latency
+
+95% of requests were faster than this value. Only 5% were slower.
+
+**Real-world meaning:** This is what matters for user experience. If your p95 is 250ns, 95 out of 100 users experience latency of 250ns or less. The remaining 5 might see something worse, but the vast majority are fine.
+
+**Example:** A web app with 1,000 concurrent users — at p95 = 250ns, 950 users see ≤250ns latency. Only 50 users see something higher.
+
+#### `p99Ns` — 99th Percentile Latency
+
+99% of requests were faster than this. Only 1% were slower. This is the "tail latency" — the worst-case experience for almost everyone.
+
+**Why track p99?** At scale (millions of requests), even 1% being slow means thousands of users per second hitting that tail. p99 tells you how bad that tail is. If p99 is 10x worse than p50, you have a latency spike problem.
+
+#### `minNs` and `maxNs` — Minimum and Maximum Latency
+
+The absolute fastest and slowest individual request in the entire benchmark run.
+
+`minNs` shows the best-case scenario (everything in cache, no GC, no contention).
+`maxNs` shows the worst-case scenario (GC pause, cache miss, OS scheduler interruption).
+
+The `maxNs` is often 10-100x worse than `p99Ns` because it captures one-off extreme events. Don't optimize for `maxNs` — it's noise.
+
+#### `stdDev` — Standard Deviation
+
+Measures how much the latencies vary from the average. Lower means more consistent performance.
+
+**Real-world analogy:** Two restaurants both serve food in 10 minutes on average. Restaurant A always takes 9-11 minutes (low stdDev). Restaurant B takes 2 minutes sometimes and 18 minutes other times (high stdDev). Same average, very different experience. Low stdDev = predictable. High stdDev = unpredictable.
+
+**What's "good"?** If `stdDev` is less than 50% of `avgNs`, performance is consistent. If it's larger than `avgNs`, there's high variance — investigate GC, cache eviction, or contention.
+
+#### `marginOfError` — 95% Confidence Interval
+
+A statistical measure of how much you can trust the average. Calculated as `1.96 × stdDev / sqrt(sampleSize)`.
+
+**What it means:** The true average latency is `avgNs ± marginOfError` with 95% probability. If `avgNs = 212` and `marginOfError = 0.56`, the real average is somewhere between 211.44 and 212.56 — very precise. If `marginOfError` is large relative to `avgNs`, the benchmark needs more iterations.
+
+**Rule of thumb:** If `marginOfError / avgNs < 0.01` (less than 1%), the measurement is solid.
+
+#### `memoryMB` — Memory Usage (Megabytes)
+
+How much heap memory the rate limiter uses during the benchmark, in megabytes. Measured as `heapUsed` after the benchmark minus `heapUsed` before.
+
+**Real-world meaning:** A rate limiter that uses 2MB for 1,000 IPs is fine. One that uses 200MB for 1,000 IPs will eat into your server's available memory. Memory matters most when you're tracking millions of unique keys (high-traffic APIs, DDoS mitigation).
+
+### Scenarios
+
+Every benchmark runs 3 scenarios to test different access patterns:
+
+| Scenario | Unique IPs | What It Tests |
+|----------|-----------|---------------|
+| `single-ip` | 1 | Best case. One key, always in cache. Tests the library's raw speed without any key lookup overhead. |
+| `multi-ip-1k` | 1,000 | Typical API. Simulates a normal application with 1,000 different clients. Tests hash map performance and memory usage. |
+| `multi-ip-10k` | 10,000 | High traffic. Simulates a busy API with 10,000 different clients. Tests how the library scales with many keys. |
+
+**Why these specific numbers?** Single-IP is the theoretical maximum (best cache locality). 1K IPs covers 99% of real APIs. 10K IPs stress-tests the data structures. Beyond 10K, the differences are proportional — a library that handles 10K well handles 100K well.
+
+## What We Benchmark
+
+### Frameworks × Stores × Runtimes
+
+**Node.js (`@joint-ops/hitlimit`):**
+
+| Framework | Memory | SQLite | Redis | Postgres |
+|-----------|--------|--------|-------|----------|
+| Express   | ✓      | ✓      | ✓     | ✓        |
+| Fastify   | ✓      | ✓      | ✓     | ✓        |
+| Hono      | ✓      | ✓      | ✓     | ✓        |
+| NestJS    | ✓      | ✓      | ✓     | ✓        |
+| Raw Store | ✓      | ✓      | ✓     | ✓        |
+
+**Bun (`@joint-ops/hitlimit-bun`):**
+
+| Framework | Memory | SQLite | Redis | Postgres |
+|-----------|--------|--------|-------|----------|
+| Bun.serve | ✓      | ✓      | ✓     | ✓        |
+| Elysia    | ✓      | ✓      | ✓     | ✓        |
+| Hono      | ✓      | ✓      | ✓     | ✓        |
+| Raw Store | ✓      | ✓      | ✓     | ✓        |
+
+### Competitors
+
+Each framework also benchmarks its native rate limiting competitor:
+
+| Framework | Competitor | Stores |
+|-----------|-----------|--------|
+| Express   | express-rate-limit | Memory |
+| Express   | rate-limiter-flexible | Memory, Redis, Postgres |
+| Fastify   | @fastify/rate-limit | Memory, Redis |
+| Hono      | hono-rate-limiter | Memory, Redis |
+| NestJS    | @nestjs/throttler | Memory |
+| Elysia    | elysia-rate-limit | Memory |
+| Raw Store | rate-limiter-flexible | Memory, Redis, Postgres |
+
+## How to Run
+
+### Prerequisites
+
+- Node.js v20+ (for Node.js benchmarks)
+- Bun v1.3+ (for Bun benchmarks)
+- pnpm (package manager)
+- Docker (optional, for Redis and Postgres benchmarks)
+
+### Build First
+
+Benchmarks import from `packages/hitlimit/dist/` and `packages/hitlimit-bun/dist/`, so you must build before running:
 
 ```bash
 # From monorepo root
-pnpm install
 pnpm build
-
-# Node.js (--expose-gc enables GC between runs)
-node --expose-gc node_modules/.bin/tsx benchmarks/src/scripts/run-node.ts
-
-# Bun
-bun benchmarks/src/scripts/run-bun.ts
 ```
 
-> **Note:** `--expose-gc` is required for Node.js to enable garbage collection between runs. Without it, benchmarks still work but memory pressure can compound across runs.
-
-## Test Environment
-
-### Hardware
-
-All published results were measured on this exact machine:
-
-- **Machine**: MacBook Air (M1, 2020)
-- **Chip**: Apple M1 — 8 cores (4 performance + 4 efficiency)
-- **Memory**: 8 GB unified
-- **OS**: macOS (Darwin, ARM64)
-
-Your numbers will differ based on your hardware. A desktop i9 or Ryzen 9 will likely produce higher throughput. A smaller cloud VM will produce lower numbers. The relative comparisons (hitlimit vs competitors) should stay roughly similar on any hardware since all libraries run under identical conditions.
-
-### Software
-
-- **Node.js**: v24 (primary), v18/v20/v22 also supported
-- **Bun**: v1.3+
-- **Redis**: 7.x via Docker (local container on port 6379)
-- **PostgreSQL**: 16.x via Docker (local container on port 5433)
-
-### Docker Overhead (Redis & Postgres)
-
-Redis and Postgres benchmarks run against **local Docker containers** — not remote servers. This means network latency is minimal (loopback), but Docker still adds overhead compared to bare-metal installs. We mitigate this by:
-
-- Running Docker containers **before** starting benchmarks (no cold-start penalty)
-- Using the same Docker setup for all competitors (same overhead for everyone)
-- Reporting Redis/Postgres numbers separately from Memory/SQLite (no mixing in-process and networked stores)
-- Adding **500ms cooldown between competitors** so one library's Docker cleanup doesn't bleed into the next
-
-If you're running benchmarks on bare-metal Redis/Postgres (no Docker), expect slightly higher numbers across the board — but the relative comparison between libraries should hold.
-
-## Methodology
-
-### How Each Benchmark Runs
-
-1. **Warmup** — 5,000 iterations are run and discarded. This lets the JS engine JIT-compile hot paths and stabilize internal caches so the first measured run isn't unfairly slow.
-
-2. **Measurement** — 50,000 iterations × 5 runs = 250,000 total measured operations. Each individual operation is timed independently (see timing below). We report aggregate stats across all 250K samples.
-
-3. **Three scenarios per store:**
-   - `single-ip` — One IP hammering the limiter (worst case for that key, best case for cache locality)
-   - `multi-ip-1k` — 1,000 unique IPs cycling round-robin (typical small-medium API)
-   - `multi-ip-10k` — 10,000 unique IPs cycling round-robin (high-traffic API, stresses map/hash lookups)
-
-4. **Reported stats** — ops/sec, avg/p50/p95/p99 latency, 95% confidence interval, memory delta.
-
-### Why We Made These Choices
-
-**Timing: `process.hrtime.bigint()` (Node.js) / `Bun.nanoseconds()` (Bun)**
-`performance.now()` returns milliseconds with microsecond precision — converting to nanoseconds creates false precision. `hrtime.bigint()` gives true nanosecond resolution from the monotonic clock. Bun's `Bun.nanoseconds()` is the native equivalent.
-
-**GC between runs: `global.gc()` / `Bun.gc(true)` before each run**
-Without explicit GC, memory pressure compounds across runs. The first competitor to run gets a clean heap while later competitors pay for accumulated garbage. Running GC before each measured run normalizes the starting conditions for everyone.
-
-**200ms cooldown between runs, 500ms between competitors**
-Back-to-back CPU-intensive work can trigger thermal throttling on laptops. Short cooldowns let the CPU recover. The 500ms gap between competitors prevents one library's cleanup from bleeding into the next library's measurement.
-
-**250K samples (50K × 5 runs)**
-Enough samples to produce stable percentiles and tight confidence intervals. We tried 10K × 3 = 30K and found the variance too high for meaningful comparisons.
-
-**Mock objects, not HTTP servers**
-We benchmark the rate limiting logic directly — not HTTP parsing, routing, or response serialization. This isolates what we're actually measuring. Each library gets the same mock request object with the same IP extraction path.
-
-**Same store configuration for all competitors**
-When comparing Redis or Postgres stores, all competitors connect to the same local instance with the same connection settings. Each competitor gets its own table/keyspace to avoid interference.
-
-### What We Don't Do
-
-- **No cherry-picking** — We report all scenarios, including ones where competitors beat us. RLF wins 2 of 3 Redis scenarios and 2 of 3 Postgres scenarios by small margins. We say so.
-- **No artificial limits on competitors** — Each library is configured the way its docs recommend. express-rate-limit uses its default key generator. rate-limiter-flexible uses `consume()` as documented.
-- **No preheating advantage** — Every competitor gets the same warmup. No library runs "first" consistently (store order is fixed, but competitor order within each store is consistent across runs).
-
-## Latest Results
-
-### Node.js (hitlimit)
-
-| Store | Scenario | Ops/sec | Avg Latency |
-|-------|----------|---------|-------------|
-| **Memory** | single-ip | 4.71M | 212ns |
-| **Memory** | 1k IPs | 1.90M | 528ns |
-| **Memory** | 10k IPs | 2.90M | 345ns |
-| **SQLite** | single-ip | 452K | 2.21μs |
-| **SQLite** | 10k IPs | 376K | 2.66μs |
-| **Redis** | single-ip | 6.1K | 165μs |
-| **Redis** | 1k IPs | 6.5K | 154μs |
-| **Redis** | 10k IPs | 5.9K | 169μs |
-| **Postgres** | single-ip | 3.5K | 286μs |
-| **Postgres** | 1k IPs | 3.3K | 299μs |
-| **Postgres** | 10k IPs | 3.3K | 304μs |
-
-### Bun (hitlimit-bun)
-
-| Store | Scenario | Ops/sec | Avg Latency |
-|-------|----------|---------|-------------|
-| **Memory** | single-ip | 5.57M | 179ns |
-| **Memory** | 1k IPs | 3.04M | 329ns |
-| **Memory** | 10k IPs | 2.90M | 345ns |
-| **bun:sqlite** | single-ip | 429K | 2.33μs |
-| **bun:sqlite** | 10k IPs | 331K | 3.02μs |
-| **Redis** | single-ip | 6.7K | 148μs |
-| **Redis** | 10k IPs | 6.7K | 149μs |
-| **Postgres** | single-ip | 3.6K | 275μs |
-| **Postgres** | 1k IPs | 3.6K | 279μs |
-| **Postgres** | 10k IPs | 3.7K | 273μs |
-
-### Comparison with Competitors (Node.js, 10K IPs)
-
-**Memory Store**
-
-| Library | Ops/sec | vs Fastest |
-|---------|---------|------------|
-| **hitlimit** | **2.90M** | **fastest** |
-| rate-limiter-flexible | 1.08M | 37% |
-| express-rate-limit | 1.04M | 36% |
-
-**Redis Store**
-
-| Library | Scenario | Ops/sec | vs Fastest |
-|---------|----------|---------|------------|
-| **rate-limiter-flexible** | single-ip | **6.2K** | **fastest** |
-| hitlimit | single-ip | 6.1K | 98% |
-| **hitlimit** | multi-1k | **6.5K** | **fastest** |
-| rate-limiter-flexible | multi-1k | 6.3K | 97% |
-| **rate-limiter-flexible** | multi-10k | **6.5K** | **fastest** |
-| hitlimit | multi-10k | 5.9K | 92% |
-
-> Redis is network-bound (~150μs latency). Both libraries use atomic Lua scripts. Results are within margin of error — hitlimit wins multi-1k, RLF wins single-ip and multi-10k. hitlimit has lower p50 latency in all 3 scenarios (148μs vs 150μs).
-
-**Postgres Store**
-
-| Library | Scenario | Ops/sec | vs Fastest |
-|---------|----------|---------|------------|
-| **hitlimit** | single-ip | **3.5K** | **fastest** |
-| rate-limiter-flexible | single-ip | 3.5K | 99% |
-| **rate-limiter-flexible** | multi-1k | **3.4K** | **fastest** |
-| hitlimit | multi-1k | 3.3K | 97% |
-| **rate-limiter-flexible** | multi-10k | **3.3K** | **fastest** |
-| hitlimit | multi-10k | 3.3K | 99% |
-
-> Postgres is essentially tied between hitlimit and RLF across all scenarios. hitlimit wins single-ip, RLF wins multi-1k by 3%, multi-10k is a virtual tie (99%). hitlimit uses named prepared statements for server-side query plan caching.
-
-> **Fair play:** These are our benchmarks and we've done our best to keep them fair and reproducible. We encourage you to clone this repo and run them yourself. They're not set in stone — there's always room for improvement. If you spot issues or have suggestions, please open an issue or PR.
-
-## Docker Setup (Redis & Postgres)
-
-Redis and Postgres benchmarks require Docker. If they're not running, those benchmarks skip gracefully — memory and SQLite results are unaffected.
+### Run Everything
 
 ```bash
-# From monorepo root — start both
-docker compose up -d
-
-# Or individually
-docker compose up -d redis     # Redis on port 6379
-docker compose up -d postgres  # Postgres on port 5433
+cd benchmarks
+pnpm bench:all          # All benchmarks (Node.js + Bun)
 ```
 
-> **Why port 5433?** Our docker-compose maps Postgres to external port 5433 (not 5432) to avoid conflicts with any local Postgres installation. The benchmark runners default to this port.
-
-### Running Benchmarks in Isolation
-
-For the most accurate memory/SQLite numbers, stop Docker containers first so they don't compete for CPU:
+### Run by Runtime
 
 ```bash
-docker compose down
-
-# Memory + SQLite only (no Docker overhead)
-node --expose-gc node_modules/.bin/tsx benchmarks/src/scripts/run-node.ts
-bun benchmarks/src/scripts/run-bun.ts
-
-# Then bring up Redis/Postgres for network store benchmarks
-docker compose up -d
-node --expose-gc node_modules/.bin/tsx benchmarks/src/scripts/run-node.ts
-bun benchmarks/src/scripts/run-bun.ts
+pnpm bench:node          # All Node.js benchmarks
+pnpm bench:bun           # All Bun benchmarks
 ```
 
-## Results Structure
+### Run by Framework
 
-Every benchmark run writes to `benchmarks/results/latest/` and automatically snapshots to `benchmarks/results/v{version}/` by reading the `VERSION` file in the repo root. No manual copying needed — just make sure `VERSION` is set before running benchmarks.
+```bash
+pnpm bench:node:express   # All Express benchmarks (hitlimit + competitors, all stores)
+pnpm bench:node:fastify   # All Fastify benchmarks
+pnpm bench:node:hono      # All Hono benchmarks
+pnpm bench:node:nestjs    # All NestJS benchmarks
+pnpm bench:node:store     # Raw store.hit() benchmarks (no framework overhead)
 
-```
-benchmarks/results/
-├── latest/              ← runners always write here
-│   ├── node.json        ← raw data (ops/sec, latencies, memory, CI)
-│   ├── node.md          ← human-readable report
-│   ├── bun.json
-│   └── bun.md
-├── v1.2.0/              ← snapshot from v1.2.0 release
-│   ├── node.json
-│   ├── node.md
-│   ├── bun.json
-│   └── bun.md
-├── v1.1.3/              ← snapshot from v1.1.3 release
-│   └── ...
-├── v1.1.2/
-│   └── ...
-└── v1.1.1/
-    └── ...
+pnpm bench:bun:bun-serve  # All Bun.serve benchmarks
+pnpm bench:bun:elysia     # All Elysia benchmarks
+pnpm bench:bun:hono       # All Bun Hono benchmarks
+pnpm bench:bun:store      # Raw store benchmarks on Bun
 ```
 
-**Why this structure?**
-- `latest/` is always the most recent run — overwritten every time you run benchmarks. No confusion about which file is "current."
-- Versioned folders (`v1.2.0/`, `v1.1.3/`, etc.) are immutable snapshots. They let you compare performance across releases and catch regressions.
-- Four files per folder, consistent naming: `node.json`, `node.md`, `bun.json`, `bun.md`. The folder name tells you the version, the filename tells you the runtime. That's it.
+### Run by Store
 
-## Key Insights
+```bash
+pnpm bench:node:store:memory    # Memory store only (Node.js)
+pnpm bench:node:express:memory  # Express + memory store only
+pnpm bench:node:express:redis   # Express + Redis store only
+pnpm bench:bun:store:memory     # Memory store only (Bun)
+```
 
-1. **Memory Store**: hitlimit is 2.7x faster than rate-limiter-flexible at 10K unique IPs (2.90M vs 1.08M — zero-allocation sync hot path + sweep timer)
-2. **SQLite Store**: Only hitlimit offers built-in SQLite — 376-452K ops/sec with zero config
-3. **Redis Store**: Network-bound (~150μs latency). Both hitlimit and RLF use atomic Lua scripts via `defineCommand()`. Essentially tied — hitlimit wins multi-1k (6.5K vs 6.3K), RLF wins single-ip and multi-10k by small margins. hitlimit has lower p50 latency in all scenarios
-4. **Postgres Store**: Network-bound (~280-300μs latency). Essentially tied — hitlimit wins single-ip (3.5K), RLF wins multi-1k by 3%, multi-10k is 99% tied. hitlimit uses named prepared statements for server-side query plan caching
-5. **Bun Runtime**: 1.6-1.9x faster than Node.js for memory operations (5.57M vs 4.71M single-ip, 2.90M vs 2.90M at 10K IPs)
-6. **4 Store Backends**: hitlimit supports Memory, SQLite, Redis, and Postgres — all built in, zero runtime dependencies
+### Run a Single Benchmark
 
-## Think We Can Do Better?
+```bash
+# Node.js (requires --expose-gc for accurate memory measurement)
+node --expose-gc ./node_modules/.bin/tsx node/express/hitlimit/memory.ts
 
-These benchmarks aren't perfect — no benchmark suite is. If you spot something unfair, have a better methodology idea, or think we're measuring the wrong thing, we genuinely want to hear from you.
+# Bun (GC exposed by default)
+bun bun/elysia/hitlimit/memory.ts
+```
 
-**How to discuss benchmark methodology:**
+### Redis and Postgres Benchmarks
 
-- **[Open an issue](https://github.com/JointOps/hitlimit-monorepo/issues)** — describe what you'd change and why. Include your hardware, runtime version, and what numbers you're seeing. Methodology discussions are welcome — we take them seriously.
-- **Submit a PR** — the benchmark runners are in `benchmarks/src/scripts/` (`run-node.ts` and `run-bun.ts`). If you have a concrete improvement, send a PR and we'll review it.
-- **Run them yourself** — clone this repo, run the benchmarks on your hardware, and share your results. Different CPUs, OSes, and Docker setups produce different absolute numbers. We want to know how hitlimit performs outside our test machine.
+Redis and Postgres benchmarks need running servers. Use Docker:
 
-**Things we'd especially love feedback on:**
-- Is the warmup count (5K) sufficient for your runtime/hardware?
-- Are the cooldowns (200ms between runs, 500ms between competitors) appropriate?
-- Should we add more scenarios (e.g., burst patterns, mixed read/write)?
-- Is there a competitor we should include that we're missing?
-- Are the Docker-based Redis/Postgres benchmarks representative of your production setup?
+```bash
+# Start Redis
+docker run -d --name bench-redis -p 6379:6379 redis:7-alpine
 
-We'd rather have honest benchmarks where we lose some scenarios than inflated numbers that don't reflect reality.
+# Start Postgres
+docker run -d --name bench-postgres -p 5433:5432 \
+  -e POSTGRES_USER=hitlimit \
+  -e POSTGRES_PASSWORD=hitlimit \
+  -e POSTGRES_DB=hitlimit_test \
+  postgres:16-alpine
+
+# Run Redis benchmarks
+pnpm bench:node:express:redis
+
+# Run Postgres benchmarks
+pnpm bench:node:express:postgres
+```
+
+If Redis/Postgres isn't available, those benchmarks skip automatically with a "not available" message.
+
+## Results
+
+### Where Results Live
+
+Results are saved to `results/v{VERSION}/` where `{VERSION}` comes from the `VERSION` file at the monorepo root.
+
+```
+results/
+└── v1.2.0/
+    ├── node-express-hitlimit-memory.json
+    ├── node-express-hitlimit-redis.json
+    ├── node-express-express-rate-limit-memory.json
+    ├── node-fastify-hitlimit-memory.json
+    ├── bun-elysia-hitlimit-memory.json
+    └── ... (~55 JSON files)
+```
+
+### File Naming
+
+`{runtime}-{framework}-{library}-{store}.json`
+
+Examples:
+- `node-express-hitlimit-memory.json` — hitlimit on Express with memory store on Node.js
+- `bun-elysia-hitlimit-redis.json` — hitlimit on Elysia with Redis store on Bun
+- `node-store-rate-limiter-flexible-memory.json` — rate-limiter-flexible raw store on Node.js
+
+### Finding Results
+
+```bash
+# All Redis benchmarks
+ls results/v1.2.0/*redis*
+
+# All Express benchmarks
+ls results/v1.2.0/node-express-*
+
+# All hitlimit benchmarks
+ls results/v1.2.0/*hitlimit*
+
+# Compare hitlimit vs express-rate-limit on Express
+cat results/v1.2.0/node-express-hitlimit-memory.json
+cat results/v1.2.0/node-express-express-rate-limit-memory.json
+```
+
+### Reading a Result File
+
+Each JSON file is self-contained — everything you need to understand and reproduce the result:
+
+```json
+{
+  "benchmark": {
+    "framework": "express",
+    "library": "hitlimit",
+    "store": "memory",
+    "runtime": "node"
+  },
+  "environment": {
+    "runtimeVersion": "v24.4.1",
+    "os": "macOS 15.3.1",
+    "arch": "arm64",
+    "cpu": "Apple M2 Pro",
+    "cpuCores": 12,
+    "memoryGB": 32,
+    "docker": false
+  },
+  "versions": {
+    "hitlimit": "1.2.0"
+  },
+  "config": {
+    "warmupIterations": 5000,
+    "measuredIterations": 50000,
+    "runs": 5,
+    "totalMeasured": 250000
+  },
+  "date": "2026-02-22T14:30:00.000Z",
+  "scenarios": {
+    "single-ip": {
+      "description": "Single IP, best cache locality",
+      "keys": 1,
+      "opsPerSec": 4712417,
+      "latency": {
+        "avgNs": 212,
+        "p50Ns": 208,
+        "p95Ns": 250,
+        "p99Ns": 375,
+        "minNs": 166,
+        "maxNs": 12500
+      },
+      "stdDev": 45.2,
+      "marginOfError": 0.56,
+      "memoryMB": 1.2
+    }
+  }
+}
+```
+
+## Regression Checking
+
+Compare the latest results against a previous version:
+
+```bash
+pnpm check-regression
+```
+
+Flags any benchmark that got >10% slower as a regression. Exits with code 1 if regressions found (useful in CI).
+
+Manual comparison of two specific files:
+
+```bash
+tsx check-regression.ts results/v1.1.0/node-express-hitlimit-memory.json results/v1.2.0/node-express-hitlimit-memory.json
+```
+
+## How to Add a Competitor
+
+1. Create a directory: `node/{framework}/{competitor-name}/`
+2. Create a file per store: `memory.ts`, `redis.ts`, etc.
+3. Follow the same pattern as existing files — import runner, set up library, call `run()`
+4. Add the file to `package.json` scripts
+5. Run it and verify JSON output appears in `results/`
+
+## How the Benchmarks Work (Under the Hood)
+
+1. **Pre-allocation:** All IP addresses, mock request objects, and response objects are created BEFORE timing starts. Nothing is allocated during the timed loop — this ensures we're measuring the rate limiter, not JavaScript's garbage collector.
+
+2. **Warmup:** 5,000 iterations run before timing starts. This lets the JavaScript engine's JIT compiler optimize the hot path. Without warmup, the first few thousand iterations would be artificially slow.
+
+3. **Measurement:** 5 runs × 50,000 iterations = 250,000 measured operations per benchmark. Each individual operation is timed with nanosecond precision.
+
+4. **GC between runs:** Garbage collection is forced between runs so one run's leftover objects don't affect the next run's measurements.
+
+5. **Cooldowns:** 200ms pause between runs, 500ms between benchmarks. Prevents CPU thermal throttling from compounding (laptop CPUs slow down when hot).
+
+6. **Sync vs Async:** Memory and SQLite stores are synchronous — the benchmark uses a tight `for` loop with no `await`. Redis and Postgres are async — the benchmark uses `await` in the loop. This matters because `await` on a synchronous value still has ~100-500ns overhead from the microtask queue.
+
+### Why Some Libraries Are Faster (Sync vs Async)
+
+You'll notice that hitlimit with memory or SQLite stores is significantly faster than competitors using the same store. A big reason for this is **synchronous vs asynchronous execution**.
+
+When a rate limiter checks a request, it does something like: look up the IP in a store, increment a counter, and return "allowed" or "blocked." If the store is in-memory (a JavaScript Map), this entire operation takes nanoseconds and never needs to wait for anything — it's synchronous.
+
+Some libraries (like `@nestjs/throttler` and `express-rate-limit`) wrap this result in a `Promise` even when the underlying store is synchronous. That means every single check goes through JavaScript's **microtask queue** — an internal scheduling mechanism that adds ~100-500 nanoseconds of overhead per call. At millions of operations per second, this adds up.
+
+hitlimit detects whether the store is synchronous and skips the Promise entirely. The result comes back as a plain value — no microtask queue, no scheduling overhead, just the answer.
+
+**How the benchmarks handle this fairly:**
+
+Each benchmark file has an `isSync` flag that tells the runner how to call the function:
+
+- `isSync: true` → tight `for` loop, no `await` (used when the library returns a plain value)
+- `isSync: false` → `for` loop with `await` (used when the library returns a Promise)
+
+This flag is set based on what the library **actually returns in production**, not what we want it to return. If a library wraps its result in a Promise, the benchmark respects that and uses `await`. If a library returns a plain value, the benchmark respects that too.
+
+We don't force `await` on synchronous libraries (that would add fake overhead) and we don't skip `await` on asynchronous libraries (that would measure nothing). Each library is benchmarked the way it actually behaves in your app.
+
+**Quick reference — what's sync and what's async:**
+
+| Store | hitlimit | express-rate-limit | @nestjs/throttler | rate-limiter-flexible | @fastify/rate-limit |
+|-------|----------|-------------------|-------------------|----------------------|-------------------|
+| Memory | Sync | Async (Promise) | Async (Promise) | Async (Promise) | Async (Promise) |
+| SQLite | Sync | — | — | — | — |
+| Redis | Async | — | — | Async | Async |
+| Postgres | Async | — | — | Async | — |
+
+hitlimit is the only library that stays synchronous for synchronous stores. This is an architectural choice, not a benchmark trick.
