@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import Redis from 'ioredis'
 import { run } from '../../../lib/runner.js'
 import { Hono } from 'hono'
-import { rateLimiter } from 'hono-rate-limiter'
+import { rateLimiter, RedisStore } from 'hono-rate-limiter'
 
 const pkg = JSON.parse(fs.readFileSync(new URL('../../../node_modules/hono-rate-limiter/package.json', import.meta.url), 'utf-8'))
 const honoPkg = JSON.parse(fs.readFileSync(new URL('../../../node_modules/hono/package.json', import.meta.url), 'utf-8'))
@@ -16,12 +16,20 @@ try {
   process.exit(0)
 }
 
+const client = {
+  scriptLoad: (script: string) => redis.call('SCRIPT', 'LOAD', script) as Promise<string>,
+  evalsha: (sha1: string, keys: string[], args: unknown[]) => redis.evalsha(sha1, keys.length, ...keys, ...(args as string[])),
+  decr: (key: string) => redis.decr(key),
+  del: (key: string) => redis.del(key),
+}
+
 const app = new Hono()
 
 app.use(rateLimiter({
   windowMs: 60_000,
   limit: 1_000_000,
-  keyGenerator: (c) => c.req.header('x-forwarded-for') || 'unknown'
+  keyGenerator: (c) => c.req.header('x-forwarded-for') || 'unknown',
+  store: new RedisStore({ client })
 }))
 app.get('/test', (c) => c.text('ok'))
 
