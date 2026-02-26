@@ -1,0 +1,112 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
+---
+
+<DocsLayout
+  title="Valkey Rate Limiting Store - hitlimit | Open-Source Redis Alternative Rate Limiter"
+  description="Valkey store for hitlimit distributed rate limiting. Drop-in Redis replacement backed by the Linux Foundation. ioredis support, atomic Lua scripts, and zero migration effort. Works with AWS ElastiCache for Valkey."
+  keywords="valkey rate limit, valkey rate limiter, valkey distributed rate limiting, valkey throttle, redis alternative rate limit, redis fork rate limiter, linux foundation valkey, aws elasticache valkey rate limit, valkey ioredis, valkey lua scripts, open source redis rate limit, bun valkey rate limit, valkey api protection"
+>
+  <h1>Valkey Store</h1>
+
+  <p>
+    The Valkey store enables distributed rate limiting using <strong>Valkey</strong> — the Linux Foundation's
+    open-source fork of Redis 7.2, backed by AWS, Google, and Oracle. It's a drop-in replacement for the
+    Redis store with identical performance, using the same <code>ioredis</code> client and atomic Lua scripts.
+  </p>
+
+  <h2 id="what-is-valkey">What is Valkey?</h2>
+
+  <p>
+    After Redis changed its license from BSD to SSPL + RSALv2 in March 2024, the Linux Foundation forked
+    Redis 7.2 as <strong>Valkey</strong> under the BSD-3-Clause license. It maintains full wire compatibility
+    with Redis — same protocol (RESP2/RESP3), same commands, same Lua scripting. Major cloud providers
+    (AWS ElastiCache, Google Cloud Memorystore) now offer managed Valkey services.
+  </p>
+
+  <h2 id="installation">Installation</h2>
+
+  <p>The Valkey store requires <code>ioredis</code> as a peer dependency (same as Redis store):</p>
+
+  <RuntimeCodeTabs
+    node='npm install ioredis\n<span class="cm"># or: pnpm add ioredis</span>\n<span class="cm"># or: yarn add ioredis</span>'
+    bun='bun add ioredis'
+  />
+
+  <h2 id="usage">Usage</h2>
+
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> { valkeyStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/valkey&#39;</span>\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">valkeyStore</span>({\n    url: <span class="str">&#39;redis://localhost:6379&#39;</span>\n  })\n}))'
+    bun='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n<span class="kw">import</span> { valkeyStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/valkey&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">valkeyStore</span>({\n    url: <span class="str">&#39;redis://localhost:6379&#39;</span>\n  })\n})'
+  />
+
+  <h2 id="options">Options</h2>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>url</code></td><td>string</td><td>-</td><td>Valkey connection URL (uses <code>redis://</code> scheme)</td></tr>
+      <tr><td><code>client</code></td><td>Redis</td><td>-</td><td>Existing ioredis client instance</td></tr>
+      <tr><td><code>prefix</code></td><td>string</td><td>'hitlimit:'</td><td>Key prefix for rate limit entries</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="migration-from-redis">Migration from Redis</h2>
+
+  <p>Migrating from <code>redisStore</code> to <code>valkeyStore</code> requires changing <strong>two lines</strong>:</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// Before (Redis)</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
+<span class="kw">const</span> store = <span class="fn">redisStore</span>({"{"} url: <span class="str">'redis://localhost:6379'</span> {"}"})
+
+<span class="cm">// After (Valkey) — same URL scheme, same port, same options</span>
+<span class="kw">import</span> {"{"} valkeyStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/valkey'</span>
+<span class="kw">const</span> store = <span class="fn">valkeyStore</span>({"{"} url: <span class="str">'redis://localhost:6379'</span> {"}"})</code></pre>
+  </div>
+
+  <p>The connection URL uses the same <code>redis://</code> scheme. ioredis connects identically to both Redis and Valkey servers.</p>
+
+  <h2 id="lua-scripts">Lua Scripts</h2>
+
+  <p>
+    The Valkey store uses the same atomic Lua scripts as the Redis store via <code>defineCommand()</code>
+    with native SHA caching. Valkey maintains full Lua scripting compatibility including the
+    <code>redis.call()</code> global object (also aliased as <code>server.call()</code>).
+  </p>
+
+  <h2 id="characteristics">Characteristics</h2>
+
+  <ul>
+    <li><strong>Speed:</strong> Same as Redis store (~6.7K ops/sec, network-bound)</li>
+    <li><strong>License:</strong> BSD-3-Clause (fully open source, no relicensing risk)</li>
+    <li><strong>Persistence:</strong> Configurable via Valkey persistence settings (RDB/AOF)</li>
+    <li><strong>Scalability:</strong> Shared across all server instances</li>
+    <li><strong>Atomic:</strong> Lua scripts ensure race-condition-free increments</li>
+    <li><strong>Cloud:</strong> AWS ElastiCache for Valkey, Google Memorystore for Valkey</li>
+  </ul>
+
+  <h2 id="when-to-use">When to Use</h2>
+
+  <ul>
+    <li>You want distributed rate limiting with a fully open-source backend</li>
+    <li>Your organization has concerns about Redis's SSPL license</li>
+    <li>You're using AWS ElastiCache for Valkey or Google Memorystore</li>
+    <li>Migrating from Redis — zero code changes beyond import path</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .options-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .options-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .options-table tr:last-child td { border-bottom: none; }
+  .options-table code { background: var(--color-bg-elevated); color: var(--color-accent); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; }
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

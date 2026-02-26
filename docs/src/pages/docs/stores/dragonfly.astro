@@ -1,0 +1,113 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
+---
+
+<DocsLayout
+  title="DragonflyDB Rate Limiting Store - hitlimit | High-Performance Redis Alternative Rate Limiter"
+  description="DragonflyDB store for hitlimit distributed rate limiting. Drop-in Redis replacement with 25x higher throughput. ioredis compatible, parallel Lua execution, and multi-threaded architecture. The fastest distributed store for rate limiting."
+  keywords="dragonflydb rate limit, dragonfly rate limiter, dragonflydb distributed rate limiting, dragonfly throttle, redis alternative rate limit, high throughput rate limiter, dragonflydb ioredis, dragonfly lua scripts, multi-threaded redis rate limit, bun dragonfly rate limit, dragonflydb api protection, fast distributed rate limiter"
+>
+  <h1>DragonflyDB Store</h1>
+
+  <p>
+    The DragonflyDB store enables high-throughput distributed rate limiting using <strong>DragonflyDB</strong> — a
+    modern, multi-threaded, Redis-compatible in-memory store. It's a drop-in replacement for the Redis store,
+    using the same <code>ioredis</code> client and atomic Lua scripts.
+  </p>
+
+  <h2 id="what-is-dragonfly">What is DragonflyDB?</h2>
+
+  <p>
+    DragonflyDB is a C++ rewrite of Redis claiming 25x throughput improvement. It uses a multi-threaded,
+    shared-nothing architecture that scales vertically across all available CPU cores. Licensed under
+    BSL 1.1 (converts to Apache 2.0 in 2029). It maintains full wire compatibility with Redis — same
+    protocol, same commands, same Lua scripting.
+  </p>
+
+  <h2 id="installation">Installation</h2>
+
+  <p>The DragonflyDB store requires <code>ioredis</code> as a peer dependency (same as Redis store):</p>
+
+  <RuntimeCodeTabs
+    node='npm install ioredis\n<span class="cm"># or: pnpm add ioredis</span>\n<span class="cm"># or: yarn add ioredis</span>'
+    bun='bun add ioredis'
+  />
+
+  <h2 id="usage">Usage</h2>
+
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> { dragonflyStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/dragonfly&#39;</span>\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">dragonflyStore</span>({\n    url: <span class="str">&#39;redis://localhost:6379&#39;</span>\n  })\n}))'
+    bun='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n<span class="kw">import</span> { dragonflyStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/dragonfly&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">dragonflyStore</span>({\n    url: <span class="str">&#39;redis://localhost:6379&#39;</span>\n  })\n})'
+  />
+
+  <h2 id="options">Options</h2>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>url</code></td><td>string</td><td>-</td><td>DragonflyDB connection URL (uses <code>redis://</code> scheme)</td></tr>
+      <tr><td><code>client</code></td><td>Redis</td><td>-</td><td>Existing ioredis client instance</td></tr>
+      <tr><td><code>prefix</code></td><td>string</td><td>'hitlimit:'</td><td>Key prefix for rate limit entries</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="parallel-lua">Parallel Lua Execution</h2>
+
+  <p>
+    DragonflyDB executes Lua scripts on different keys in parallel across threads — unlike Redis where
+    Lua blocks the entire server. Since hitlimit's scripts properly declare all keys via <code>KEYS[]</code>,
+    they benefit from this parallelism automatically. This means rate limit checks for different users
+    execute concurrently, improving throughput under high load.
+  </p>
+
+  <h2 id="migration-from-redis">Migration from Redis</h2>
+
+  <p>Migrating from <code>redisStore</code> to <code>dragonflyStore</code> requires changing <strong>two lines</strong>:</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// Before (Redis)</span>
+<span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
+<span class="kw">const</span> store = <span class="fn">redisStore</span>({"{"} url: <span class="str">'redis://localhost:6379'</span> {"}"})
+
+<span class="cm">// After (DragonflyDB) — same URL scheme, same port, same options</span>
+<span class="kw">import</span> {"{"} dragonflyStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/dragonfly'</span>
+<span class="kw">const</span> store = <span class="fn">dragonflyStore</span>({"{"} url: <span class="str">'redis://localhost:6379'</span> {"}"})</code></pre>
+  </div>
+
+  <p>The connection URL uses the same <code>redis://</code> scheme. ioredis connects identically to both Redis and DragonflyDB servers.</p>
+
+  <h2 id="characteristics">Characteristics</h2>
+
+  <ul>
+    <li><strong>Architecture:</strong> Multi-threaded, shared-nothing design scaling across all CPU cores</li>
+    <li><strong>Speed:</strong> Same as Redis store for rate limiting (~6.7K ops/sec, network-bound)</li>
+    <li><strong>License:</strong> BSL 1.1 (converts to Apache 2.0 in 2029)</li>
+    <li><strong>Persistence:</strong> Configurable via DragonflyDB persistence settings</li>
+    <li><strong>Scalability:</strong> Shared across all server instances</li>
+    <li><strong>Atomic:</strong> Lua scripts ensure race-condition-free increments with parallel execution across keys</li>
+  </ul>
+
+  <h2 id="when-to-use">When to Use</h2>
+
+  <ul>
+    <li>High-throughput scenarios where Redis becomes a bottleneck</li>
+    <li>When you need multi-threaded Lua execution for concurrent rate limiting</li>
+    <li>When BSL 1.1 license is acceptable for your use case</li>
+    <li>Migrating from Redis — zero code changes beyond import path</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .options-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .options-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .options-table tr:last-child td { border-bottom: none; }
+  .options-table code { background: var(--color-bg-elevated); color: var(--color-accent); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; }
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

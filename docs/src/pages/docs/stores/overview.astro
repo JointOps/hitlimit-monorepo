@@ -23,6 +23,8 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><td><a href="/docs/stores/memory">Memory</a></td><td>No</td><td>No</td><td>Development, single instance</td></tr>
         <tr><td><a href="/docs/stores/sqlite">SQLite</a></td><td>Yes</td><td>No</td><td>Single server, persistence needed</td></tr>
         <tr><td><a href="/docs/stores/redis">Redis</a></td><td>Yes</td><td>Yes</td><td>Distributed systems, high traffic</td></tr>
+        <tr><td><a href="/docs/stores/valkey">Valkey</a></td><td>Yes</td><td>Yes</td><td>Distributed, open-source Redis alternative</td></tr>
+        <tr><td><a href="/docs/stores/dragonfly">DragonflyDB</a></td><td>Yes</td><td>Yes</td><td>High-throughput distributed</td></tr>
         <tr><td><a href="/docs/stores/postgres">Postgres</a></td><td>Yes</td><td>Yes</td><td>Distributed, existing Postgres infra</td></tr>
       </tbody>
     </table>
@@ -42,6 +44,8 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><td><a href="/docs/stores/memory">Memory</a></td><td>No</td><td>No</td><td>Default — 12.3M+ ops/sec</td></tr>
         <tr><td><a href="/docs/stores/sqlite">SQLite</a></td><td>Yes</td><td>No</td><td>bun:sqlite, zero deps — 325K ops/sec</td></tr>
         <tr><td><a href="/docs/stores/redis">Redis</a></td><td>Yes</td><td>Yes</td><td>Distributed — 6.7K ops/sec</td></tr>
+        <tr><td><a href="/docs/stores/valkey">Valkey</a></td><td>Yes</td><td>Yes</td><td>Distributed, open-source — same as Redis</td></tr>
+        <tr><td><a href="/docs/stores/dragonfly">DragonflyDB</a></td><td>Yes</td><td>Yes</td><td>High-throughput distributed</td></tr>
         <tr><td><a href="/docs/stores/postgres">Postgres</a></td><td>Yes</td><td>Yes</td><td>Distributed SQL — 3.7K ops/sec</td></tr>
       </tbody>
     </table>
@@ -50,8 +54,8 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
   <h2 id="quick-comparison">Quick Comparison</h2>
 
   <RuntimeCodeTabs
-    node='<span class="kw">import</span> { hitlimit, memoryStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> { sqliteStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/sqlite&#39;</span>\n<span class="kw">import</span> { redisStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/redis&#39;</span>\n\n<span class="cm">// Memory - default, no config needed</span>\n<span class="fn">hitlimit</span>({ limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span> })\n\n<span class="cm">// SQLite - persistent storage</span>\n<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">sqliteStore</span>({ path: <span class="str">&#39;./limits.db&#39;</span> })\n})\n\n<span class="cm">// Redis - distributed</span>\n<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({ url: <span class="str">&#39;redis://localhost:6379&#39;</span> })\n})'
-    bun='<span class="kw">import</span> { hitlimit, sqliteStore, redisStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n\n<span class="cm">// Memory - default, no config needed</span>\n<span class="fn">hitlimit</span>({ limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span> })\n\n<span class="cm">// SQLite - persistent via bun:sqlite</span>\n<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">sqliteStore</span>({ path: <span class="str">&#39;./limits.db&#39;</span> })\n})\n\n<span class="cm">// Redis - distributed</span>\n<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({ url: <span class="str">&#39;redis://localhost:6379&#39;</span> })\n})'
+    node='<span class="kw">import</span> { hitlimit, memoryStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> { sqliteStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/sqlite&#39;</span>\n<span class="kw">import</span> { redisStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/redis&#39;</span>\n\n<span class="cm">// Memory - default, no config needed</span>\n<span class="fn">hitlimit</span>({ limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span> })\n\n<span class="cm">// SQLite - persistent storage</span>\n<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">sqliteStore</span>({ path: <span class="str">&#39;./limits.db&#39;</span> })\n})\n\n<span class="cm">// Redis - distributed</span>\n<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({ url: <span class="str">&#39;redis://localhost:6379&#39;</span> })\n})\n\n<span class="cm">// Valkey - open-source Redis alternative</span>\n<span class="kw">import</span> { valkeyStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/valkey&#39;</span>\n<span class="fn">hitlimit</span>({ limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span>, store: <span class="fn">valkeyStore</span>({ url: <span class="str">&#39;redis://localhost:6379&#39;</span> }) })\n\n<span class="cm">// DragonflyDB - high-throughput Redis alternative</span>\n<span class="kw">import</span> { dragonflyStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/dragonfly&#39;</span>\n<span class="fn">hitlimit</span>({ limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span>, store: <span class="fn">dragonflyStore</span>({ url: <span class="str">&#39;redis://localhost:6379&#39;</span> }) })'
+    bun='<span class="kw">import</span> { hitlimit, sqliteStore, redisStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n\n<span class="cm">// Memory - default, no config needed</span>\n<span class="fn">hitlimit</span>({ limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span> })\n\n<span class="cm">// SQLite - persistent via bun:sqlite</span>\n<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">sqliteStore</span>({ path: <span class="str">&#39;./limits.db&#39;</span> })\n})\n\n<span class="cm">// Redis - distributed</span>\n<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">redisStore</span>({ url: <span class="str">&#39;redis://localhost:6379&#39;</span> })\n})\n\n<span class="cm">// Valkey - open-source Redis alternative</span>\n<span class="kw">import</span> { valkeyStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/valkey&#39;</span>\n<span class="fn">hitlimit</span>({ limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span>, store: <span class="fn">valkeyStore</span>({ url: <span class="str">&#39;redis://localhost:6379&#39;</span> }) })\n\n<span class="cm">// DragonflyDB - high-throughput Redis alternative</span>\n<span class="kw">import</span> { dragonflyStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/dragonfly&#39;</span>\n<span class="fn">hitlimit</span>({ limit: <span class="num">100</span>, window: <span class="str">&#39;1m&#39;</span>, store: <span class="fn">dragonflyStore</span>({ url: <span class="str">&#39;redis://localhost:6379&#39;</span> }) })'
   />
 
   <h2 id="choosing-a-store">Choosing a Store</h2>
@@ -60,6 +64,8 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
     <li><strong>Development:</strong> Use the default memory store for simplicity</li>
     <li><strong>Single server production:</strong> SQLite provides persistence without external dependencies</li>
     <li><strong>Multiple servers:</strong> Redis ensures consistent rate limiting across all instances</li>
+    <li><strong>Multiple servers (open-source):</strong> Valkey provides BSD-licensed distributed rate limiting</li>
+    <li><strong>High-throughput distributed:</strong> DragonflyDB's multi-threaded architecture for maximum throughput</li>
     <li><strong>Custom requirements:</strong> <a href="/docs/stores/custom">Create your own store</a></li>
   </ul>
 
@@ -98,7 +104,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 {"}"})</code></pre>
   </div>
 
-  <p>All four stores implement the same interface. No changes to your route handlers, middleware, or rate limit logic.</p>
+  <p>All six stores implement the same interface. No changes to your route handlers, middleware, or rate limit logic.</p>
 </DocsLayout>
 
 <style>
