@@ -7,7 +7,7 @@ export interface RedisStoreOptions {
 }
 
 // Lua script: atomic hit (no ban) — INCR + PEXPIRE + PTTL in 1 call
-const HIT_SCRIPT = `
+export const HIT_SCRIPT = `
 local key = KEYS[1]
 local windowMs = tonumber(ARGV[1])
 local count = redis.call('INCR', key)
@@ -20,7 +20,7 @@ return {count, ttl}
 `
 
 // Lua script: atomic hit + ban check + violation tracking in 1 call
-const HIT_WITH_BAN_SCRIPT = `
+export const HIT_WITH_BAN_SCRIPT = `
 local hitKey = KEYS[1]
 local banKey = KEYS[2]
 local violationKey = KEYS[3]
@@ -60,7 +60,7 @@ end
 return {count, ttl, banned, violations}
 `
 
-class RedisStore implements HitLimitStore {
+export class RedisStore implements HitLimitStore {
   private redis: Redis
   private prefix: string
   private banPrefix: string
