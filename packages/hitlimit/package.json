@@ -88,7 +88,13 @@
     "fast",
     "lightweight",
     "zero-dependency",
-    "esm"
+    "esm",
+    "valkey",
+    "valkey-rate-limit",
+    "dragonfly",
+    "dragonflydb",
+    "dragonfly-rate-limit",
+    "redis-alternative"
   ],
   "type": "module",
   "main": "./dist/index.js",
@@ -130,6 +136,14 @@
     "./stores/postgres": {
       "types": "./dist/stores/postgres.d.ts",
       "import": "./dist/stores/postgres.js"
+    },
+    "./stores/valkey": {
+      "types": "./dist/stores/valkey.d.ts",
+      "import": "./dist/stores/valkey.js"
+    },
+    "./stores/dragonfly": {
+      "types": "./dist/stores/dragonfly.d.ts",
+      "import": "./dist/stores/dragonfly.js"
     },
     "./loggers/console": {
       "types": "./dist/loggers/console.d.ts",
