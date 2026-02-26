@@ -94,9 +94,18 @@ new Elysia()
 
 ---
 
-## 4 Storage Backends
+## 6 Storage Backends
 
 All built in. No extra packages to install.
+
+| Store | Best For | Peer Dependency |
+|---|---|---|
+| Memory | Development, single server | None |
+| bun:sqlite | Single server + persistence | None (built-in) |
+| Redis | Distributed, production | `ioredis` |
+| **Valkey** | **Distributed, open-source Redis alternative** | `ioredis` |
+| **DragonflyDB** | **High-throughput distributed** | `ioredis` |
+| PostgreSQL | Shared database infrastructure | `pg` |
 
 ```typescript
 import { hitlimit } from '@joint-ops/hitlimit-bun'
@@ -112,6 +121,14 @@ Bun.serve({ fetch: hitlimit({ store: sqliteStore({ path: './ratelimit.db' }) }, 
 import { redisStore } from '@joint-ops/hitlimit-bun/stores/redis'
 Bun.serve({ fetch: hitlimit({ store: redisStore({ url: 'redis://localhost:6379' }) }, handler) })
 
+// Valkey — open-source Redis alternative
+import { valkeyStore } from '@joint-ops/hitlimit-bun/stores/valkey'
+Bun.serve({ fetch: hitlimit({ store: valkeyStore({ url: 'redis://localhost:6379' }) }, handler) })
+
+// DragonflyDB — high-throughput Redis alternative
+import { dragonflyStore } from '@joint-ops/hitlimit-bun/stores/dragonfly'
+Bun.serve({ fetch: hitlimit({ store: dragonflyStore({ url: 'redis://localhost:6379' }) }, handler) })
+
 // Postgres — distributed, atomic upserts
 import { postgresStore } from '@joint-ops/hitlimit-bun/stores/postgres'
 Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' }) }, handler) })
@@ -123,6 +140,34 @@ Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: 'postgres://localhost:
 | bun:sqlite | 325,000 | 3.1μs | Single server, need persistence |
 | Redis | 6,700 | 148μs | Multi-server / distributed |
 | Postgres | 3,700 | 273μs | Multi-server / already using Postgres |
+
+### Valkey (Redis Alternative)
+```typescript
+import { hitlimit } from '@joint-ops/hitlimit-bun'
+import { valkeyStore } from '@joint-ops/hitlimit-bun/stores/valkey'
+
+Bun.serve({
+  fetch: hitlimit({
+    store: valkeyStore({ url: 'redis://localhost:6379' }),
+    limit: 100,
+    window: '1m'
+  }, handler)
+})
+```
+
+### DragonflyDB
+```typescript
+import { hitlimit } from '@joint-ops/hitlimit-bun'
+import { dragonflyStore } from '@joint-ops/hitlimit-bun/stores/dragonfly'
+
+Bun.serve({
+  fetch: hitlimit({
+    store: dragonflyStore({ url: 'redis://localhost:6379' }),
+    limit: 100,
+    window: '1m'
+  }, handler)
+})
+```
 
 ---
 

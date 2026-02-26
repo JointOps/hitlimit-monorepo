@@ -89,7 +89,7 @@ Bun.serve({ port: 3000, fetch: app.fetch })
 - **Blazing fast** - Optimized for each runtime
 - **Zero config** - Works out of the box
 - **Tiny** - ~6KB (hitlimit Node.js) / ~18KB (hitlimit-bun)
-- **Pluggable stores** - Memory, SQLite, Redis
+- **Pluggable stores** - Memory, SQLite, Redis, Valkey, DragonflyDB, Postgres
 - **Tiered limits** - Different limits per user plan
 - **Customizable** - Keys, responses, headers
 - **TypeScript** - Full type safety
@@ -166,6 +166,28 @@ app.use(hitlimit({ store: redisStore({ url: 'redis://localhost:6379' }) }))
 
 // Bun
 import { redisStore } from '@joint-ops/hitlimit-bun/stores/redis'
+```
+
+### Valkey
+
+```javascript
+// Node.js
+import { valkeyStore } from '@joint-ops/hitlimit/stores/valkey'
+app.use(hitlimit({ store: valkeyStore({ url: 'redis://localhost:6379' }) }))
+
+// Bun
+import { valkeyStore } from '@joint-ops/hitlimit-bun/stores/valkey'
+```
+
+### DragonflyDB
+
+```javascript
+// Node.js
+import { dragonflyStore } from '@joint-ops/hitlimit/stores/dragonfly'
+app.use(hitlimit({ store: dragonflyStore({ url: 'redis://localhost:6379' }) }))
+
+// Bun
+import { dragonflyStore } from '@joint-ops/hitlimit-bun/stores/dragonfly'
 ```
 
 ## Default Response (429)

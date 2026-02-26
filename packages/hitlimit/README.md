@@ -108,9 +108,18 @@ hitlimit({ skip: (req) => req.path === '/health' || req.user?.role === 'admin' }
 
 ---
 
-## 4 Storage Backends
+## 6 Storage Backends
 
 Pick the right backend for your deployment — all built in, no extra packages.
+
+| Store | Best For | Peer Dependency |
+|---|---|---|
+| Memory | Development, single server | None |
+| SQLite | Single server + persistence | `better-sqlite3` |
+| Redis | Distributed, production | `ioredis` |
+| **Valkey** | **Distributed, open-source Redis alternative** | `ioredis` |
+| **DragonflyDB** | **High-throughput distributed** | `ioredis` |
+| PostgreSQL | Shared database infrastructure | `pg` |
 
 ```javascript
 import { hitlimit } from '@joint-ops/hitlimit'
@@ -126,6 +135,14 @@ app.use(hitlimit({ store: sqliteStore({ path: './ratelimit.db' }) }))
 import { redisStore } from '@joint-ops/hitlimit/stores/redis'
 app.use(hitlimit({ store: redisStore({ url: 'redis://localhost:6379' }) }))
 
+// Valkey — open-source Redis alternative
+import { valkeyStore } from '@joint-ops/hitlimit/stores/valkey'
+app.use(hitlimit({ store: valkeyStore({ url: 'redis://localhost:6379' }) }))
+
+// DragonflyDB — high-throughput Redis alternative
+import { dragonflyStore } from '@joint-ops/hitlimit/stores/dragonfly'
+app.use(hitlimit({ store: dragonflyStore({ url: 'redis://localhost:6379' }) }))
+
 // Postgres — distributed, atomic upserts
 import { postgresStore } from '@joint-ops/hitlimit/stores/postgres'
 app.use(hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' }) }))
@@ -137,6 +154,30 @@ app.use(hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' 
 | SQLite | 352,000 | 2.8μs | Single server, need persistence |
 | Redis | 6,700 | 149μs | Multi-server / distributed |
 | Postgres | 3,000 | 336μs | Multi-server / already using Postgres |
+
+### Valkey (Redis Alternative)
+```typescript
+import { hitlimit } from '@joint-ops/hitlimit'
+import { valkeyStore } from '@joint-ops/hitlimit/stores/valkey'
+
+app.use(hitlimit({
+  store: valkeyStore({ url: 'redis://localhost:6379' }),
+  limit: 100,
+  window: '1m'
+}))
+```
+
+### DragonflyDB
+```typescript
+import { hitlimit } from '@joint-ops/hitlimit'
+import { dragonflyStore } from '@joint-ops/hitlimit/stores/dragonfly'
+
+app.use(hitlimit({
+  store: dragonflyStore({ url: 'redis://localhost:6379' }),
+  limit: 100,
+  window: '1m'
+}))
+```
 
 ---
 
