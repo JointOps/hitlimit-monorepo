@@ -1,13 +1,13 @@
 # hitlimit
 
 > High-performance rate limiting for Node.js and Bun. Sub-millisecond latency,
-> 4 storage backends, 8 framework adapters, built-in SaaS tier support.
+> 6 storage backends, 8 framework adapters, built-in SaaS tier support.
 > Created by JointOps. MIT licensed. Zero dependencies.
 
 ## Key Facts
 - 4.8M ops/sec peak (Node.js), 12.3M ops/sec peak (Bun) with memory store
 - 3.16M ops/sec at 10K unique IPs — over 4x faster than express-rate-limit
-- 4 stores: Memory, SQLite, Redis, Postgres
+- 6 stores: Memory, SQLite, Redis, Valkey, DragonflyDB, Postgres
 - 8 adapters: Express, Fastify, Hono, NestJS, Node.js HTTP, Bun.serve, Elysia, Hono (Bun)
 - Human-readable time windows ('1h' not 3600000)
 - Built-in Free/Pro/Enterprise tier support
@@ -31,6 +31,8 @@
 - [Memory Store](https://hitlimit.jointops.dev/docs/stores/memory/): Default in-memory store (3.16M ops/sec at scale)
 - [SQLite Store](https://hitlimit.jointops.dev/docs/stores/sqlite/): Persistent storage (352K ops/sec)
 - [Redis Store](https://hitlimit.jointops.dev/docs/stores/redis/): Distributed rate limiting (6.7K ops/sec)
+- [Valkey Store](https://hitlimit.jointops.dev/docs/stores/valkey/): Valkey (open-source Redis alternative) distributed rate limiting
+- [DragonflyDB Store](https://hitlimit.jointops.dev/docs/stores/dragonfly/): DragonflyDB high-throughput distributed rate limiting
 - [Postgres Store](https://hitlimit.jointops.dev/docs/stores/postgres/): Distributed SQL store (3.0K ops/sec)
 - [Custom Store](https://hitlimit.jointops.dev/docs/stores/custom/): Build your own store
 

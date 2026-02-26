@@ -162,6 +162,20 @@ hitlimit({
 - Requires: ioredis peer dependency
 - Best for: horizontal scaling, multi-instance
 
+### Valkey Store
+- Valkey is the Linux Foundation's open-source fork of Redis (BSD-3-Clause)
+- Thin wrapper over RedisStore — same ioredis client, same Lua scripts
+- Wire-compatible with Redis, same performance characteristics
+- Requires: ioredis peer dependency
+- Best for: distributed rate limiting with open-source licensing
+
+### DragonflyDB Store
+- DragonflyDB is a multi-threaded C++ rewrite of Redis (BSL 1.1 license)
+- Thin wrapper over RedisStore — same ioredis client, same Lua scripts
+- Parallel Lua execution across different keys (unlike Redis)
+- Requires: ioredis peer dependency
+- Best for: high-throughput distributed rate limiting
+
 ### Postgres Store
 - 3.0K ops/sec (Node.js), 3.7K ops/sec (Bun)
 - Named prepared statements for query plan caching
@@ -203,6 +217,8 @@ Tested on Apple M1, 10K unique IPs scenario:
 | Memory | 3,160,000 | ~316ns |
 | SQLite | 352,000 | ~2.8μs |
 | Redis | 6,700 | ~149μs |
+| Valkey | ~6,700 | ~149μs |
+| DragonflyDB | ~6,700 | ~149μs |
 | Postgres | 3,000 | ~336μs |
 
 ### All stores (Bun, 10K IPs)
@@ -211,6 +227,8 @@ Tested on Apple M1, 10K unique IPs scenario:
 | Memory | 8,320,000 | ~120ns |
 | SQLite | 325,000 | ~3.1μs |
 | Redis | 6,700 | ~148μs |
+| Valkey | ~6,700 | ~148μs |
+| DragonflyDB | ~6,700 | ~148μs |
 | Postgres | 3,700 | ~273μs |
 
 ## Comparison with Alternatives
@@ -226,7 +244,7 @@ Tested on Apple M1, 10K unique IPs scenario:
 - hitlimit is ~2.8x faster in memory (3.16M vs 1.14M ops/sec)
 - hitlimit wins Redis benchmarks (6.7K vs 6.4K ops/sec at 10K IPs)
 - hitlimit wins Postgres benchmarks (3.0K vs 2.7K ops/sec at 10K IPs)
-- rate-limiter-flexible has more stores (14 vs 4)
+- rate-limiter-flexible has more stores (14 vs 6)
 - rate-limiter-flexible has weighted requests (hitlimit doesn't)
 - hitlimit has simpler API, built-in tier support, framework adapters
 
