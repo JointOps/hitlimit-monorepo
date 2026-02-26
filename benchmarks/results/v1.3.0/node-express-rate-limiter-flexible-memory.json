@@ -23,55 +23,55 @@
     "runs": 5,
     "totalMeasured": 250000
   },
-  "date": "2026-02-25T01:23:35.456Z",
+  "date": "2026-02-26T00:00:51.837Z",
   "scenarios": {
     "single-ip": {
       "description": "Single IP, best cache locality",
       "keys": 1,
-      "memoryMB": 3.18,
-      "opsPerSec": 1414171,
+      "memoryMB": 3.2,
+      "opsPerSec": 1559925,
       "latency": {
-        "avgNs": 707,
-        "p50Ns": 584,
-        "p95Ns": 1583,
-        "p99Ns": 2250,
-        "minNs": 208,
-        "maxNs": 221750
+        "avgNs": 641,
+        "p50Ns": 500,
+        "p95Ns": 1042,
+        "p99Ns": 1916,
+        "minNs": 250,
+        "maxNs": 901375
       },
-      "stdDev": 1532.43,
-      "marginOfError": 6.01
+      "stdDev": 4258.49,
+      "marginOfError": 16.69
     },
     "multi-ip-1k": {
       "description": "1,000 unique IPs, typical API",
       "keys": 1000,
-      "memoryMB": 8.01,
-      "opsPerSec": 969927,
+      "memoryMB": 8.04,
+      "opsPerSec": 610273,
       "latency": {
-        "avgNs": 1031,
-        "p50Ns": 709,
-        "p95Ns": 2208,
-        "p99Ns": 3417,
-        "minNs": 416,
-        "maxNs": 312125
+        "avgNs": 1639,
+        "p50Ns": 625,
+        "p95Ns": 1750,
+        "p99Ns": 3959,
+        "minNs": 291,
+        "maxNs": 23838291
       },
-      "stdDev": 2109.86,
-      "marginOfError": 8.27
+      "stdDev": 82805.31,
+      "marginOfError": 324.6
     },
     "multi-ip-10k": {
       "description": "10,000 unique IPs, high traffic",
       "keys": 10000,
-      "memoryMB": 17.89,
-      "opsPerSec": 874255,
+      "memoryMB": 18.27,
+      "opsPerSec": 355513,
       "latency": {
-        "avgNs": 1144,
-        "p50Ns": 792,
-        "p95Ns": 2292,
-        "p99Ns": 3709,
+        "avgNs": 2813,
+        "p50Ns": 833,
+        "p95Ns": 2667,
+        "p99Ns": 11541,
         "minNs": 333,
-        "maxNs": 2309792
+        "maxNs": 132901583
       },
-      "stdDev": 7333.87,
-      "marginOfError": 28.75
+      "stdDev": 273622.97,
+      "marginOfError": 1072.6
     }
   }
 }

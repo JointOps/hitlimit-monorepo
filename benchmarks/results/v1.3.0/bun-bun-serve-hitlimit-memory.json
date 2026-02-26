@@ -1,12 +1,12 @@
 {
   "benchmark": {
-    "framework": "express",
+    "framework": "bun-serve",
     "library": "hitlimit",
     "store": "memory",
-    "runtime": "node"
+    "runtime": "bun"
   },
   "environment": {
-    "runtimeVersion": "v24.4.1",
+    "runtimeVersion": "1.3.7",
     "os": "macOS 26.2",
     "arch": "arm64",
     "cpu": "Apple M1",
@@ -15,7 +15,7 @@
     "docker": false
   },
   "versions": {
-    "hitlimit": "1.2.0"
+    "hitlimit-bun": "1.3.0"
   },
   "config": {
     "warmupIterations": 5000,
@@ -23,55 +23,55 @@
     "runs": 5,
     "totalMeasured": 250000
   },
-  "date": "2026-02-25T01:23:24.978Z",
+  "date": "2026-02-26T00:13:12.639Z",
   "scenarios": {
     "single-ip": {
       "description": "Single IP, best cache locality",
       "keys": 1,
-      "memoryMB": 1.38,
-      "opsPerSec": 2883650,
+      "memoryMB": 4.14,
+      "opsPerSec": 2866765,
       "latency": {
-        "avgNs": 347,
-        "p50Ns": 333,
+        "avgNs": 349,
+        "p50Ns": 292,
         "p95Ns": 541,
-        "p99Ns": 709,
-        "minNs": 83,
-        "maxNs": 265583
+        "p99Ns": 2125,
+        "minNs": 42,
+        "maxNs": 2921792
       },
-      "stdDev": 1208.71,
-      "marginOfError": 4.74
+      "stdDev": 6271.61,
+      "marginOfError": 24.58
     },
     "multi-ip-1k": {
       "description": "1,000 unique IPs, typical API",
       "keys": 1000,
-      "memoryMB": 6.94,
-      "opsPerSec": 2254127,
+      "memoryMB": 0,
+      "opsPerSec": 2289409,
       "latency": {
-        "avgNs": 444,
-        "p50Ns": 416,
-        "p95Ns": 667,
-        "p99Ns": 1166,
-        "minNs": 208,
-        "maxNs": 125584
+        "avgNs": 437,
+        "p50Ns": 334,
+        "p95Ns": 750,
+        "p99Ns": 2625,
+        "minNs": 166,
+        "maxNs": 92875
       },
-      "stdDev": 501.02,
-      "marginOfError": 1.96
+      "stdDev": 692.44,
+      "marginOfError": 2.71
     },
     "multi-ip-10k": {
       "description": "10,000 unique IPs, high traffic",
       "keys": 10000,
-      "memoryMB": 8.53,
-      "opsPerSec": 1902068,
+      "memoryMB": 0,
+      "opsPerSec": 2072417,
       "latency": {
-        "avgNs": 526,
-        "p50Ns": 417,
-        "p95Ns": 1042,
-        "p99Ns": 2500,
+        "avgNs": 483,
+        "p50Ns": 334,
+        "p95Ns": 1084,
+        "p99Ns": 3083,
         "minNs": 166,
-        "maxNs": 548500
+        "maxNs": 93875
       },
-      "stdDev": 1225.45,
-      "marginOfError": 4.8
+      "stdDev": 739.79,
+      "marginOfError": 2.9
     }
   }
 }

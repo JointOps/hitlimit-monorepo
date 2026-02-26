@@ -23,55 +23,55 @@
     "runs": 5,
     "totalMeasured": 250000
   },
-  "date": "2026-02-25T01:23:30.321Z",
+  "date": "2026-02-26T00:00:45.404Z",
   "scenarios": {
     "single-ip": {
       "description": "Single IP, best cache locality",
       "keys": 1,
-      "memoryMB": 0.49,
-      "opsPerSec": 1085075,
+      "memoryMB": 0.55,
+      "opsPerSec": 292179,
       "latency": {
-        "avgNs": 922,
-        "p50Ns": 791,
-        "p95Ns": 1583,
-        "p99Ns": 2250,
-        "minNs": 459,
-        "maxNs": 417375
+        "avgNs": 3423,
+        "p50Ns": 666,
+        "p95Ns": 1958,
+        "p99Ns": 8541,
+        "minNs": 500,
+        "maxNs": 145830917
       },
-      "stdDev": 1921.44,
-      "marginOfError": 7.53
+      "stdDev": 397945.86,
+      "marginOfError": 1559.95
     },
     "multi-ip-1k": {
       "description": "1,000 unique IPs, typical API",
       "keys": 1000,
-      "memoryMB": 15.61,
-      "opsPerSec": 752055,
+      "memoryMB": 15.43,
+      "opsPerSec": 889177,
       "latency": {
-        "avgNs": 1330,
-        "p50Ns": 1083,
-        "p95Ns": 2084,
-        "p99Ns": 4708,
-        "minNs": 625,
-        "maxNs": 1179167
+        "avgNs": 1125,
+        "p50Ns": 834,
+        "p95Ns": 1667,
+        "p99Ns": 2334,
+        "minNs": 541,
+        "maxNs": 4194708
       },
-      "stdDev": 3808.72,
-      "marginOfError": 14.93
+      "stdDev": 12493.38,
+      "marginOfError": 48.97
     },
     "multi-ip-10k": {
       "description": "10,000 unique IPs, high traffic",
       "keys": 10000,
-      "memoryMB": 6.36,
-      "opsPerSec": 702087,
+      "memoryMB": 6.42,
+      "opsPerSec": 632740,
       "latency": {
-        "avgNs": 1424,
-        "p50Ns": 1125,
-        "p95Ns": 2416,
-        "p99Ns": 3500,
-        "minNs": 583,
-        "maxNs": 4946375
+        "avgNs": 1580,
+        "p50Ns": 916,
+        "p95Ns": 2459,
+        "p99Ns": 5125,
+        "minNs": 541,
+        "maxNs": 8368791
       },
-      "stdDev": 12469.84,
-      "marginOfError": 48.88
+      "stdDev": 26901,
+      "marginOfError": 105.45
     }
   }
 }

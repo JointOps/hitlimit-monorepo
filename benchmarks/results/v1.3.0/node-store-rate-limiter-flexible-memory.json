@@ -1,6 +1,6 @@
 {
   "benchmark": {
-    "framework": "express",
+    "framework": "store",
     "library": "rate-limiter-flexible",
     "store": "memory",
     "runtime": "node"
@@ -23,55 +23,55 @@
     "runs": 5,
     "totalMeasured": 250000
   },
-  "date": "2026-02-25T01:23:35.456Z",
+  "date": "2026-02-26T00:34:17.436Z",
   "scenarios": {
     "single-ip": {
       "description": "Single IP, best cache locality",
       "keys": 1,
-      "memoryMB": 3.18,
-      "opsPerSec": 1414171,
+      "memoryMB": 0.38,
+      "opsPerSec": 1713636,
       "latency": {
-        "avgNs": 707,
-        "p50Ns": 584,
-        "p95Ns": 1583,
-        "p99Ns": 2250,
+        "avgNs": 584,
+        "p50Ns": 542,
+        "p95Ns": 917,
+        "p99Ns": 1250,
         "minNs": 208,
-        "maxNs": 221750
+        "maxNs": 346834
       },
-      "stdDev": 1532.43,
-      "marginOfError": 6.01
+      "stdDev": 1621.78,
+      "marginOfError": 6.36
     },
     "multi-ip-1k": {
       "description": "1,000 unique IPs, typical API",
       "keys": 1000,
-      "memoryMB": 8.01,
-      "opsPerSec": 969927,
+      "memoryMB": 4.32,
+      "opsPerSec": 1188960,
       "latency": {
-        "avgNs": 1031,
+        "avgNs": 841,
         "p50Ns": 709,
-        "p95Ns": 2208,
-        "p99Ns": 3417,
-        "minNs": 416,
-        "maxNs": 312125
+        "p95Ns": 1375,
+        "p99Ns": 2875,
+        "minNs": 375,
+        "maxNs": 316291
       },
-      "stdDev": 2109.86,
-      "marginOfError": 8.27
+      "stdDev": 1558.51,
+      "marginOfError": 6.11
     },
     "multi-ip-10k": {
       "description": "10,000 unique IPs, high traffic",
       "keys": 10000,
-      "memoryMB": 17.89,
-      "opsPerSec": 874255,
+      "memoryMB": 14.59,
+      "opsPerSec": 1066832,
       "latency": {
-        "avgNs": 1144,
-        "p50Ns": 792,
-        "p95Ns": 2292,
-        "p99Ns": 3709,
+        "avgNs": 937,
+        "p50Ns": 750,
+        "p95Ns": 1958,
+        "p99Ns": 3667,
         "minNs": 333,
-        "maxNs": 2309792
+        "maxNs": 787209
       },
-      "stdDev": 7333.87,
-      "marginOfError": 28.75
+      "stdDev": 2317.4,
+      "marginOfError": 9.08
     }
   }
 }
