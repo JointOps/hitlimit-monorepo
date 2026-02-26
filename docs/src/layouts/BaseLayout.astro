@@ -17,7 +17,7 @@ const siteUrl = 'https://hitlimit.jointops.dev';
 const {
   title = 'hitlimit - The Fastest Rate Limiter for Node.js, Bun, Express, Fastify, Hono & NestJS | express-rate-limit alternative',
   description = 'Lightning-fast rate limiting middleware for Node.js, Bun, Express, Fastify, Hono, NestJS, and Elysia. A faster, lighter alternative to express-rate-limit, @fastify/rate-limit, hono-rate-limiter, and rate-limiter-flexible. Sub-millisecond performance, memory/SQLite/Redis/Postgres stores, zero config.',
-  keywords = 'rate limit, rate limiter, rate limiting, express rate limit, express-rate-limit, express-rate-limit alternative, fastify rate limit, fastify rate limiter, fastify plugin, @fastify/rate-limit, @fastify/rate-limit alternative, hono rate limit, hono rate limiter, hono middleware, hono-rate-limiter, hono-rate-limiter alternative, rate-limiter-flexible, rate-limiter-flexible alternative, express middleware, nestjs rate limit, nestjs throttler, @nestjs/throttler, bun rate limit, bun rate limiter, elysia rate limit, elysia plugin, nodejs rate limiter, node rate limit, api rate limiting, throttle requests, request throttling, ddos protection, brute force protection, login protection, redis rate limit, sqlite rate limit, postgres rate limit, postgres rate limiter, api throttling, request limiting, npm rate limit, sliding window, fixed window, token bucket, api security, request limiter',
+  keywords = 'rate limit, rate limiter, rate limiting, express rate limit, express-rate-limit, express-rate-limit alternative, fastify rate limit, fastify rate limiter, fastify plugin, @fastify/rate-limit, @fastify/rate-limit alternative, hono rate limit, hono rate limiter, hono middleware, hono-rate-limiter, hono-rate-limiter alternative, rate-limiter-flexible, rate-limiter-flexible alternative, express middleware, nestjs rate limit, nestjs throttler, @nestjs/throttler, bun rate limit, bun rate limiter, elysia rate limit, elysia plugin, nodejs rate limiter, node rate limit, api rate limiting, throttle requests, request throttling, ddos protection, brute force protection, login protection, redis rate limit, sqlite rate limit, postgres rate limit, postgres rate limiter, api throttling, request limiting, npm rate limit, sliding window, fixed window, token bucket, api security, request limiter, valkey rate limit, valkey rate limiter, dragonflydb rate limit, dragonfly rate limiter, redis alternative rate limit',
   canonical = `${siteUrl}${Astro.url.pathname}`,
   ogType = 'website'
 } = Astro.props;
@@ -121,7 +121,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "What is hitlimit?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "hitlimit is an open-source rate limiting library for Node.js and Bun created by JointOps. It provides sub-millisecond performance with 4.8M ops/sec (Node.js) and 12.3M ops/sec (Bun), over 4x faster than express-rate-limit. It has a ~8KB bundle (Node.js) or ~18KB (Bun) with zero runtime dependencies. It supports Express, Fastify, Hono, NestJS, Bun.serve, and Elysia frameworks with 4 storage backends: memory, SQLite, Redis, and Postgres."
+            "text": "hitlimit is an open-source rate limiting library for Node.js and Bun created by JointOps. It provides sub-millisecond performance with 4.8M ops/sec (Node.js) and 12.3M ops/sec (Bun), over 4x faster than express-rate-limit. It has a ~8KB bundle (Node.js) or ~18KB (Bun) with zero runtime dependencies. It supports Express, Fastify, Hono, NestJS, Bun.serve, and Elysia frameworks with 6 storage backends: memory, SQLite, Redis, Valkey, DragonflyDB, and Postgres."
           }
         },
         {
@@ -145,7 +145,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "Does hitlimit support Redis?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, hitlimit supports Redis for distributed rate limiting across multiple servers using atomic Lua scripts via ioredis defineCommand(). Import redisStore from '@joint-ops/hitlimit/stores/redis' and pass it as the store option. hitlimit supports 4 stores: memory (default), SQLite, Redis, and Postgres."
+            "text": "Yes, hitlimit supports Redis for distributed rate limiting across multiple servers using atomic Lua scripts via ioredis defineCommand(). Import redisStore from '@joint-ops/hitlimit/stores/redis' and pass it as the store option. hitlimit supports 6 stores: memory (default), SQLite, Redis, Valkey, DragonflyDB, and Postgres."
           }
         },
         {
@@ -169,7 +169,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "What is the difference between hitlimit and rate-limiter-flexible?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "hitlimit is faster in memory benchmarks (3.16M ops/sec vs 1.14M at 10K IPs). hitlimit also wins in Redis and Postgres benchmarks. rate-limiter-flexible has more storage backends (14 vs 4) and weighted requests. hitlimit offers simpler configuration, built-in SaaS tier support, 8 framework adapters, and human-readable time windows."
+            "text": "hitlimit is faster in memory benchmarks (3.16M ops/sec vs 1.14M at 10K IPs). hitlimit also wins in Redis and Postgres benchmarks. rate-limiter-flexible has more storage backends (14 vs 6) and weighted requests. hitlimit offers simpler configuration, built-in SaaS tier support, 8 framework adapters, and human-readable time windows."
           }
         },
         {
@@ -177,7 +177,23 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "Does hitlimit work with Bun?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, hitlimit has a dedicated Bun package (@joint-ops/hitlimit-bun) optimized for Bun runtime. It works with Bun.serve(), Elysia, and Hono frameworks, achieving 12.3M+ ops/sec peak performance. It includes native bun:sqlite integration and supports all 4 storage backends."
+            "text": "Yes, hitlimit has a dedicated Bun package (@joint-ops/hitlimit-bun) optimized for Bun runtime. It works with Bun.serve(), Elysia, and Hono frameworks, achieving 12.3M+ ops/sec peak performance. It includes native bun:sqlite integration and supports all 6 storage backends."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does hitlimit support Valkey?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, hitlimit has a dedicated Valkey store for distributed rate limiting. Valkey is the Linux Foundation's open-source fork of Redis (BSD-3-Clause license). Import valkeyStore from '@joint-ops/hitlimit/stores/valkey' — it uses the same ioredis client and atomic Lua scripts as the Redis store. Zero migration effort if you're switching from Redis to Valkey."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does hitlimit support DragonflyDB?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, hitlimit has a dedicated DragonflyDB store for high-throughput distributed rate limiting. DragonflyDB is a multi-threaded Redis-compatible in-memory store. Import dragonflyStore from '@joint-ops/hitlimit/stores/dragonfly' — it uses the same ioredis client and benefits from DragonflyDB's parallel Lua script execution across different keys."
           }
         }
       ]

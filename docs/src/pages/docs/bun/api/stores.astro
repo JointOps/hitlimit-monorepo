@@ -4,9 +4,9 @@ import RuntimeBanner from '../../../../components/RuntimeBanner.astro';
 ---
 
 <DocsLayout
-  title="Stores API (Bun) - hitlimit-bun | Memory, SQLite, Redis, Postgres Store Reference"
-  description="API reference for hitlimit-bun storage backends. HitLimitStore interface, memoryStore(), sqliteStore(), redisStore(), and postgresStore() function signatures and options."
-  keywords="hitlimit-bun store api, bun rate limit store, bun memory store api, bun sqlite store api, bun redis store api, bun postgres store api, hitlimit store interface"
+  title="Stores API (Bun) - hitlimit-bun | Memory, SQLite, Redis, Valkey, DragonflyDB, Postgres Store Reference"
+  description="API reference for hitlimit-bun storage backends. HitLimitStore interface, memoryStore(), sqliteStore(), redisStore(), valkeyStore(), dragonflyStore(), and postgresStore() function signatures and options."
+  keywords="hitlimit-bun store api, bun rate limit store, bun memory store api, bun sqlite store api, bun redis store api, bun valkey store api, bun dragonflydb store api, bun postgres store api, hitlimit store interface"
 >
   <h1>Stores API (Bun)</h1>
 
@@ -250,6 +250,158 @@ import RuntimeBanner from '../../../../components/RuntimeBanner.astro';
 {"}"})</code></pre>
   </div>
 
+  <h2 id="valkey-store">valkeyStore()</h2>
+
+  <p>
+    Valkey-backed storage for distributed deployments. Thin wrapper over <code>RedisStore</code> —
+    uses the same ioredis client and atomic Lua scripts. Valkey is the Linux Foundation's
+    open-source fork of Redis (BSD-3-Clause).
+  </p>
+
+  <h3>Signature</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">function</span> <span class="fn">valkeyStore</span>(options?: ValkeyStoreOptions): HitLimitStore</code></pre>
+  </div>
+
+  <h3>Import</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} valkeyStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/valkey'</span></code></pre>
+  </div>
+
+  <h3>Options</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Option</th>
+        <th>Type</th>
+        <th>Default</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>url</code></td>
+        <td><code>string</code></td>
+        <td>—</td>
+        <td>Valkey connection URL (uses <code>redis://</code> scheme).</td>
+      </tr>
+      <tr>
+        <td><code>client</code></td>
+        <td><code>Redis</code></td>
+        <td>—</td>
+        <td>Existing ioredis client instance.</td>
+      </tr>
+      <tr>
+        <td><code>prefix</code></td>
+        <td><code>string</code></td>
+        <td><code>'hitlimit:'</code></td>
+        <td>Key prefix for rate limit entries.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Usage</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">valkey.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+<span class="kw">import</span> {"{"} valkeyStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/valkey'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">valkeyStore</span>({"{"}
+    url: <span class="str">'redis://localhost:6379'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="dragonfly-store">dragonflyStore()</h2>
+
+  <p>
+    DragonflyDB-backed storage for high-throughput distributed deployments. Thin wrapper over
+    <code>RedisStore</code> — uses the same ioredis client and Lua scripts. Benefits from
+    DragonflyDB's parallel Lua execution across different keys.
+  </p>
+
+  <h3>Signature</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">function</span> <span class="fn">dragonflyStore</span>(options?: DragonflyStoreOptions): HitLimitStore</code></pre>
+  </div>
+
+  <h3>Import</h3>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} dragonflyStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/dragonfly'</span></code></pre>
+  </div>
+
+  <h3>Options</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Option</th>
+        <th>Type</th>
+        <th>Default</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>url</code></td>
+        <td><code>string</code></td>
+        <td>—</td>
+        <td>DragonflyDB connection URL (uses <code>redis://</code> scheme).</td>
+      </tr>
+      <tr>
+        <td><code>client</code></td>
+        <td><code>Redis</code></td>
+        <td>—</td>
+        <td>Existing ioredis client instance.</td>
+      </tr>
+      <tr>
+        <td><code>prefix</code></td>
+        <td><code>string</code></td>
+        <td><code>'hitlimit:'</code></td>
+        <td>Key prefix for rate limit entries.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Usage</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <span class="code-filename">dragonfly.ts</span>
+    </div>
+    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+<span class="kw">import</span> {"{"} dragonflyStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/dragonfly'</span>
+
+<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  store: <span class="fn">dragonflyStore</span>({"{"}
+    url: <span class="str">'redis://localhost:6379'</span>
+  {"}"})
+{"}"})</code></pre>
+  </div>
+
   <h2 id="postgres-store">postgresStore()</h2>
 
   <p>
@@ -417,6 +569,22 @@ import RuntimeBanner from '../../../../components/RuntimeBanner.astro';
       <tr>
         <td><strong>Redis</strong></td>
         <td>6.7K ops/sec</td>
+        <td>~148&mu;s</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td><strong>Valkey</strong></td>
+        <td>~6.7K ops/sec</td>
+        <td>~148&mu;s</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td><strong>DragonflyDB</strong></td>
+        <td>~6.7K ops/sec</td>
         <td>~148&mu;s</td>
         <td>Yes</td>
         <td>Yes</td>

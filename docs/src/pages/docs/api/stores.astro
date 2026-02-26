@@ -4,9 +4,9 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
 ---
 
 <DocsLayout
-  title="Store API Reference - hitlimit | Memory, SQLite, Redis, Postgres Store Interfaces"
-  description="API reference for hitlimit storage backends. Store interface methods (get, increment, reset, close), built-in stores (Memory, SQLite, Redis, Postgres), and how to create custom stores."
-  keywords="hitlimit store api, rate limit store interface, memory store api, sqlite store api, redis store api, postgres store api, custom rate limit store, store methods, rate limit storage"
+  title="Store API Reference - hitlimit | Memory, SQLite, Redis, Valkey, DragonflyDB, Postgres Store Interfaces"
+  description="API reference for hitlimit storage backends. Store interface methods (get, increment, reset, close), built-in stores (Memory, SQLite, Redis, Valkey, DragonflyDB, Postgres), and how to create custom stores."
+  keywords="hitlimit store api, rate limit store interface, memory store api, sqlite store api, redis store api, valkey store api, dragonflydb store api, postgres store api, custom rate limit store, store methods, rate limit storage"
 >
   <h1>Store API</h1>
   <RuntimeBanner
@@ -92,6 +92,30 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
     <pre><code><span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
 
 <span class="kw">const</span> store = <span class="fn">redisStore</span>({"{"}
+  url: <span class="str">'redis://localhost:6379'</span>,
+  prefix: <span class="str">'rl:'</span>  <span class="cm">// Key prefix</span>
+{"}"})</code></pre>
+  </div>
+
+  <h3>valkeyStore()</h3>
+  <p>Valkey storage for distributed deployments. Thin wrapper over <code>RedisStore</code> — uses the same ioredis client and Lua scripts.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} valkeyStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/valkey'</span>
+
+<span class="kw">const</span> store = <span class="fn">valkeyStore</span>({"{"}
+  url: <span class="str">'redis://localhost:6379'</span>,
+  prefix: <span class="str">'rl:'</span>  <span class="cm">// Key prefix</span>
+{"}"})</code></pre>
+  </div>
+
+  <h3>dragonflyStore()</h3>
+  <p>DragonflyDB storage for high-throughput distributed deployments. Thin wrapper over <code>RedisStore</code> — uses the same ioredis client and Lua scripts.</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">import</span> {"{"} dragonflyStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/dragonfly'</span>
+
+<span class="kw">const</span> store = <span class="fn">dragonflyStore</span>({"{"}
   url: <span class="str">'redis://localhost:6379'</span>,
   prefix: <span class="str">'rl:'</span>  <span class="cm">// Key prefix</span>
 {"}"})</code></pre>

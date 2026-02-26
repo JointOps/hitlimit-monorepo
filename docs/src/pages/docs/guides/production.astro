@@ -24,6 +24,8 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
       <tr><td>Single instance</td><td>memoryStore</td><td>Fast, no setup required</td></tr>
       <tr><td>Single server, persistence</td><td>sqliteStore</td><td>Survives restarts</td></tr>
       <tr><td>Multiple instances</td><td>redisStore</td><td>Shared state across nodes</td></tr>
+      <tr><td>Multiple instances (open-source)</td><td>valkeyStore</td><td>BSD-licensed Redis alternative</td></tr>
+      <tr><td>Multiple instances (high-throughput)</td><td>dragonflyStore</td><td>Multi-threaded Redis alternative</td></tr>
       <tr><td>Multiple instances (no Redis)</td><td>postgresStore</td><td>Use existing Postgres DB</td></tr>
     </tbody>
   </table>

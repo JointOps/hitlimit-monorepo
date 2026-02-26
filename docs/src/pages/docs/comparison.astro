@@ -27,7 +27,7 @@ const faqSchema = {
       "name": "Does hitlimit support Redis?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, hitlimit has built-in Redis support for distributed rate limiting. It also supports Memory and SQLite stores out of the box."
+        "text": "Yes, hitlimit has built-in Redis support for distributed rate limiting. It also supports Memory, SQLite, Valkey, DragonflyDB, and Postgres stores out of the box."
       }
     },
     {
@@ -129,6 +129,22 @@ const faqSchema = {
             <td>Built-in</td>
             <td>Built-in</td>
             <td>External</td>
+          </tr>
+          <tr>
+            <td>Valkey Store</td>
+            <td class="highlight-col good">Built-in</td>
+            <td>No</td>
+            <td>No</td>
+            <td>No</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>DragonflyDB Store</td>
+            <td class="highlight-col good">Built-in</td>
+            <td>No</td>
+            <td>No</td>
+            <td>No</td>
+            <td>No</td>
           </tr>
           <tr>
             <td>Postgres Store</td>
@@ -415,6 +431,14 @@ const faqSchema = {
             <td class="highlight-col good">Built-in (Lua scripts)</td>
           </tr>
           <tr>
+            <td>Valkey Store</td>
+            <td class="highlight-col good">Built-in (Redis alternative)</td>
+          </tr>
+          <tr>
+            <td>DragonflyDB Store</td>
+            <td class="highlight-col good">Built-in (high-throughput)</td>
+          </tr>
+          <tr>
             <td>Postgres Store</td>
             <td class="highlight-col good">Built-in</td>
           </tr>
@@ -522,6 +546,18 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
         <div class="store-perf-ops">6.7K <span class="store-perf-unit">ops/s</span></div>
         <div class="store-perf-latency">~148&micro;s latency</div>
         <div class="store-perf-use">Multi-instance, dedicated cache</div>
+      </div>
+      <div class="store-perf-card">
+        <div class="store-perf-name">Valkey Store</div>
+        <div class="store-perf-ops">~6.7K <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">~148&micro;s latency</div>
+        <div class="store-perf-use">Open-source Redis alternative (BSD)</div>
+      </div>
+      <div class="store-perf-card">
+        <div class="store-perf-name">DragonflyDB Store</div>
+        <div class="store-perf-ops">~6.7K <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">~148&micro;s latency</div>
+        <div class="store-perf-use">Multi-threaded, parallel Lua</div>
       </div>
       <div class="store-perf-card">
         <div class="store-perf-name">Postgres Store</div>
@@ -687,6 +723,14 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
           <tr>
             <td>Multi-server / distributed</td>
             <td class="good">Redis — 6.7K ops/sec, Lua scripts</td>
+          </tr>
+          <tr>
+            <td>Multi-server / open-source</td>
+            <td class="good">Valkey — BSD-licensed Redis alternative</td>
+          </tr>
+          <tr>
+            <td>Multi-server / high-throughput</td>
+            <td class="good">DragonflyDB — multi-threaded</td>
           </tr>
           <tr>
             <td>Multi-server / distributed (SQL)</td>
