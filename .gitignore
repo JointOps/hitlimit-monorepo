@@ -47,3 +47,5 @@ yarn.lock
 package-lock.json
 CLAUDE.md
 plan.md
+VALKEY_DRAGONFLY_PLAN.md
+BENCHMARK_RESTRUCTURE_PLAN.md

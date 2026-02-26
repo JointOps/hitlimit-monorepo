@@ -40,6 +40,36 @@ services:
       retries: 5
     restart: unless-stopped
 
+  valkey:
+    image: valkey/valkey:8-alpine
+    container_name: hitlimit-valkey
+    ports:
+      - "6381:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    profiles:
+      - valkey
+      - all
+
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly
+    container_name: hitlimit-dragonfly
+    ports:
+      - "6382:6379"
+    ulimits:
+      memlock: -1
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6379", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    profiles:
+      - dragonfly
+      - all
+
   redis-commander:
     image: rediscommander/redis-commander:latest
     container_name: hitlimit-redis-ui
