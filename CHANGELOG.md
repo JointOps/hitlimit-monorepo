@@ -2,6 +2,65 @@
 
 All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.5.0] - 2026-XX-XX
+
+### Added
+- MySQL store (`mysqlStore()`) — SQL rate limiting with atomic `INSERT ON DUPLICATE KEY UPDATE`
+- Available for both Node.js (`@joint-ops/hitlimit`) and Bun (`@joint-ops/hitlimit-bun`)
+- Peer dependency: `mysql2` >=3.0.0 (optional)
+- Full test suites for both packages
+- Documentation page with usage guide
+- Benchmarks: Node.js and Bun store benchmarks, Express middleware benchmarks
+
+## [1.4.0] - 2026-XX-XX
+
+### Added
+- MongoDB store (`mongoStore()`) — NoSQL rate limiting with atomic `findOneAndUpdate`, TTL indexes
+- Available for both Node.js (`@joint-ops/hitlimit`) and Bun (`@joint-ops/hitlimit-bun`)
+- Peer dependency: `mongodb` >=6.0.0 (optional)
+- Full test suites for both packages
+- Documentation page with usage guide
+- Benchmarks: Node.js and Bun store benchmarks, Express middleware benchmarks
+
+## [1.3.0] - 2026-02-26
+
+### Added
+- Valkey store (`valkeyStore()`) — open-source Redis alternative, uses same atomic Lua scripts
+  - Available for both Node.js and Bun packages
+  - Peer dependency: `ioredis` (shared with Redis store)
+  - Full test suites for both packages
+  - Documentation page and benchmarks
+- DragonflyDB store (`dragonflyStore()`) — high-throughput Redis-compatible store
+  - Available for both Node.js and Bun packages
+  - Peer dependency: `ioredis` (shared with Redis store)
+  - Full test suites for both packages
+  - Documentation page and benchmarks
+- Docker services for Valkey and DragonflyDB
+
+### Changed
+- Updated package exports, keywords, and Bun build config for new stores
+- Updated docs: comparison table, store overview, SEO, and llms.txt
+
+## [1.2.0] - 2026-02-22
+
+### Added
+- PostgreSQL store (`postgresStore()`) — distributed rate limiting with atomic upserts
+  - Available for both Node.js and Bun packages
+  - Peer dependency: `pg` (optional)
+  - Full test suites for both packages
+  - Documentation page with usage guide
+- Comprehensive benchmark suite — all frameworks (Express, Fastify, Hono, NestJS, Bun.serve, Elysia) across all stores
+- Benchmark methodology documentation with full transparency
+
+### Changed
+- Optimized Redis store — `ioredis` `defineCommand()` for native SHA caching
+- Optimized Postgres store — named prepared statements + ready flag
+- Async fast path for sync key extraction in middleware
+- Improved benchmark runner fairness — `hrtime.bigint()`, GC between runs
+
 ## [1.1.3] - 2026-02-17
 
 ### Performance
