@@ -1,0 +1,77 @@
+{
+  "benchmark": {
+    "framework": "store",
+    "library": "hitlimit",
+    "store": "sqlite",
+    "runtime": "bun"
+  },
+  "environment": {
+    "runtimeVersion": "1.3.7",
+    "os": "macOS 26.2",
+    "arch": "arm64",
+    "cpu": "Apple M1",
+    "cpuCores": 8,
+    "memoryGB": 8,
+    "docker": false
+  },
+  "versions": {
+    "hitlimit-bun": "1.4.0"
+  },
+  "config": {
+    "warmupIterations": 5000,
+    "iterations": 50000,
+    "runs": 5,
+    "totalMeasured": 250000
+  },
+  "date": "2026-03-04T13:20:03.614Z",
+  "scenarios": {
+    "single-ip": {
+      "description": "Single IP, best cache locality",
+      "keys": 1,
+      "memoryMB": 4.19,
+      "opsPerSec": 386118,
+      "latency": {
+        "avgNs": 2590,
+        "p50Ns": 1959,
+        "p95Ns": 4459,
+        "p99Ns": 7458,
+        "minNs": 1625,
+        "maxNs": 18760750
+      },
+      "stdDev": 43686.08,
+      "marginOfError": 171.25
+    },
+    "multi-ip-1k": {
+      "description": "1,000 unique IPs, typical API",
+      "keys": 1000,
+      "memoryMB": 0,
+      "opsPerSec": 350440,
+      "latency": {
+        "avgNs": 2854,
+        "p50Ns": 2417,
+        "p95Ns": 4917,
+        "p99Ns": 7416,
+        "minNs": 1958,
+        "maxNs": 314792
+      },
+      "stdDev": 1915.1,
+      "marginOfError": 7.51
+    },
+    "multi-ip-10k": {
+      "description": "10,000 unique IPs, high traffic",
+      "keys": 10000,
+      "memoryMB": 0,
+      "opsPerSec": 340622,
+      "latency": {
+        "avgNs": 2936,
+        "p50Ns": 2541,
+        "p95Ns": 5000,
+        "p99Ns": 7291,
+        "minNs": 2083,
+        "maxNs": 771000
+      },
+      "stdDev": 2207.66,
+      "marginOfError": 8.65
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "benchmark": {
+    "framework": "nestjs",
+    "library": "hitlimit",
+    "store": "sqlite",
+    "runtime": "node"
+  },
+  "environment": {
+    "runtimeVersion": "v24.4.1",
+    "os": "macOS 26.2",
+    "arch": "arm64",
+    "cpu": "Apple M1",
+    "cpuCores": 8,
+    "memoryGB": 8,
+    "docker": false
+  },
+  "versions": {
+    "hitlimit": "1.4.0",
+    "@nestjs/core": "10.4.22"
+  },
+  "config": {
+    "warmupIterations": 5000,
+    "iterations": 50000,
+    "runs": 5,
+    "totalMeasured": 250000
+  },
+  "date": "2026-03-04T13:19:57.653Z",
+  "scenarios": {
+    "single-ip": {
+      "description": "Single IP, best cache locality",
+      "keys": 1,
+      "memoryMB": 4.05,
+      "opsPerSec": 265229,
+      "latency": {
+        "avgNs": 3770,
+        "p50Ns": 3167,
+        "p95Ns": 6584,
+        "p99Ns": 9584,
+        "minNs": 2958,
+        "maxNs": 313750
+      },
+      "stdDev": 2582.99,
+      "marginOfError": 10.13
+    },
+    "multi-ip-1k": {
+      "description": "1,000 unique IPs, typical API",
+      "keys": 1000,
+      "memoryMB": 12.11,
+      "opsPerSec": 233288,
+      "latency": {
+        "avgNs": 4287,
+        "p50Ns": 3625,
+        "p95Ns": 7458,
+        "p99Ns": 11917,
+        "minNs": 3292,
+        "maxNs": 1174041
+      },
+      "stdDev": 3817.04,
+      "marginOfError": 14.96
+    },
+    "multi-ip-10k": {
+      "description": "10,000 unique IPs, high traffic",
+      "keys": 10000,
+      "memoryMB": 37.17,
+      "opsPerSec": 220784,
+      "latency": {
+        "avgNs": 4529,
+        "p50Ns": 3916,
+        "p95Ns": 7917,
+        "p99Ns": 11875,
+        "minNs": 3416,
+        "maxNs": 2001125
+      },
+      "stdDev": 5007.9,
+      "marginOfError": 19.63
+    }
+  }
+}
