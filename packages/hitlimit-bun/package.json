@@ -1,6 +1,6 @@
 {
   "name": "@joint-ops/hitlimit-bun",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Ultra-fast Bun-native rate limiting - Memory-first with 6M+ ops/sec for Bun.serve, Elysia & Hono",
   "author": {
     "name": "Shayan M Hussain",
