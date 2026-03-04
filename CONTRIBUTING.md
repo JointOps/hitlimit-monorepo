@@ -207,22 +207,21 @@ pnpm benchmark:memory      # Memory store only
 ### Full benchmarks (requires Docker)
 
 ```bash
-# Start required services
-docker run -d --name bench-redis -p 6379:6379 redis:7-alpine
-docker run -d --name bench-postgres -p 5433:5432 \
-  -e POSTGRES_USER=hitlimit \
-  -e POSTGRES_PASSWORD=hitlimit \
-  -e POSTGRES_DB=hitlimit_test \
-  postgres:16-alpine
+# Run all benchmarks (Docker services start/stop automatically per store)
+pnpm benchmark:all         # Runs ./benchmarks/benchmark-all.sh
 
-# Run all benchmarks (Node.js + Bun, all stores, all frameworks)
-pnpm benchmark:all         # Runs ./scripts/benchmark-all.sh
+# Or use the script directly for more options
+./benchmarks/benchmark-all.sh              # Interactive menu
+./benchmarks/benchmark-all.sh store redis  # Specific store only
+./benchmarks/benchmark-all.sh quick        # Memory + SQLite (no Docker)
+./benchmarks/benchmark-all.sh status       # View existing results
 ```
 
 ### Benchmark structure
 
 ```
 benchmarks/
+├── benchmark-all.sh       # Main benchmark suite runner
 ├── node/
 │   ├── store/              # Raw store benchmarks (hitlimit vs rate-limiter-flexible)
 │   ├── express/            # Express middleware (hitlimit vs express-rate-limit vs rate-limiter-flexible)
