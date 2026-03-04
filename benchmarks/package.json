@@ -5,11 +5,14 @@
   "type": "module",
   "scripts": {
     "bench:all": "pnpm bench:node && pnpm bench:bun",
-
-    "docker:up": "docker run -d --name bench-redis -p 6379:6379 redis:7-alpine && docker run -d --name bench-postgres -p 5433:5432 -e POSTGRES_USER=hitlimit -e POSTGRES_PASSWORD=hitlimit -e POSTGRES_DB=hitlimit_test postgres:16-alpine && echo 'Waiting for Postgres...' && sleep 3",
-    "docker:down": "docker rm -f bench-redis bench-postgres 2>/dev/null; true",
-    "docker:restart": "pnpm docker:down && pnpm docker:up",
-    "clean:stores": "docker exec bench-redis redis-cli FLUSHDB 2>/dev/null; docker exec bench-postgres psql -U hitlimit -d hitlimit_test -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;' 2>/dev/null; true",
+    "bench:all:memory": "pnpm bench:node:store:memory && pnpm bench:node:express:memory && pnpm bench:node:fastify:memory && pnpm bench:node:hono:memory && pnpm bench:node:nestjs:memory && pnpm bench:bun:store:memory && pnpm bench:bun:bun-serve:memory && pnpm bench:bun:elysia:memory && pnpm bench:bun:hono:memory",
+    "bench:all:sqlite": "pnpm bench:node:store:sqlite && pnpm bench:node:express:sqlite && pnpm bench:node:fastify:sqlite && pnpm bench:node:hono:sqlite && pnpm bench:node:nestjs:sqlite && pnpm bench:bun:store:sqlite && pnpm bench:bun:bun-serve:sqlite && pnpm bench:bun:elysia:sqlite && pnpm bench:bun:hono:sqlite",
+    "bench:all:redis": "pnpm bench:node:store:redis && pnpm bench:node:express:redis && pnpm bench:node:fastify:redis && pnpm bench:node:hono:redis && pnpm bench:node:nestjs:redis && pnpm bench:bun:store:redis && pnpm bench:bun:bun-serve:redis && pnpm bench:bun:elysia:redis && pnpm bench:bun:hono:redis",
+    "bench:all:postgres": "pnpm bench:node:store:postgres && pnpm bench:node:express:postgres && pnpm bench:node:fastify:postgres && pnpm bench:node:hono:postgres && pnpm bench:node:nestjs:postgres && pnpm bench:bun:store:postgres && pnpm bench:bun:bun-serve:postgres && pnpm bench:bun:elysia:postgres && pnpm bench:bun:hono:postgres",
+    "bench:all:valkey": "pnpm bench:node:store:valkey && pnpm bench:node:express:valkey && pnpm bench:node:fastify:valkey && pnpm bench:node:hono:valkey && pnpm bench:node:nestjs:valkey && pnpm bench:bun:store:valkey && pnpm bench:bun:bun-serve:valkey && pnpm bench:bun:elysia:valkey && pnpm bench:bun:hono:valkey",
+    "bench:all:dragonfly": "pnpm bench:node:store:dragonfly && pnpm bench:node:express:dragonfly && pnpm bench:node:fastify:dragonfly && pnpm bench:node:hono:dragonfly && pnpm bench:node:nestjs:dragonfly && pnpm bench:bun:store:dragonfly && pnpm bench:bun:bun-serve:dragonfly && pnpm bench:bun:elysia:dragonfly && pnpm bench:bun:hono:dragonfly",
+    "bench:all:mongodb": "pnpm bench:node:store:mongodb && pnpm bench:node:express:mongodb && pnpm bench:node:fastify:mongodb && pnpm bench:node:hono:mongodb && pnpm bench:node:nestjs:mongodb && pnpm bench:bun:store:mongodb && pnpm bench:bun:bun-serve:mongodb && pnpm bench:bun:elysia:mongodb && pnpm bench:bun:hono:mongodb",
+    "bench:all:mysql": "pnpm bench:node:store:mysql && pnpm bench:node:express:mysql && pnpm bench:node:fastify:mysql && pnpm bench:node:hono:mysql && pnpm bench:node:nestjs:mysql && pnpm bench:bun:store:mysql && pnpm bench:bun:bun-serve:mysql && pnpm bench:bun:elysia:mysql && pnpm bench:bun:hono:mysql",
 
     "bench:node": "pnpm bench:node:store && pnpm bench:node:express && pnpm bench:node:fastify && pnpm bench:node:hono && pnpm bench:node:nestjs",
     "bench:node:store": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/sqlite.ts && NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/store/rate-limiter-flexible/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/store/rate-limiter-flexible/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/store/rate-limiter-flexible/postgres.ts",
@@ -103,13 +106,23 @@
     "bench:bun:hono:mongodb": "bun bun/hono/hitlimit/mongodb.ts",
     "bench:bun:hono:mysql": "bun bun/hono/hitlimit/mysql.ts",
 
-    "docker:valkey": "docker compose --profile valkey up -d",
-    "docker:dragonfly": "docker compose --profile dragonfly up -d",
-    "docker:mongodb": "docker compose --profile mongodb up -d",
-    "docker:mysql": "docker compose --profile mysql up -d",
-    "docker:all": "docker compose --profile all up -d",
+    "docker:up": "docker compose --profile test up -d --wait",
+    "docker:down": "docker compose down --remove-orphans",
+    "docker:all": "docker compose --profile all up -d --wait",
+    "docker:redis": "docker compose --profile redis up -d --wait",
+    "docker:postgres": "docker compose --profile postgres up -d --wait",
+    "docker:valkey": "docker compose --profile valkey up -d --wait",
+    "docker:dragonfly": "docker compose --profile dragonfly up -d --wait",
+    "docker:mongodb": "docker compose --profile mongodb up -d --wait",
+    "docker:mysql": "docker compose --profile mysql up -d --wait --wait-timeout 120",
+
+    "clean:stores": "pnpm clean:redis; pnpm clean:postgres; pnpm clean:valkey; pnpm clean:dragonfly; pnpm clean:mongodb; pnpm clean:mysql; true",
+    "clean:redis": "docker exec hitlimit-redis redis-cli FLUSHDB 2>/dev/null; true",
+    "clean:postgres": "docker exec hitlimit-postgres psql -U hitlimit -d hitlimit_test -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;' 2>/dev/null; true",
     "clean:valkey": "docker exec hitlimit-valkey valkey-cli FLUSHDB 2>/dev/null; true",
     "clean:dragonfly": "docker exec hitlimit-dragonfly redis-cli FLUSHDB 2>/dev/null; true",
+    "clean:mongodb": "docker exec hitlimit-mongodb mongosh hitlimit_test --eval 'db.dropDatabase()' 2>/dev/null; true",
+    "clean:mysql": "docker exec hitlimit-mysql mysqladmin -uhitlimit -phitlimit drop hitlimit_test -f 2>/dev/null; docker exec hitlimit-mysql mysqladmin -uhitlimit -phitlimit create hitlimit_test 2>/dev/null; true",
 
     "check-regression": "tsx check-regression.ts"
   },
