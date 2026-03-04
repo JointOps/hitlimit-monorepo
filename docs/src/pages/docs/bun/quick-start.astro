@@ -1,11 +1,12 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import RuntimeBanner from '../../../components/RuntimeBanner.astro';
+import { bench, formatOps } from '../../../data/benchmarks';
 ---
 
 <DocsLayout
   title="Bun Rate Limiting Quick Start - hitlimit-bun | Get Started in 5 Minutes"
-  description="Quick start guide for Bun rate limiting with hitlimit-bun. Memory-first design achieving 12M+ ops/sec. Set up rate limiting for Bun.serve in 5 minutes with custom key extraction."
+  description={`Quick start guide for Bun rate limiting with hitlimit-bun. Memory-first design achieving ${formatOps(bench.bun.memory.singleIp.opsPerSec)}+ ops/sec. Set up rate limiting for Bun.serve in 5 minutes with custom key extraction.`}
   keywords="bun rate limit quick start, hitlimit-bun tutorial, bun serve rate limiting, bun:sqlite rate limit, bun api protection, bun rate limiter setup, elysia rate limit tutorial"
 >
   <h1>Bun Quick Start</h1>

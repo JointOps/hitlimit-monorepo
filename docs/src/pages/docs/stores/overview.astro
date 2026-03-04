@@ -1,6 +1,7 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
+import { bench, formatOps, formatOpsPlus } from '../../../data/benchmarks';
 ---
 
 <DocsLayout
@@ -34,8 +35,8 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 
   <div data-runtime-content="bun">
     <p>
-      hitlimit-bun is <strong>memory-first by default</strong> with 12.3M+ ops/sec performance.
-      Optional persistence available with native bun:sqlite (325K ops/sec), Redis (6.7K ops/sec), or Postgres (3.7K ops/sec) when you need it.
+      hitlimit-bun is <strong>memory-first by default</strong> with {formatOpsPlus(bench.bun.memory.singleIp.opsPerSec)} ops/sec performance.
+      Optional persistence available with native bun:sqlite ({formatOps(bench.bun.sqlite.multi10k.opsPerSec)} ops/sec), Redis ({formatOps(bench.bun.redis.multi10k.opsPerSec)} ops/sec), or Postgres ({formatOps(bench.bun.postgres.multi10k.opsPerSec)} ops/sec) when you need it.
     </p>
 
     <table class="stores-table">
@@ -43,12 +44,12 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><th>Store</th><th>Persistence</th><th>Multi-instance</th><th>Best For</th></tr>
       </thead>
       <tbody>
-        <tr><td><a href="/docs/stores/memory">Memory</a></td><td>No</td><td>No</td><td>Default — 12.3M+ ops/sec</td></tr>
-        <tr><td><a href="/docs/stores/sqlite">SQLite</a></td><td>Yes</td><td>No</td><td>bun:sqlite, zero deps — 325K ops/sec</td></tr>
-        <tr><td><a href="/docs/stores/redis">Redis</a></td><td>Yes</td><td>Yes</td><td>Distributed — 6.7K ops/sec</td></tr>
+        <tr><td><a href="/docs/stores/memory">Memory</a></td><td>No</td><td>No</td><td>Default — {formatOpsPlus(bench.bun.memory.singleIp.opsPerSec)} ops/sec</td></tr>
+        <tr><td><a href="/docs/stores/sqlite">SQLite</a></td><td>Yes</td><td>No</td><td>bun:sqlite, zero deps — {formatOps(bench.bun.sqlite.multi10k.opsPerSec)} ops/sec</td></tr>
+        <tr><td><a href="/docs/stores/redis">Redis</a></td><td>Yes</td><td>Yes</td><td>Distributed — {formatOps(bench.bun.redis.multi10k.opsPerSec)} ops/sec</td></tr>
         <tr><td><a href="/docs/stores/valkey">Valkey</a></td><td>Yes</td><td>Yes</td><td>Distributed, open-source — same as Redis</td></tr>
         <tr><td><a href="/docs/stores/dragonfly">DragonflyDB</a></td><td>Yes</td><td>Yes</td><td>High-throughput distributed</td></tr>
-        <tr><td><a href="/docs/stores/postgres">Postgres</a></td><td>Yes</td><td>Yes</td><td>Distributed SQL — 3.7K ops/sec</td></tr>
+        <tr><td><a href="/docs/stores/postgres">Postgres</a></td><td>Yes</td><td>Yes</td><td>Distributed SQL — {formatOps(bench.bun.postgres.multi10k.opsPerSec)} ops/sec</td></tr>
         <tr><td><a href="/docs/stores/mongodb">MongoDB</a></td><td>Yes</td><td>Yes</td><td>Distributed NoSQL</td></tr>
         <tr><td><a href="/docs/stores/mysql">MySQL</a></td><td>Yes</td><td>Yes</td><td>Distributed SQL — MySQL/MariaDB</td></tr>
       </tbody>

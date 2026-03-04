@@ -1,5 +1,11 @@
 ---
 import DocsLayout from '../../layouts/DocsLayout.astro';
+import { bench, formatOps, formatLatency, formatLatencyApprox, pctOfFastest, speedup } from '../../data/benchmarks';
+
+const n = bench.node;
+const b = bench.bun;
+const rlf = bench.competitors.rateLimiterFlexible;
+const erl = bench.competitors.expressRateLimit;
 
 // FAQPage schema for AI search visibility
 const faqSchema = {
@@ -11,7 +17,7 @@ const faqSchema = {
       "name": "How fast is hitlimit compared to express-rate-limit?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "hitlimit achieves 3.16M ops/sec vs 749K for express-rate-limit in high-traffic scenarios (10k unique IPs), making it over 4x faster. hitlimit is also ~2.8x faster than rate-limiter-flexible (3.16M vs 1.14M at 10K IPs)."
+        "text": `hitlimit achieves ${formatOps(n.memory.multi10k.opsPerSec)} ops/sec vs ${formatOps(erl.memory.multi10k.opsPerSec)} for express-rate-limit in high-traffic scenarios (10k unique IPs), making it over 4x faster. hitlimit is also ~${speedup(n.memory.multi10k.opsPerSec, rlf.memory.multi10k.opsPerSec)} faster than rate-limiter-flexible (${formatOps(n.memory.multi10k.opsPerSec)} vs ${formatOps(rlf.memory.multi10k.opsPerSec)} at 10K IPs).`
       }
     },
     {
@@ -19,7 +25,7 @@ const faqSchema = {
       "name": "What is the bundle size of hitlimit?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "hitlimit's Node.js core entry point is approximately 8KB, and the Bun package core entry is approximately 18KB. Both have zero runtime dependencies."
+        "text": `hitlimit's Node.js core entry point is approximately ${bench.bundleSize.node.core.replace('~', '')}, and the Bun package core entry is approximately ${bench.bundleSize.bun.core.replace('~', '')}. Both have zero runtime dependencies.`
       }
     },
     {
@@ -60,7 +66,7 @@ const faqSchema = {
 
 <DocsLayout
   title="hitlimit vs express-rate-limit vs @fastify/rate-limit vs rate-limiter-flexible | Comparison Guide"
-  description="Compare hitlimit (3.16M ops/sec) with express-rate-limit, @fastify/rate-limit, rate-limiter-flexible, and @nestjs/throttler. Feature comparison, performance benchmarks, and migration guides."
+  description={`Compare hitlimit (${formatOps(n.memory.multi10k.opsPerSec)} ops/sec) with express-rate-limit, @fastify/rate-limit, rate-limiter-flexible, and @nestjs/throttler. Feature comparison, performance benchmarks, and migration guides.`}
   keywords="hitlimit vs express-rate-limit, hitlimit vs fastify rate limit, best rate limiter nodejs, rate-limiter-flexible alternative, nestjs throttler comparison, fastest rate limiter, rate limit comparison, express rate limit alternative, fastify rate limit alternative, bun rate limiter, hono rate limiter"
 >
   <!-- FAQPage Schema for AI Search -->
@@ -108,10 +114,10 @@ const faqSchema = {
           </tr>
           <tr>
             <td>Memory Store (high-traffic)</td>
-            <td class="highlight-col good">3.16M ops/s</td>
-            <td>749K ops/s</td>
+            <td class="highlight-col good">{formatOps(n.memory.multi10k.opsPerSec)} ops/s</td>
+            <td>{formatOps(erl.memory.multi10k.opsPerSec)} ops/s</td>
             <td>N/A</td>
-            <td>1.14M ops/s</td>
+            <td>{formatOps(rlf.memory.multi10k.opsPerSec)} ops/s</td>
             <td>N/A</td>
           </tr>
           <tr>
@@ -361,27 +367,27 @@ const faqSchema = {
         <div class="benchmark-bar hitlimit" style="width: 100%;"></div>
         <div class="benchmark-info">
           <span class="benchmark-name">hitlimit</span>
-          <span class="benchmark-value">3.16M ops/s</span>
+          <span class="benchmark-value">{formatOps(n.memory.multi10k.opsPerSec)} ops/s</span>
         </div>
       </div>
       <div class="benchmark-item">
-        <div class="benchmark-bar other" style="width: 36%;"></div>
+        <div class="benchmark-bar other" style={`width: ${pctOfFastest(rlf.memory.multi10k.opsPerSec, n.memory.multi10k.opsPerSec)};`}></div>
         <div class="benchmark-info">
           <span class="benchmark-name">rate-limiter-flexible</span>
-          <span class="benchmark-value">1.14M ops/s</span>
+          <span class="benchmark-value">{formatOps(rlf.memory.multi10k.opsPerSec)} ops/s</span>
         </div>
       </div>
       <div class="benchmark-item">
-        <div class="benchmark-bar other" style="width: 24%;"></div>
+        <div class="benchmark-bar other" style={`width: ${pctOfFastest(erl.memory.multi10k.opsPerSec, n.memory.multi10k.opsPerSec)};`}></div>
         <div class="benchmark-info">
           <span class="benchmark-name">express-rate-limit</span>
-          <span class="benchmark-value">749K ops/s</span>
+          <span class="benchmark-value">{formatOps(erl.memory.multi10k.opsPerSec)} ops/s</span>
         </div>
       </div>
     </div>
 
     <p class="benchmark-note">
-      Memory store, 10k unique keys. hitlimit is also fastest on single-IP (4.83M vs 1.66M for rate-limiter-flexible).
+      Memory store, 10k unique keys. hitlimit is also fastest on single-IP ({formatOps(n.memory.singleIp.opsPerSec)} vs {formatOps(rlf.memory.singleIp.opsPerSec)} for rate-limiter-flexible).
       hitlimit also wins all Redis and Postgres scenarios with lower latency and less memory usage.
       These are our benchmarks — we've done our best to keep them fair and reproducible.
       <a href="/docs/benchmarks">See full benchmarks</a> or <a href="https://github.com/JointOps/hitlimit-monorepo">clone and run them yourself</a>.
@@ -408,7 +414,7 @@ const faqSchema = {
         <tbody>
           <tr>
             <td>Bundle Size</td>
-            <td class="highlight-col good">~18KB</td>
+            <td class="highlight-col good">{bench.bundleSize.bun.core}</td>
           </tr>
           <tr>
             <td>Zero Dependencies</td>
@@ -420,7 +426,7 @@ const faqSchema = {
           </tr>
           <tr>
             <td>Memory Store</td>
-            <td class="highlight-col good">8.32M ops/s (10K IPs)</td>
+            <td class="highlight-col good">{formatOps(b.memory.multi10k.opsPerSec)} ops/s (10K IPs)</td>
           </tr>
           <tr>
             <td>bun:sqlite Store</td>
@@ -477,7 +483,7 @@ const faqSchema = {
       <h3>Choose hitlimit-bun if you need:</h3>
       <ul>
         <li><strong>Zero runtime dependencies</strong> — no external packages needed</li>
-        <li><strong>Native bun:sqlite</strong> — Zero-dependency persistence at 325K ops/sec</li>
+        <li><strong>Native bun:sqlite</strong> — Zero-dependency persistence at {formatOps(bench.bun.sqlite.multi10k.opsPerSec)} ops/sec</li>
         <li><strong>Multiple frameworks</strong> — Bun.serve, Elysia, and Hono from one package</li>
         <li><strong>Human-readable time windows</strong> — <code>'1m'</code> vs milliseconds</li>
         <li><strong>Built-in tiered limits</strong> — Free/Pro/Enterprise tiers in 8 lines</li>
@@ -526,14 +532,14 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
     <div class="store-perf-grid">
       <div class="store-perf-card featured">
         <div class="store-perf-name">Memory Store</div>
-        <div class="store-perf-ops">8.32M <span class="store-perf-unit">ops/s</span></div>
-        <div class="store-perf-latency">~120ns latency</div>
+        <div class="store-perf-ops">{formatOps(b.memory.multi10k.opsPerSec)} <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">{formatLatencyApprox(b.memory.multi10k.latencyAvgNs)} latency</div>
         <div class="store-perf-use">Single-process, highest throughput</div>
       </div>
       <div class="store-perf-card">
         <div class="store-perf-name">bun:sqlite Store</div>
-        <div class="store-perf-ops">325K <span class="store-perf-unit">ops/s</span></div>
-        <div class="store-perf-latency">~3.1&micro;s latency</div>
+        <div class="store-perf-ops">{formatOps(b.sqlite.multi10k.opsPerSec)} <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">{formatLatencyApprox(b.sqlite.multi10k.latencyAvgNs)} latency</div>
         <div class="store-perf-use">Persistent, survives restarts</div>
       </div>
     </div>
@@ -543,32 +549,32 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
     <div class="store-perf-grid">
       <div class="store-perf-card">
         <div class="store-perf-name">Redis Store</div>
-        <div class="store-perf-ops">6.7K <span class="store-perf-unit">ops/s</span></div>
-        <div class="store-perf-latency">~148&micro;s latency</div>
+        <div class="store-perf-ops">{formatOps(b.redis.multi10k.opsPerSec)} <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">{formatLatencyApprox(b.redis.multi10k.latencyAvgNs)} latency</div>
         <div class="store-perf-use">Multi-instance, dedicated cache</div>
       </div>
       <div class="store-perf-card">
         <div class="store-perf-name">Valkey Store</div>
-        <div class="store-perf-ops">~6.7K <span class="store-perf-unit">ops/s</span></div>
-        <div class="store-perf-latency">~148&micro;s latency</div>
+        <div class="store-perf-ops">~{formatOps(b.redis.multi10k.opsPerSec)} <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">{formatLatencyApprox(b.redis.multi10k.latencyAvgNs)} latency</div>
         <div class="store-perf-use">Open-source Redis alternative (BSD)</div>
       </div>
       <div class="store-perf-card">
         <div class="store-perf-name">DragonflyDB Store</div>
-        <div class="store-perf-ops">~6.7K <span class="store-perf-unit">ops/s</span></div>
-        <div class="store-perf-latency">~148&micro;s latency</div>
+        <div class="store-perf-ops">~{formatOps(b.redis.multi10k.opsPerSec)} <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">{formatLatencyApprox(b.redis.multi10k.latencyAvgNs)} latency</div>
         <div class="store-perf-use">Multi-threaded, parallel Lua</div>
       </div>
       <div class="store-perf-card">
         <div class="store-perf-name">Postgres Store</div>
-        <div class="store-perf-ops">3.7K <span class="store-perf-unit">ops/s</span></div>
-        <div class="store-perf-latency">~273&micro;s latency</div>
+        <div class="store-perf-ops">{formatOps(b.postgres.multi10k.opsPerSec)} <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">{formatLatencyApprox(b.postgres.multi10k.latencyAvgNs)} latency</div>
         <div class="store-perf-use">Use your existing database</div>
       </div>
     </div>
 
     <p class="benchmark-note">
-      Bun significantly outperforms Node.js at 10K IPs (8.32M vs 3.16M) and single-IP (12.38M vs 4.83M).
+      Bun significantly outperforms Node.js at 10K IPs ({formatOps(b.memory.multi10k.opsPerSec)} vs {formatOps(n.memory.multi10k.opsPerSec)}) and single-IP ({formatOps(b.memory.singleIp.opsPerSec)} vs {formatOps(n.memory.singleIp.opsPerSec)}).
       These are our benchmarks — we've done our best to keep them fair. They're not set in stone; there's always room for improvement.
       <a href="/docs/benchmarks">See full benchmarks</a> or <a href="https://github.com/JointOps/hitlimit-monorepo">clone and run them yourself</a>.
     </p>
@@ -714,15 +720,15 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
         <tbody>
           <tr>
             <td>Single server, maximum speed</td>
-            <td class="good">Memory (default) — 8.32M ops/sec</td>
+            <td class="good">Memory (default) — {formatOps(b.memory.multi10k.opsPerSec)} ops/sec</td>
           </tr>
           <tr>
             <td>Need persistence, single server</td>
-            <td class="good">bun:sqlite — 325K ops/sec, 0 deps</td>
+            <td class="good">bun:sqlite — {formatOps(b.sqlite.multi10k.opsPerSec)} ops/sec, 0 deps</td>
           </tr>
           <tr>
             <td>Multi-server / distributed</td>
-            <td class="good">Redis — 6.7K ops/sec, Lua scripts</td>
+            <td class="good">Redis — {formatOps(b.redis.multi10k.opsPerSec)} ops/sec, Lua scripts</td>
           </tr>
           <tr>
             <td>Multi-server / open-source</td>
@@ -734,7 +740,7 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
           </tr>
           <tr>
             <td>Multi-server / distributed (SQL)</td>
-            <td class="good">Postgres — 3.7K ops/sec</td>
+            <td class="good">Postgres — {formatOps(b.postgres.multi10k.opsPerSec)} ops/sec</td>
           </tr>
           <tr>
             <td>Elysia plugin</td>

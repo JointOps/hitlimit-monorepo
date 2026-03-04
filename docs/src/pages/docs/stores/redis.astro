@@ -1,6 +1,7 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
+import { bench, formatOps, formatLatencyApprox } from '../../../data/benchmarks';
 ---
 
 <DocsLayout
@@ -104,7 +105,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
   <h2 id="characteristics">Characteristics</h2>
 
   <ul>
-    <li><strong>Speed:</strong> ~6.7K ops/sec, ~149&micro;s latency (network-bound)</li>
+    <li><strong>Speed:</strong> ~{formatOps(bench.node.redis.multi10k.opsPerSec)} ops/sec, {formatLatencyApprox(bench.node.redis.multi10k.latencyAvgNs)} latency (network-bound)</li>
     <li><strong>Persistence:</strong> Configurable via Redis persistence settings (RDB/AOF)</li>
     <li><strong>Scalability:</strong> Shared across all server instances</li>
     <li><strong>Atomic:</strong> Lua scripts ensure race-condition-free increments</li>

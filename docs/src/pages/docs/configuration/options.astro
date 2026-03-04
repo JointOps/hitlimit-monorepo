@@ -1,6 +1,7 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
+import { bench, formatOps } from '../../../data/benchmarks';
 ---
 
 <DocsLayout
@@ -102,10 +103,10 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><th>Store</th><th>Best For</th><th>Throughput</th></tr>
       </thead>
       <tbody>
-        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">3.16M ops/s</td></tr>
-        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts</td><td>352K ops/s</td></tr>
-        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>6.7K ops/s</td></tr>
-        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>3.0K ops/s</td></tr>
+        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">{formatOps(bench.node.memory.multi10k.opsPerSec)} ops/s</td></tr>
+        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts</td><td>{formatOps(bench.node.sqlite.multi10k.opsPerSec)} ops/s</td></tr>
+        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>{formatOps(bench.node.redis.multi10k.opsPerSec)} ops/s</td></tr>
+        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>{formatOps(bench.node.postgres.multi10k.opsPerSec)} ops/s</td></tr>
       </tbody>
     </table>
   </div>
@@ -116,10 +117,10 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><th>Store</th><th>Best For</th><th>Throughput</th></tr>
       </thead>
       <tbody>
-        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">8.32M ops/s</td></tr>
-        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts (bun:sqlite)</td><td>325K ops/s</td></tr>
-        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>6.7K ops/s</td></tr>
-        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>3.7K ops/s</td></tr>
+        <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">{formatOps(bench.bun.memory.multi10k.opsPerSec)} ops/s</td></tr>
+        <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts (bun:sqlite)</td><td>{formatOps(bench.bun.sqlite.multi10k.opsPerSec)} ops/s</td></tr>
+        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>{formatOps(bench.bun.redis.multi10k.opsPerSec)} ops/s</td></tr>
+        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>{formatOps(bench.bun.postgres.multi10k.opsPerSec)} ops/s</td></tr>
       </tbody>
     </table>
   </div>

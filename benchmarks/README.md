@@ -38,10 +38,10 @@ How many rate limit checks the library can perform in one second. Higher is bett
 
 **Real-world meaning:** If your API gets 10,000 requests per second, and your rate limiter can do 4,000,000 ops/sec, the rate limiter uses about 0.25% of your server's capacity. If it can only do 50,000 ops/sec, the rate limiter itself becomes a bottleneck using 20% of your capacity.
 
+<!-- BENCH:EXAMPLES -->
 **Example values:**
-- `4,830,798 ops/sec` — 4.8 million checks per second (memory store, very fast)
-- `6,700 ops/sec` — 6.7 thousand checks per second (Redis store, network overhead)
-- `3,000 ops/sec` — 3.0 thousand checks per second (Postgres store, database overhead)
+- `5,412,404 ops/sec` — 5.41 million checks per second (memory store, very fast)
+<!-- /BENCH:EXAMPLES -->
 
 #### `avgNs` — Average Latency (Nanoseconds)
 

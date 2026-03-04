@@ -1,6 +1,7 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
+import { bench, formatOps, formatLatencyApprox } from '../../../data/benchmarks';
 ---
 
 <DocsLayout
@@ -104,7 +105,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 
   <div data-runtime-content="node">
     <ul>
-      <li><strong>Speed:</strong> ~3.0K ops/sec, ~336&micro;s latency (network-bound)</li>
+      <li><strong>Speed:</strong> ~{formatOps(bench.node.postgres.multi10k.opsPerSec)} ops/sec, {formatLatencyApprox(bench.node.postgres.multi10k.latencyAvgNs)} latency (network-bound)</li>
       <li><strong>Persistence:</strong> Full PostgreSQL durability (WAL, replication)</li>
       <li><strong>Scalability:</strong> Shared across all server instances</li>
       <li><strong>Atomic:</strong> Upsert queries ensure race-condition-free increments</li>
@@ -114,7 +115,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 
   <div data-runtime-content="bun">
     <ul>
-      <li><strong>Speed:</strong> ~3.7K ops/sec, ~273&micro;s latency (network-bound)</li>
+      <li><strong>Speed:</strong> ~{formatOps(bench.bun.postgres.multi10k.opsPerSec)} ops/sec, {formatLatencyApprox(bench.bun.postgres.multi10k.latencyAvgNs)} latency (network-bound)</li>
       <li><strong>Persistence:</strong> Full PostgreSQL durability (WAL, replication)</li>
       <li><strong>Scalability:</strong> Shared across all server instances</li>
       <li><strong>Atomic:</strong> Upsert queries ensure race-condition-free increments</li>
@@ -161,8 +162,8 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
       <tr><th>Aspect</th><th>Postgres</th><th>Redis</th></tr>
     </thead>
     <tbody>
-      <tr><td><strong>Latency</strong></td><td>~336&micro;s (Node.js)</td><td>~149&micro;s (Node.js)</td></tr>
-      <tr><td><strong>Throughput</strong></td><td>~3.0K ops/sec</td><td>~6.7K ops/sec</td></tr>
+      <tr><td><strong>Latency</strong></td><td>{formatLatencyApprox(bench.node.postgres.multi10k.latencyAvgNs)} (Node.js)</td><td>{formatLatencyApprox(bench.node.redis.multi10k.latencyAvgNs)} (Node.js)</td></tr>
+      <tr><td><strong>Throughput</strong></td><td>~{formatOps(bench.node.postgres.multi10k.opsPerSec)} ops/sec</td><td>~{formatOps(bench.node.redis.multi10k.opsPerSec)} ops/sec</td></tr>
       <tr><td><strong>Extra infra</strong></td><td>None (use existing DB)</td><td>Requires Redis server</td></tr>
       <tr><td><strong>Observability</strong></td><td>SQL queries, pg_stat</td><td>Redis CLI, MONITOR</td></tr>
       <tr><td><strong>Durability</strong></td><td>Full ACID</td><td>Configurable (RDB/AOF)</td></tr>

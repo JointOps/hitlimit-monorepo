@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
+import { bench, formatOps, formatOpsPlus, speedup } from '../data/benchmarks';
 
 interface Props {
   title?: string;
@@ -122,7 +123,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "What is hitlimit?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "hitlimit is an open-source rate limiting library for Node.js and Bun created by JointOps. It provides sub-millisecond performance with 4.8M ops/sec (Node.js) and 12.3M ops/sec (Bun), over 4x faster than express-rate-limit. It has a ~8KB bundle (Node.js) or ~18KB (Bun) with zero runtime dependencies. It supports Express, Fastify, Hono, NestJS, Bun.serve, and Elysia frameworks with 8 storage backends: memory, SQLite, Redis, Valkey, DragonflyDB, Postgres, MongoDB, and MySQL."
+            "text": `hitlimit is an open-source rate limiting library for Node.js and Bun created by JointOps. It provides sub-millisecond performance with ${formatOps(bench.node.memory.singleIp.opsPerSec)} ops/sec (Node.js) and ${formatOps(bench.bun.memory.singleIp.opsPerSec)} ops/sec (Bun), over 4x faster than express-rate-limit. It has a ${bench.bundleSize.node.core} bundle (Node.js) or ${bench.bundleSize.bun.core} (Bun) with zero runtime dependencies. It supports Express, Fastify, Hono, NestJS, Bun.serve, and Elysia frameworks with 8 storage backends: memory, SQLite, Redis, Valkey, DragonflyDB, Postgres, MongoDB, and MySQL.`
           }
         },
         {
@@ -130,7 +131,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "Is hitlimit faster than express-rate-limit?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, hitlimit is over 4x faster than express-rate-limit in high-traffic benchmarks. It achieves 3.16 million operations per second compared to 749 thousand for express-rate-limit (10K unique IPs, memory store, Node.js). Both have zero runtime dependencies."
+            "text": `Yes, hitlimit is over 4x faster than express-rate-limit in high-traffic benchmarks. It achieves ${formatOps(bench.node.memory.multi10k.opsPerSec)} operations per second compared to ${formatOps(bench.competitors.expressRateLimit.memory.multi10k.opsPerSec)} for express-rate-limit (10K unique IPs, memory store, Node.js). Both have zero runtime dependencies.`
           }
         },
         {
@@ -170,7 +171,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "What is the difference between hitlimit and rate-limiter-flexible?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "hitlimit is faster in memory benchmarks (3.16M ops/sec vs 1.14M at 10K IPs). hitlimit also wins in Redis and Postgres benchmarks. rate-limiter-flexible has more storage backends (14 vs 8) and weighted requests. hitlimit offers simpler configuration, built-in SaaS tier support, 8 framework adapters, and human-readable time windows."
+            "text": `hitlimit is faster in memory benchmarks (${formatOps(bench.node.memory.multi10k.opsPerSec)} ops/sec vs ${formatOps(bench.competitors.rateLimiterFlexible.memory.multi10k.opsPerSec)} at 10K IPs). hitlimit also wins in Redis and Postgres benchmarks. rate-limiter-flexible has more storage backends (14 vs 8) and weighted requests. hitlimit offers simpler configuration, built-in SaaS tier support, 8 framework adapters, and human-readable time windows.`
           }
         },
         {
@@ -178,7 +179,7 @@ const ogImage = `${siteUrl}/og-image.png`;
           "name": "Does hitlimit work with Bun?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes, hitlimit has a dedicated Bun package (@joint-ops/hitlimit-bun) optimized for Bun runtime. It works with Bun.serve(), Elysia, and Hono frameworks, achieving 12.3M+ ops/sec peak performance. It includes native bun:sqlite integration and supports all 8 storage backends."
+            "text": `Yes, hitlimit has a dedicated Bun package (@joint-ops/hitlimit-bun) optimized for Bun runtime. It works with Bun.serve(), Elysia, and Hono frameworks, achieving ${formatOpsPlus(bench.bun.memory.singleIp.opsPerSec)} ops/sec peak performance. It includes native bun:sqlite integration and supports all 8 storage backends.`
           }
         },
         {

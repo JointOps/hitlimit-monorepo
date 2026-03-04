@@ -1,6 +1,7 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
+import { bench, formatOps } from '../../../data/benchmarks';
 ---
 
 <DocsLayout
@@ -81,7 +82,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
   <h2 id="characteristics">Characteristics</h2>
 
   <ul>
-    <li><strong>Speed:</strong> Same as Redis store (~6.7K ops/sec, network-bound)</li>
+    <li><strong>Speed:</strong> Same as Redis store (~{formatOps(bench.node.redis.multi10k.opsPerSec)} ops/sec, network-bound)</li>
     <li><strong>License:</strong> BSD-3-Clause (fully open source, no relicensing risk)</li>
     <li><strong>Persistence:</strong> Configurable via Valkey persistence settings (RDB/AOF)</li>
     <li><strong>Scalability:</strong> Shared across all server instances</li>

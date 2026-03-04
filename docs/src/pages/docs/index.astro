@@ -1,5 +1,6 @@
 ---
 import DocsLayout from '../../layouts/DocsLayout.astro';
+import { bench, formatOps, formatOpsPlus } from '../../data/benchmarks';
 ---
 
 <DocsLayout title="Documentation - hitlimit" description="Get started with hitlimit — the fastest rate limiter for Node.js and Bun.">
@@ -34,7 +35,7 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
           </div>
         </div>
         <p class="text-sm text-[var(--color-text-secondary)] mb-4">
-          Express, Fastify, Hono, NestJS, and raw Node.js HTTP. 4.8M+ ops/sec.
+          Express, Fastify, Hono, NestJS, and raw Node.js HTTP. {formatOpsPlus(bench.node.memory.singleIp.opsPerSec)} ops/sec.
         </p>
         <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--color-bg-elevated)] font-mono text-xs text-[var(--color-text-muted)] mb-4">
           <span>$</span> npm i @joint-ops/hitlimit
@@ -65,7 +66,7 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
           </div>
         </div>
         <p class="text-sm text-[var(--color-text-secondary)] mb-4">
-          Bun.serve, Elysia, and Hono on Bun. 12.3M+ ops/sec with native bun:sqlite.
+          Bun.serve, Elysia, and Hono on Bun. {formatOpsPlus(bench.bun.memory.singleIp.opsPerSec)} ops/sec with native bun:sqlite.
         </p>
         <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--color-bg-elevated)] font-mono text-xs text-[var(--color-text-muted)] mb-4">
           <span>$</span> bun add @joint-ops/hitlimit-bun
@@ -95,7 +96,7 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
     <ul class="space-y-2 text-[var(--color-text-secondary)] mb-8">
       <li class="flex items-start gap-2">
         <svg class="w-5 h-5 text-[var(--color-accent)] mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span><strong class="text-white">Blazing fast</strong> — 4.8M ops/sec (Node.js) to 12.3M ops/sec (Bun)</span>
+        <span><strong class="text-white">Blazing fast</strong> — {formatOps(bench.node.memory.singleIp.opsPerSec)} ops/sec (Node.js) to {formatOps(bench.bun.memory.singleIp.opsPerSec)} ops/sec (Bun)</span>
       </li>
       <li class="flex items-start gap-2">
         <svg class="w-5 h-5 text-[var(--color-accent)] mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 4L12 14.01l-3-3" stroke-linecap="round" stroke-linejoin="round"/></svg>
