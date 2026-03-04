@@ -19,6 +19,8 @@
     "bench:node:store:postgres": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/store/rate-limiter-flexible/postgres.ts",
     "bench:node:store:valkey": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/valkey.ts",
     "bench:node:store:dragonfly": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/dragonfly.ts",
+    "bench:node:store:mongodb": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/mongodb.ts",
+    "bench:node:store:mysql": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/mysql.ts",
 
     "bench:node:express": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/sqlite.ts && NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/express/express-rate-limit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/postgres.ts",
     "bench:node:express:memory": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/express-rate-limit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/memory.ts",
@@ -27,6 +29,8 @@
     "bench:node:express:postgres": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/postgres.ts",
     "bench:node:express:valkey": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/valkey.ts",
     "bench:node:express:dragonfly": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/dragonfly.ts",
+    "bench:node:express:mongodb": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/mongodb.ts",
+    "bench:node:express:mysql": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/mysql.ts",
 
     "bench:node:fastify": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/sqlite.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/fastify/fastify-rate-limit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/fastify-rate-limit/redis.ts",
     "bench:node:fastify:memory": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/fastify-rate-limit/memory.ts",
@@ -35,6 +39,8 @@
     "bench:node:fastify:postgres": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/postgres.ts",
     "bench:node:fastify:valkey": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/valkey.ts",
     "bench:node:fastify:dragonfly": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/dragonfly.ts",
+    "bench:node:fastify:mongodb": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/mongodb.ts",
+    "bench:node:fastify:mysql": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/mysql.ts",
 
     "bench:node:hono": "NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/sqlite.ts && NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/hono/hono-rate-limiter/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/hono/hono-rate-limiter/redis.ts",
     "bench:node:hono:memory": "NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/hono/hono-rate-limiter/memory.ts",
@@ -43,6 +49,8 @@
     "bench:node:hono:postgres": "NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/postgres.ts",
     "bench:node:hono:valkey": "NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/valkey.ts",
     "bench:node:hono:dragonfly": "NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/dragonfly.ts",
+    "bench:node:hono:mongodb": "NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/mongodb.ts",
+    "bench:node:hono:mysql": "NODE_OPTIONS='--expose-gc' tsx node/hono/hitlimit/mysql.ts",
 
     "bench:node:nestjs": "NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/sqlite.ts && NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/nestjs/nestjs-throttler/memory.ts",
     "bench:node:nestjs:memory": "NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/nestjs/nestjs-throttler/memory.ts",
@@ -51,6 +59,8 @@
     "bench:node:nestjs:postgres": "NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/postgres.ts",
     "bench:node:nestjs:valkey": "NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/valkey.ts",
     "bench:node:nestjs:dragonfly": "NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/dragonfly.ts",
+    "bench:node:nestjs:mongodb": "NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/mongodb.ts",
+    "bench:node:nestjs:mysql": "NODE_OPTIONS='--expose-gc' tsx node/nestjs/hitlimit/mysql.ts",
 
     "bench:bun": "pnpm bench:bun:store && pnpm bench:bun:bun-serve && pnpm bench:bun:elysia && pnpm bench:bun:hono",
     "bench:bun:store": "bun bun/store/hitlimit/memory.ts && bun bun/store/hitlimit/sqlite.ts && bun bun/store/hitlimit/redis.ts && bun bun/store/hitlimit/postgres.ts && pnpm clean:stores && bun bun/store/rate-limiter-flexible/memory.ts && bun bun/store/rate-limiter-flexible/redis.ts && bun bun/store/rate-limiter-flexible/postgres.ts",
@@ -60,6 +70,8 @@
     "bench:bun:store:postgres": "bun bun/store/hitlimit/postgres.ts && pnpm clean:stores && bun bun/store/rate-limiter-flexible/postgres.ts",
     "bench:bun:store:valkey": "bun bun/store/hitlimit/valkey.ts",
     "bench:bun:store:dragonfly": "bun bun/store/hitlimit/dragonfly.ts",
+    "bench:bun:store:mongodb": "bun bun/store/hitlimit/mongodb.ts",
+    "bench:bun:store:mysql": "bun bun/store/hitlimit/mysql.ts",
 
     "bench:bun:bun-serve": "bun bun/bun-serve/hitlimit/memory.ts && bun bun/bun-serve/hitlimit/sqlite.ts && bun bun/bun-serve/hitlimit/redis.ts && bun bun/bun-serve/hitlimit/postgres.ts",
     "bench:bun:bun-serve:memory": "bun bun/bun-serve/hitlimit/memory.ts",
@@ -68,6 +80,8 @@
     "bench:bun:bun-serve:postgres": "bun bun/bun-serve/hitlimit/postgres.ts",
     "bench:bun:bun-serve:valkey": "bun bun/bun-serve/hitlimit/valkey.ts",
     "bench:bun:bun-serve:dragonfly": "bun bun/bun-serve/hitlimit/dragonfly.ts",
+    "bench:bun:bun-serve:mongodb": "bun bun/bun-serve/hitlimit/mongodb.ts",
+    "bench:bun:bun-serve:mysql": "bun bun/bun-serve/hitlimit/mysql.ts",
 
     "bench:bun:elysia": "bun bun/elysia/hitlimit/memory.ts && bun bun/elysia/hitlimit/sqlite.ts && bun bun/elysia/hitlimit/redis.ts && bun bun/elysia/hitlimit/postgres.ts && pnpm clean:stores && bun bun/elysia/elysia-rate-limit/memory.ts",
     "bench:bun:elysia:memory": "bun bun/elysia/hitlimit/memory.ts && bun bun/elysia/elysia-rate-limit/memory.ts",
@@ -76,6 +90,8 @@
     "bench:bun:elysia:postgres": "bun bun/elysia/hitlimit/postgres.ts",
     "bench:bun:elysia:valkey": "bun bun/elysia/hitlimit/valkey.ts",
     "bench:bun:elysia:dragonfly": "bun bun/elysia/hitlimit/dragonfly.ts",
+    "bench:bun:elysia:mongodb": "bun bun/elysia/hitlimit/mongodb.ts",
+    "bench:bun:elysia:mysql": "bun bun/elysia/hitlimit/mysql.ts",
 
     "bench:bun:hono": "bun bun/hono/hitlimit/memory.ts && bun bun/hono/hitlimit/sqlite.ts && bun bun/hono/hitlimit/redis.ts && bun bun/hono/hitlimit/postgres.ts && pnpm clean:stores && bun bun/hono/hono-rate-limiter/memory.ts && bun bun/hono/hono-rate-limiter/redis.ts",
     "bench:bun:hono:memory": "bun bun/hono/hitlimit/memory.ts && bun bun/hono/hono-rate-limiter/memory.ts",
@@ -84,9 +100,13 @@
     "bench:bun:hono:postgres": "bun bun/hono/hitlimit/postgres.ts",
     "bench:bun:hono:valkey": "bun bun/hono/hitlimit/valkey.ts",
     "bench:bun:hono:dragonfly": "bun bun/hono/hitlimit/dragonfly.ts",
+    "bench:bun:hono:mongodb": "bun bun/hono/hitlimit/mongodb.ts",
+    "bench:bun:hono:mysql": "bun bun/hono/hitlimit/mysql.ts",
 
     "docker:valkey": "docker compose --profile valkey up -d",
     "docker:dragonfly": "docker compose --profile dragonfly up -d",
+    "docker:mongodb": "docker compose --profile mongodb up -d",
+    "docker:mysql": "docker compose --profile mysql up -d",
     "docker:all": "docker compose --profile all up -d",
     "clean:valkey": "docker exec hitlimit-valkey valkey-cli FLUSHDB 2>/dev/null; true",
     "clean:dragonfly": "docker exec hitlimit-dragonfly redis-cli FLUSHDB 2>/dev/null; true",
@@ -110,6 +130,8 @@
   },
   "devDependencies": {
     "ioredis": "^5.3.0",
+    "mongodb": "^6.0.0",
+    "mysql2": "^3.0.0",
     "pg": "^8.13.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"

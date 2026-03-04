@@ -1,0 +1,55 @@
+import fs from 'node:fs'
+import { run } from '../../../lib/runner.js'
+import { Hono } from 'hono'
+import { hitlimit } from '../../../../packages/hitlimit/dist/hono.js'
+import { mysqlStore } from '../../../../packages/hitlimit/dist/stores/mysql.js'
+
+const version = fs.readFileSync(new URL('../../../../VERSION', import.meta.url), 'utf-8').trim()
+
+let pool: any
+try {
+  const mysql = await import('mysql2/promise')
+  pool = mysql.default.createPool({
+    host: 'localhost',
+    port: 3306,
+    user: 'hitlimit',
+    password: 'hitlimit',
+    database: 'hitlimit_test',
+    connectionLimit: 10
+  })
+  const conn = await pool.getConnection()
+  await conn.execute('SELECT 1')
+  conn.release()
+} catch {
+  console.log('MySQL not available, skipping')
+  process.exit(0)
+}
+
+const prefix = 'bench_node_hono_hl'
+const store = mysqlStore({ pool, tablePrefix: prefix })
+const app = new Hono()
+
+app.use(hitlimit({
+  limit: 1_000_000,
+  window: '1m',
+  store,
+  headers: { standard: false, legacy: false }
+}))
+app.get('/test', (c) => c.text('ok'))
+
+await run({
+  framework: 'hono',
+  library: 'hitlimit',
+  store: 'mysql',
+  runtime: 'node',
+  versions: { hitlimit: version, hono: JSON.parse(fs.readFileSync(new URL('../../../node_modules/hono/package.json', import.meta.url), 'utf-8')).version, mysql2: JSON.parse(fs.readFileSync(new URL('../../../node_modules/mysql2/package.json', import.meta.url), 'utf-8')).version },
+  fn: (key) => app.request('/test', { headers: { 'x-forwarded-for': key } }),
+  isSync: false,
+  cleanup: async () => {
+    await pool.execute(`DROP TABLE IF EXISTS ${prefix}_hits`)
+    await pool.execute(`DROP TABLE IF EXISTS ${prefix}_bans`)
+    await pool.execute(`DROP TABLE IF EXISTS ${prefix}_violations`)
+    store.shutdown?.()
+    await pool.end()
+  }
+})
