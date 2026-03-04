@@ -11,10 +11,12 @@ const moduleRef = await Test.createTestingModule({
   imports: [ThrottlerModule.forRoot([{
     ttl: 60000,
     limit: 1_000_000
-  }])]
+  }])],
+  providers: [ThrottlerGuard]
 }).compile()
 
 const guard = moduleRef.get(ThrottlerGuard)
+await guard.onModuleInit()
 
 const ctxCache = new Map<string, any>()
 function getCtx(ip: string) {

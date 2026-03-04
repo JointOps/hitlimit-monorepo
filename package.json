@@ -16,7 +16,8 @@
     "test:bun": "cd packages/hitlimit-bun && bun test",
 
     "benchmark": "pnpm --filter hitlimit-benchmarks bench",
-    "benchmark:all": "./benchmarks/benchmark-all.sh",
+    "benchmark:all": "npx tsx benchmarks/cli.ts all",
+    "benchmark:cli": "npx tsx benchmarks/cli.ts",
     "benchmark:memory": "pnpm --filter hitlimit-benchmarks bench:memory",
     "benchmark:sqlite": "pnpm --filter hitlimit-benchmarks bench:sqlite",
     "benchmark:redis": "pnpm --filter hitlimit-benchmarks bench:redis",

@@ -9,7 +9,8 @@ const elysiaPkg = JSON.parse(fs.readFileSync(new URL('../../../node_modules/elys
 const app = new Elysia()
   .use(rateLimit({
     max: 1_000_000,
-    duration: 60_000
+    duration: 60_000,
+    generator: (req) => req.headers.get('x-forwarded-for') ?? 'unknown'
   }))
   .get('/test', () => 'ok')
 

@@ -4,6 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "cli": "tsx cli.ts",
+    "cli:all": "tsx cli.ts all",
+    "cli:quick": "tsx cli.ts quick",
+    "cli:status": "tsx cli.ts status",
+    "cli:compare": "tsx cli.ts compare",
+
     "bench:all": "pnpm bench:node && pnpm bench:bun",
     "bench:all:memory": "pnpm bench:node:store:memory && pnpm bench:node:express:memory && pnpm bench:node:fastify:memory && pnpm bench:node:hono:memory && pnpm bench:node:nestjs:memory && pnpm bench:bun:store:memory && pnpm bench:bun:bun-serve:memory && pnpm bench:bun:elysia:memory && pnpm bench:bun:hono:memory",
     "bench:all:sqlite": "pnpm bench:node:store:sqlite && pnpm bench:node:express:sqlite && pnpm bench:node:fastify:sqlite && pnpm bench:node:hono:sqlite && pnpm bench:node:nestjs:sqlite && pnpm bench:bun:store:sqlite && pnpm bench:bun:bun-serve:sqlite && pnpm bench:bun:elysia:sqlite && pnpm bench:bun:hono:sqlite",
@@ -22,8 +28,8 @@
     "bench:node:store:postgres": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/store/rate-limiter-flexible/postgres.ts",
     "bench:node:store:valkey": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/valkey.ts",
     "bench:node:store:dragonfly": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/dragonfly.ts",
-    "bench:node:store:mongodb": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/mongodb.ts",
-    "bench:node:store:mysql": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/mysql.ts",
+    "bench:node:store:mongodb": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/mongodb.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/store/rate-limiter-flexible/mongodb.ts",
+    "bench:node:store:mysql": "NODE_OPTIONS='--expose-gc' tsx node/store/hitlimit/mysql.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/store/rate-limiter-flexible/mysql.ts",
 
     "bench:node:express": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/sqlite.ts && NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/express/express-rate-limit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/postgres.ts",
     "bench:node:express:memory": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/express-rate-limit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/memory.ts",
@@ -32,8 +38,8 @@
     "bench:node:express:postgres": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/postgres.ts",
     "bench:node:express:valkey": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/valkey.ts",
     "bench:node:express:dragonfly": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/dragonfly.ts",
-    "bench:node:express:mongodb": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/mongodb.ts",
-    "bench:node:express:mysql": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/mysql.ts",
+    "bench:node:express:mongodb": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/mongodb.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/mongodb.ts",
+    "bench:node:express:mysql": "NODE_OPTIONS='--expose-gc' tsx node/express/hitlimit/mysql.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/express/rate-limiter-flexible/mysql.ts",
 
     "bench:node:fastify": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/sqlite.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/redis.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/postgres.ts && pnpm clean:stores && NODE_OPTIONS='--expose-gc' tsx node/fastify/fastify-rate-limit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/fastify-rate-limit/redis.ts",
     "bench:node:fastify:memory": "NODE_OPTIONS='--expose-gc' tsx node/fastify/hitlimit/memory.ts && NODE_OPTIONS='--expose-gc' tsx node/fastify/fastify-rate-limit/memory.ts",
@@ -73,8 +79,8 @@
     "bench:bun:store:postgres": "bun bun/store/hitlimit/postgres.ts && pnpm clean:stores && bun bun/store/rate-limiter-flexible/postgres.ts",
     "bench:bun:store:valkey": "bun bun/store/hitlimit/valkey.ts",
     "bench:bun:store:dragonfly": "bun bun/store/hitlimit/dragonfly.ts",
-    "bench:bun:store:mongodb": "bun bun/store/hitlimit/mongodb.ts",
-    "bench:bun:store:mysql": "bun bun/store/hitlimit/mysql.ts",
+    "bench:bun:store:mongodb": "bun bun/store/hitlimit/mongodb.ts && pnpm clean:stores && bun bun/store/rate-limiter-flexible/mongodb.ts",
+    "bench:bun:store:mysql": "bun bun/store/hitlimit/mysql.ts && pnpm clean:stores && bun bun/store/rate-limiter-flexible/mysql.ts",
 
     "bench:bun:bun-serve": "bun bun/bun-serve/hitlimit/memory.ts && bun bun/bun-serve/hitlimit/sqlite.ts && bun bun/bun-serve/hitlimit/redis.ts && bun bun/bun-serve/hitlimit/postgres.ts",
     "bench:bun:bun-serve:memory": "bun bun/bun-serve/hitlimit/memory.ts",
@@ -124,7 +130,8 @@
     "clean:mongodb": "docker exec hitlimit-mongodb mongosh hitlimit_test --eval 'db.dropDatabase()' 2>/dev/null; true",
     "clean:mysql": "docker exec hitlimit-mysql mysqladmin -uhitlimit -phitlimit drop hitlimit_test -f 2>/dev/null; docker exec hitlimit-mysql mysqladmin -uhitlimit -phitlimit create hitlimit_test 2>/dev/null; true",
 
-    "check-regression": "tsx check-regression.ts"
+    "check-regression": "tsx check-regression.ts",
+    "bench:update-docs": "tsx scripts/generate-benchmark-data.ts"
   },
   "dependencies": {
     "express-rate-limit": "^7.5.0",
@@ -139,7 +146,9 @@
     "hono-rate-limiter": "^0.5.0",
     "elysia": "^1.0.0",
     "elysia-rate-limit": "^4.0.0",
-    "reflect-metadata": "^0.2.0"
+    "reflect-metadata": "^0.2.0",
+    "@clack/prompts": "^0.10.0",
+    "picocolors": "^1.1.0"
   },
   "devDependencies": {
     "ioredis": "^5.3.0",

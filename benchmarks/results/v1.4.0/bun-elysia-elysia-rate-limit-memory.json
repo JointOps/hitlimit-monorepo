@@ -1,0 +1,78 @@
+{
+  "benchmark": {
+    "framework": "elysia",
+    "library": "elysia-rate-limit",
+    "store": "memory",
+    "runtime": "bun"
+  },
+  "environment": {
+    "runtimeVersion": "1.3.7",
+    "os": "macOS 26.2",
+    "arch": "arm64",
+    "cpu": "Apple M1",
+    "cpuCores": 8,
+    "memoryGB": 8,
+    "docker": false
+  },
+  "versions": {
+    "elysia-rate-limit": "4.5.0",
+    "elysia": "1.4.25"
+  },
+  "config": {
+    "warmupIterations": 5000,
+    "iterations": 50000,
+    "runs": 5,
+    "totalMeasured": 250000
+  },
+  "date": "2026-03-04T13:18:50.851Z",
+  "scenarios": {
+    "single-ip": {
+      "description": "Single IP, best cache locality",
+      "keys": 1,
+      "memoryMB": 2.58,
+      "opsPerSec": 225980,
+      "latency": {
+        "avgNs": 4425,
+        "p50Ns": 3750,
+        "p95Ns": 7375,
+        "p99Ns": 14125,
+        "minNs": 3166,
+        "maxNs": 1181916
+      },
+      "stdDev": 7896.14,
+      "marginOfError": 30.95
+    },
+    "multi-ip-1k": {
+      "description": "1,000 unique IPs, typical API",
+      "keys": 1000,
+      "memoryMB": 0,
+      "opsPerSec": 212000,
+      "latency": {
+        "avgNs": 4717,
+        "p50Ns": 3834,
+        "p95Ns": 8916,
+        "p99Ns": 14542,
+        "minNs": 3208,
+        "maxNs": 1378583
+      },
+      "stdDev": 7906.18,
+      "marginOfError": 30.99
+    },
+    "multi-ip-10k": {
+      "description": "10,000 unique IPs, high traffic",
+      "keys": 10000,
+      "memoryMB": 12.55,
+      "opsPerSec": 203926,
+      "latency": {
+        "avgNs": 4904,
+        "p50Ns": 3875,
+        "p95Ns": 8916,
+        "p99Ns": 14292,
+        "minNs": 3083,
+        "maxNs": 1398125
+      },
+      "stdDev": 12689.33,
+      "marginOfError": 49.74
+    }
+  }
+}
