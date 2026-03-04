@@ -88,9 +88,9 @@ pnpm docs:preview      # Preview production build
 ### Benchmarks
 
 ```bash
-pnpm benchmark         # Run Node.js benchmarks
-pnpm benchmark:bun     # Run Bun benchmarks
-pnpm benchmark:all     # Run all benchmarks
+pnpm benchmark         # Run Node.js benchmarks (memory/sqlite)
+pnpm benchmark:memory  # Memory store only
+pnpm benchmark:all     # Run ALL benchmarks (requires Docker for Redis/Postgres)
 ```
 
 ## Hybrid Package Manager Architecture
@@ -142,28 +142,118 @@ pnpm test
 
 ## Testing
 
-We use:
-- **Vitest** for Node.js packages
-- **Bun's built-in test runner** for hitlimit-bun
+We use **Vitest** for Node.js packages and **Bun's built-in test runner** for hitlimit-bun.
 
-Run tests with:
+### Run all tests (Node.js + Bun)
+
 ```bash
-pnpm test
+pnpm test                # Runs ./scripts/test-all.sh
 ```
+
+### Run tests by runtime
+
+```bash
+pnpm test:node           # Node.js only (types + hitlimit via Vitest)
+pnpm test:bun            # Bun only (hitlimit-bun via bun test)
+```
+
+### Run a single test file
+
+```bash
+# Node.js (Vitest)
+cd packages/hitlimit
+pnpm vitest run test/stores/redis.test.ts
+
+# Bun
+cd packages/hitlimit-bun
+bun test test/stores/memory.test.ts
+```
+
+### Test structure
+
+```
+packages/hitlimit/test/
+├── core/           # limiter, config, headers, response, utils
+├── stores/         # memory, sqlite, redis, valkey, dragonfly, postgres, mongodb, mysql
+├── adapters/       # express, fastify, hono, node, nest
+├── integration/    # performance, tiered, concurrency, error-handling, store-errors
+└── loggers/        # logger tests
+
+packages/hitlimit-bun/test/
+├── core/           # limiter, config, headers, response, utils
+├── stores/         # memory, sqlite, redis, valkey, dragonfly, postgres, mongodb, mysql
+├── adapters/       # bun-serve, elysia, hono
+├── integration/    # performance, tiered, concurrency, error-handling, store-errors
+└── loggers/        # logger tests
+```
+
+### Notes on store tests
+
+- **Memory, SQLite, MongoDB, MySQL, Postgres** tests run with mocks locally — no services needed
+- **Redis, Valkey, DragonflyDB** tests attempt a real connection; they'll log ioredis errors locally if the service isn't running, but tests still pass (they mock the connection failure)
+- **CI** runs all store tests with real services via Docker (Redis, Postgres, Valkey, DragonflyDB, MongoDB, MySQL)
+
+## Benchmarks
+
+Benchmarks live in the `benchmarks/` directory, organized by runtime and framework.
+
+### Quick benchmarks (no Docker needed)
+
+```bash
+pnpm benchmark             # Node.js memory/sqlite benchmarks
+pnpm benchmark:memory      # Memory store only
+```
+
+### Full benchmarks (requires Docker)
+
+```bash
+# Start required services
+docker run -d --name bench-redis -p 6379:6379 redis:7-alpine
+docker run -d --name bench-postgres -p 5433:5432 \
+  -e POSTGRES_USER=hitlimit \
+  -e POSTGRES_PASSWORD=hitlimit \
+  -e POSTGRES_DB=hitlimit_test \
+  postgres:16-alpine
+
+# Run all benchmarks (Node.js + Bun, all stores, all frameworks)
+pnpm benchmark:all         # Runs ./scripts/benchmark-all.sh
+```
+
+### Benchmark structure
+
+```
+benchmarks/
+├── node/
+│   ├── store/              # Raw store benchmarks (hitlimit vs rate-limiter-flexible)
+│   ├── express/            # Express middleware (hitlimit vs express-rate-limit vs rate-limiter-flexible)
+│   ├── fastify/            # Fastify plugin (hitlimit vs @fastify/rate-limit)
+│   ├── hono/               # Hono middleware (hitlimit vs hono-rate-limiter)
+│   └── nestjs/             # NestJS guard (hitlimit vs @nestjs/throttler)
+├── bun/
+│   ├── store/              # Raw store benchmarks
+│   ├── bun-serve/          # Bun.serve benchmarks
+│   ├── elysia/             # Elysia plugin (hitlimit vs elysia-rate-limit)
+│   └── hono/               # Hono on Bun (hitlimit vs hono-rate-limiter)
+├── lib/                    # Shared benchmark runner, scenarios, types
+└── results/                # Saved benchmark results
+```
+
+Each benchmark tests across stores: memory, sqlite, redis, valkey, dragonfly, postgres, mongodb, mysql.
 
 ## Releasing
 
 Releases are handled by maintainers:
 
 ```bash
-# 1. Update VERSION file
-echo "1.0.1" > VERSION
+# 1. Update VERSION file (CI validates tag matches this)
+echo "1.4.0" > VERSION
 
 # 2. Bump all package versions
 ./scripts/bump-version.sh
 
 # 3. Commit
-git add . && git commit -m "chore: bump version to 1.0.1"
+git add VERSION packages/*/package.json
+git commit -m "chore: bump version to 1.4.0"
 
 # 4. Release
 ./scripts/release.sh
@@ -174,6 +264,8 @@ The release script will:
 - Build all packages
 - Publish to npm
 - Create a git tag
+
+**Important**: Always update the `VERSION` file first — CI validates the git tag matches it.
 
 ## Getting Help
 

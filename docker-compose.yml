@@ -50,9 +50,6 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
-    profiles:
-      - valkey
-      - all
 
   dragonfly:
     image: docker.dragonflydb.io/dragonflydb/dragonfly
@@ -61,6 +58,7 @@ services:
       - "6382:6379"
     ulimits:
       memlock: -1
+    command: dragonfly --proactor_threads=1 --maxmemory=512mb
     healthcheck:
       test: ["CMD", "redis-cli", "-p", "6379", "ping"]
       interval: 5s
@@ -82,9 +80,6 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
-    profiles:
-      - mongodb
-      - all
 
   mysql:
     image: mysql:8.4
@@ -101,9 +96,6 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
-    profiles:
-      - mysql
-      - all
 
   redis-commander:
     image: rediscommander/redis-commander:latest
