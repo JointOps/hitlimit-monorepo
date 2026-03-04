@@ -35,6 +35,29 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 5
+      mongodb:
+        image: mongo:7-jammy
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ping:1})'"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+      mysql:
+        image: mysql:8.4
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: hitlimit
+          MYSQL_DATABASE: hitlimit_test
+          MYSQL_USER: hitlimit
+          MYSQL_PASSWORD: hitlimit
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -56,6 +79,12 @@ jobs:
         env:
           REDIS_URL: redis://localhost:6379
           POSTGRES_URL: postgres://hitlimit:hitlimit@localhost:5432/hitlimit_test
+          MONGODB_URL: mongodb://localhost:27017
+          MYSQL_HOST: localhost
+          MYSQL_PORT: 3306
+          MYSQL_USER: hitlimit
+          MYSQL_PASSWORD: hitlimit
+          MYSQL_DATABASE: hitlimit_test
 
       - uses: actions/upload-artifact@v4
         with:
@@ -71,6 +100,29 @@ jobs:
         image: redis:7-alpine
         ports:
           - 6379:6379
+      mongodb:
+        image: mongo:7-jammy
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ping:1})'"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+      mysql:
+        image: mysql:8.4
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: hitlimit
+          MYSQL_DATABASE: hitlimit_test
+          MYSQL_USER: hitlimit
+          MYSQL_PASSWORD: hitlimit
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -108,6 +160,12 @@ jobs:
         run: bun benchmarks/src/scripts/run-bun.ts
         env:
           REDIS_URL: redis://localhost:6379
+          MONGODB_URL: mongodb://localhost:27017
+          MYSQL_HOST: localhost
+          MYSQL_PORT: 3306
+          MYSQL_USER: hitlimit
+          MYSQL_PASSWORD: hitlimit
+          MYSQL_DATABASE: hitlimit_test
 
       - uses: actions/upload-artifact@v4
         with:
