@@ -1,5 +1,13 @@
 ---
 import DocsLayout from '../../layouts/DocsLayout.astro';
+import { bench, formatOps, formatLatency, formatLatencyApprox, opsRange, opsRangeDecimal, pctOfFastest, speedup, overheadPct, formatOpsComma } from '../../data/benchmarks';
+
+const n = bench.node;
+const b = bench.bun;
+const rlf = bench.competitors.rateLimiterFlexible;
+const erl = bench.competitors.expressRateLimit;
+const http = bench.httpOverhead;
+const env = bench.environment;
 ---
 
 <DocsLayout
@@ -19,10 +27,10 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
     <table>
       <thead><tr><th>Use Case</th><th>Recommended Store</th><th>Performance</th></tr></thead>
       <tbody>
-        <tr><td>Single server, many unique IPs</td><td><strong>Memory</strong> (default)</td><td class="highlight">3.16-4.83M ops/sec</td></tr>
-        <tr><td>Need persistence, single server</td><td><strong>SQLite</strong></td><td class="highlight">352-455K ops/sec</td></tr>
-        <tr><td>Multiple servers (distributed)</td><td><strong>Redis</strong></td><td class="highlight">6.7-6.9K ops/sec</td></tr>
-        <tr><td>Multiple servers (distributed, SQL)</td><td><strong>Postgres</strong></td><td class="highlight">3.0-3.5K ops/sec</td></tr>
+        <tr><td>Single server, many unique IPs</td><td><strong>Memory</strong> (default)</td><td class="highlight">{opsRange(n.memory.multi10k.opsPerSec, n.memory.singleIp.opsPerSec)} ops/sec</td></tr>
+        <tr><td>Need persistence, single server</td><td><strong>SQLite</strong></td><td class="highlight">{opsRange(n.sqlite.multi10k.opsPerSec, n.sqlite.singleIp.opsPerSec)} ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed)</td><td><strong>Redis</strong></td><td class="highlight">{opsRangeDecimal(n.redis.multi10k.opsPerSec, n.redis.multi1k.opsPerSec)} ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed, SQL)</td><td><strong>Postgres</strong></td><td class="highlight">{opsRangeDecimal(n.postgres.multi10k.opsPerSec, n.postgres.singleIp.opsPerSec)} ops/sec</td></tr>
       </tbody>
     </table>
   </div>
@@ -33,10 +41,10 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
     <table>
       <thead><tr><th>Use Case</th><th>Recommended Store</th><th>Performance</th></tr></thead>
       <tbody>
-        <tr><td>Single server, many unique IPs</td><td><strong>Memory</strong> (default)</td><td class="highlight">8.32-12.38M ops/sec</td></tr>
-        <tr><td>Need persistence, single server</td><td><strong>bun:sqlite</strong></td><td class="highlight">325-458K ops/sec</td></tr>
-        <tr><td>Multiple servers (distributed)</td><td><strong>Redis</strong></td><td class="highlight">6.7K ops/sec</td></tr>
-        <tr><td>Multiple servers (distributed, SQL)</td><td><strong>Postgres</strong></td><td class="highlight">3.7K ops/sec</td></tr>
+        <tr><td>Single server, many unique IPs</td><td><strong>Memory</strong> (default)</td><td class="highlight">{opsRange(b.memory.multi10k.opsPerSec, b.memory.singleIp.opsPerSec)} ops/sec</td></tr>
+        <tr><td>Need persistence, single server</td><td><strong>bun:sqlite</strong></td><td class="highlight">{opsRange(b.sqlite.multi10k.opsPerSec, b.sqlite.singleIp.opsPerSec)} ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed)</td><td><strong>Redis</strong></td><td class="highlight">{formatOps(b.redis.multi10k.opsPerSec)} ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed, SQL)</td><td><strong>Postgres</strong></td><td class="highlight">{formatOps(b.postgres.multi10k.opsPerSec)} ops/sec</td></tr>
       </tbody>
     </table>
   </div>
@@ -45,11 +53,11 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
 
   <div class="code-block">
     <div class="code-header"><span class="code-label">Test Environment</span></div>
-    <pre><code>Machine:    Apple M1 (ARM64, 8GB)
-Node.js:    v24.4.1
-Bun:        v1.3.7
-Redis:      7.x (Docker, localhost)
-Postgres:   16.x (Docker, localhost)
+    <pre><code>Machine:    {env.cpu} ({env.arch}, {env.ram})
+Node.js:    {env.nodeVersion}
+Bun:        {env.bunVersion}
+Redis:      {env.redisVersion} (Docker, localhost)
+Postgres:   {env.postgresVersion} (Docker, localhost)
 
 Test Scenarios:
 - single-ip:    Same key every request (worst case)
@@ -71,9 +79,9 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <table class="benchmark-table">
       <thead><tr><th>Library</th><th>ops/sec</th><th>Latency</th><th>vs Fastest</th></tr></thead>
       <tbody>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td><strong>4.83M</strong></td><td>207ns</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>1.66M</td><td>601ns</td><td>34%</td></tr>
-        <tr><td>express-rate-limit</td><td>967K</td><td>1,034ns</td><td>20%</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td><strong>{formatOps(n.memory.singleIp.opsPerSec)}</strong></td><td>{formatLatency(n.memory.singleIp.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>{formatOps(rlf.memory.singleIp.opsPerSec)}</td><td>{formatLatency(rlf.memory.singleIp.latencyAvgNs)}</td><td>{pctOfFastest(rlf.memory.singleIp.opsPerSec, n.memory.singleIp.opsPerSec)}</td></tr>
+        <tr><td>express-rate-limit</td><td>{formatOps(erl.memory.singleIp.opsPerSec)}</td><td>{formatLatency(erl.memory.singleIp.latencyAvgNs)}</td><td>{pctOfFastest(erl.memory.singleIp.opsPerSec, n.memory.singleIp.opsPerSec)}</td></tr>
       </tbody>
     </table>
 
@@ -83,15 +91,15 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <table class="benchmark-table">
       <thead><tr><th>Library</th><th>ops/sec</th><th>Latency</th><th>vs Fastest</th></tr></thead>
       <tbody>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td><strong>3.16M</strong></td><td>316ns</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>1.14M</td><td>878ns</td><td>36%</td></tr>
-        <tr><td>express-rate-limit</td><td>749K</td><td>1,335ns</td><td>24%</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td><strong>{formatOps(n.memory.multi10k.opsPerSec)}</strong></td><td>{formatLatency(n.memory.multi10k.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>{formatOps(rlf.memory.multi10k.opsPerSec)}</td><td>{formatLatency(rlf.memory.multi10k.latencyAvgNs)}</td><td>{pctOfFastest(rlf.memory.multi10k.opsPerSec, n.memory.multi10k.opsPerSec)}</td></tr>
+        <tr><td>express-rate-limit</td><td>{formatOps(erl.memory.multi10k.opsPerSec)}</td><td>{formatLatency(erl.memory.multi10k.latencyAvgNs)}</td><td>{pctOfFastest(erl.memory.multi10k.opsPerSec, n.memory.multi10k.opsPerSec)}</td></tr>
       </tbody>
     </table>
 
     <div class="callout">
       <strong>Key Insight:</strong> hitlimit's sync fast path eliminates async/await overhead for in-process stores.
-      For high-traffic APIs, hitlimit is ~2.8x faster than rate-limiter-flexible (3.16M vs 1.14M at 10K IPs).
+      For high-traffic APIs, hitlimit is ~{speedup(n.memory.multi10k.opsPerSec, rlf.memory.multi10k.opsPerSec)} faster than rate-limiter-flexible ({formatOps(n.memory.multi10k.opsPerSec)} vs {formatOps(rlf.memory.multi10k.opsPerSec)} at 10K IPs).
     </div>
 
     <h2 id="sqlite-store">SQLite Store</h2>
@@ -101,8 +109,8 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <div class="benchmark-result">
       <div class="benchmark-header">SQLite Store (Node.js)</div>
       <div class="benchmark-stats">
-        <div class="stat"><span class="stat-value">352-455K</span><span class="stat-label">ops/sec</span></div>
-        <div class="stat"><span class="stat-value">2.2μs</span><span class="stat-label">avg latency</span></div>
+        <div class="stat"><span class="stat-value">{opsRange(n.sqlite.multi10k.opsPerSec, n.sqlite.singleIp.opsPerSec)}</span><span class="stat-label">ops/sec</span></div>
+        <div class="stat"><span class="stat-value">{formatLatency(n.sqlite.singleIp.latencyAvgNs)}</span><span class="stat-label">avg latency</span></div>
       </div>
     </div>
 
@@ -116,12 +124,12 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <table class="benchmark-table">
       <thead><tr><th>Library</th><th>Scenario</th><th>ops/sec</th><th>Latency</th><th>vs Fastest</th></tr></thead>
       <tbody>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>single-ip</td><td><strong>6.7K</strong></td><td>150μs</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>single-ip</td><td>5.7K</td><td>176μs</td><td>85%</td></tr>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-1k</td><td><strong>6.9K</strong></td><td>144μs</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>multi-1k</td><td>5.9K</td><td>171μs</td><td>85%</td></tr>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-10k</td><td><strong>6.7K</strong></td><td>149μs</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>multi-10k</td><td>6.4K</td><td>156μs</td><td>95%</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>single-ip</td><td><strong>{formatOps(n.redis.singleIp.opsPerSec)}</strong></td><td>{formatLatency(n.redis.singleIp.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>single-ip</td><td>{formatOps(rlf.redis.singleIp.opsPerSec)}</td><td>{formatLatency(rlf.redis.singleIp.latencyAvgNs)}</td><td>{pctOfFastest(rlf.redis.singleIp.opsPerSec, n.redis.singleIp.opsPerSec)}</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-1k</td><td><strong>{formatOps(n.redis.multi1k.opsPerSec)}</strong></td><td>{formatLatency(n.redis.multi1k.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>multi-1k</td><td>{formatOps(rlf.redis.multi1k.opsPerSec)}</td><td>{formatLatency(rlf.redis.multi1k.latencyAvgNs)}</td><td>{pctOfFastest(rlf.redis.multi1k.opsPerSec, n.redis.multi1k.opsPerSec)}</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-10k</td><td><strong>{formatOps(n.redis.multi10k.opsPerSec)}</strong></td><td>{formatLatency(n.redis.multi10k.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>multi-10k</td><td>{formatOps(rlf.redis.multi10k.opsPerSec)}</td><td>{formatLatency(rlf.redis.multi10k.latencyAvgNs)}</td><td>{pctOfFastest(rlf.redis.multi10k.opsPerSec, n.redis.multi10k.opsPerSec)}</td></tr>
       </tbody>
     </table>
 
@@ -131,7 +139,7 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     </div>
 
     <p class="benchmark-note">
-      Redis throughput is limited by network latency (~150μs local Docker).
+      Redis throughput is limited by network latency ({formatLatencyApprox(n.redis.singleIp.latencyAvgNs)} local Docker).
       For remote Redis, expect 200-1000 ops/sec.
     </p>
 
@@ -144,12 +152,12 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <table class="benchmark-table">
       <thead><tr><th>Library</th><th>Scenario</th><th>ops/sec</th><th>Latency</th><th>vs Fastest</th></tr></thead>
       <tbody>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>single-ip</td><td><strong>3.5K</strong></td><td>286μs</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>single-ip</td><td>3.0K</td><td>334μs</td><td>86%</td></tr>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-1k</td><td><strong>3.2K</strong></td><td>308μs</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>multi-1k</td><td>3.0K</td><td>330μs</td><td>94%</td></tr>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-10k</td><td><strong>3.0K</strong></td><td>336μs</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>multi-10k</td><td>2.7K</td><td>365μs</td><td>92%</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>single-ip</td><td><strong>{formatOps(n.postgres.singleIp.opsPerSec)}</strong></td><td>{formatLatency(n.postgres.singleIp.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>single-ip</td><td>{formatOps(rlf.postgres.singleIp.opsPerSec)}</td><td>{formatLatency(rlf.postgres.singleIp.latencyAvgNs)}</td><td>{pctOfFastest(rlf.postgres.singleIp.opsPerSec, n.postgres.singleIp.opsPerSec)}</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-1k</td><td><strong>{formatOps(n.postgres.multi1k.opsPerSec)}</strong></td><td>{formatLatency(n.postgres.multi1k.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>multi-1k</td><td>{formatOps(rlf.postgres.multi1k.opsPerSec)}</td><td>{formatLatency(rlf.postgres.multi1k.latencyAvgNs)}</td><td>{pctOfFastest(rlf.postgres.multi1k.opsPerSec, n.postgres.multi1k.opsPerSec)}</td></tr>
+        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-10k</td><td><strong>{formatOps(n.postgres.multi10k.opsPerSec)}</strong></td><td>{formatLatency(n.postgres.multi10k.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
+        <tr><td>rate-limiter-flexible</td><td>multi-10k</td><td>{formatOps(rlf.postgres.multi10k.opsPerSec)}</td><td>{formatLatency(rlf.postgres.multi10k.latencyAvgNs)}</td><td>{pctOfFastest(rlf.postgres.multi10k.opsPerSec, n.postgres.multi10k.opsPerSec)}</td></tr>
       </tbody>
     </table>
 
@@ -176,8 +184,8 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <table class="benchmark-table">
       <thead><tr><th>Framework</th><th>Without Limiter</th><th>With hitlimit</th><th>Overhead</th></tr></thead>
       <tbody>
-        <tr><td>Express</td><td>45,000 req/s</td><td>42,000 req/s</td><td><strong>~7%</strong></td></tr>
-        <tr><td>Fastify</td><td>65,000 req/s</td><td>61,000 req/s</td><td><strong>~6%</strong></td></tr>
+        <tr><td>Express</td><td>{formatOpsComma(http.express.withoutReqSec)} req/s</td><td>{formatOpsComma(http.express.withReqSec)} req/s</td><td><strong>{overheadPct(http.express.withoutReqSec, http.express.withReqSec)}</strong></td></tr>
+        <tr><td>Fastify</td><td>{formatOpsComma(http.fastify.withoutReqSec)} req/s</td><td>{formatOpsComma(http.fastify.withReqSec)} req/s</td><td><strong>{overheadPct(http.fastify.withoutReqSec, http.fastify.withReqSec)}</strong></td></tr>
       </tbody>
     </table>
 
@@ -195,14 +203,14 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <table class="benchmark-table">
       <thead><tr><th>Scenario</th><th>ops/sec</th><th>Latency</th></tr></thead>
       <tbody>
-        <tr class="winner hitlimit-win"><td>Single IP</td><td><strong>12.38M</strong></td><td>81ns</td></tr>
-        <tr class="winner hitlimit-win"><td>1,000 Unique IPs</td><td><strong>5.17M</strong></td><td>193ns</td></tr>
-        <tr class="winner hitlimit-win"><td>10,000 Unique IPs</td><td><strong>8.32M</strong></td><td>120ns</td></tr>
+        <tr class="winner hitlimit-win"><td>Single IP</td><td><strong>{formatOps(b.memory.singleIp.opsPerSec)}</strong></td><td>{formatLatency(b.memory.singleIp.latencyAvgNs)}</td></tr>
+        <tr class="winner hitlimit-win"><td>1,000 Unique IPs</td><td><strong>{formatOps(b.memory.multi1k.opsPerSec)}</strong></td><td>{formatLatency(b.memory.multi1k.latencyAvgNs)}</td></tr>
+        <tr class="winner hitlimit-win"><td>10,000 Unique IPs</td><td><strong>{formatOps(b.memory.multi10k.opsPerSec)}</strong></td><td>{formatLatency(b.memory.multi10k.latencyAvgNs)}</td></tr>
       </tbody>
     </table>
 
     <div class="callout bun-callout">
-      <strong>Key Insight:</strong> Bun significantly outperforms Node.js on memory store — 8.32M vs 3.16M at 10K IPs (2.6x faster).
+      <strong>Key Insight:</strong> Bun significantly outperforms Node.js on memory store — {formatOps(b.memory.multi10k.opsPerSec)} vs {formatOps(n.memory.multi10k.opsPerSec)} at 10K IPs ({speedup(b.memory.multi10k.opsPerSec, n.memory.multi10k.opsPerSec)} faster).
       Bun's optimized JavaScript engine shines on synchronous operations like in-memory rate limiting.
     </div>
 
@@ -213,8 +221,8 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <div class="benchmark-result bun">
       <div class="benchmark-header">bun:sqlite Store</div>
       <div class="benchmark-stats">
-        <div class="stat"><span class="stat-value">325K</span><span class="stat-label">ops/sec (10K IPs)</span></div>
-        <div class="stat"><span class="stat-value">3.1μs</span><span class="stat-label">avg latency</span></div>
+        <div class="stat"><span class="stat-value">{formatOps(b.sqlite.multi10k.opsPerSec)}</span><span class="stat-label">ops/sec (10K IPs)</span></div>
+        <div class="stat"><span class="stat-value">{formatLatency(b.sqlite.multi10k.latencyAvgNs)}</span><span class="stat-label">avg latency</span></div>
         <div class="stat"><span class="stat-value">0</span><span class="stat-label">dependencies</span></div>
       </div>
     </div>
@@ -228,14 +236,14 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <div class="benchmark-result bun">
       <div class="benchmark-header">Redis Store (Bun)</div>
       <div class="benchmark-stats">
-        <div class="stat"><span class="stat-value">6.7K</span><span class="stat-label">ops/sec</span></div>
-        <div class="stat"><span class="stat-value">148μs</span><span class="stat-label">avg latency</span></div>
+        <div class="stat"><span class="stat-value">{formatOps(b.redis.multi10k.opsPerSec)}</span><span class="stat-label">ops/sec</span></div>
+        <div class="stat"><span class="stat-value">{formatLatency(b.redis.multi10k.latencyAvgNs)}</span><span class="stat-label">avg latency</span></div>
         <div class="stat"><span class="stat-value">1</span><span class="stat-label">round-trip per request</span></div>
       </div>
     </div>
 
     <p class="benchmark-note">
-      Redis throughput is limited by network latency (~150μs local Docker).
+      Redis throughput is limited by network latency ({formatLatencyApprox(b.redis.multi10k.latencyAvgNs)} local Docker).
       For remote Redis, expect 200-1000 ops/sec.
     </p>
 
@@ -245,8 +253,8 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <div class="benchmark-result bun">
       <div class="benchmark-header">Postgres Store (Bun)</div>
       <div class="benchmark-stats">
-        <div class="stat"><span class="stat-value">3.7K</span><span class="stat-label">ops/sec</span></div>
-        <div class="stat"><span class="stat-value">273μs</span><span class="stat-label">avg latency</span></div>
+        <div class="stat"><span class="stat-value">{formatOps(b.postgres.multi10k.opsPerSec)}</span><span class="stat-label">ops/sec</span></div>
+        <div class="stat"><span class="stat-value">{formatLatency(b.postgres.multi10k.latencyAvgNs)}</span><span class="stat-label">avg latency</span></div>
       </div>
     </div>
 
@@ -255,10 +263,10 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <table>
       <thead><tr><th>Store</th><th>Status</th><th>Performance</th><th>Use Case</th></tr></thead>
       <tbody>
-        <tr><td>Memory</td><td class="good">Built-in</td><td class="highlight">8.32M ops/sec</td><td>Single server, ephemeral</td></tr>
-        <tr><td>bun:sqlite</td><td class="good">Built-in (native)</td><td class="highlight">325K ops/sec</td><td>Single server, persistent</td></tr>
-        <tr><td>Redis</td><td class="good">Built-in</td><td class="highlight">6.7K ops/sec</td><td>Multi-server, distributed</td></tr>
-        <tr><td>Postgres</td><td class="good">Built-in</td><td class="highlight">3.7K ops/sec</td><td>Multi-server, distributed (SQL)</td></tr>
+        <tr><td>Memory</td><td class="good">Built-in</td><td class="highlight">{formatOps(b.memory.multi10k.opsPerSec)} ops/sec</td><td>Single server, ephemeral</td></tr>
+        <tr><td>bun:sqlite</td><td class="good">Built-in (native)</td><td class="highlight">{formatOps(b.sqlite.multi10k.opsPerSec)} ops/sec</td><td>Single server, persistent</td></tr>
+        <tr><td>Redis</td><td class="good">Built-in</td><td class="highlight">{formatOps(b.redis.multi10k.opsPerSec)} ops/sec</td><td>Multi-server, distributed</td></tr>
+        <tr><td>Postgres</td><td class="good">Built-in</td><td class="highlight">{formatOps(b.postgres.multi10k.opsPerSec)} ops/sec</td><td>Multi-server, distributed (SQL)</td></tr>
       </tbody>
     </table>
   </div>
@@ -284,7 +292,7 @@ pnpm bench:node</code></pre>
 
     <div class="callout note">
       <strong>Note:</strong> These are our benchmarks and we've done our best to keep them fair and reproducible. Results vary by hardware and environment.
-      hitlimit is the fastest in ALL memory scenarios — ~2.9x faster than rate-limiter-flexible on single-IP (4.83M vs 1.66M) and ~2.8x faster on high-traffic 10K IPs (3.16M vs 1.14M).
+      hitlimit is the fastest in ALL memory scenarios — ~{speedup(n.memory.singleIp.opsPerSec, rlf.memory.singleIp.opsPerSec)} faster than rate-limiter-flexible on single-IP ({formatOps(n.memory.singleIp.opsPerSec)} vs {formatOps(rlf.memory.singleIp.opsPerSec)}) and ~{speedup(n.memory.multi10k.opsPerSec, rlf.memory.multi10k.opsPerSec)} faster on high-traffic 10K IPs ({formatOps(n.memory.multi10k.opsPerSec)} vs {formatOps(rlf.memory.multi10k.opsPerSec)}).
       hitlimit also wins all Redis and Postgres scenarios — with 18% faster Redis throughput and significantly lower memory usage.
       They're not set in stone — there's always room for improvement. If you spot issues or have suggestions, please <a href="https://github.com/JointOps/hitlimit-monorepo/issues">open an issue</a>.
     </div>
@@ -308,7 +316,7 @@ pnpm bench:bun</code></pre>
 
     <div class="callout note">
       <strong>Note:</strong> These are our benchmarks and we've done our best to keep them fair and reproducible. Results vary by hardware and environment.
-      Bun significantly outperforms Node.js on memory store — 8.32M vs 3.16M at 10K IPs. Bun's optimized JS engine shines on synchronous in-memory operations.
+      Bun significantly outperforms Node.js on memory store — {formatOps(b.memory.multi10k.opsPerSec)} vs {formatOps(n.memory.multi10k.opsPerSec)} at 10K IPs. Bun's optimized JS engine shines on synchronous in-memory operations.
       Clone the repo and run them yourself — they're not set in stone. If you spot issues or have suggestions, please <a href="https://github.com/JointOps/hitlimit-monorepo/issues">open an issue</a>.
     </div>
   </div>

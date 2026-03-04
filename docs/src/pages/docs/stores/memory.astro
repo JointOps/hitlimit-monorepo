@@ -1,6 +1,7 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
+import { bench, formatOps, formatLatencyApprox } from '../../../data/benchmarks';
 ---
 
 <DocsLayout
@@ -45,7 +46,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 
   <div data-runtime-content="node">
     <ul>
-      <li><strong>Speed:</strong> Fastest option — 4.83M ops/sec peak, no I/O overhead</li>
+      <li><strong>Speed:</strong> Fastest option — {formatOps(bench.node.memory.singleIp.opsPerSec)} ops/sec peak, no I/O overhead</li>
       <li><strong>Persistence:</strong> Data is lost on restart</li>
       <li><strong>Scalability:</strong> Not shared between instances</li>
       <li><strong>Memory:</strong> Grows with unique keys; auto-cleanup removes expired entries</li>
@@ -54,7 +55,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 
   <div data-runtime-content="bun">
     <ul>
-      <li><strong>Speed:</strong> 12.38M ops/sec (~81ns latency) — the fastest store available</li>
+      <li><strong>Speed:</strong> {formatOps(bench.bun.memory.singleIp.opsPerSec)} ops/sec ({formatLatencyApprox(bench.bun.memory.singleIp.latencyAvgNs)} latency) — the fastest store available</li>
       <li><strong>Zero dependencies:</strong> Built into the runtime</li>
       <li><strong>Persistence:</strong> None — data is lost on restart</li>
       <li><strong>Scalability:</strong> Single instance only — not shared between processes</li>

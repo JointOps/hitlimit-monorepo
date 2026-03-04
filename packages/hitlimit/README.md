@@ -2,7 +2,9 @@
 
 > Rate limiting that doesn't slow you down.
 
-**3.16M ops/sec** at 10K unique IPs. Zero dependencies. One line to protect any Node.js API.
+<!-- BENCH:NODE_HERO -->
+**3.21M ops/sec** at 10K unique IPs. Zero dependencies. One line to protect any Node.js API.
+<!-- /BENCH:NODE_HERO -->
 
 ```bash
 npm install @joint-ops/hitlimit
@@ -163,12 +165,13 @@ const pool = mysql.createPool('mysql://root@localhost:3306/mydb')
 app.use(hitlimit({ store: mysqlStore({ pool }) }))
 ```
 
+<!-- BENCH:NODE_STORE_TABLE -->
 | Store | Ops/sec | Latency | When to use |
 |-------|---------|---------|-------------|
-| Memory | 3,160,000 | 316ns | Single server, no persistence needed |
-| SQLite | 352,000 | 2.8μs | Single server, need persistence |
-| Redis | 6,700 | 149μs | Multi-server / distributed |
-| Postgres | 3,000 | 336μs | Multi-server / already using Postgres |
+| Memory | 3,206,714 | 312ns | Single server, no persistence needed |
+| SQLite | 362,981 | 2.8μs | Single server, need persistence |
+| MongoDB | 2,439 | 410μs | Multi-server / NoSQL infrastructure |
+<!-- /BENCH:NODE_STORE_TABLE -->
 
 ### Valkey (Redis Alternative)
 ```typescript
@@ -231,11 +234,13 @@ app.use(hitlimit({
 
 ### vs Competitors (Memory Store, 10K unique IPs)
 
+<!-- BENCH:NODE_COMPETITOR_TABLE -->
 | Library | Ops/sec | |
 |---------|---------|---|
-| **hitlimit** | **3,160,000** | ████████████████████ |
-| rate-limiter-flexible | 1,140,000 | ███████ |
-| express-rate-limit | 749,000 | █████ |
+| **hitlimit** | **3,206,714** | ████████████████████ |
+| rate-limiter-flexible | 1,202,274 | ███████ |
+| express-rate-limit | 844,323 | █████ |
+<!-- /BENCH:NODE_COMPETITOR_TABLE -->
 
 This is the **memory store** comparison — the default for all three libraries. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. We report scenarios where competitors beat us. Run them yourself.
 
@@ -257,7 +262,7 @@ Full [migration guide](https://hitlimit.jointops.dev/docs/guides/migration) in t
 
 ## Related
 
-- **[@joint-ops/hitlimit-bun](https://www.npmjs.com/package/@joint-ops/hitlimit-bun)** — Bun-native variant with bun:sqlite and 12M+ ops/sec
+- **[@joint-ops/hitlimit-bun](https://www.npmjs.com/package/@joint-ops/hitlimit-bun)** — Bun-native variant with native bun:sqlite
 
 ## License
 

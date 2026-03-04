@@ -1,6 +1,7 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
+import { bench, formatOps, formatOpsCommaPlus, formatLatencyApprox } from '../../../data/benchmarks';
 ---
 
 <DocsLayout
@@ -81,12 +82,12 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><th>Store</th><th>Ops/sec</th><th>Multi-Instance</th></tr>
       </thead>
       <tbody>
-        <tr><td>memoryStore</td><td>3,160,000+</td><td>No</td></tr>
-        <tr><td>sqliteStore</td><td>352,000+</td><td>No</td></tr>
-        <tr><td>redisStore</td><td>6,700+</td><td>Yes</td></tr>
-        <tr><td>valkeyStore</td><td>~6,700+</td><td>Yes</td></tr>
-        <tr><td>dragonflyStore</td><td>~6,700+</td><td>Yes</td></tr>
-        <tr><td>postgresStore</td><td>3,000+</td><td>Yes</td></tr>
+        <tr><td>memoryStore</td><td>{formatOpsCommaPlus(bench.node.memory.multi10k.opsPerSec)}</td><td>No</td></tr>
+        <tr><td>sqliteStore</td><td>{formatOpsCommaPlus(bench.node.sqlite.multi10k.opsPerSec)}</td><td>No</td></tr>
+        <tr><td>redisStore</td><td>{formatOpsCommaPlus(bench.node.redis.multi10k.opsPerSec)}</td><td>Yes</td></tr>
+        <tr><td>valkeyStore</td><td>~{formatOpsCommaPlus(bench.node.redis.multi10k.opsPerSec)}</td><td>Yes</td></tr>
+        <tr><td>dragonflyStore</td><td>~{formatOpsCommaPlus(bench.node.redis.multi10k.opsPerSec)}</td><td>Yes</td></tr>
+        <tr><td>postgresStore</td><td>{formatOpsCommaPlus(bench.node.postgres.multi10k.opsPerSec)}</td><td>Yes</td></tr>
         <tr><td>mongoStore</td><td>TBD</td><td>Yes</td></tr>
         <tr><td>mysqlStore</td><td>TBD</td><td>Yes</td></tr>
       </tbody>
@@ -99,12 +100,12 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><th>Store</th><th>Ops/sec</th><th>Latency</th><th>Multi-Instance</th></tr>
       </thead>
       <tbody>
-        <tr><td>memoryStore</td><td class="highlight">8,320,000+</td><td>~120ns</td><td>No</td></tr>
-        <tr><td>sqliteStore</td><td>325,000+</td><td>~3.1&micro;s</td><td>No</td></tr>
-        <tr><td>redisStore</td><td>6,700+</td><td>~148&micro;s</td><td>Yes</td></tr>
-        <tr><td>valkeyStore</td><td>~6,700+</td><td>~148&micro;s</td><td>Yes</td></tr>
-        <tr><td>dragonflyStore</td><td>~6,700+</td><td>~148&micro;s</td><td>Yes</td></tr>
-        <tr><td>postgresStore</td><td>3,700+</td><td>~273&micro;s</td><td>Yes</td></tr>
+        <tr><td>memoryStore</td><td class="highlight">{formatOpsCommaPlus(bench.bun.memory.multi10k.opsPerSec)}</td><td>{formatLatencyApprox(bench.bun.memory.multi10k.latencyAvgNs)}</td><td>No</td></tr>
+        <tr><td>sqliteStore</td><td>{formatOpsCommaPlus(bench.bun.sqlite.multi10k.opsPerSec)}</td><td>{formatLatencyApprox(bench.bun.sqlite.multi10k.latencyAvgNs)}</td><td>No</td></tr>
+        <tr><td>redisStore</td><td>{formatOpsCommaPlus(bench.bun.redis.multi10k.opsPerSec)}</td><td>{formatLatencyApprox(bench.bun.redis.multi10k.latencyAvgNs)}</td><td>Yes</td></tr>
+        <tr><td>valkeyStore</td><td>~{formatOpsCommaPlus(bench.bun.redis.multi10k.opsPerSec)}</td><td>{formatLatencyApprox(bench.bun.redis.multi10k.latencyAvgNs)}</td><td>Yes</td></tr>
+        <tr><td>dragonflyStore</td><td>~{formatOpsCommaPlus(bench.bun.redis.multi10k.opsPerSec)}</td><td>{formatLatencyApprox(bench.bun.redis.multi10k.latencyAvgNs)}</td><td>Yes</td></tr>
+        <tr><td>postgresStore</td><td>{formatOpsCommaPlus(bench.bun.postgres.multi10k.opsPerSec)}</td><td>{formatLatencyApprox(bench.bun.postgres.multi10k.latencyAvgNs)}</td><td>Yes</td></tr>
         <tr><td>mongoStore</td><td>TBD</td><td>TBD</td><td>Yes</td></tr>
         <tr><td>mysqlStore</td><td>TBD</td><td>TBD</td><td>Yes</td></tr>
       </tbody>

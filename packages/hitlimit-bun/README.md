@@ -2,7 +2,9 @@
 
 > Rate limiting built for Bun. Not ported — built.
 
-**12.38M ops/sec** on memory. **8.32M at 10K IPs**. Native bun:sqlite. Atomic Redis Lua. Postgres. Zero dependencies.
+<!-- BENCH:BUN_HERO -->
+**6.41M ops/sec** on memory. **6.06M at 10K IPs**. Native bun:sqlite. Atomic Redis Lua. Postgres. Zero dependencies.
+<!-- /BENCH:BUN_HERO -->
 
 ```bash
 bun add @joint-ops/hitlimit-bun
@@ -149,12 +151,12 @@ const pool = mysql.createPool('mysql://root@localhost:3306/mydb')
 Bun.serve({ fetch: hitlimit({ store: mysqlStore({ pool }) }, handler) })
 ```
 
+<!-- BENCH:BUN_STORE_TABLE -->
 | Store | Ops/sec | Latency | When to use |
 |-------|---------|---------|-------------|
-| Memory | 8,320,000 | 120ns | Single server, maximum speed |
-| bun:sqlite | 325,000 | 3.1μs | Single server, need persistence |
-| Redis | 6,700 | 148μs | Multi-server / distributed |
-| Postgres | 3,700 | 273μs | Multi-server / already using Postgres |
+| Memory | 6,058,830 | 165ns | Single server, maximum speed |
+| bun:sqlite | 340,622 | 2.9μs | Single server, need persistence |
+<!-- /BENCH:BUN_STORE_TABLE -->
 
 ### Valkey (Redis Alternative)
 ```typescript
@@ -225,12 +227,16 @@ Bun.serve({
 
 ### Bun vs Node.js — Memory Store, 10K unique IPs
 
+<!-- BENCH:BUN_VS_NODE_TABLE -->
 | Runtime | Ops/sec | |
 |---------|---------|---|
-| **Bun** | **8,320,000** | ████████████████████ |
-| Node.js | 3,160,000 | ████████ |
+| **Bun** | **6,058,830** | ████████████████████ |
+| Node.js | 3,206,714 | ███████████ |
+<!-- /BENCH:BUN_VS_NODE_TABLE -->
 
-Bun leads at 10K IPs (8.32M vs 3.16M) and single-IP (12.38M vs 4.83M). Same library, same algorithm, **memory store**. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. Run them yourself.
+<!-- BENCH:BUN_VS_NODE_TEXT -->
+Bun leads at 10K IPs (6.06M vs 3.21M) and single-IP (6.41M vs 5.41M). Same library, same algorithm, **memory store**. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. Run them yourself.
+<!-- /BENCH:BUN_VS_NODE_TEXT -->
 
 ### Why bun:sqlite is faster than better-sqlite3
 

@@ -1,4 +1,10 @@
 ---
+import { bench, formatOpsPlus } from '../data/benchmarks';
+
+const nodeOpsPlus = formatOpsPlus(bench.node.memory.singleIp.opsPerSec);
+const bunOpsPlus = formatOpsPlus(bench.bun.memory.singleIp.opsPerSec);
+const nodeBundleSize = bench.bundleSize.node.core;
+const bunBundleSize = bench.bundleSize.bun.core;
 ---
 
 <section class="py-24 px-4 section-divider">
@@ -42,7 +48,7 @@
           <!-- Stats -->
           <div class="grid grid-cols-3 gap-4 mb-6">
             <div>
-              <div class="text-2xl font-black text-[var(--color-runtime-node)]">4.8M+</div>
+              <div class="text-2xl font-black text-[var(--color-runtime-node)]">{nodeOpsPlus}</div>
               <div class="text-xs text-[var(--color-text-muted)]">ops/sec</div>
             </div>
             <div>
@@ -50,7 +56,7 @@
               <div class="text-xs text-[var(--color-text-muted)]">adapters</div>
             </div>
             <div>
-              <div class="text-2xl font-black text-white">~8KB</div>
+              <div class="text-2xl font-black text-white">{nodeBundleSize}</div>
               <div class="text-xs text-[var(--color-text-muted)]">core bundle</div>
             </div>
           </div>
@@ -98,7 +104,7 @@
           <!-- Stats -->
           <div class="grid grid-cols-3 gap-4 mb-6">
             <div>
-              <div class="text-2xl font-black text-[var(--color-runtime-bun)]">12.3M+</div>
+              <div class="text-2xl font-black text-[var(--color-runtime-bun)]">{bunOpsPlus}</div>
               <div class="text-xs text-[var(--color-text-muted)]">ops/sec</div>
             </div>
             <div>
@@ -106,7 +112,7 @@
               <div class="text-xs text-[var(--color-text-muted)]">adapters</div>
             </div>
             <div>
-              <div class="text-2xl font-black text-white">~18KB</div>
+              <div class="text-2xl font-black text-white">{bunBundleSize}</div>
               <div class="text-xs text-[var(--color-text-muted)]">core bundle</div>
             </div>
           </div>

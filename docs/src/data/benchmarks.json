@@ -1,0 +1,176 @@
+{
+  "version": "1.4.0",
+  "date": "2026-03-04",
+  "environment": {
+    "cpu": "Apple M1",
+    "arch": "ARM64",
+    "ram": "8GB",
+    "nodeVersion": "v24.4.1",
+    "bunVersion": "v1.3.7",
+    "redisVersion": "7.x",
+    "postgresVersion": "16.x"
+  },
+  "node": {
+    "memory": {
+      "singleIp": {
+        "opsPerSec": 5412404,
+        "latencyAvgNs": 185
+      },
+      "multi1k": {
+        "opsPerSec": 3627222,
+        "latencyAvgNs": 276
+      },
+      "multi10k": {
+        "opsPerSec": 3206714,
+        "latencyAvgNs": 312,
+        "memoryMB": 5.07
+      }
+    },
+    "mongodb": {
+      "singleIp": {
+        "opsPerSec": 2368,
+        "latencyAvgNs": 422257
+      },
+      "multi1k": {
+        "opsPerSec": 2337,
+        "latencyAvgNs": 427889
+      },
+      "multi10k": {
+        "opsPerSec": 2439,
+        "latencyAvgNs": 410044,
+        "memoryMB": 7.9
+      }
+    },
+    "sqlite": {
+      "singleIp": {
+        "opsPerSec": 453811,
+        "latencyAvgNs": 2204
+      },
+      "multi1k": {
+        "opsPerSec": 382599,
+        "latencyAvgNs": 2614
+      },
+      "multi10k": {
+        "opsPerSec": 362981,
+        "latencyAvgNs": 2755,
+        "memoryMB": 15.41
+      }
+    },
+    "redis": {
+      "singleIp": { "opsPerSec": 6700, "latencyAvgNs": 150000 },
+      "multi1k": { "opsPerSec": 6900, "latencyAvgNs": 144000 },
+      "multi10k": { "opsPerSec": 6700, "latencyAvgNs": 149000 }
+    },
+    "postgres": {
+      "singleIp": { "opsPerSec": 3500, "latencyAvgNs": 286000 },
+      "multi1k": { "opsPerSec": 3200, "latencyAvgNs": 308000 },
+      "multi10k": { "opsPerSec": 3000, "latencyAvgNs": 336000 }
+    }
+  },
+  "bun": {
+    "memory": {
+      "singleIp": {
+        "opsPerSec": 6409566,
+        "latencyAvgNs": 156
+      },
+      "multi1k": {
+        "opsPerSec": 5615442,
+        "latencyAvgNs": 178
+      },
+      "multi10k": {
+        "opsPerSec": 6058830,
+        "latencyAvgNs": 165
+      }
+    },
+    "sqlite": {
+      "singleIp": {
+        "opsPerSec": 386118,
+        "latencyAvgNs": 2590
+      },
+      "multi1k": {
+        "opsPerSec": 350440,
+        "latencyAvgNs": 2854
+      },
+      "multi10k": {
+        "opsPerSec": 340622,
+        "latencyAvgNs": 2936
+      }
+    },
+    "redis": {
+      "singleIp": { "opsPerSec": 6700, "latencyAvgNs": 148000 },
+      "multi1k": { "opsPerSec": 6900, "latencyAvgNs": 144000 },
+      "multi10k": { "opsPerSec": 6700, "latencyAvgNs": 148000 }
+    },
+    "postgres": {
+      "singleIp": { "opsPerSec": 3700, "latencyAvgNs": 273000 },
+      "multi1k": { "opsPerSec": 3400, "latencyAvgNs": 294000 },
+      "multi10k": { "opsPerSec": 3200, "latencyAvgNs": 312000 }
+    }
+  },
+  "competitors": {
+    "rateLimiterFlexible": {
+      "memory": {
+        "singleIp": {
+          "opsPerSec": 1643178,
+          "latencyAvgNs": 609
+        },
+        "multi1k": {
+          "opsPerSec": 1310674,
+          "latencyAvgNs": 763
+        },
+        "multi10k": {
+          "opsPerSec": 1202274,
+          "latencyAvgNs": 832,
+          "memoryMB": 14.59
+        }
+      },
+      "redis": {
+        "singleIp": { "opsPerSec": 5700, "latencyAvgNs": 176000 },
+        "multi1k": { "opsPerSec": 5900, "latencyAvgNs": 171000 },
+        "multi10k": { "opsPerSec": 6400, "latencyAvgNs": 156000 }
+      },
+      "postgres": {
+        "singleIp": { "opsPerSec": 3000, "latencyAvgNs": 334000 },
+        "multi1k": { "opsPerSec": 3000, "latencyAvgNs": 330000 },
+        "multi10k": { "opsPerSec": 2700, "latencyAvgNs": 365000 }
+      }
+    },
+    "expressRateLimit": {
+      "memory": {
+        "singleIp": {
+          "opsPerSec": 982824,
+          "latencyAvgNs": 1017
+        },
+        "multi1k": {
+          "opsPerSec": 941138,
+          "latencyAvgNs": 1063
+        },
+        "multi10k": {
+          "opsPerSec": 844323,
+          "latencyAvgNs": 1184,
+          "memoryMB": 6.43
+        }
+      }
+    }
+  },
+  "httpOverhead": {
+    "express": {
+      "withoutReqSec": 45000,
+      "withReqSec": 42000
+    },
+    "fastify": {
+      "withoutReqSec": 65000,
+      "withReqSec": 61000
+    }
+  },
+  "bundleSize": {
+    "node": {
+      "core": "~8KB",
+      "total": "~41KB"
+    },
+    "bun": {
+      "core": "~18KB",
+      "total": "~48KB"
+    }
+  }
+}

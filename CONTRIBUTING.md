@@ -208,20 +208,34 @@ pnpm benchmark:memory      # Memory store only
 
 ```bash
 # Run all benchmarks (Docker services start/stop automatically per store)
-pnpm benchmark:all         # Runs ./benchmarks/benchmark-all.sh
+pnpm benchmark:all                         # Full suite
 
-# Or use the script directly for more options
-./benchmarks/benchmark-all.sh              # Interactive menu
-./benchmarks/benchmark-all.sh store redis  # Specific store only
-./benchmarks/benchmark-all.sh quick        # Memory + SQLite (no Docker)
-./benchmarks/benchmark-all.sh status       # View existing results
+# Interactive CLI with all options
+pnpm benchmark:cli                         # Interactive menu
+npx tsx benchmarks/cli.ts store redis      # Specific store only
+npx tsx benchmarks/cli.ts quick            # Memory + SQLite (no Docker)
+npx tsx benchmarks/cli.ts status           # View existing results
+npx tsx benchmarks/cli.ts compare          # Regression check
 ```
+
+### Updating docs after benchmarks
+
+All benchmark numbers across the docs site and READMEs are driven by a single JSON file. After running benchmarks:
+
+```bash
+cd benchmarks
+pnpm bench:update-docs     # Auto-generates docs/src/data/benchmarks.json + updates READMEs
+cd ../docs
+pnpm build                 # Verify all 51 pages build with the new numbers
+```
+
+See [`docs/README.md`](docs/README.md#benchmark-data-system) for full details on how the benchmark data system works.
 
 ### Benchmark structure
 
 ```
 benchmarks/
-├── benchmark-all.sh       # Main benchmark suite runner
+├── cli.ts                 # Interactive benchmark CLI
 ├── node/
 │   ├── store/              # Raw store benchmarks (hitlimit vs rate-limiter-flexible)
 │   ├── express/            # Express middleware (hitlimit vs express-rate-limit vs rate-limiter-flexible)
