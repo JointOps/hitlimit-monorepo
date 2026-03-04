@@ -94,7 +94,14 @@
     "dragonfly",
     "dragonflydb",
     "dragonfly-rate-limit",
-    "redis-alternative"
+    "redis-alternative",
+    "mongodb",
+    "mongodb-rate-limit",
+    "mongoose-rate-limit",
+    "mysql",
+    "mysql-rate-limit",
+    "mysql2-rate-limit",
+    "database-rate-limit"
   ],
   "type": "module",
   "main": "./dist/index.js",
@@ -145,6 +152,14 @@
       "types": "./dist/stores/dragonfly.d.ts",
       "import": "./dist/stores/dragonfly.js"
     },
+    "./stores/mongodb": {
+      "types": "./dist/stores/mongodb.d.ts",
+      "import": "./dist/stores/mongodb.js"
+    },
+    "./stores/mysql": {
+      "types": "./dist/stores/mysql.d.ts",
+      "import": "./dist/stores/mysql.js"
+    },
     "./loggers/console": {
       "types": "./dist/loggers/console.d.ts",
       "import": "./dist/loggers/console.js"
@@ -179,6 +194,8 @@
     "fastify-plugin": ">=4.0.0",
     "hono": ">=4.0.0",
     "ioredis": ">=5.0.0",
+    "mongodb": ">=6.0.0",
+    "mysql2": ">=3.0.0",
     "pg": ">=8.0.0",
     "pino": ">=8.0.0",
     "winston": ">=3.0.0"
@@ -203,6 +220,12 @@
       "optional": true
     },
     "ioredis": {
+      "optional": true
+    },
+    "mongodb": {
+      "optional": true
+    },
+    "mysql2": {
       "optional": true
     },
     "pg": {
@@ -231,6 +254,8 @@
     "fastify-plugin": "^5.1.0",
     "hono": "^4.11.9",
     "ioredis": "^5.3.0",
+    "mongodb": "^6.0.0",
+    "mysql2": "^3.0.0",
     "pg": "^8.13.0",
     "@types/pg": "^8.11.0",
     "pino": "^10.3.0",
