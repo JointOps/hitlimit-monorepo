@@ -108,7 +108,7 @@ hitlimit({ skip: (req) => req.path === '/health' || req.user?.role === 'admin' }
 
 ---
 
-## 6 Storage Backends
+## 8 Storage Backends
 
 Pick the right backend for your deployment — all built in, no extra packages.
 
@@ -117,9 +117,11 @@ Pick the right backend for your deployment — all built in, no extra packages.
 | Memory | Development, single server | None |
 | SQLite | Single server + persistence | `better-sqlite3` |
 | Redis | Distributed, production | `ioredis` |
-| **Valkey** | **Distributed, open-source Redis alternative** | `ioredis` |
-| **DragonflyDB** | **High-throughput distributed** | `ioredis` |
+| Valkey | Distributed, open-source Redis alternative | `ioredis` |
+| DragonflyDB | High-throughput distributed | `ioredis` |
 | PostgreSQL | Shared database infrastructure | `pg` |
+| **MongoDB** | **NoSQL distributed, MEAN/MERN stacks** | `mongodb` |
+| **MySQL** | **SQL distributed, LAMP stacks** | `mysql2` |
 
 ```javascript
 import { hitlimit } from '@joint-ops/hitlimit'
@@ -146,6 +148,19 @@ app.use(hitlimit({ store: dragonflyStore({ url: 'redis://localhost:6379' }) }))
 // Postgres — distributed, atomic upserts
 import { postgresStore } from '@joint-ops/hitlimit/stores/postgres'
 app.use(hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' }) }))
+
+// MongoDB — NoSQL, atomic findOneAndUpdate with TTL indexes
+import { mongoStore } from '@joint-ops/hitlimit/stores/mongodb'
+import { MongoClient } from 'mongodb'
+const client = new MongoClient('mongodb://localhost:27017')
+const db = client.db('myapp')
+app.use(hitlimit({ store: mongoStore({ db }) }))
+
+// MySQL — SQL distributed, atomic INSERT ON DUPLICATE KEY UPDATE
+import { mysqlStore } from '@joint-ops/hitlimit/stores/mysql'
+import mysql from 'mysql2/promise'
+const pool = mysql.createPool('mysql://root@localhost:3306/mydb')
+app.use(hitlimit({ store: mysqlStore({ pool }) }))
 ```
 
 | Store | Ops/sec | Latency | When to use |
@@ -174,6 +189,37 @@ import { dragonflyStore } from '@joint-ops/hitlimit/stores/dragonfly'
 
 app.use(hitlimit({
   store: dragonflyStore({ url: 'redis://localhost:6379' }),
+  limit: 100,
+  window: '1m'
+}))
+```
+
+### MongoDB
+```typescript
+import { hitlimit } from '@joint-ops/hitlimit'
+import { mongoStore } from '@joint-ops/hitlimit/stores/mongodb'
+import { MongoClient } from 'mongodb'
+
+const client = new MongoClient('mongodb://localhost:27017')
+const db = client.db('myapp')
+
+app.use(hitlimit({
+  store: mongoStore({ db }),
+  limit: 100,
+  window: '1m'
+}))
+```
+
+### MySQL
+```typescript
+import { hitlimit } from '@joint-ops/hitlimit'
+import { mysqlStore } from '@joint-ops/hitlimit/stores/mysql'
+import mysql from 'mysql2/promise'
+
+const pool = mysql.createPool('mysql://root@localhost:3306/mydb')
+
+app.use(hitlimit({
+  store: mysqlStore({ pool }),
   limit: 100,
   window: '1m'
 }))

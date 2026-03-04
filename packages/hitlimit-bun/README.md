@@ -94,7 +94,7 @@ new Elysia()
 
 ---
 
-## 6 Storage Backends
+## 8 Storage Backends
 
 All built in. No extra packages to install.
 
@@ -103,9 +103,11 @@ All built in. No extra packages to install.
 | Memory | Development, single server | None |
 | bun:sqlite | Single server + persistence | None (built-in) |
 | Redis | Distributed, production | `ioredis` |
-| **Valkey** | **Distributed, open-source Redis alternative** | `ioredis` |
-| **DragonflyDB** | **High-throughput distributed** | `ioredis` |
+| Valkey | Distributed, open-source Redis alternative | `ioredis` |
+| DragonflyDB | High-throughput distributed | `ioredis` |
 | PostgreSQL | Shared database infrastructure | `pg` |
+| **MongoDB** | **NoSQL distributed, MEAN/MERN stacks** | `mongodb` |
+| **MySQL** | **SQL distributed, LAMP stacks** | `mysql2` |
 
 ```typescript
 import { hitlimit } from '@joint-ops/hitlimit-bun'
@@ -132,6 +134,19 @@ Bun.serve({ fetch: hitlimit({ store: dragonflyStore({ url: 'redis://localhost:63
 // Postgres — distributed, atomic upserts
 import { postgresStore } from '@joint-ops/hitlimit-bun/stores/postgres'
 Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' }) }, handler) })
+
+// MongoDB — NoSQL, atomic findOneAndUpdate with TTL indexes
+import { mongoStore } from '@joint-ops/hitlimit-bun/stores/mongodb'
+import { MongoClient } from 'mongodb'
+const client = new MongoClient('mongodb://localhost:27017')
+const db = client.db('myapp')
+Bun.serve({ fetch: hitlimit({ store: mongoStore({ db }) }, handler) })
+
+// MySQL — SQL distributed, atomic INSERT ON DUPLICATE KEY UPDATE
+import { mysqlStore } from '@joint-ops/hitlimit-bun/stores/mysql'
+import mysql from 'mysql2/promise'
+const pool = mysql.createPool('mysql://root@localhost:3306/mydb')
+Bun.serve({ fetch: hitlimit({ store: mysqlStore({ pool }) }, handler) })
 ```
 
 | Store | Ops/sec | Latency | When to use |
@@ -163,6 +178,41 @@ import { dragonflyStore } from '@joint-ops/hitlimit-bun/stores/dragonfly'
 Bun.serve({
   fetch: hitlimit({
     store: dragonflyStore({ url: 'redis://localhost:6379' }),
+    limit: 100,
+    window: '1m'
+  }, handler)
+})
+```
+
+### MongoDB
+```typescript
+import { hitlimit } from '@joint-ops/hitlimit-bun'
+import { mongoStore } from '@joint-ops/hitlimit-bun/stores/mongodb'
+import { MongoClient } from 'mongodb'
+
+const client = new MongoClient('mongodb://localhost:27017')
+const db = client.db('myapp')
+
+Bun.serve({
+  fetch: hitlimit({
+    store: mongoStore({ db }),
+    limit: 100,
+    window: '1m'
+  }, handler)
+})
+```
+
+### MySQL
+```typescript
+import { hitlimit } from '@joint-ops/hitlimit-bun'
+import { mysqlStore } from '@joint-ops/hitlimit-bun/stores/mysql'
+import mysql from 'mysql2/promise'
+
+const pool = mysql.createPool('mysql://root@localhost:3306/mydb')
+
+Bun.serve({
+  fetch: hitlimit({
+    store: mysqlStore({ pool }),
     limit: 100,
     window: '1m'
   }, handler)
