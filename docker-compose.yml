@@ -70,6 +70,41 @@ services:
       - dragonfly
       - all
 
+  mongodb:
+    image: mongo:7-jammy
+    container_name: hitlimit-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: hitlimit_test
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    profiles:
+      - mongodb
+      - all
+
+  mysql:
+    image: mysql:8.4
+    container_name: hitlimit-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: hitlimit
+      MYSQL_DATABASE: hitlimit_test
+      MYSQL_USER: hitlimit
+      MYSQL_PASSWORD: hitlimit
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    profiles:
+      - mysql
+      - all
+
   redis-commander:
     image: rediscommander/redis-commander:latest
     container_name: hitlimit-redis-ui
