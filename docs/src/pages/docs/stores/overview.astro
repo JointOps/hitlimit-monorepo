@@ -4,9 +4,9 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 ---
 
 <DocsLayout
-  title="Rate Limit Stores - hitlimit | Memory, SQLite, Redis, Postgres Storage Backends"
-  description="Choose the right storage backend for your rate limiter. Compare memory, SQLite, Redis, and Postgres stores for persistence, scalability, and performance. Easy migration between stores."
-  keywords="rate limit store, redis rate limiter, sqlite rate limit, postgres rate limiter, memory store, rate limit storage, distributed rate limiting, rate limit backend, persistent rate limit, bun rate limit store"
+  title="Rate Limit Stores - hitlimit | Memory, SQLite, Redis, Postgres, MongoDB, MySQL Storage Backends"
+  description="Choose the right storage backend for your rate limiter. Compare memory, SQLite, Redis, Postgres, MongoDB, and MySQL stores for persistence, scalability, and performance. Easy migration between stores."
+  keywords="rate limit store, redis rate limiter, sqlite rate limit, postgres rate limiter, mongodb rate limiter, mysql rate limiter, memory store, rate limit storage, distributed rate limiting, rate limit backend, persistent rate limit, bun rate limit store"
 >
   <h1>Stores Overview</h1>
 
@@ -26,6 +26,8 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><td><a href="/docs/stores/valkey">Valkey</a></td><td>Yes</td><td>Yes</td><td>Distributed, open-source Redis alternative</td></tr>
         <tr><td><a href="/docs/stores/dragonfly">DragonflyDB</a></td><td>Yes</td><td>Yes</td><td>High-throughput distributed</td></tr>
         <tr><td><a href="/docs/stores/postgres">Postgres</a></td><td>Yes</td><td>Yes</td><td>Distributed, existing Postgres infra</td></tr>
+        <tr><td><a href="/docs/stores/mongodb">MongoDB</a></td><td>Yes</td><td>Yes</td><td>Distributed, NoSQL / MEAN/MERN stacks</td></tr>
+        <tr><td><a href="/docs/stores/mysql">MySQL</a></td><td>Yes</td><td>Yes</td><td>Distributed, LAMP stacks / MariaDB</td></tr>
       </tbody>
     </table>
   </div>
@@ -47,6 +49,8 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
         <tr><td><a href="/docs/stores/valkey">Valkey</a></td><td>Yes</td><td>Yes</td><td>Distributed, open-source — same as Redis</td></tr>
         <tr><td><a href="/docs/stores/dragonfly">DragonflyDB</a></td><td>Yes</td><td>Yes</td><td>High-throughput distributed</td></tr>
         <tr><td><a href="/docs/stores/postgres">Postgres</a></td><td>Yes</td><td>Yes</td><td>Distributed SQL — 3.7K ops/sec</td></tr>
+        <tr><td><a href="/docs/stores/mongodb">MongoDB</a></td><td>Yes</td><td>Yes</td><td>Distributed NoSQL</td></tr>
+        <tr><td><a href="/docs/stores/mysql">MySQL</a></td><td>Yes</td><td>Yes</td><td>Distributed SQL — MySQL/MariaDB</td></tr>
       </tbody>
     </table>
   </div>
@@ -66,6 +70,8 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
     <li><strong>Multiple servers:</strong> Redis ensures consistent rate limiting across all instances</li>
     <li><strong>Multiple servers (open-source):</strong> Valkey provides BSD-licensed distributed rate limiting</li>
     <li><strong>High-throughput distributed:</strong> DragonflyDB's multi-threaded architecture for maximum throughput</li>
+    <li><strong>Existing MongoDB:</strong> MongoDB store for MEAN/MERN stacks with TTL index auto-cleanup</li>
+    <li><strong>Existing MySQL:</strong> MySQL store for LAMP stacks with InnoDB transactions</li>
     <li><strong>Custom requirements:</strong> <a href="/docs/stores/custom">Create your own store</a></li>
   </ul>
 
@@ -104,7 +110,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 {"}"})</code></pre>
   </div>
 
-  <p>All six stores implement the same interface. No changes to your route handlers, middleware, or rate limit logic.</p>
+  <p>All eight stores implement the same interface. No changes to your route handlers, middleware, or rate limit logic.</p>
 </DocsLayout>
 
 <style>

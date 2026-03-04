@@ -25,13 +25,15 @@ const searchData: SearchItem[] = [
   { title: 'Skip/Whitelist', section: 'Configuration', href: '/docs/configuration/skip', content: 'skip whitelist bypass exclude admin routes health check', headings: ['Skip Function', 'Whitelist IPs'], runtime: 'both' },
 
   // Stores
-  { title: 'Overview', section: 'Stores', href: '/docs/stores/overview', content: 'stores storage backend memory redis sqlite postgres persistence distributed', headings: ['Memory', 'Redis', 'SQLite', 'Postgres'], runtime: 'both' },
+  { title: 'Overview', section: 'Stores', href: '/docs/stores/overview', content: 'stores storage backend memory redis sqlite postgres mongodb mysql persistence distributed', headings: ['Memory', 'Redis', 'SQLite', 'Postgres', 'MongoDB', 'MySQL'], runtime: 'both' },
   { title: 'Memory Store', section: 'Stores', href: '/docs/stores/memory', content: 'memory store in-memory default development local single instance', headings: ['Usage', 'Options', 'Limitations'], runtime: 'both' },
   { title: 'SQLite Store', section: 'Stores', href: '/docs/stores/sqlite', content: 'sqlite store database persistent better-sqlite3 file local', headings: ['Installation', 'Usage', 'Options'], runtime: 'both' },
   { title: 'Redis Store', section: 'Stores', href: '/docs/stores/redis', content: 'redis store distributed cluster ioredis scaling production', headings: ['Installation', 'Usage', 'Cluster', 'Options'], runtime: 'both' },
   { title: 'Valkey Store', section: 'Stores', href: '/docs/stores/valkey', content: 'valkey store redis alternative linux foundation distributed ioredis lua scripts open source bsd rate limit aws elasticache', headings: ['What is Valkey', 'Installation', 'Usage', 'Options', 'Migration from Redis', 'Lua Scripts', 'Characteristics'], runtime: 'both' },
   { title: 'DragonflyDB Store', section: 'Stores', href: '/docs/stores/dragonfly', content: 'dragonfly dragonflydb store redis alternative high throughput distributed ioredis lua scripts c++ rewrite multi-threaded parallel rate limit', headings: ['What is DragonflyDB', 'Installation', 'Usage', 'Options', 'Parallel Lua', 'Migration from Redis', 'Characteristics'], runtime: 'both' },
   { title: 'Postgres Store', section: 'Stores', href: '/docs/stores/postgres', content: 'postgres postgresql store distributed pg pool prepared statements sql database', headings: ['Installation', 'Usage', 'Options', 'Schema'], runtime: 'both' },
+  { title: 'MongoDB Store', section: 'Stores', href: '/docs/stores/mongodb', content: 'mongodb mongo store nosql distributed findOneAndUpdate ttl indexes atlas documentdb mean mern rate limit', headings: ['Installation', 'Usage', 'Options', 'TTL Indexes', 'Schema', 'MongoDB Atlas', 'Bun Compatibility', 'Characteristics'], runtime: 'both' },
+  { title: 'MySQL Store', section: 'Stores', href: '/docs/stores/mysql', content: 'mysql mysql2 store sql distributed innodb insert on duplicate key update mariadb planetscale rds lamp rate limit', headings: ['Installation', 'Usage', 'Options', 'Schema', 'MySQL vs PostgreSQL', 'Characteristics'], runtime: 'both' },
   { title: 'Custom Stores', section: 'Stores', href: '/docs/stores/custom', content: 'custom store implementation interface adapter create own', headings: ['Interface', 'Implementation', 'Example'], runtime: 'both' },
 
   // Adapters

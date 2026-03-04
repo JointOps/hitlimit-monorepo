@@ -1,0 +1,134 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
+---
+
+<DocsLayout
+  title="MongoDB Rate Limiting Store - hitlimit | NoSQL Rate Limiter for Node.js & Bun"
+  description="MongoDB store for hitlimit distributed rate limiting. Atomic findOneAndUpdate operations, TTL indexes for auto-cleanup, and connection pooling. Works with MongoDB Atlas, self-hosted, and DocumentDB."
+  keywords="mongodb rate limit, mongodb rate limiter, mongodb throttle, nosql rate limit, mongoose rate limit, mongodb atlas rate limit, mongodb findOneAndUpdate rate limit, mongodb ttl index, bun mongodb rate limit, node mongodb rate limit, distributed rate limiting mongodb, mongodb api protection"
+>
+  <h1>MongoDB Store</h1>
+
+  <p>The MongoDB store enables distributed rate limiting using your existing MongoDB database. Ideal for teams running MEAN/MERN stacks or MongoDB Atlas who want to add rate limiting without introducing Redis or Postgres.</p>
+
+  <h2 id="installation">Installation</h2>
+
+  <p>The MongoDB store requires <code>mongodb</code> as a peer dependency:</p>
+
+  <RuntimeCodeTabs
+    node='npm install mongodb\n<span class="cm"># or: pnpm add mongodb</span>\n<span class="cm"># or: yarn add mongodb</span>'
+    bun='bun add mongodb'
+  />
+
+  <h2 id="usage">Usage</h2>
+
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> { mongoStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/mongodb&#39;</span>\n<span class="kw">import</span> { MongoClient } <span class="kw">from</span> <span class="str">&#39;mongodb&#39;</span>\n\n<span class="kw">const</span> client = <span class="kw">new</span> <span class="fn">MongoClient</span>(<span class="str">&#39;mongodb://localhost:27017&#39;</span>)\n<span class="kw">await</span> client.<span class="fn">connect</span>()\n<span class="kw">const</span> db = client.<span class="fn">db</span>(<span class="str">&#39;myapp&#39;</span>)\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">mongoStore</span>({ db })\n}))'
+    bun='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n<span class="kw">import</span> { mongoStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/mongodb&#39;</span>\n<span class="kw">import</span> { MongoClient } <span class="kw">from</span> <span class="str">&#39;mongodb&#39;</span>\n\n<span class="kw">const</span> client = <span class="kw">new</span> <span class="fn">MongoClient</span>(<span class="str">&#39;mongodb://localhost:27017&#39;</span>)\n<span class="kw">await</span> client.<span class="fn">connect</span>()\n<span class="kw">const</span> db = client.<span class="fn">db</span>(<span class="str">&#39;myapp&#39;</span>)\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">mongoStore</span>({ db })\n})'
+  />
+
+  <h2 id="options">Options</h2>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>db</code></td><td>Db</td><td>-</td><td>A MongoDB <code>Db</code> instance from <code>MongoClient.db()</code> (required)</td></tr>
+      <tr><td><code>collectionPrefix</code></td><td>string</td><td>'hitlimit'</td><td>Prefix for rate limit collection names</td></tr>
+      <tr><td><code>skipIndexCreation</code></td><td>boolean</td><td>false</td><td>Skip automatic TTL and unique index creation on startup</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="ttl-indexes">TTL Indexes</h2>
+
+  <p>
+    The MongoDB store automatically creates <strong>TTL indexes</strong> on all collections. MongoDB's background
+    thread deletes expired documents automatically — no cleanup timers needed.
+  </p>
+
+  <p>Each collection has an <code>expireAt</code> field with a TTL index (<code>expireAfterSeconds: 0</code>). When the <code>expireAt</code> timestamp passes, MongoDB removes the document within ~60 seconds.</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// TTL indexes created automatically:</span>
+{"{"} expireAt: <span class="num">1</span> {"}"}, {"{"} expireAfterSeconds: <span class="num">0</span> {"}"}
+<span class="cm">// Unique key indexes for upsert operations:</span>
+{"{"} key: <span class="num">1</span> {"}"}, {"{"} unique: <span class="kw">true</span> {"}"}</code></pre>
+  </div>
+
+  <h2 id="schema">Schema</h2>
+
+  <p>The store creates three collections (prefix defaults to <code>hitlimit</code>):</p>
+
+  <div class="code-block">
+    <pre><code><span class="cm">// hitlimit_hits</span>
+{"{"} key: <span class="str">"string"</span>, count: <span class="num">number</span>, resetAt: <span class="num">number</span>, expireAt: <span class="str">Date</span> {"}"}
+
+<span class="cm">// hitlimit_bans</span>
+{"{"} key: <span class="str">"string"</span>, expiresAt: <span class="num">number</span>, expireAt: <span class="str">Date</span> {"}"}
+
+<span class="cm">// hitlimit_violations</span>
+{"{"} key: <span class="str">"string"</span>, count: <span class="num">number</span>, resetAt: <span class="num">number</span>, expireAt: <span class="str">Date</span> {"}"}</code></pre>
+  </div>
+
+  <h2 id="mongodb-atlas">MongoDB Atlas</h2>
+
+  <p>Connect to MongoDB Atlas using a connection string:</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">const</span> client = <span class="kw">new</span> <span class="fn">MongoClient</span>(
+  <span class="str">'mongodb+srv://user:password@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority'</span>
+)
+<span class="kw">await</span> client.<span class="fn">connect</span>()
+<span class="kw">const</span> db = client.<span class="fn">db</span>(<span class="str">'myapp'</span>)
+
+<span class="fn">mongoStore</span>({"{"} db {"}"})</code></pre>
+  </div>
+
+  <h2 id="bun-compatibility">Bun Compatibility</h2>
+
+  <p>
+    The <code>mongodb</code> 6.x driver is pure JavaScript and works with Bun, but there are known issues
+    to be aware of:
+  </p>
+
+  <ul>
+    <li><strong>TLS connections may fail</strong> — MongoDB Atlas and other TLS-enabled connections can fail under Bun due to TLS handling differences (Bun issues #17913, #24374). Use localhost or non-TLS connections for Bun.</li>
+    <li><strong>Memory leaks</strong> — Some users report ~8-12MB/hr memory growth with the MongoDB driver on Bun (issue #24118).</li>
+  </ul>
+
+  <p><strong>Recommendation:</strong> For production MongoDB with TLS, use Node.js. For localhost/non-TLS development or testing, Bun works reliably. Node.js has no such limitations.</p>
+
+  <h2 id="characteristics">Characteristics</h2>
+
+  <ul>
+    <li><strong>Persistence:</strong> Full MongoDB durability (journaling, replica sets)</li>
+    <li><strong>Scalability:</strong> Shared across all server instances</li>
+    <li><strong>Atomic:</strong> <code>findOneAndUpdate</code> with aggregation pipeline ensures race-condition-free increments</li>
+    <li><strong>Cleanup:</strong> Automatic via MongoDB TTL indexes (no timers needed)</li>
+    <li><strong>Dependencies:</strong> Requires <code>mongodb</code> driver (>=6.0.0)</li>
+  </ul>
+
+  <h2 id="when-to-use">When to Use</h2>
+
+  <ul>
+    <li>Teams already running MongoDB in production</li>
+    <li>MEAN/MERN stack applications</li>
+    <li>MongoDB Atlas or DocumentDB users</li>
+    <li>When you want distributed rate limiting without adding Redis or Postgres</li>
+    <li>NoSQL-first architectures</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .options-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .options-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .options-table tr:last-child td { border-bottom: none; }
+  .options-table code { background: var(--color-bg-elevated); color: var(--color-accent); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; }
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>
