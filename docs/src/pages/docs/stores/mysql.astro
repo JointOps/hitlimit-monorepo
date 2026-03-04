@@ -1,0 +1,114 @@
+---
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
+---
+
+<DocsLayout
+  title="MySQL Rate Limiting Store - hitlimit | SQL Rate Limiter for Node.js & Bun"
+  description="MySQL store for hitlimit distributed rate limiting. Atomic INSERT ON DUPLICATE KEY UPDATE, InnoDB transactions, and connection pooling via mysql2. Works with MySQL 5.7+, MariaDB, PlanetScale, and AWS RDS."
+  keywords="mysql rate limit, mysql rate limiter, mysql throttle, mysql2 rate limit, sql rate limit, mariadb rate limit, planetscale rate limit, rds mysql rate limit, bun mysql rate limit, node mysql rate limit, distributed rate limiting mysql, mysql api protection"
+>
+  <h1>MySQL Store</h1>
+
+  <p>The MySQL store enables distributed rate limiting using your existing MySQL database. Ideal for teams running LAMP stacks, WordPress infrastructure, or any MySQL-backed application who want to add rate limiting without introducing Redis.</p>
+
+  <h2 id="installation">Installation</h2>
+
+  <p>The MySQL store requires <code>mysql2</code> as a peer dependency:</p>
+
+  <RuntimeCodeTabs
+    node='npm install mysql2\n<span class="cm"># or: pnpm add mysql2</span>\n<span class="cm"># or: yarn add mysql2</span>'
+    bun='bun add mysql2'
+  />
+
+  <h2 id="usage">Usage</h2>
+
+  <RuntimeCodeTabs
+    node='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> { mysqlStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/mysql&#39;</span>\n<span class="kw">import</span> mysql <span class="kw">from</span> <span class="str">&#39;mysql2/promise&#39;</span>\n\n<span class="kw">const</span> pool = mysql.<span class="fn">createPool</span>({\n  host: <span class="str">&#39;localhost&#39;</span>,\n  user: <span class="str">&#39;root&#39;</span>,\n  password: <span class="str">&#39;secret&#39;</span>,\n  database: <span class="str">&#39;myapp&#39;</span>\n})\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">mysqlStore</span>({ pool })\n}))'
+    bun='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n<span class="kw">import</span> { mysqlStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/mysql&#39;</span>\n<span class="kw">import</span> mysql <span class="kw">from</span> <span class="str">&#39;mysql2/promise&#39;</span>\n\n<span class="kw">const</span> pool = mysql.<span class="fn">createPool</span>({\n  host: <span class="str">&#39;localhost&#39;</span>,\n  user: <span class="str">&#39;root&#39;</span>,\n  password: <span class="str">&#39;secret&#39;</span>,\n  database: <span class="str">&#39;myapp&#39;</span>\n})\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">mysqlStore</span>({ pool })\n})'
+  />
+
+  <h2 id="options">Options</h2>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>pool</code></td><td>Pool</td><td>-</td><td>A <code>mysql2/promise</code> Pool instance (required)</td></tr>
+      <tr><td><code>tablePrefix</code></td><td>string</td><td>'hitlimit'</td><td>Prefix for rate limit table names</td></tr>
+      <tr><td><code>cleanupInterval</code></td><td>number</td><td>60000</td><td>Interval (ms) to clean expired entries</td></tr>
+      <tr><td><code>skipTableCreation</code></td><td>boolean</td><td>false</td><td>Skip automatic table creation on startup</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="schema">Schema</h2>
+
+  <p>The store automatically creates the following InnoDB tables (prefix defaults to <code>hitlimit</code>):</p>
+
+  <div class="code-block">
+    <pre><code><span class="kw">CREATE TABLE IF NOT EXISTS</span> hitlimit_hits (
+  `key` <span class="str">VARCHAR(255) NOT NULL PRIMARY KEY</span>,
+  count <span class="str">INT NOT NULL DEFAULT 1</span>,
+  reset_at <span class="str">BIGINT NOT NULL</span>
+) ENGINE=InnoDB
+
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> hitlimit_bans (
+  `key` <span class="str">VARCHAR(255) NOT NULL PRIMARY KEY</span>,
+  expires_at <span class="str">BIGINT NOT NULL</span>
+) ENGINE=InnoDB
+
+<span class="kw">CREATE TABLE IF NOT EXISTS</span> hitlimit_violations (
+  `key` <span class="str">VARCHAR(255) NOT NULL PRIMARY KEY</span>,
+  count <span class="str">INT NOT NULL DEFAULT 1</span>,
+  reset_at <span class="str">BIGINT NOT NULL</span>
+) ENGINE=InnoDB</code></pre>
+  </div>
+
+  <h2 id="mysql-vs-postgres">MySQL vs PostgreSQL</h2>
+
+  <table class="options-table">
+    <thead>
+      <tr><th>Aspect</th><th>MySQL</th><th>PostgreSQL</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Atomicity</strong></td><td><code>INSERT ON DUPLICATE KEY UPDATE</code> + <code>LAST_INSERT_ID()</code></td><td><code>ON CONFLICT DO UPDATE</code> + named prepared statements</td></tr>
+      <tr><td><strong>Cleanup</strong></td><td>Timer-based (<code>DELETE WHERE expired</code>)</td><td>Timer-based (<code>DELETE WHERE expired</code>)</td></tr>
+      <tr><td><strong>Driver</strong></td><td><code>mysql2</code></td><td><code>pg</code></td></tr>
+      <tr><td><strong>Extra infra</strong></td><td>None (use existing DB)</td><td>None (use existing DB)</td></tr>
+      <tr><td><strong>Compatibility</strong></td><td>MySQL 5.7+, MariaDB, PlanetScale</td><td>PostgreSQL 12+</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="characteristics">Characteristics</h2>
+
+  <ul>
+    <li><strong>Persistence:</strong> Full MySQL/InnoDB durability (redo log, replication)</li>
+    <li><strong>Scalability:</strong> Shared across all server instances</li>
+    <li><strong>Atomic:</strong> <code>INSERT ON DUPLICATE KEY UPDATE</code> with <code>LAST_INSERT_ID()</code> ensures race-condition-free increments</li>
+    <li><strong>Cleanup:</strong> Periodic timer deletes expired rows (configurable interval)</li>
+    <li><strong>Dependencies:</strong> Requires <code>mysql2</code> driver (>=3.0.0)</li>
+  </ul>
+
+  <h2 id="when-to-use">When to Use</h2>
+
+  <ul>
+    <li>Teams already running MySQL in production</li>
+    <li>LAMP stack and WordPress-ecosystem applications</li>
+    <li>PlanetScale, AWS RDS, or MariaDB users</li>
+    <li>When you want distributed rate limiting without adding Redis or Postgres</li>
+    <li>MySQL-first architectures with existing connection pools</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .options-table { width: 100%; margin: 1.5rem 0; border-collapse: collapse; border: 1px solid var(--color-border); border-radius: 0.75rem; overflow: hidden; }
+  .options-table th { background: var(--color-bg-surface); text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--color-text-muted); border-bottom: 1px solid var(--color-border); }
+  .options-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); }
+  .options-table tr:last-child td { border-bottom: none; }
+  .options-table code { background: var(--color-bg-elevated); color: var(--color-accent); padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; }
+  .code-block { margin: 1rem 0; border-radius: 0.75rem; border: 1px solid var(--color-border); background: var(--color-bg-surface); overflow: hidden; }
+  .code-block pre { margin: 0; padding: 1rem; overflow-x: auto; font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.7; }
+  .code-block code { background: none !important; border: none !important; padding: 0 !important; }
+  .kw { color: #c792ea; } .str { color: #a6e22e; } .num { color: #fd971f; } .fn { color: #66d9ef; } .cm { color: #71717a; }
+</style>

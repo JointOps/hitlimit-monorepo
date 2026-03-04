@@ -5,9 +5,9 @@ const features = [
   { name: 'Tiered limits (SaaS)', hitlimit: 'Built-in', expressRL: 'Manual', rateFlexible: 'Manual', nestThrottler: 'Per-route', highlight: true },
   { name: 'Bun native support', hitlimit: 'bun:sqlite', expressRL: false, rateFlexible: false, nestThrottler: false, highlight: true },
   { name: 'Auto-ban on abuse', hitlimit: true, expressRL: false, rateFlexible: true, nestThrottler: true },
-  { name: 'Storage backends', hitlimit: '4', expressRL: '5', rateFlexible: '14', nestThrottler: '2' },
+  { name: 'Storage backends', hitlimit: '8', expressRL: '5', rateFlexible: '14', nestThrottler: '2' },
   { name: 'Standard headers', hitlimit: 'Both', expressRL: 'Both', rateFlexible: 'Manual', nestThrottler: 'Legacy' },
-  { name: 'MongoDB / Postgres stores', hitlimit: 'Postgres', expressRL: 'External', rateFlexible: true, nestThrottler: false },
+  { name: 'MongoDB / MySQL / Postgres', hitlimit: true, expressRL: 'External', rateFlexible: true, nestThrottler: false },
   { name: 'Weighted requests', hitlimit: false, expressRL: false, rateFlexible: true, nestThrottler: false, gap: true },
 ] as const;
 
