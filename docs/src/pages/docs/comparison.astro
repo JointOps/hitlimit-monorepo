@@ -388,7 +388,7 @@ const faqSchema = {
 
     <p class="benchmark-note">
       Memory store, 10k unique keys. hitlimit is also fastest on single-IP ({formatOps(n.memory.singleIp.opsPerSec)} vs {formatOps(rlf.memory.singleIp.opsPerSec)} for rate-limiter-flexible).
-      hitlimit also wins all Redis and Postgres scenarios with lower latency and less memory usage.
+      hitlimit also supports MongoDB, Redis, Postgres, and other distributed stores for multi-server deployments.
       These are our benchmarks — we've done our best to keep them fair and reproducible.
       <a href="/docs/benchmarks">See full benchmarks</a> or <a href="https://github.com/JointOps/hitlimit-monorepo">clone and run them yourself</a>.
     </p>
@@ -549,26 +549,26 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
     <div class="store-perf-grid">
       <div class="store-perf-card">
         <div class="store-perf-name">Redis Store</div>
-        <div class="store-perf-ops">{formatOps(b.redis.multi10k.opsPerSec)} <span class="store-perf-unit">ops/s</span></div>
-        <div class="store-perf-latency">{formatLatencyApprox(b.redis.multi10k.latencyAvgNs)} latency</div>
+        <div class="store-perf-ops">Network-bound <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">Network-bound latency</div>
         <div class="store-perf-use">Multi-instance, dedicated cache</div>
       </div>
       <div class="store-perf-card">
         <div class="store-perf-name">Valkey Store</div>
-        <div class="store-perf-ops">~{formatOps(b.redis.multi10k.opsPerSec)} <span class="store-perf-unit">ops/s</span></div>
-        <div class="store-perf-latency">{formatLatencyApprox(b.redis.multi10k.latencyAvgNs)} latency</div>
+        <div class="store-perf-ops">Network-bound <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">Network-bound latency</div>
         <div class="store-perf-use">Open-source Redis alternative (BSD)</div>
       </div>
       <div class="store-perf-card">
         <div class="store-perf-name">DragonflyDB Store</div>
-        <div class="store-perf-ops">~{formatOps(b.redis.multi10k.opsPerSec)} <span class="store-perf-unit">ops/s</span></div>
-        <div class="store-perf-latency">{formatLatencyApprox(b.redis.multi10k.latencyAvgNs)} latency</div>
+        <div class="store-perf-ops">Network-bound <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">Network-bound latency</div>
         <div class="store-perf-use">Multi-threaded, parallel Lua</div>
       </div>
       <div class="store-perf-card">
         <div class="store-perf-name">Postgres Store</div>
-        <div class="store-perf-ops">{formatOps(b.postgres.multi10k.opsPerSec)} <span class="store-perf-unit">ops/s</span></div>
-        <div class="store-perf-latency">{formatLatencyApprox(b.postgres.multi10k.latencyAvgNs)} latency</div>
+        <div class="store-perf-ops">Network-bound <span class="store-perf-unit">ops/s</span></div>
+        <div class="store-perf-latency">Network-bound latency</div>
         <div class="store-perf-use">Use your existing database</div>
       </div>
     </div>
@@ -728,7 +728,7 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
           </tr>
           <tr>
             <td>Multi-server / distributed</td>
-            <td class="good">Redis — {formatOps(b.redis.multi10k.opsPerSec)} ops/sec, Lua scripts</td>
+            <td class="good">Redis — Network-bound, Lua scripts</td>
           </tr>
           <tr>
             <td>Multi-server / open-source</td>
@@ -740,7 +740,7 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
           </tr>
           <tr>
             <td>Multi-server / distributed (SQL)</td>
-            <td class="good">Postgres — {formatOps(b.postgres.multi10k.opsPerSec)} ops/sec</td>
+            <td class="good">Postgres — Network-bound</td>
           </tr>
           <tr>
             <td>Elysia plugin</td>

@@ -29,8 +29,8 @@ const env = bench.environment;
       <tbody>
         <tr><td>Single server, many unique IPs</td><td><strong>Memory</strong> (default)</td><td class="highlight">{opsRange(n.memory.multi10k.opsPerSec, n.memory.singleIp.opsPerSec)} ops/sec</td></tr>
         <tr><td>Need persistence, single server</td><td><strong>SQLite</strong></td><td class="highlight">{opsRange(n.sqlite.multi10k.opsPerSec, n.sqlite.singleIp.opsPerSec)} ops/sec</td></tr>
-        <tr><td>Multiple servers (distributed)</td><td><strong>Redis</strong></td><td class="highlight">{opsRangeDecimal(n.redis.multi10k.opsPerSec, n.redis.multi1k.opsPerSec)} ops/sec</td></tr>
-        <tr><td>Multiple servers (distributed, SQL)</td><td><strong>Postgres</strong></td><td class="highlight">{opsRangeDecimal(n.postgres.multi10k.opsPerSec, n.postgres.singleIp.opsPerSec)} ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed, document DB)</td><td><strong>MongoDB</strong></td><td class="highlight">{opsRangeDecimal(n.mongodb.multi10k.opsPerSec, n.mongodb.singleIp.opsPerSec)} ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed)</td><td><strong>Redis / Postgres / MySQL</strong></td><td>Network-bound (~200-3,500 ops/sec)</td></tr>
       </tbody>
     </table>
   </div>
@@ -43,8 +43,7 @@ const env = bench.environment;
       <tbody>
         <tr><td>Single server, many unique IPs</td><td><strong>Memory</strong> (default)</td><td class="highlight">{opsRange(b.memory.multi10k.opsPerSec, b.memory.singleIp.opsPerSec)} ops/sec</td></tr>
         <tr><td>Need persistence, single server</td><td><strong>bun:sqlite</strong></td><td class="highlight">{opsRange(b.sqlite.multi10k.opsPerSec, b.sqlite.singleIp.opsPerSec)} ops/sec</td></tr>
-        <tr><td>Multiple servers (distributed)</td><td><strong>Redis</strong></td><td class="highlight">{formatOps(b.redis.multi10k.opsPerSec)} ops/sec</td></tr>
-        <tr><td>Multiple servers (distributed, SQL)</td><td><strong>Postgres</strong></td><td class="highlight">{formatOps(b.postgres.multi10k.opsPerSec)} ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed)</td><td><strong>Redis / Postgres / MongoDB</strong></td><td>Network-bound (~200-3,500 ops/sec)</td></tr>
       </tbody>
     </table>
   </div>
@@ -56,6 +55,7 @@ const env = bench.environment;
     <pre><code>Machine:    {env.cpu} ({env.arch}, {env.ram})
 Node.js:    {env.nodeVersion}
 Bun:        {env.bunVersion}
+MongoDB:    Docker, localhost
 Redis:      {env.redisVersion} (Docker, localhost)
 Postgres:   {env.postgresVersion} (Docker, localhost)
 
@@ -114,66 +114,47 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
       </div>
     </div>
 
-    <h2 id="redis-store">Redis Store</h2>
+    <h2 id="mongodb-store">MongoDB Store</h2>
 
     <p>
-      Redis operations use atomic Lua scripts via <code>defineCommand()</code> for single round-trip performance.
-      hitlimit wins all three scenarios with lower latency across the board.
+      MongoDB operations use atomic <code>$inc</code> + <code>$setOnInsert</code> upserts with TTL indexes for automatic cleanup.
+      Both hitlimit and rate-limiter-flexible use the same optimized approach, resulting in comparable performance.
     </p>
 
     <table class="benchmark-table">
       <thead><tr><th>Library</th><th>Scenario</th><th>ops/sec</th><th>Latency</th><th>vs Fastest</th></tr></thead>
       <tbody>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>single-ip</td><td><strong>{formatOps(n.redis.singleIp.opsPerSec)}</strong></td><td>{formatLatency(n.redis.singleIp.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>single-ip</td><td>{formatOps(rlf.redis.singleIp.opsPerSec)}</td><td>{formatLatency(rlf.redis.singleIp.latencyAvgNs)}</td><td>{pctOfFastest(rlf.redis.singleIp.opsPerSec, n.redis.singleIp.opsPerSec)}</td></tr>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-1k</td><td><strong>{formatOps(n.redis.multi1k.opsPerSec)}</strong></td><td>{formatLatency(n.redis.multi1k.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>multi-1k</td><td>{formatOps(rlf.redis.multi1k.opsPerSec)}</td><td>{formatLatency(rlf.redis.multi1k.latencyAvgNs)}</td><td>{pctOfFastest(rlf.redis.multi1k.opsPerSec, n.redis.multi1k.opsPerSec)}</td></tr>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-10k</td><td><strong>{formatOps(n.redis.multi10k.opsPerSec)}</strong></td><td>{formatLatency(n.redis.multi10k.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>multi-10k</td><td>{formatOps(rlf.redis.multi10k.opsPerSec)}</td><td>{formatLatency(rlf.redis.multi10k.latencyAvgNs)}</td><td>{pctOfFastest(rlf.redis.multi10k.opsPerSec, n.redis.multi10k.opsPerSec)}</td></tr>
+        <tr><td><strong>hitlimit</strong></td><td>single-ip</td><td><strong>{formatOps(n.mongodb.singleIp.opsPerSec)}</strong></td><td>{formatLatency(n.mongodb.singleIp.latencyAvgNs)}</td><td>{pctOfFastest(n.mongodb.singleIp.opsPerSec, Math.max(n.mongodb.singleIp.opsPerSec, rlf.mongodb.singleIp.opsPerSec))}</td></tr>
+        <tr><td>rate-limiter-flexible</td><td>single-ip</td><td>{formatOps(rlf.mongodb.singleIp.opsPerSec)}</td><td>{formatLatency(rlf.mongodb.singleIp.latencyAvgNs)}</td><td>{pctOfFastest(rlf.mongodb.singleIp.opsPerSec, Math.max(n.mongodb.singleIp.opsPerSec, rlf.mongodb.singleIp.opsPerSec))}</td></tr>
+        <tr><td><strong>hitlimit</strong></td><td>multi-1k</td><td><strong>{formatOps(n.mongodb.multi1k.opsPerSec)}</strong></td><td>{formatLatency(n.mongodb.multi1k.latencyAvgNs)}</td><td>{pctOfFastest(n.mongodb.multi1k.opsPerSec, Math.max(n.mongodb.multi1k.opsPerSec, rlf.mongodb.multi1k.opsPerSec))}</td></tr>
+        <tr><td>rate-limiter-flexible</td><td>multi-1k</td><td>{formatOps(rlf.mongodb.multi1k.opsPerSec)}</td><td>{formatLatency(rlf.mongodb.multi1k.latencyAvgNs)}</td><td>{pctOfFastest(rlf.mongodb.multi1k.opsPerSec, Math.max(n.mongodb.multi1k.opsPerSec, rlf.mongodb.multi1k.opsPerSec))}</td></tr>
+        <tr><td><strong>hitlimit</strong></td><td>multi-10k</td><td><strong>{formatOps(n.mongodb.multi10k.opsPerSec)}</strong></td><td>{formatLatency(n.mongodb.multi10k.latencyAvgNs)}</td><td>{pctOfFastest(n.mongodb.multi10k.opsPerSec, Math.max(n.mongodb.multi10k.opsPerSec, rlf.mongodb.multi10k.opsPerSec))}</td></tr>
+        <tr><td>rate-limiter-flexible</td><td>multi-10k</td><td>{formatOps(rlf.mongodb.multi10k.opsPerSec)}</td><td>{formatLatency(rlf.mongodb.multi10k.latencyAvgNs)}</td><td>{pctOfFastest(rlf.mongodb.multi10k.opsPerSec, Math.max(n.mongodb.multi10k.opsPerSec, rlf.mongodb.multi10k.opsPerSec))}</td></tr>
       </tbody>
     </table>
 
     <div class="callout">
-      <strong>Key Insight:</strong> Both libraries use atomic Lua scripts via ioredis <code>defineCommand()</code> for SHA caching and single round-trip performance.
-      hitlimit wins all three scenarios — 18% faster on single-ip and multi-1k, 5% faster on multi-10k. hitlimit also uses significantly less memory (4.9MB vs 29-55MB for RLF).
+      <strong>Key Insight:</strong> Both hitlimit and rate-limiter-flexible use atomic <code>$inc</code> + <code>$setOnInsert</code> operators for MongoDB, resulting in nearly identical performance.
+      The bottleneck is MongoDB network/query latency (~{formatLatency(n.mongodb.singleIp.latencyAvgNs)}), not library overhead.
+      For remote MongoDB, expect 200-1,000 ops/sec depending on network latency.
     </div>
 
-    <p class="benchmark-note">
-      Redis throughput is limited by network latency ({formatLatencyApprox(n.redis.singleIp.latencyAvgNs)} local Docker).
-      For remote Redis, expect 200-1000 ops/sec.
-    </p>
-
-    <h2 id="postgres-store">Postgres Store</h2>
-    <p>
-      Postgres operations use atomic INSERT...ON CONFLICT upserts with named prepared statements.
-      hitlimit wins all three scenarios with lower latency and better memory usage.
-    </p>
-
-    <table class="benchmark-table">
-      <thead><tr><th>Library</th><th>Scenario</th><th>ops/sec</th><th>Latency</th><th>vs Fastest</th></tr></thead>
-      <tbody>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>single-ip</td><td><strong>{formatOps(n.postgres.singleIp.opsPerSec)}</strong></td><td>{formatLatency(n.postgres.singleIp.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>single-ip</td><td>{formatOps(rlf.postgres.singleIp.opsPerSec)}</td><td>{formatLatency(rlf.postgres.singleIp.latencyAvgNs)}</td><td>{pctOfFastest(rlf.postgres.singleIp.opsPerSec, n.postgres.singleIp.opsPerSec)}</td></tr>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-1k</td><td><strong>{formatOps(n.postgres.multi1k.opsPerSec)}</strong></td><td>{formatLatency(n.postgres.multi1k.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>multi-1k</td><td>{formatOps(rlf.postgres.multi1k.opsPerSec)}</td><td>{formatLatency(rlf.postgres.multi1k.latencyAvgNs)}</td><td>{pctOfFastest(rlf.postgres.multi1k.opsPerSec, n.postgres.multi1k.opsPerSec)}</td></tr>
-        <tr class="winner hitlimit-win"><td><strong>hitlimit</strong></td><td>multi-10k</td><td><strong>{formatOps(n.postgres.multi10k.opsPerSec)}</strong></td><td>{formatLatency(n.postgres.multi10k.latencyAvgNs)}</td><td><strong>fastest</strong></td></tr>
-        <tr><td>rate-limiter-flexible</td><td>multi-10k</td><td>{formatOps(rlf.postgres.multi10k.opsPerSec)}</td><td>{formatLatency(rlf.postgres.multi10k.latencyAvgNs)}</td><td>{pctOfFastest(rlf.postgres.multi10k.opsPerSec, n.postgres.multi10k.opsPerSec)}</td></tr>
-      </tbody>
-    </table>
+    <h2 id="redis-postgres-stores">Redis &amp; Postgres Stores</h2>
 
     <p class="benchmark-note">
-      Postgres throughput is limited by query latency (~280-300μs local Docker).
-      hitlimit uses named prepared statements for server-side query plan caching.
+      Redis and Postgres benchmarks are coming soon. Both stores are fully supported and use atomic operations
+      (Lua scripts for Redis, INSERT...ON CONFLICT upserts for Postgres).
+      Performance is network-bound, typically 200-3,500 ops/sec on localhost Docker.
     </p>
 
     <h2 id="store-support">Store Support Comparison</h2>
 
     <table>
-      <thead><tr><th>Library</th><th>Memory</th><th>SQLite</th><th>Redis</th><th>Postgres</th></tr></thead>
+      <thead><tr><th>Library</th><th>Memory</th><th>SQLite</th><th>Redis</th><th>Postgres</th><th>MongoDB</th></tr></thead>
       <tbody>
-        <tr><td>hitlimit</td><td class="good">Built-in</td><td class="good">Built-in</td><td class="good">Built-in</td><td class="good">Built-in</td></tr>
-        <tr><td>express-rate-limit</td><td class="good">Built-in</td><td class="bad">No</td><td class="warn">External</td><td class="bad">No</td></tr>
-        <tr><td>rate-limiter-flexible</td><td class="good">Built-in</td><td class="bad">No</td><td class="good">Built-in</td><td class="good">Built-in</td></tr>
+        <tr><td>hitlimit</td><td class="good">Built-in</td><td class="good">Built-in</td><td class="good">Built-in</td><td class="good">Built-in</td><td class="good">Built-in</td></tr>
+        <tr><td>express-rate-limit</td><td class="good">Built-in</td><td class="bad">No</td><td class="warn">External</td><td class="bad">No</td><td class="bad">No</td></tr>
+        <tr><td>rate-limiter-flexible</td><td class="good">Built-in</td><td class="bad">No</td><td class="good">Built-in</td><td class="good">Built-in</td><td class="good">Built-in</td></tr>
       </tbody>
     </table>
 
@@ -230,21 +211,20 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <h2 id="redis-store-bun">Redis Store</h2>
 
     <p>
-      Atomic Lua scripts (EVALSHA) — single round-trip per request. Same Redis protocol, same performance.
+      Atomic Lua scripts (EVALSHA) — single round-trip per request. Performance is network-bound.
     </p>
 
     <div class="benchmark-result bun">
       <div class="benchmark-header">Redis Store (Bun)</div>
       <div class="benchmark-stats">
-        <div class="stat"><span class="stat-value">{formatOps(b.redis.multi10k.opsPerSec)}</span><span class="stat-label">ops/sec</span></div>
-        <div class="stat"><span class="stat-value">{formatLatency(b.redis.multi10k.latencyAvgNs)}</span><span class="stat-label">avg latency</span></div>
+        <div class="stat"><span class="stat-value">Network-bound</span><span class="stat-label">~200-3,500 ops/sec</span></div>
         <div class="stat"><span class="stat-value">1</span><span class="stat-label">round-trip per request</span></div>
       </div>
     </div>
 
     <p class="benchmark-note">
-      Redis throughput is limited by network latency ({formatLatencyApprox(b.redis.multi10k.latencyAvgNs)} local Docker).
-      For remote Redis, expect 200-1000 ops/sec.
+      Redis throughput is limited by network latency (~300-500μs local Docker).
+      For remote Redis, expect 200-1,000 ops/sec. Bun benchmarks for Redis coming soon.
     </p>
 
     <h2 id="postgres-store-bun">Postgres Store</h2>
@@ -253,10 +233,14 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
     <div class="benchmark-result bun">
       <div class="benchmark-header">Postgres Store (Bun)</div>
       <div class="benchmark-stats">
-        <div class="stat"><span class="stat-value">{formatOps(b.postgres.multi10k.opsPerSec)}</span><span class="stat-label">ops/sec</span></div>
-        <div class="stat"><span class="stat-value">{formatLatency(b.postgres.multi10k.latencyAvgNs)}</span><span class="stat-label">avg latency</span></div>
+        <div class="stat"><span class="stat-value">Network-bound</span><span class="stat-label">~200-3,500 ops/sec</span></div>
       </div>
     </div>
+
+    <p class="benchmark-note">
+      Postgres throughput is limited by query latency (~280-300μs local Docker).
+      Bun benchmarks for Postgres coming soon.
+    </p>
 
     <h2 id="store-support-bun">All Four Stores — Built In</h2>
 
@@ -265,8 +249,9 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
       <tbody>
         <tr><td>Memory</td><td class="good">Built-in</td><td class="highlight">{formatOps(b.memory.multi10k.opsPerSec)} ops/sec</td><td>Single server, ephemeral</td></tr>
         <tr><td>bun:sqlite</td><td class="good">Built-in (native)</td><td class="highlight">{formatOps(b.sqlite.multi10k.opsPerSec)} ops/sec</td><td>Single server, persistent</td></tr>
-        <tr><td>Redis</td><td class="good">Built-in</td><td class="highlight">{formatOps(b.redis.multi10k.opsPerSec)} ops/sec</td><td>Multi-server, distributed</td></tr>
-        <tr><td>Postgres</td><td class="good">Built-in</td><td class="highlight">{formatOps(b.postgres.multi10k.opsPerSec)} ops/sec</td><td>Multi-server, distributed (SQL)</td></tr>
+        <tr><td>Redis</td><td class="good">Built-in</td><td>Network-bound</td><td>Multi-server, distributed</td></tr>
+        <tr><td>Postgres</td><td class="good">Built-in</td><td>Network-bound</td><td>Multi-server, distributed (SQL)</td></tr>
+        <tr><td>MongoDB</td><td class="good">Built-in</td><td>Network-bound</td><td>Multi-server, distributed (document DB)</td></tr>
       </tbody>
     </table>
   </div>
@@ -293,7 +278,7 @@ pnpm bench:node</code></pre>
     <div class="callout note">
       <strong>Note:</strong> These are our benchmarks and we've done our best to keep them fair and reproducible. Results vary by hardware and environment.
       hitlimit is the fastest in ALL memory scenarios — ~{speedup(n.memory.singleIp.opsPerSec, rlf.memory.singleIp.opsPerSec)} faster than rate-limiter-flexible on single-IP ({formatOps(n.memory.singleIp.opsPerSec)} vs {formatOps(rlf.memory.singleIp.opsPerSec)}) and ~{speedup(n.memory.multi10k.opsPerSec, rlf.memory.multi10k.opsPerSec)} faster on high-traffic 10K IPs ({formatOps(n.memory.multi10k.opsPerSec)} vs {formatOps(rlf.memory.multi10k.opsPerSec)}).
-      hitlimit also wins all Redis and Postgres scenarios — with 18% faster Redis throughput and significantly lower memory usage.
+      For MongoDB, both libraries perform comparably since both use the same atomic upsert pattern. Redis and Postgres benchmarks are coming soon.
       They're not set in stone — there's always room for improvement. If you spot issues or have suggestions, please <a href="https://github.com/JointOps/hitlimit-monorepo/issues">open an issue</a>.
     </div>
   </div>
