@@ -24,55 +24,55 @@
     "runs": 5,
     "totalMeasured": 250000
   },
-  "date": "2026-03-09T07:01:48.217Z",
+  "date": "2026-03-09T09:50:55.991Z",
   "scenarios": {
     "single-ip": {
       "description": "Single IP, best cache locality",
       "keys": 1,
-      "memoryMB": 4.13,
-      "opsPerSec": 298336,
+      "memoryMB": 4.11,
+      "opsPerSec": 295266,
       "latency": {
-        "avgNs": 3352,
+        "avgNs": 3387,
         "p50Ns": 3041,
-        "p95Ns": 4084,
-        "p99Ns": 7375,
-        "minNs": 2792,
-        "maxNs": 205333
+        "p95Ns": 4917,
+        "p99Ns": 6708,
+        "minNs": 2833,
+        "maxNs": 256209
       },
-      "stdDev": 2621.21,
-      "marginOfError": 10.28
+      "stdDev": 1994.19,
+      "marginOfError": 7.82
     },
     "multi-ip-1k": {
       "description": "1,000 unique IPs, typical API",
       "keys": 1000,
-      "memoryMB": 12.09,
-      "opsPerSec": 248179,
+      "memoryMB": 12.15,
+      "opsPerSec": 248738,
       "latency": {
-        "avgNs": 4029,
-        "p50Ns": 3542,
-        "p95Ns": 6375,
-        "p99Ns": 8500,
-        "minNs": 3125,
-        "maxNs": 625584
+        "avgNs": 4020,
+        "p50Ns": 3500,
+        "p95Ns": 6292,
+        "p99Ns": 10375,
+        "minNs": 3167,
+        "maxNs": 3720834
       },
-      "stdDev": 3104.99,
-      "marginOfError": 12.17
+      "stdDev": 11350.17,
+      "marginOfError": 44.49
     },
     "multi-ip-10k": {
       "description": "10,000 unique IPs, high traffic",
       "keys": 10000,
-      "memoryMB": 37.13,
-      "opsPerSec": 231169,
+      "memoryMB": 37.14,
+      "opsPerSec": 228638,
       "latency": {
-        "avgNs": 4326,
-        "p50Ns": 3833,
-        "p95Ns": 6542,
-        "p99Ns": 9750,
+        "avgNs": 4374,
+        "p50Ns": 3791,
+        "p95Ns": 7333,
+        "p99Ns": 10709,
         "minNs": 3250,
-        "maxNs": 1701833
+        "maxNs": 1956208
       },
-      "stdDev": 5939.1,
-      "marginOfError": 23.28
+      "stdDev": 5695.96,
+      "marginOfError": 22.33
     }
   }
 }

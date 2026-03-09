@@ -7,38 +7,38 @@ const bunOps = formatOps(bench.bun.memory.singleIp.opsPerSec);
 const features = [
   {
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    title: 'Every Runtime',
-    description: `First-class support for Node.js (${nodeOps} ops/sec) and Bun (${bunOps} ops/sec). Same API, same config. One library for every JavaScript runtime.`,
+    title: 'Benchmarked, Not Claimed',
+    description: `${nodeOps} ops/sec on Node.js. ${bunOps} ops/sec on Bun. Single-core, reproducible benchmarks you can run yourself.`,
     color: 'cyan',
   },
   {
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    title: 'Zero Config',
-    description: 'One line to start. Sensible defaults for everything. Human-readable time windows like \'15m\' and \'1h\'.',
+    title: 'One Line to Protect',
+    description: `hitlimit({ limit: 100, window: '1m' }) — that's your entire setup. Human-readable windows, sensible defaults, done.`,
     color: 'purple',
   },
   {
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></svg>`,
-    title: 'Tiny Bundle',
-    description: `${bench.bundleSize.node.core} core (Node.js) / ${bench.bundleSize.bun.core} (Bun). Tree-shakeable. Zero runtime dependencies.`,
+    title: 'Ships Nothing Extra',
+    description: `${bench.bundleSize.node.core} core bundle. Zero runtime dependencies. Tree-shakeable — you only pay for what you import.`,
     color: 'cyan',
   },
   {
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>`,
-    title: 'Tiered Limits',
-    description: 'Free, Pro, Enterprise tiers built-in. No extra code needed. Perfect for SaaS applications.',
+    title: 'Built-in SaaS Tiers',
+    description: 'Define Free, Pro, and Enterprise limits in one config object. No manual routing, no separate middleware instances.',
     color: 'purple',
   },
   {
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`,
-    title: '8 Framework Adapters',
-    description: 'Express, Fastify, Hono, NestJS, Node.js HTTP, Bun.serve, Elysia. Built-in adapters that work out of the box.',
+    title: 'Your Framework, Covered',
+    description: '8 built-in adapters: Express, Fastify, Hono, NestJS, Node.js HTTP, Bun.serve, Elysia. Drop in and go.',
     color: 'cyan',
   },
   {
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    title: 'Fail Safe',
-    description: 'Per-request error handling. Decide fail-open or fail-closed for each endpoint. Critical routes stay protected.',
+    title: 'Auto-Ban Abusers',
+    description: 'Automatic ban escalation for repeat offenders. Configurable thresholds and durations. Your API fights back.',
     color: 'purple',
   },
 ];
@@ -49,10 +49,10 @@ const features = [
     <!-- Section header -->
     <div class="text-center mb-16 reveal">
       <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-        Everything you need to <span class="gradient-text">protect your APIs</span>
+        Why teams <span class="gradient-text">switch to hitlimit</span>
       </h2>
       <p class="text-lg text-[var(--color-text-secondary)] max-w-2xl mx-auto">
-        Built for performance, designed for developers. Rate limiting that doesn't slow you down.
+        Less code, faster throughput, and every store from memory to Postgres. Here's what you get out of the box.
       </p>
     </div>
 

@@ -21,6 +21,7 @@ class BunSqliteStore implements HitLimitStore {
 
   constructor(options: SqliteStoreOptions = {}) {
     this.db = new Database(options.path ?? ':memory:')
+    this.db.exec('PRAGMA journal_mode = WAL')
 
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS hitlimit (

@@ -24,55 +24,55 @@
     "runs": 5,
     "totalMeasured": 250000
   },
-  "date": "2026-03-09T07:00:27.064Z",
+  "date": "2026-03-09T09:49:17.024Z",
   "scenarios": {
     "single-ip": {
       "description": "Single IP, best cache locality",
       "keys": 1,
-      "memoryMB": 5.31,
-      "opsPerSec": 176930,
+      "memoryMB": 6.17,
+      "opsPerSec": 188517,
       "latency": {
-        "avgNs": 5652,
-        "p50Ns": 4458,
-        "p95Ns": 8959,
-        "p99Ns": 17250,
-        "minNs": 3875,
-        "maxNs": 774917
+        "avgNs": 5305,
+        "p50Ns": 4333,
+        "p95Ns": 8583,
+        "p99Ns": 16000,
+        "minNs": 3916,
+        "maxNs": 483750
       },
-      "stdDev": 6313.38,
-      "marginOfError": 24.75
+      "stdDev": 4521.07,
+      "marginOfError": 17.72
     },
     "multi-ip-1k": {
       "description": "1,000 unique IPs, typical API",
       "keys": 1000,
-      "memoryMB": 6.61,
-      "opsPerSec": 176429,
+      "memoryMB": 14.58,
+      "opsPerSec": 181182,
       "latency": {
-        "avgNs": 5668,
-        "p50Ns": 4625,
-        "p95Ns": 8958,
-        "p99Ns": 15292,
-        "minNs": 3958,
-        "maxNs": 638000
+        "avgNs": 5519,
+        "p50Ns": 4583,
+        "p95Ns": 8875,
+        "p99Ns": 16667,
+        "minNs": 4083,
+        "maxNs": 750958
       },
-      "stdDev": 5347.4,
-      "marginOfError": 20.96
+      "stdDev": 4890.59,
+      "marginOfError": 19.17
     },
     "multi-ip-10k": {
       "description": "10,000 unique IPs, high traffic",
       "keys": 10000,
-      "memoryMB": 14.4,
-      "opsPerSec": 173276,
+      "memoryMB": 14.99,
+      "opsPerSec": 185262,
       "latency": {
-        "avgNs": 5771,
-        "p50Ns": 4875,
+        "avgNs": 5398,
+        "p50Ns": 4583,
         "p95Ns": 8334,
-        "p99Ns": 14209,
-        "minNs": 4208,
-        "maxNs": 608208
+        "p99Ns": 14167,
+        "minNs": 4000,
+        "maxNs": 830625
       },
-      "stdDev": 5236.33,
-      "marginOfError": 20.53
+      "stdDev": 4578.84,
+      "marginOfError": 17.95
     }
   }
 }

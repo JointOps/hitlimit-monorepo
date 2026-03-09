@@ -24,55 +24,55 @@
     "runs": 5,
     "totalMeasured": 250000
   },
-  "date": "2026-03-09T07:01:40.909Z",
+  "date": "2026-03-09T09:50:48.682Z",
   "scenarios": {
     "single-ip": {
       "description": "Single IP, best cache locality",
       "keys": 1,
-      "memoryMB": 5.25,
-      "opsPerSec": 110223,
+      "memoryMB": 5.2,
+      "opsPerSec": 115386,
       "latency": {
-        "avgNs": 9072,
-        "p50Ns": 7667,
-        "p95Ns": 12292,
-        "p99Ns": 24667,
-        "minNs": 6875,
-        "maxNs": 23852250
+        "avgNs": 8667,
+        "p50Ns": 7500,
+        "p95Ns": 12125,
+        "p99Ns": 22125,
+        "minNs": 6917,
+        "maxNs": 679500
       },
-      "stdDev": 49346.66,
-      "marginOfError": 193.44
+      "stdDev": 5041.53,
+      "marginOfError": 19.76
     },
     "multi-ip-1k": {
       "description": "1,000 unique IPs, typical API",
       "keys": 1000,
-      "memoryMB": 5.79,
-      "opsPerSec": 108323,
+      "memoryMB": 5.8,
+      "opsPerSec": 113163,
       "latency": {
-        "avgNs": 9232,
-        "p50Ns": 8208,
-        "p95Ns": 12000,
-        "p99Ns": 21500,
-        "minNs": 7416,
-        "maxNs": 1145542
+        "avgNs": 8837,
+        "p50Ns": 7875,
+        "p95Ns": 11875,
+        "p99Ns": 20917,
+        "minNs": 7333,
+        "maxNs": 625666
       },
-      "stdDev": 6558.23,
-      "marginOfError": 25.71
+      "stdDev": 4623.53,
+      "marginOfError": 18.12
     },
     "multi-ip-10k": {
       "description": "10,000 unique IPs, high traffic",
       "keys": 10000,
       "memoryMB": 5.45,
-      "opsPerSec": 107890,
+      "opsPerSec": 110683,
       "latency": {
-        "avgNs": 9269,
-        "p50Ns": 8250,
-        "p95Ns": 11959,
-        "p99Ns": 24459,
-        "minNs": 7541,
-        "maxNs": 923583
+        "avgNs": 9035,
+        "p50Ns": 8125,
+        "p95Ns": 11833,
+        "p99Ns": 22583,
+        "minNs": 7458,
+        "maxNs": 750750
       },
-      "stdDev": 6331.62,
-      "marginOfError": 24.82
+      "stdDev": 4987.12,
+      "marginOfError": 19.55
     }
   }
 }

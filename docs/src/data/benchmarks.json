@@ -6,23 +6,23 @@
     "arch": "ARM64",
     "ram": "16GB",
     "nodeVersion": "v24.14.0",
-    "bunVersion": "v1.3.7",
+    "bunVersion": "v1.3.10",
     "redisVersion": "7.x",
     "postgresVersion": "16.x"
   },
   "node": {
     "memory": {
       "singleIp": {
-        "opsPerSec": 8375397,
-        "latencyAvgNs": 119
+        "opsPerSec": 5956655,
+        "latencyAvgNs": 168
       },
       "multi1k": {
-        "opsPerSec": 5387611,
-        "latencyAvgNs": 186
+        "opsPerSec": 4504636,
+        "latencyAvgNs": 222
       },
       "multi10k": {
-        "opsPerSec": 5206854,
-        "latencyAvgNs": 192,
+        "opsPerSec": 4082874,
+        "latencyAvgNs": 245,
         "memoryMB": 5.07
       }
     },
@@ -43,16 +43,16 @@
     },
     "sqlite": {
       "singleIp": {
-        "opsPerSec": 523978,
-        "latencyAvgNs": 1908
+        "opsPerSec": 497353,
+        "latencyAvgNs": 2011
       },
       "multi1k": {
-        "opsPerSec": 403406,
-        "latencyAvgNs": 2479
+        "opsPerSec": 416456,
+        "latencyAvgNs": 2401
       },
       "multi10k": {
-        "opsPerSec": 395399,
-        "latencyAvgNs": 2529,
+        "opsPerSec": 404135,
+        "latencyAvgNs": 2474,
         "memoryMB": 15.41
       }
     }
@@ -60,30 +60,30 @@
   "bun": {
     "memory": {
       "singleIp": {
-        "opsPerSec": 6409566,
-        "latencyAvgNs": 156
+        "opsPerSec": 7728773,
+        "latencyAvgNs": 129
       },
       "multi1k": {
-        "opsPerSec": 5615442,
-        "latencyAvgNs": 178
+        "opsPerSec": 5939488,
+        "latencyAvgNs": 168
       },
       "multi10k": {
-        "opsPerSec": 6058830,
-        "latencyAvgNs": 165
+        "opsPerSec": 5574103,
+        "latencyAvgNs": 179
       }
     },
     "sqlite": {
       "singleIp": {
-        "opsPerSec": 386118,
-        "latencyAvgNs": 2590
+        "opsPerSec": 469149,
+        "latencyAvgNs": 2132
       },
       "multi1k": {
-        "opsPerSec": 350440,
-        "latencyAvgNs": 2854
+        "opsPerSec": 376660,
+        "latencyAvgNs": 2655
       },
       "multi10k": {
-        "opsPerSec": 340622,
-        "latencyAvgNs": 2936
+        "opsPerSec": 372247,
+        "latencyAvgNs": 2686
       }
     }
   },
@@ -91,17 +91,17 @@
     "rateLimiterFlexible": {
       "memory": {
         "singleIp": {
-          "opsPerSec": 2450605,
-          "latencyAvgNs": 408
+          "opsPerSec": 2058682,
+          "latencyAvgNs": 486
         },
         "multi1k": {
-          "opsPerSec": 1923818,
-          "latencyAvgNs": 520
+          "opsPerSec": 1577814,
+          "latencyAvgNs": 634
         },
         "multi10k": {
-          "opsPerSec": 1449640,
-          "latencyAvgNs": 690,
-          "memoryMB": 14.59
+          "opsPerSec": 1261659,
+          "latencyAvgNs": 793,
+          "memoryMB": 14.62
         }
       },
       "mongodb": {
@@ -123,17 +123,17 @@
     "expressRateLimit": {
       "memory": {
         "singleIp": {
-          "opsPerSec": 1196529,
-          "latencyAvgNs": 836
+          "opsPerSec": 1223856,
+          "latencyAvgNs": 817
         },
         "multi1k": {
-          "opsPerSec": 1105447,
-          "latencyAvgNs": 905
+          "opsPerSec": 926290,
+          "latencyAvgNs": 1080
         },
         "multi10k": {
-          "opsPerSec": 892379,
-          "latencyAvgNs": 1121,
-          "memoryMB": 8.29
+          "opsPerSec": 824030,
+          "latencyAvgNs": 1214,
+          "memoryMB": 6.34
         }
       }
     }
