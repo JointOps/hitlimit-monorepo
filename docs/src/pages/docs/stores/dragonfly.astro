@@ -1,7 +1,6 @@
 ---
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
-import { bench, formatOps } from '../../../data/benchmarks';
 ---
 
 <DocsLayout
@@ -84,7 +83,7 @@ import { bench, formatOps } from '../../../data/benchmarks';
 
   <ul>
     <li><strong>Architecture:</strong> Multi-threaded, shared-nothing design scaling across all CPU cores</li>
-    <li><strong>Speed:</strong> Same as Redis store for rate limiting (~{formatOps(bench.node.redis.multi10k.opsPerSec)} ops/sec, network-bound)</li>
+    <li><strong>Speed:</strong> Same as Redis store for rate limiting (network-bound)</li>
     <li><strong>License:</strong> BSL 1.1 (converts to Apache 2.0 in 2029)</li>
     <li><strong>Persistence:</strong> Configurable via DragonflyDB persistence settings</li>
     <li><strong>Scalability:</strong> Shared across all server instances</li>

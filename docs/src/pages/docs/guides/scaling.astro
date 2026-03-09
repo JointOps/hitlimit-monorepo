@@ -84,12 +84,12 @@ import { bench, formatOps, formatOpsCommaPlus, formatLatencyApprox } from '../..
       <tbody>
         <tr><td>memoryStore</td><td>{formatOpsCommaPlus(bench.node.memory.multi10k.opsPerSec)}</td><td>No</td></tr>
         <tr><td>sqliteStore</td><td>{formatOpsCommaPlus(bench.node.sqlite.multi10k.opsPerSec)}</td><td>No</td></tr>
-        <tr><td>redisStore</td><td>{formatOpsCommaPlus(bench.node.redis.multi10k.opsPerSec)}</td><td>Yes</td></tr>
-        <tr><td>valkeyStore</td><td>~{formatOpsCommaPlus(bench.node.redis.multi10k.opsPerSec)}</td><td>Yes</td></tr>
-        <tr><td>dragonflyStore</td><td>~{formatOpsCommaPlus(bench.node.redis.multi10k.opsPerSec)}</td><td>Yes</td></tr>
-        <tr><td>postgresStore</td><td>{formatOpsCommaPlus(bench.node.postgres.multi10k.opsPerSec)}</td><td>Yes</td></tr>
-        <tr><td>mongoStore</td><td>TBD</td><td>Yes</td></tr>
-        <tr><td>mysqlStore</td><td>TBD</td><td>Yes</td></tr>
+        <tr><td>mongoStore</td><td>{formatOpsCommaPlus(bench.node.mongodb.multi10k.opsPerSec)}</td><td>Yes</td></tr>
+        <tr><td>redisStore</td><td>Network-bound</td><td>Yes</td></tr>
+        <tr><td>valkeyStore</td><td>Network-bound</td><td>Yes</td></tr>
+        <tr><td>dragonflyStore</td><td>Network-bound</td><td>Yes</td></tr>
+        <tr><td>postgresStore</td><td>Network-bound</td><td>Yes</td></tr>
+        <tr><td>mysqlStore</td><td>Network-bound</td><td>Yes</td></tr>
       </tbody>
     </table>
   </div>
@@ -102,12 +102,12 @@ import { bench, formatOps, formatOpsCommaPlus, formatLatencyApprox } from '../..
       <tbody>
         <tr><td>memoryStore</td><td class="highlight">{formatOpsCommaPlus(bench.bun.memory.multi10k.opsPerSec)}</td><td>{formatLatencyApprox(bench.bun.memory.multi10k.latencyAvgNs)}</td><td>No</td></tr>
         <tr><td>sqliteStore</td><td>{formatOpsCommaPlus(bench.bun.sqlite.multi10k.opsPerSec)}</td><td>{formatLatencyApprox(bench.bun.sqlite.multi10k.latencyAvgNs)}</td><td>No</td></tr>
-        <tr><td>redisStore</td><td>{formatOpsCommaPlus(bench.bun.redis.multi10k.opsPerSec)}</td><td>{formatLatencyApprox(bench.bun.redis.multi10k.latencyAvgNs)}</td><td>Yes</td></tr>
-        <tr><td>valkeyStore</td><td>~{formatOpsCommaPlus(bench.bun.redis.multi10k.opsPerSec)}</td><td>{formatLatencyApprox(bench.bun.redis.multi10k.latencyAvgNs)}</td><td>Yes</td></tr>
-        <tr><td>dragonflyStore</td><td>~{formatOpsCommaPlus(bench.bun.redis.multi10k.opsPerSec)}</td><td>{formatLatencyApprox(bench.bun.redis.multi10k.latencyAvgNs)}</td><td>Yes</td></tr>
-        <tr><td>postgresStore</td><td>{formatOpsCommaPlus(bench.bun.postgres.multi10k.opsPerSec)}</td><td>{formatLatencyApprox(bench.bun.postgres.multi10k.latencyAvgNs)}</td><td>Yes</td></tr>
-        <tr><td>mongoStore</td><td>TBD</td><td>TBD</td><td>Yes</td></tr>
-        <tr><td>mysqlStore</td><td>TBD</td><td>TBD</td><td>Yes</td></tr>
+        <tr><td>redisStore</td><td>Network-bound</td><td>Network-bound</td><td>Yes</td></tr>
+        <tr><td>valkeyStore</td><td>Network-bound</td><td>Network-bound</td><td>Yes</td></tr>
+        <tr><td>dragonflyStore</td><td>Network-bound</td><td>Network-bound</td><td>Yes</td></tr>
+        <tr><td>postgresStore</td><td>Network-bound</td><td>Network-bound</td><td>Yes</td></tr>
+        <tr><td>mongoStore</td><td>Network-bound</td><td>Network-bound</td><td>Yes</td></tr>
+        <tr><td>mysqlStore</td><td>Network-bound</td><td>Network-bound</td><td>Yes</td></tr>
       </tbody>
     </table>
   </div>

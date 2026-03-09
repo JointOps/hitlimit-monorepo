@@ -569,32 +569,32 @@ import { bench, formatOps, formatLatencyApprox } from '../../../../data/benchmar
       </tr>
       <tr>
         <td><strong>Redis</strong></td>
-        <td>{formatOps(bench.bun.redis.multi10k.opsPerSec)} ops/sec</td>
-        <td>{formatLatencyApprox(bench.bun.redis.multi10k.latencyAvgNs)}</td>
+        <td>Network-bound</td>
+        <td>Network-bound</td>
         <td>Yes</td>
         <td>Yes</td>
         <td>No</td>
       </tr>
       <tr>
         <td><strong>Valkey</strong></td>
-        <td>~{formatOps(bench.bun.redis.multi10k.opsPerSec)} ops/sec</td>
-        <td>{formatLatencyApprox(bench.bun.redis.multi10k.latencyAvgNs)}</td>
+        <td>Network-bound</td>
+        <td>Network-bound</td>
         <td>Yes</td>
         <td>Yes</td>
         <td>No</td>
       </tr>
       <tr>
         <td><strong>DragonflyDB</strong></td>
-        <td>~{formatOps(bench.bun.redis.multi10k.opsPerSec)} ops/sec</td>
-        <td>{formatLatencyApprox(bench.bun.redis.multi10k.latencyAvgNs)}</td>
+        <td>Network-bound</td>
+        <td>Network-bound</td>
         <td>Yes</td>
         <td>Yes</td>
         <td>No</td>
       </tr>
       <tr>
         <td><strong>Postgres</strong></td>
-        <td>{formatOps(bench.bun.postgres.multi10k.opsPerSec)} ops/sec</td>
-        <td>{formatLatencyApprox(bench.bun.postgres.multi10k.latencyAvgNs)}</td>
+        <td>Network-bound</td>
+        <td>Network-bound</td>
         <td>Yes</td>
         <td>Yes</td>
         <td>No</td>

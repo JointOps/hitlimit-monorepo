@@ -11,8 +11,7 @@ const stats = [
 const benchmarks = [
   { store: 'Memory', nodeOps: formatOps(bench.node.memory.multi10k.opsPerSec), bunOps: formatOps(bench.bun.memory.multi10k.opsPerSec), nodeLatency: formatLatencyApprox(bench.node.memory.multi10k.latencyAvgNs), bunLatency: formatLatencyApprox(bench.bun.memory.multi10k.latencyAvgNs), note: 'Highest throughput', color: 'cyan' },
   { store: 'SQLite', nodeOps: formatOps(bench.node.sqlite.multi10k.opsPerSec), bunOps: formatOps(bench.bun.sqlite.multi10k.opsPerSec), nodeLatency: formatLatencyApprox(bench.node.sqlite.multi10k.latencyAvgNs), bunLatency: formatLatencyApprox(bench.bun.sqlite.multi10k.latencyAvgNs), note: 'Persistent storage', color: 'purple' },
-  { store: 'Redis', nodeOps: formatOps(bench.node.redis.multi10k.opsPerSec), bunOps: formatOps(bench.bun.redis.multi10k.opsPerSec), nodeLatency: formatLatencyApprox(bench.node.redis.multi10k.latencyAvgNs), bunLatency: formatLatencyApprox(bench.bun.redis.multi10k.latencyAvgNs), note: 'Distributed', color: 'cyan' },
-  { store: 'Postgres', nodeOps: formatOps(bench.node.postgres.multi10k.opsPerSec), bunOps: formatOps(bench.bun.postgres.multi10k.opsPerSec), nodeLatency: formatLatencyApprox(bench.node.postgres.multi10k.latencyAvgNs), bunLatency: formatLatencyApprox(bench.bun.postgres.multi10k.latencyAvgNs), note: 'Distributed (SQL)', color: 'purple' },
+  { store: 'MongoDB', nodeOps: formatOps(bench.node.mongodb.multi10k.opsPerSec), bunOps: 'N/A', nodeLatency: formatLatencyApprox(bench.node.mongodb.multi10k.latencyAvgNs), bunLatency: '-', note: 'Distributed (NoSQL)', color: 'cyan' },
 ];
 ---
 

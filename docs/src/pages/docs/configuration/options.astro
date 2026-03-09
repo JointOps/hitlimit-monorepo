@@ -105,8 +105,9 @@ import { bench, formatOps } from '../../../data/benchmarks';
       <tbody>
         <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">{formatOps(bench.node.memory.multi10k.opsPerSec)} ops/s</td></tr>
         <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts</td><td>{formatOps(bench.node.sqlite.multi10k.opsPerSec)} ops/s</td></tr>
-        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>{formatOps(bench.node.redis.multi10k.opsPerSec)} ops/s</td></tr>
-        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>{formatOps(bench.node.postgres.multi10k.opsPerSec)} ops/s</td></tr>
+        <tr><td><code>mongoStore()</code></td><td>Teams already using MongoDB</td><td>{formatOps(bench.node.mongodb.multi10k.opsPerSec)} ops/s</td></tr>
+        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>Network-bound</td></tr>
+        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>Network-bound</td></tr>
       </tbody>
     </table>
   </div>
@@ -119,8 +120,8 @@ import { bench, formatOps } from '../../../data/benchmarks';
       <tbody>
         <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">{formatOps(bench.bun.memory.multi10k.opsPerSec)} ops/s</td></tr>
         <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts (bun:sqlite)</td><td>{formatOps(bench.bun.sqlite.multi10k.opsPerSec)} ops/s</td></tr>
-        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>{formatOps(bench.bun.redis.multi10k.opsPerSec)} ops/s</td></tr>
-        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>{formatOps(bench.bun.postgres.multi10k.opsPerSec)} ops/s</td></tr>
+        <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>Network-bound</td></tr>
+        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>Network-bound</td></tr>
       </tbody>
     </table>
   </div>
