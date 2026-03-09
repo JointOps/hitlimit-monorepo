@@ -1,6 +1,6 @@
 {
   "benchmark": {
-    "framework": "store",
+    "framework": "express",
     "library": "rate-limiter-flexible",
     "store": "mongodb",
     "runtime": "node"
@@ -24,55 +24,55 @@
     "runs": 5,
     "totalMeasured": 250000
   },
-  "date": "2026-03-09T07:37:36.836Z",
+  "date": "2026-03-09T07:40:50.527Z",
   "scenarios": {
     "single-ip": {
       "description": "Single IP, best cache locality",
       "keys": 1,
-      "memoryMB": 6.67,
-      "opsPerSec": 2433,
+      "memoryMB": 5.97,
+      "opsPerSec": 2752,
       "latency": {
-        "avgNs": 411097,
-        "p50Ns": 393792,
-        "p95Ns": 544583,
-        "p99Ns": 677583,
-        "minNs": 225542,
-        "maxNs": 17540583
+        "avgNs": 363415,
+        "p50Ns": 357583,
+        "p95Ns": 434083,
+        "p99Ns": 511417,
+        "minNs": 222667,
+        "maxNs": 12728458
       },
-      "stdDev": 116952.5,
-      "marginOfError": 458.45
+      "stdDev": 60014.23,
+      "marginOfError": 235.26
     },
     "multi-ip-1k": {
       "description": "1,000 unique IPs, typical API",
       "keys": 1000,
-      "memoryMB": 17.51,
-      "opsPerSec": 2495,
+      "memoryMB": 15.32,
+      "opsPerSec": 2413,
       "latency": {
-        "avgNs": 400766,
-        "p50Ns": 382167,
-        "p95Ns": 539000,
-        "p99Ns": 747875,
-        "minNs": 225084,
-        "maxNs": 23777875
+        "avgNs": 414363,
+        "p50Ns": 381959,
+        "p95Ns": 556334,
+        "p99Ns": 769834,
+        "minNs": 184834,
+        "maxNs": 17513833
       },
-      "stdDev": 138483.44,
-      "marginOfError": 542.86
+      "stdDev": 142079.13,
+      "marginOfError": 556.95
     },
     "multi-ip-10k": {
       "description": "10,000 unique IPs, high traffic",
       "keys": 10000,
-      "memoryMB": 16.05,
-      "opsPerSec": 2586,
+      "memoryMB": 16.85,
+      "opsPerSec": 2275,
       "latency": {
-        "avgNs": 386771,
-        "p50Ns": 356041,
-        "p95Ns": 502833,
-        "p99Ns": 1074000,
-        "minNs": 191542,
-        "maxNs": 17729041
+        "avgNs": 439470,
+        "p50Ns": 388625,
+        "p95Ns": 805042,
+        "p99Ns": 1316125,
+        "minNs": 195042,
+        "maxNs": 37984500
       },
-      "stdDev": 147630.19,
-      "marginOfError": 578.71
+      "stdDev": 236402.46,
+      "marginOfError": 926.7
     }
   }
 }

@@ -6,12 +6,12 @@
     "runtime": "node"
   },
   "environment": {
-    "runtimeVersion": "v24.4.1",
+    "runtimeVersion": "v24.14.0",
     "os": "macOS 26.2",
     "arch": "arm64",
-    "cpu": "Apple M1",
+    "cpu": "Apple M1 Pro",
     "cpuCores": 8,
-    "memoryGB": 8,
+    "memoryGB": 16,
     "docker": false
   },
   "versions": {
@@ -23,55 +23,55 @@
     "runs": 5,
     "totalMeasured": 250000
   },
-  "date": "2026-03-04T13:26:34.028Z",
+  "date": "2026-03-09T07:01:29.607Z",
   "scenarios": {
     "single-ip": {
       "description": "Single IP, best cache locality",
       "keys": 1,
-      "memoryMB": 0.77,
-      "opsPerSec": 477278,
+      "memoryMB": 2.64,
+      "opsPerSec": 504655,
       "latency": {
-        "avgNs": 2095,
+        "avgNs": 1982,
         "p50Ns": 1792,
-        "p95Ns": 3666,
-        "p99Ns": 5208,
+        "p95Ns": 2542,
+        "p99Ns": 4333,
         "minNs": 1625,
-        "maxNs": 315417
+        "maxNs": 223208
       },
-      "stdDev": 1380.69,
-      "marginOfError": 5.41
+      "stdDev": 1478.37,
+      "marginOfError": 5.8
     },
     "multi-ip-1k": {
       "description": "1,000 unique IPs, typical API",
       "keys": 1000,
-      "memoryMB": 5.55,
-      "opsPerSec": 358730,
+      "memoryMB": 6.58,
+      "opsPerSec": 395605,
       "latency": {
-        "avgNs": 2788,
-        "p50Ns": 2250,
-        "p95Ns": 5166,
-        "p99Ns": 6833,
+        "avgNs": 2528,
+        "p50Ns": 2291,
+        "p95Ns": 3542,
+        "p99Ns": 5708,
         "minNs": 1916,
-        "maxNs": 291000
+        "maxNs": 157208
       },
-      "stdDev": 1660.55,
-      "marginOfError": 6.51
+      "stdDev": 1618.52,
+      "marginOfError": 6.34
     },
     "multi-ip-10k": {
       "description": "10,000 unique IPs, high traffic",
       "keys": 10000,
-      "memoryMB": 4.42,
-      "opsPerSec": 316910,
+      "memoryMB": 17.23,
+      "opsPerSec": 380277,
       "latency": {
-        "avgNs": 3155,
-        "p50Ns": 2375,
-        "p95Ns": 3709,
-        "p99Ns": 13458,
-        "minNs": 2000,
-        "maxNs": 7084708
+        "avgNs": 2630,
+        "p50Ns": 2333,
+        "p95Ns": 3667,
+        "p99Ns": 6500,
+        "minNs": 1958,
+        "maxNs": 580333
       },
-      "stdDev": 21925.21,
-      "marginOfError": 85.95
+      "stdDev": 2399.06,
+      "marginOfError": 9.4
     }
   }
 }
