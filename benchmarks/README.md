@@ -124,22 +124,22 @@ Every benchmark runs 3 scenarios to test different access patterns:
 
 **Node.js (`@joint-ops/hitlimit`):**
 
-| Framework | Memory | SQLite | Redis | Postgres |
-|-----------|--------|--------|-------|----------|
-| Express   | ✓      | ✓      | ✓     | ✓        |
-| Fastify   | ✓      | ✓      | ✓     | ✓        |
-| Hono      | ✓      | ✓      | ✓     | ✓        |
-| NestJS    | ✓      | ✓      | ✓     | ✓        |
-| Raw Store | ✓      | ✓      | ✓     | ✓        |
+| Framework | Memory | SQLite | Redis | Postgres | MongoDB | MySQL |
+|-----------|--------|--------|-------|----------|---------|-------|
+| Express   | ✓      | ✓      | ✓     | ✓        | ✓       | ✓     |
+| Fastify   | ✓      | ✓      | ✓     | ✓        | ✓       | ✓     |
+| Hono      | ✓      | ✓      | ✓     | ✓        | ✓       | ✓     |
+| NestJS    | ✓      | ✓      | ✓     | ✓        | ✓       | ✓     |
+| Raw Store | ✓      | ✓      | ✓     | ✓        | ✓       | ✓     |
 
 **Bun (`@joint-ops/hitlimit-bun`):**
 
-| Framework | Memory | SQLite | Redis | Postgres |
-|-----------|--------|--------|-------|----------|
-| Bun.serve | ✓      | ✓      | ✓     | ✓        |
-| Elysia    | ✓      | ✓      | ✓     | ✓        |
-| Hono      | ✓      | ✓      | ✓     | ✓        |
-| Raw Store | ✓      | ✓      | ✓     | ✓        |
+| Framework | Memory | SQLite | Redis | Postgres | MongoDB | MySQL |
+|-----------|--------|--------|-------|----------|---------|-------|
+| Bun.serve | ✓      | ✓      | ✓     | ✓        | ✓       | ✓     |
+| Elysia    | ✓      | ✓      | ✓     | ✓        | ✓       | ✓     |
+| Hono      | ✓      | ✓      | ✓     | ✓        | ✓       | ✓     |
+| Raw Store | ✓      | ✓      | ✓     | ✓        | ✓       | ✓     |
 
 ### Competitors
 
@@ -148,12 +148,12 @@ Each framework also benchmarks its native rate limiting competitor:
 | Framework | Competitor | Stores |
 |-----------|-----------|--------|
 | Express   | express-rate-limit | Memory |
-| Express   | rate-limiter-flexible | Memory, Redis, Postgres |
+| Express   | rate-limiter-flexible | Memory, Redis, Postgres, MongoDB, MySQL |
 | Fastify   | @fastify/rate-limit | Memory, Redis |
 | Hono      | hono-rate-limiter | Memory, Redis |
 | NestJS    | @nestjs/throttler | Memory |
 | Elysia    | elysia-rate-limit | Memory |
-| Raw Store | rate-limiter-flexible | Memory, Redis, Postgres |
+| Raw Store | rate-limiter-flexible | Memory, Redis, Postgres, MongoDB, MySQL |
 
 ## How to Run
 
@@ -221,29 +221,43 @@ node --expose-gc ./node_modules/.bin/tsx node/express/hitlimit/memory.ts
 bun bun/elysia/hitlimit/memory.ts
 ```
 
-### Redis and Postgres Benchmarks
+### Network Store Benchmarks
 
-Redis and Postgres benchmarks need running servers. Use Docker:
+Redis, Postgres, MongoDB, and MySQL benchmarks need running servers. Use Docker Compose from the monorepo root:
 
 ```bash
-# Start Redis
+# Start all services
+docker compose --profile redis --profile postgres --profile mongodb --profile mysql up -d
+
+# Or start individual services
+docker compose --profile mongodb up -d
+docker compose --profile mysql up -d
+```
+
+Or start them manually:
+
+```bash
+# Redis
 docker run -d --name bench-redis -p 6379:6379 redis:7-alpine
 
-# Start Postgres
+# Postgres
 docker run -d --name bench-postgres -p 5433:5432 \
   -e POSTGRES_USER=hitlimit \
   -e POSTGRES_PASSWORD=hitlimit \
   -e POSTGRES_DB=hitlimit_test \
   postgres:16-alpine
 
-# Run Redis benchmarks
-pnpm bench:node:express:redis
+# MongoDB
+docker run -d --name bench-mongodb -p 27017:27017 mongo:7
 
-# Run Postgres benchmarks
-pnpm bench:node:express:postgres
+# MySQL
+docker run -d --name bench-mysql -p 3306:3306 \
+  -e MYSQL_ROOT_PASSWORD=hitlimit \
+  -e MYSQL_DATABASE=hitlimit_test \
+  mysql:8
 ```
 
-If Redis/Postgres isn't available, those benchmarks skip automatically with a "not available" message.
+If a service isn't available, those benchmarks skip automatically with a "not available" message.
 
 ## Results
 
@@ -407,5 +421,7 @@ We don't force `await` on synchronous libraries (that would add fake overhead) a
 | SQLite | Sync | — | — | — | — |
 | Redis | Async | — | — | Async | Async |
 | Postgres | Async | — | — | Async | — |
+| MongoDB | Async | — | — | Async | — |
+| MySQL | Async | — | — | Async | — |
 
 hitlimit is the only library that stays synchronous for synchronous stores. This is an architectural choice, not a benchmark trick.

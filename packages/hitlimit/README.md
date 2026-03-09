@@ -110,59 +110,18 @@ hitlimit({ skip: (req) => req.path === '/health' || req.user?.role === 'admin' }
 
 ---
 
-## 8 Storage Backends
+## Pick Your Store
 
-Pick the right backend for your deployment — all built in, no extra packages.
+Every store is built in. Swap one line — your rate limiting code stays the same.
 
-| Store | Best For | Peer Dependency |
-|---|---|---|
-| Memory | Development, single server | None |
-| SQLite | Single server + persistence | `better-sqlite3` |
-| Redis | Distributed, production | `ioredis` |
-| Valkey | Distributed, open-source Redis alternative | `ioredis` |
-| DragonflyDB | High-throughput distributed | `ioredis` |
-| PostgreSQL | Shared database infrastructure | `pg` |
-| **MongoDB** | **NoSQL distributed, MEAN/MERN stacks** | `mongodb` |
-| **MySQL** | **SQL distributed, LAMP stacks** | `mysql2` |
-
-```javascript
-import { hitlimit } from '@joint-ops/hitlimit'
-
-// Memory (default) — single server, fastest
-app.use(hitlimit())
-
-// SQLite — single server, survives restarts
-import { sqliteStore } from '@joint-ops/hitlimit/stores/sqlite'
-app.use(hitlimit({ store: sqliteStore({ path: './ratelimit.db' }) }))
-
-// Redis — distributed, atomic Lua scripts
-import { redisStore } from '@joint-ops/hitlimit/stores/redis'
-app.use(hitlimit({ store: redisStore({ url: 'redis://localhost:6379' }) }))
-
-// Valkey — open-source Redis alternative
-import { valkeyStore } from '@joint-ops/hitlimit/stores/valkey'
-app.use(hitlimit({ store: valkeyStore({ url: 'redis://localhost:6379' }) }))
-
-// DragonflyDB — high-throughput Redis alternative
-import { dragonflyStore } from '@joint-ops/hitlimit/stores/dragonfly'
-app.use(hitlimit({ store: dragonflyStore({ url: 'redis://localhost:6379' }) }))
-
-// Postgres — distributed, atomic upserts
-import { postgresStore } from '@joint-ops/hitlimit/stores/postgres'
-app.use(hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' }) }))
-
-// MongoDB — NoSQL, atomic findOneAndUpdate with TTL indexes
-import { mongoStore } from '@joint-ops/hitlimit/stores/mongodb'
-import { MongoClient } from 'mongodb'
-const client = new MongoClient('mongodb://localhost:27017')
-const db = client.db('myapp')
-app.use(hitlimit({ store: mongoStore({ db }) }))
-
-// MySQL — SQL distributed, atomic INSERT ON DUPLICATE KEY UPDATE
-import { mysqlStore } from '@joint-ops/hitlimit/stores/mysql'
-import mysql from 'mysql2/promise'
-const pool = mysql.createPool('mysql://root@localhost:3306/mydb')
-app.use(hitlimit({ store: mysqlStore({ pool }) }))
+```
+               Single Server                          Multi-Server
+          ┌──────────────────────┐          ┌──────────────────────────┐
+          │  Memory  │  SQLite   │          │  Redis   │  Postgres    │
+          │  (default)           │          │  Valkey  │  MongoDB     │
+          │                      │          │  Dragonfly  MySQL       │
+          └──────────────────────┘          └──────────────────────────┘
+             No persistence         Your existing infrastructure, zero lock-in
 ```
 
 <!-- BENCH:NODE_STORE_TABLE -->
@@ -173,60 +132,101 @@ app.use(hitlimit({ store: mysqlStore({ pool }) }))
 | MongoDB | 2,161 | 462.8μs | Multi-server / NoSQL infrastructure |
 <!-- /BENCH:NODE_STORE_TABLE -->
 
-### Valkey (Redis Alternative)
-```typescript
+> Redis, Valkey, DragonflyDB, Postgres, and MySQL are network-bound (~200–3,500 ops/sec). Benchmarks at [hitlimit.jointops.dev/docs/benchmarks](https://hitlimit.jointops.dev/docs/benchmarks).
+
+### The pattern is always the same
+
+```javascript
 import { hitlimit } from '@joint-ops/hitlimit'
+import { ______Store } from '@joint-ops/hitlimit/stores/______'
+
+app.use(hitlimit({ store: ______Store({ /* connection config */ }) }))
+```
+
+<details>
+<summary><b>Memory</b> — default, zero config</summary>
+
+```javascript
+app.use(hitlimit()) // that's it
+```
+</details>
+
+<details>
+<summary><b>SQLite</b> — survives restarts, single server</summary>
+
+```javascript
+import { sqliteStore } from '@joint-ops/hitlimit/stores/sqlite'
+app.use(hitlimit({ store: sqliteStore({ path: './ratelimit.db' }) }))
+```
+Peer dep: `better-sqlite3`
+</details>
+
+<details>
+<summary><b>Redis</b> — distributed, atomic Lua scripts</summary>
+
+```javascript
+import { redisStore } from '@joint-ops/hitlimit/stores/redis'
+app.use(hitlimit({ store: redisStore({ url: 'redis://localhost:6379' }) }))
+```
+Peer dep: `ioredis`
+</details>
+
+<details>
+<summary><b>Valkey</b> — open-source Redis fork, drop-in replacement</summary>
+
+```javascript
 import { valkeyStore } from '@joint-ops/hitlimit/stores/valkey'
-
-app.use(hitlimit({
-  store: valkeyStore({ url: 'redis://localhost:6379' }),
-  limit: 100,
-  window: '1m'
-}))
+app.use(hitlimit({ store: valkeyStore({ url: 'redis://localhost:6379' }) }))
 ```
+Peer dep: `ioredis`
+</details>
 
-### DragonflyDB
-```typescript
-import { hitlimit } from '@joint-ops/hitlimit'
+<details>
+<summary><b>DragonflyDB</b> — Redis-compatible, higher throughput</summary>
+
+```javascript
 import { dragonflyStore } from '@joint-ops/hitlimit/stores/dragonfly'
-
-app.use(hitlimit({
-  store: dragonflyStore({ url: 'redis://localhost:6379' }),
-  limit: 100,
-  window: '1m'
-}))
+app.use(hitlimit({ store: dragonflyStore({ url: 'redis://localhost:6379' }) }))
 ```
+Peer dep: `ioredis`
+</details>
 
-### MongoDB
-```typescript
-import { hitlimit } from '@joint-ops/hitlimit'
+<details>
+<summary><b>PostgreSQL</b> — use your existing database</summary>
+
+```javascript
+import { postgresStore } from '@joint-ops/hitlimit/stores/postgres'
+app.use(hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' }) }))
+```
+Peer dep: `pg`
+</details>
+
+<details>
+<summary><b>MongoDB</b> — NoSQL, TTL indexes, MEAN/MERN stacks</summary>
+
+```javascript
 import { mongoStore } from '@joint-ops/hitlimit/stores/mongodb'
 import { MongoClient } from 'mongodb'
 
 const client = new MongoClient('mongodb://localhost:27017')
 const db = client.db('myapp')
-
-app.use(hitlimit({
-  store: mongoStore({ db }),
-  limit: 100,
-  window: '1m'
-}))
+app.use(hitlimit({ store: mongoStore({ db }) }))
 ```
+Peer dep: `mongodb`
+</details>
 
-### MySQL
-```typescript
-import { hitlimit } from '@joint-ops/hitlimit'
+<details>
+<summary><b>MySQL</b> — SQL distributed, LAMP stacks</summary>
+
+```javascript
 import { mysqlStore } from '@joint-ops/hitlimit/stores/mysql'
 import mysql from 'mysql2/promise'
 
 const pool = mysql.createPool('mysql://root@localhost:3306/mydb')
-
-app.use(hitlimit({
-  store: mysqlStore({ pool }),
-  limit: 100,
-  window: '1m'
-}))
+app.use(hitlimit({ store: mysqlStore({ pool }) }))
 ```
+Peer dep: `mysql2`
+</details>
 
 ---
 

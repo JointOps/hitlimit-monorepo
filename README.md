@@ -13,10 +13,10 @@ High-performance, framework-agnostic rate limiting for Node.js and Bun. A faster
 
 ## Packages
 
-| Package | Runtime | Default Store | Install |
-|---------|---------|---------------|---------|
-| [`@joint-ops/hitlimit`](./packages/hitlimit) | Node.js | Memory | `npm i @joint-ops/hitlimit` |
-| [`@joint-ops/hitlimit-bun`](./packages/hitlimit-bun) | Bun | **Memory** (v1.1+) | `bun add @joint-ops/hitlimit-bun` |
+| Package | Runtime | Install |
+|---------|---------|---------|
+| [`@joint-ops/hitlimit`](./packages/hitlimit) | Node.js | `npm i @joint-ops/hitlimit` |
+| [`@joint-ops/hitlimit-bun`](./packages/hitlimit-bun) | Bun | `bun add @joint-ops/hitlimit-bun` |
 
 ## Quick Start
 
@@ -36,6 +36,13 @@ import { hitlimit } from '@joint-ops/hitlimit-bun'
 Bun.serve({
   fetch: hitlimit({}, (req) => new Response('Hello!'))
 })
+```
+
+### Fastify
+
+```typescript
+import { hitlimit } from '@joint-ops/hitlimit/fastify'
+await app.register(hitlimit, { limit: 100, window: '1m' })
 ```
 
 ### NestJS
@@ -64,35 +71,47 @@ new Elysia()
 
 ```typescript
 // Node.js
-import { Hono } from 'hono'
 import { hitlimit } from '@joint-ops/hitlimit/hono'
-
-const app = new Hono()
 app.use(hitlimit({ limit: 100, window: '1m' }))
 
 // Bun
 import { hitlimit } from '@joint-ops/hitlimit-bun/hono'
-
-const app = new Hono()
 app.use(hitlimit({ limit: 100, window: '1m' }))
-Bun.serve({ port: 3000, fetch: app.fetch })
 ```
 
-## Community
+## Why hitlimit
 
-- 💬 **[Discussions](https://github.com/JointOps/hitlimit-monorepo/discussions)** - Ask questions, share ideas, show off your projects
-- 🐛 **[Issues](https://github.com/JointOps/hitlimit-monorepo/issues)** - Report bugs and request features
-- 📖 **[Documentation](https://hitlimit.jointops.dev)** - Comprehensive guides and API reference
+- **4M+ ops/sec** on Node.js, **5.5M+ on Bun** — memory store, 10K unique IPs
+- **8 stores built in** — Memory, SQLite, Redis, Valkey, DragonflyDB, Postgres, MongoDB, MySQL
+- **Zero dependencies** for core module
+- **Tiered limits** — Free, Pro, Enterprise in one config
+- **Auto-ban** — Block repeat offenders without custom code
+- **Every framework** — Express, Fastify, Hono, NestJS, Bun.serve, Elysia
+- **TypeScript-first** — Full type safety across both packages
 
-## Features
+## 8 Storage Backends
 
-- **Blazing fast** - Optimized for each runtime
-- **Zero config** - Works out of the box
-- **Tiny** - ~6KB (hitlimit Node.js) / ~18KB (hitlimit-bun)
-- **Pluggable stores** - Memory, SQLite, Redis, Valkey, DragonflyDB, Postgres
-- **Tiered limits** - Different limits per user plan
-- **Customizable** - Keys, responses, headers
-- **TypeScript** - Full type safety
+Pick the right backend for your deployment. All built in, no extra packages.
+
+```
+            Single Server                          Multi-Server
+       ┌──────────────────────┐          ┌──────────────────────────┐
+       │  Memory  │  SQLite   │          │  Redis   │  Postgres    │
+       │  (default)           │          │  Valkey  │  MongoDB     │
+       │                      │          │  Dragonfly  MySQL       │
+       └──────────────────────┘          └──────────────────────────┘
+```
+
+```javascript
+app.use(hitlimit())                                            // Memory (default)
+app.use(hitlimit({ store: sqliteStore({ path: './rl.db' }) })) // SQLite
+app.use(hitlimit({ store: redisStore({ url: '...' }) }))       // Redis / Valkey / Dragonfly
+app.use(hitlimit({ store: postgresStore({ url: '...' }) }))    // PostgreSQL
+app.use(hitlimit({ store: mongoStore({ db }) }))               // MongoDB
+app.use(hitlimit({ store: mysqlStore({ pool }) }))             // MySQL
+```
+
+See the [Node.js README](./packages/hitlimit#pick-your-store) or [Bun README](./packages/hitlimit-bun#pick-your-store) for full import paths and setup.
 
 ## Configuration
 
@@ -135,61 +154,6 @@ hitlimit({
 })
 ```
 
-## Stores
-
-### Memory (default for hitlimit)
-
-```javascript
-import { hitlimit } from '@joint-ops/hitlimit'
-app.use(hitlimit()) // uses memory store
-```
-
-### SQLite
-
-```javascript
-// Node.js (uses better-sqlite3)
-import { sqliteStore } from '@joint-ops/hitlimit/stores/sqlite'
-app.use(hitlimit({ store: sqliteStore({ path: './ratelimit.db' }) }))
-
-// Bun (uses bun:sqlite)
-import { hitlimit } from '@joint-ops/hitlimit-bun'
-import { sqliteStore } from '@joint-ops/hitlimit-bun'
-Bun.serve({ fetch: hitlimit({ store: sqliteStore({ path: './ratelimit.db' }) }, handler) })
-```
-
-### Redis
-
-```javascript
-// Node.js
-import { redisStore } from '@joint-ops/hitlimit/stores/redis'
-app.use(hitlimit({ store: redisStore({ url: 'redis://localhost:6379' }) }))
-
-// Bun
-import { redisStore } from '@joint-ops/hitlimit-bun/stores/redis'
-```
-
-### Valkey
-
-```javascript
-// Node.js
-import { valkeyStore } from '@joint-ops/hitlimit/stores/valkey'
-app.use(hitlimit({ store: valkeyStore({ url: 'redis://localhost:6379' }) }))
-
-// Bun
-import { valkeyStore } from '@joint-ops/hitlimit-bun/stores/valkey'
-```
-
-### DragonflyDB
-
-```javascript
-// Node.js
-import { dragonflyStore } from '@joint-ops/hitlimit/stores/dragonfly'
-app.use(hitlimit({ store: dragonflyStore({ url: 'redis://localhost:6379' }) }))
-
-// Bun
-import { dragonflyStore } from '@joint-ops/hitlimit-bun/stores/dragonfly'
-```
-
 ## Default Response (429)
 
 ```json
@@ -201,6 +165,12 @@ import { dragonflyStore } from '@joint-ops/hitlimit-bun/stores/dragonfly'
   "resetIn": 42
 }
 ```
+
+## Community
+
+- [Discussions](https://github.com/JointOps/hitlimit-monorepo/discussions) — Ask questions, share ideas, show off your projects
+- [Issues](https://github.com/JointOps/hitlimit-monorepo/issues) — Report bugs and request features
+- [Documentation](https://hitlimit.jointops.dev) — Comprehensive guides and API reference
 
 ## Contributing
 

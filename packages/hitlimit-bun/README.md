@@ -96,59 +96,18 @@ new Elysia()
 
 ---
 
-## 8 Storage Backends
+## Pick Your Store
 
-All built in. No extra packages to install.
+Every store is built in. Swap one line — your rate limiting code stays the same.
 
-| Store | Best For | Peer Dependency |
-|---|---|---|
-| Memory | Development, single server | None |
-| bun:sqlite | Single server + persistence | None (built-in) |
-| Redis | Distributed, production | `ioredis` |
-| Valkey | Distributed, open-source Redis alternative | `ioredis` |
-| DragonflyDB | High-throughput distributed | `ioredis` |
-| PostgreSQL | Shared database infrastructure | `pg` |
-| **MongoDB** | **NoSQL distributed, MEAN/MERN stacks** | `mongodb` |
-| **MySQL** | **SQL distributed, LAMP stacks** | `mysql2` |
-
-```typescript
-import { hitlimit } from '@joint-ops/hitlimit-bun'
-
-// Memory (default) — fastest, no config
-Bun.serve({ fetch: hitlimit({}, handler) })
-
-// bun:sqlite — persists across restarts, native performance
-import { sqliteStore } from '@joint-ops/hitlimit-bun'
-Bun.serve({ fetch: hitlimit({ store: sqliteStore({ path: './ratelimit.db' }) }, handler) })
-
-// Redis — distributed, atomic Lua scripts
-import { redisStore } from '@joint-ops/hitlimit-bun/stores/redis'
-Bun.serve({ fetch: hitlimit({ store: redisStore({ url: 'redis://localhost:6379' }) }, handler) })
-
-// Valkey — open-source Redis alternative
-import { valkeyStore } from '@joint-ops/hitlimit-bun/stores/valkey'
-Bun.serve({ fetch: hitlimit({ store: valkeyStore({ url: 'redis://localhost:6379' }) }, handler) })
-
-// DragonflyDB — high-throughput Redis alternative
-import { dragonflyStore } from '@joint-ops/hitlimit-bun/stores/dragonfly'
-Bun.serve({ fetch: hitlimit({ store: dragonflyStore({ url: 'redis://localhost:6379' }) }, handler) })
-
-// Postgres — distributed, atomic upserts
-import { postgresStore } from '@joint-ops/hitlimit-bun/stores/postgres'
-Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' }) }, handler) })
-
-// MongoDB — NoSQL, atomic findOneAndUpdate with TTL indexes
-import { mongoStore } from '@joint-ops/hitlimit-bun/stores/mongodb'
-import { MongoClient } from 'mongodb'
-const client = new MongoClient('mongodb://localhost:27017')
-const db = client.db('myapp')
-Bun.serve({ fetch: hitlimit({ store: mongoStore({ db }) }, handler) })
-
-// MySQL — SQL distributed, atomic INSERT ON DUPLICATE KEY UPDATE
-import { mysqlStore } from '@joint-ops/hitlimit-bun/stores/mysql'
-import mysql from 'mysql2/promise'
-const pool = mysql.createPool('mysql://root@localhost:3306/mydb')
-Bun.serve({ fetch: hitlimit({ store: mysqlStore({ pool }) }, handler) })
+```
+               Single Server                          Multi-Server
+          ┌──────────────────────┐          ┌──────────────────────────┐
+          │  Memory  │  SQLite   │          │  Redis   │  Postgres    │
+          │  (default) (bun:sqlite)         │  Valkey  │  MongoDB     │
+          │                      │          │  Dragonfly  MySQL       │
+          └──────────────────────┘          └──────────────────────────┘
+             No dependencies at all            Your existing infra, zero lock-in
 ```
 
 <!-- BENCH:BUN_STORE_TABLE -->
@@ -159,68 +118,101 @@ Bun.serve({ fetch: hitlimit({ store: mysqlStore({ pool }) }, handler) })
 | MongoDB | 2,132 | 469μs | Multi-server / NoSQL infrastructure |
 <!-- /BENCH:BUN_STORE_TABLE -->
 
-### Valkey (Redis Alternative)
+> Redis, Valkey, DragonflyDB, Postgres, and MySQL are network-bound (~200–3,500 ops/sec). Benchmarks at [hitlimit.jointops.dev/docs/benchmarks](https://hitlimit.jointops.dev/docs/benchmarks).
+
+### The pattern is always the same
+
 ```typescript
 import { hitlimit } from '@joint-ops/hitlimit-bun'
+import { ______Store } from '@joint-ops/hitlimit-bun/stores/______'
+
+Bun.serve({ fetch: hitlimit({ store: ______Store({ /* config */ }) }, handler) })
+```
+
+<details>
+<summary><b>Memory</b> — default, zero config</summary>
+
+```typescript
+Bun.serve({ fetch: hitlimit({}, handler) }) // that's it
+```
+</details>
+
+<details>
+<summary><b>bun:sqlite</b> — native, no N-API, no FFI, survives restarts</summary>
+
+```typescript
+import { sqliteStore } from '@joint-ops/hitlimit-bun'
+Bun.serve({ fetch: hitlimit({ store: sqliteStore({ path: './ratelimit.db' }) }, handler) })
+```
+No peer dependency — `bun:sqlite` is built into Bun.
+</details>
+
+<details>
+<summary><b>Redis</b> — distributed, atomic Lua scripts</summary>
+
+```typescript
+import { redisStore } from '@joint-ops/hitlimit-bun/stores/redis'
+Bun.serve({ fetch: hitlimit({ store: redisStore({ url: 'redis://localhost:6379' }) }, handler) })
+```
+Peer dep: `ioredis`
+</details>
+
+<details>
+<summary><b>Valkey</b> — open-source Redis fork, drop-in replacement</summary>
+
+```typescript
 import { valkeyStore } from '@joint-ops/hitlimit-bun/stores/valkey'
-
-Bun.serve({
-  fetch: hitlimit({
-    store: valkeyStore({ url: 'redis://localhost:6379' }),
-    limit: 100,
-    window: '1m'
-  }, handler)
-})
+Bun.serve({ fetch: hitlimit({ store: valkeyStore({ url: 'redis://localhost:6379' }) }, handler) })
 ```
+Peer dep: `ioredis`
+</details>
 
-### DragonflyDB
+<details>
+<summary><b>DragonflyDB</b> — Redis-compatible, higher throughput</summary>
+
 ```typescript
-import { hitlimit } from '@joint-ops/hitlimit-bun'
 import { dragonflyStore } from '@joint-ops/hitlimit-bun/stores/dragonfly'
-
-Bun.serve({
-  fetch: hitlimit({
-    store: dragonflyStore({ url: 'redis://localhost:6379' }),
-    limit: 100,
-    window: '1m'
-  }, handler)
-})
+Bun.serve({ fetch: hitlimit({ store: dragonflyStore({ url: 'redis://localhost:6379' }) }, handler) })
 ```
+Peer dep: `ioredis`
+</details>
 
-### MongoDB
+<details>
+<summary><b>PostgreSQL</b> — use your existing database</summary>
+
 ```typescript
-import { hitlimit } from '@joint-ops/hitlimit-bun'
+import { postgresStore } from '@joint-ops/hitlimit-bun/stores/postgres'
+Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' }) }, handler) })
+```
+Peer dep: `pg`
+</details>
+
+<details>
+<summary><b>MongoDB</b> — NoSQL, TTL indexes, MEAN/MERN stacks</summary>
+
+```typescript
 import { mongoStore } from '@joint-ops/hitlimit-bun/stores/mongodb'
 import { MongoClient } from 'mongodb'
 
 const client = new MongoClient('mongodb://localhost:27017')
 const db = client.db('myapp')
-
-Bun.serve({
-  fetch: hitlimit({
-    store: mongoStore({ db }),
-    limit: 100,
-    window: '1m'
-  }, handler)
-})
+Bun.serve({ fetch: hitlimit({ store: mongoStore({ db }) }, handler) })
 ```
+Peer dep: `mongodb`
+</details>
 
-### MySQL
+<details>
+<summary><b>MySQL</b> — SQL distributed, LAMP stacks</summary>
+
 ```typescript
-import { hitlimit } from '@joint-ops/hitlimit-bun'
 import { mysqlStore } from '@joint-ops/hitlimit-bun/stores/mysql'
 import mysql from 'mysql2/promise'
 
 const pool = mysql.createPool('mysql://root@localhost:3306/mydb')
-
-Bun.serve({
-  fetch: hitlimit({
-    store: mysqlStore({ pool }),
-    limit: 100,
-    window: '1m'
-  }, handler)
-})
+Bun.serve({ fetch: hitlimit({ store: mysqlStore({ pool }) }, handler) })
 ```
+Peer dep: `mysql2`
+</details>
 
 ---
 
@@ -239,7 +231,7 @@ Bun.serve({
 Bun leads at 10K IPs (5.57M vs 4.08M) and single-IP (7.73M vs 5.96M). Same library, same algorithm, **memory store**. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. Run them yourself.
 <!-- /BENCH:BUN_VS_NODE_TEXT -->
 
-### Why bun:sqlite is faster than better-sqlite3
+### Why bun:sqlite doesn't need bindings
 
 ```
 Node.js: JS → N-API → C++ binding → SQLite
