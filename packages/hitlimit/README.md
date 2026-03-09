@@ -3,7 +3,7 @@
 > Rate limiting that doesn't slow you down.
 
 <!-- BENCH:NODE_HERO -->
-**3.21M ops/sec** at 10K unique IPs. Zero dependencies. One line to protect any Node.js API.
+**5.21M ops/sec** at 10K unique IPs. Zero dependencies. One line to protect any Node.js API.
 <!-- /BENCH:NODE_HERO -->
 
 ```bash
@@ -168,9 +168,9 @@ app.use(hitlimit({ store: mysqlStore({ pool }) }))
 <!-- BENCH:NODE_STORE_TABLE -->
 | Store | Ops/sec | Latency | When to use |
 |-------|---------|---------|-------------|
-| Memory | 3,206,714 | 312ns | Single server, no persistence needed |
-| SQLite | 362,981 | 2.8μs | Single server, need persistence |
-| MongoDB | 2,439 | 410μs | Multi-server / NoSQL infrastructure |
+| Memory | 5,206,854 | 192ns | Single server, no persistence needed |
+| SQLite | 395,399 | 2.5μs | Single server, need persistence |
+| MongoDB | 2,161 | 462.8μs | Multi-server / NoSQL infrastructure |
 <!-- /BENCH:NODE_STORE_TABLE -->
 
 ### Valkey (Redis Alternative)
@@ -237,9 +237,9 @@ app.use(hitlimit({
 <!-- BENCH:NODE_COMPETITOR_TABLE -->
 | Library | Ops/sec | |
 |---------|---------|---|
-| **hitlimit** | **3,206,714** | ████████████████████ |
-| rate-limiter-flexible | 1,202,274 | ███████ |
-| express-rate-limit | 844,323 | █████ |
+| **hitlimit** | **5,206,854** | ████████████████████ |
+| rate-limiter-flexible | 1,449,640 | ██████ |
+| express-rate-limit | 892,379 | ███ |
 <!-- /BENCH:NODE_COMPETITOR_TABLE -->
 
 This is the **memory store** comparison — the default for all three libraries. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. We report scenarios where competitors beat us. Run them yourself.
