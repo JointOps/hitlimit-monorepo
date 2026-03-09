@@ -231,11 +231,11 @@ Bun.serve({
 | Runtime | Ops/sec | |
 |---------|---------|---|
 | **Bun** | **6,058,830** | ████████████████████ |
-| Node.js | 3,206,714 | ███████████ |
+| Node.js | 5,206,854 | █████████████████ |
 <!-- /BENCH:BUN_VS_NODE_TABLE -->
 
 <!-- BENCH:BUN_VS_NODE_TEXT -->
-Bun leads at 10K IPs (6.06M vs 3.21M) and single-IP (6.41M vs 5.41M). Same library, same algorithm, **memory store**. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. Run them yourself.
+Bun leads at 10K IPs (6.06M vs 5.21M) and single-IP (6.41M vs 8.38M). Same library, same algorithm, **memory store**. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. Run them yourself.
 <!-- /BENCH:BUN_VS_NODE_TEXT -->
 
 ### Why bun:sqlite is faster than better-sqlite3
