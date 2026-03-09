@@ -72,6 +72,20 @@
         "latencyAvgNs": 179
       }
     },
+    "mongodb": {
+      "singleIp": {
+        "opsPerSec": 2302,
+        "latencyAvgNs": 434383
+      },
+      "multi1k": {
+        "opsPerSec": 2159,
+        "latencyAvgNs": 463172
+      },
+      "multi10k": {
+        "opsPerSec": 2132,
+        "latencyAvgNs": 469044
+      }
+    },
     "sqlite": {
       "singleIp": {
         "opsPerSec": 469149,
