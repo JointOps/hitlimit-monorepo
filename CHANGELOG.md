@@ -5,25 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.0] - 2026-XX-XX
+## [1.4.0] - 2026-03-09
 
 ### Added
-- MySQL store (`mysqlStore()`) — SQL rate limiting with atomic `INSERT ON DUPLICATE KEY UPDATE`
-- Available for both Node.js (`@joint-ops/hitlimit`) and Bun (`@joint-ops/hitlimit-bun`)
-- Peer dependency: `mysql2` >=3.0.0 (optional)
-- Full test suites for both packages
-- Documentation page with usage guide
-- Benchmarks: Node.js and Bun store benchmarks, Express middleware benchmarks
+- **MongoDB store** (`mongoStore()`) — NoSQL rate limiting with atomic `$inc` + `$setOnInsert` upserts, TTL indexes for auto-cleanup
+  - Available for both Node.js (`@joint-ops/hitlimit`) and Bun (`@joint-ops/hitlimit-bun`)
+  - Peer dependency: `mongodb` >=6.0.0 (optional)
+  - Full test suites for both packages
+  - Documentation page with usage guide
+- **MySQL store** (`mysqlStore()`) — SQL rate limiting with atomic `INSERT ON DUPLICATE KEY UPDATE`, scheduled cleanup
+  - Available for both Node.js (`@joint-ops/hitlimit`) and Bun (`@joint-ops/hitlimit-bun`)
+  - Peer dependency: `mysql2` >=3.0.0 (optional)
+  - Full test suites for both packages
+  - Documentation page with usage guide
+- **Benchmark CLI** (`benchmarks/cli.ts`) — interactive benchmark runner replacing legacy shell scripts
+- **Benchmark data generator** — centralized `benchmarks.json` as single source of truth for all 50+ doc pages
+- **34 benchmark result files** for v1.4.0 across Memory, SQLite, MongoDB stores on Express, Fastify, Hono, NestJS, Elysia, Bun.serve
+- **CI/CD workflows** — benchmark, CI (with MongoDB/MySQL services), and release pipelines
+- Docker Compose profiles for MongoDB and MySQL
 
-## [1.4.0] - 2026-XX-XX
-
-### Added
-- MongoDB store (`mongoStore()`) — NoSQL rate limiting with atomic `findOneAndUpdate`, TTL indexes
-- Available for both Node.js (`@joint-ops/hitlimit`) and Bun (`@joint-ops/hitlimit-bun`)
-- Peer dependency: `mongodb` >=6.0.0 (optional)
-- Full test suites for both packages
-- Documentation page with usage guide
-- Benchmarks: Node.js and Bun store benchmarks, Express middleware benchmarks
+### Changed
+- **Bun SQLite store** — added `PRAGMA journal_mode = WAL` for parity with Node.js `better-sqlite3`
+- **MongoDB query optimization** — replaced aggregation pipeline with direct `$inc` + `$setOnInsert` upserts (~2x throughput)
+- All doc pages now consume benchmark data from centralized `benchmarks.json` via helper functions
+- Overhauled READMEs with collapsible store sections and ASCII deployment diagrams
+- Integrated docs build into Turbo pipeline
+- Removed legacy `bench.sh` and `benchmark-all.sh` scripts
 
 ## [1.3.0] - 2026-02-26
 
