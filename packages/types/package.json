@@ -70,6 +70,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "tsc",
+    "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
   "devDependencies": {
