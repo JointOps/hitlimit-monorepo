@@ -43,7 +43,8 @@ const env = bench.environment;
       <tbody>
         <tr><td>Single server, many unique IPs</td><td><strong>Memory</strong> (default)</td><td class="highlight">{opsRange(b.memory.multi10k.opsPerSec, b.memory.singleIp.opsPerSec)} ops/sec</td></tr>
         <tr><td>Need persistence, single server</td><td><strong>bun:sqlite</strong></td><td class="highlight">{opsRange(b.sqlite.multi10k.opsPerSec, b.sqlite.singleIp.opsPerSec)} ops/sec</td></tr>
-        <tr><td>Multiple servers (distributed)</td><td><strong>Redis / Postgres / MongoDB</strong></td><td>Network-bound (~200-3,500 ops/sec)</td></tr>
+        <tr><td>Multiple servers (distributed, document DB)</td><td><strong>MongoDB</strong></td><td class="highlight">{opsRangeDecimal(b.mongodb.multi10k.opsPerSec, b.mongodb.singleIp.opsPerSec)} ops/sec</td></tr>
+        <tr><td>Multiple servers (distributed)</td><td><strong>Redis / Postgres</strong></td><td>Network-bound (~200-3,500 ops/sec)</td></tr>
       </tbody>
     </table>
   </div>
@@ -208,6 +209,27 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
       </div>
     </div>
 
+    <h2 id="mongodb-store-bun">MongoDB Store</h2>
+
+    <p>
+      Atomic <code>$inc</code> + <code>$setOnInsert</code> upserts with TTL indexes — same approach as Node.js.
+      Performance is network/query-bound.
+    </p>
+
+    <table class="benchmark-table">
+      <thead><tr><th>Scenario</th><th>ops/sec</th><th>Latency</th></tr></thead>
+      <tbody>
+        <tr><td>Single IP</td><td><strong>{formatOps(b.mongodb.singleIp.opsPerSec)}</strong></td><td>{formatLatency(b.mongodb.singleIp.latencyAvgNs)}</td></tr>
+        <tr><td>1,000 Unique IPs</td><td><strong>{formatOps(b.mongodb.multi1k.opsPerSec)}</strong></td><td>{formatLatency(b.mongodb.multi1k.latencyAvgNs)}</td></tr>
+        <tr><td>10,000 Unique IPs</td><td><strong>{formatOps(b.mongodb.multi10k.opsPerSec)}</strong></td><td>{formatLatency(b.mongodb.multi10k.latencyAvgNs)}</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout bun-callout">
+      <strong>Key Insight:</strong> MongoDB performance is nearly identical on Bun and Node.js (~{formatOps(b.mongodb.singleIp.opsPerSec)} vs {formatOps(n.mongodb.singleIp.opsPerSec)} ops/sec).
+      The bottleneck is MongoDB network/query latency (~{formatLatency(b.mongodb.singleIp.latencyAvgNs)}), not the runtime.
+    </div>
+
     <h2 id="redis-store-bun">Redis Store</h2>
 
     <p>
@@ -251,7 +273,7 @@ Each benchmark: 5 runs × 50,000 iterations</code></pre>
         <tr><td>bun:sqlite</td><td class="good">Built-in (native)</td><td class="highlight">{formatOps(b.sqlite.multi10k.opsPerSec)} ops/sec</td><td>Single server, persistent</td></tr>
         <tr><td>Redis</td><td class="good">Built-in</td><td>Network-bound</td><td>Multi-server, distributed</td></tr>
         <tr><td>Postgres</td><td class="good">Built-in</td><td>Network-bound</td><td>Multi-server, distributed (SQL)</td></tr>
-        <tr><td>MongoDB</td><td class="good">Built-in</td><td>Network-bound</td><td>Multi-server, distributed (document DB)</td></tr>
+        <tr><td>MongoDB</td><td class="good">Built-in</td><td class="highlight">{formatOps(b.mongodb.multi10k.opsPerSec)} ops/sec</td><td>Multi-server, distributed (document DB)</td></tr>
       </tbody>
     </table>
   </div>

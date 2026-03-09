@@ -156,6 +156,7 @@ Bun.serve({ fetch: hitlimit({ store: mysqlStore({ pool }) }, handler) })
 |-------|---------|---------|-------------|
 | Memory | 5,574,103 | 179ns | Single server, maximum speed |
 | bun:sqlite | 372,247 | 2.7μs | Single server, need persistence |
+| MongoDB | 2,132 | 469μs | Multi-server / NoSQL infrastructure |
 <!-- /BENCH:BUN_STORE_TABLE -->
 
 ### Valkey (Redis Alternative)
