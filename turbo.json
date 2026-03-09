@@ -5,6 +5,14 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "docs#build": {
+      "dependsOn": [],
+      "outputs": ["dist/**", ".astro/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
     "test": {
       "dependsOn": ["build"]
     },
@@ -13,6 +21,10 @@
     },
     "clean": {
       "cache": false
+    },
+    "preview": {
+      "cache": false,
+      "persistent": true
     }
   }
 }
