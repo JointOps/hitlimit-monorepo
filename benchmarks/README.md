@@ -40,7 +40,7 @@ How many rate limit checks the library can perform in one second. Higher is bett
 
 <!-- BENCH:EXAMPLES -->
 **Example values:**
-- `8,375,397 ops/sec` — 8.38 million checks per second (memory store, very fast)
+- `5,956,655 ops/sec` — 5.96 million checks per second (memory store, very fast)
 <!-- /BENCH:EXAMPLES -->
 
 #### `avgNs` — Average Latency (Nanoseconds)

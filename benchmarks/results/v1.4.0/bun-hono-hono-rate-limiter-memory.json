@@ -24,55 +24,55 @@
     "runs": 5,
     "totalMeasured": 250000
   },
-  "date": "2026-03-09T07:01:11.578Z",
+  "date": "2026-03-09T09:50:19.783Z",
   "scenarios": {
     "single-ip": {
       "description": "Single IP, best cache locality",
       "keys": 1,
-      "memoryMB": 2.26,
-      "opsPerSec": 209648,
+      "memoryMB": 2.24,
+      "opsPerSec": 211102,
       "latency": {
-        "avgNs": 4770,
-        "p50Ns": 3834,
-        "p95Ns": 7791,
-        "p99Ns": 19041,
-        "minNs": 3041,
-        "maxNs": 853125
+        "avgNs": 4737,
+        "p50Ns": 3750,
+        "p95Ns": 7875,
+        "p99Ns": 18125,
+        "minNs": 3000,
+        "maxNs": 752792
       },
-      "stdDev": 10344.9,
-      "marginOfError": 40.55
+      "stdDev": 9275.77,
+      "marginOfError": 36.36
     },
     "multi-ip-1k": {
       "description": "1,000 unique IPs, typical API",
       "keys": 1000,
       "memoryMB": 0,
-      "opsPerSec": 204626,
+      "opsPerSec": 209292,
       "latency": {
-        "avgNs": 4887,
-        "p50Ns": 3917,
-        "p95Ns": 7959,
-        "p99Ns": 19958,
-        "minNs": 3083,
-        "maxNs": 1149500
+        "avgNs": 4778,
+        "p50Ns": 3750,
+        "p95Ns": 8292,
+        "p99Ns": 18084,
+        "minNs": 3041,
+        "maxNs": 949708
       },
-      "stdDev": 10344.81,
-      "marginOfError": 40.55
+      "stdDev": 9573.14,
+      "marginOfError": 37.53
     },
     "multi-ip-10k": {
       "description": "10,000 unique IPs, high traffic",
       "keys": 10000,
       "memoryMB": 0,
-      "opsPerSec": 196924,
+      "opsPerSec": 199145,
       "latency": {
-        "avgNs": 5078,
-        "p50Ns": 4083,
-        "p95Ns": 8459,
-        "p99Ns": 20167,
-        "minNs": 3083,
-        "maxNs": 855416
+        "avgNs": 5021,
+        "p50Ns": 3875,
+        "p95Ns": 8750,
+        "p99Ns": 19166,
+        "minNs": 3041,
+        "maxNs": 716625
       },
-      "stdDev": 10214.56,
-      "marginOfError": 40.04
+      "stdDev": 9451.15,
+      "marginOfError": 37.05
     }
   }
 }

@@ -24,55 +24,55 @@
     "runs": 5,
     "totalMeasured": 250000
   },
-  "date": "2026-03-09T07:00:37.234Z",
+  "date": "2026-03-09T09:49:26.989Z",
   "scenarios": {
     "single-ip": {
       "description": "Single IP, best cache locality",
       "keys": 1,
-      "memoryMB": 12.69,
-      "opsPerSec": 127498,
+      "memoryMB": 12.59,
+      "opsPerSec": 132554,
       "latency": {
-        "avgNs": 7843,
-        "p50Ns": 6667,
-        "p95Ns": 11083,
-        "p99Ns": 19625,
-        "minNs": 6083,
-        "maxNs": 684667
+        "avgNs": 7544,
+        "p50Ns": 6584,
+        "p95Ns": 10792,
+        "p99Ns": 17833,
+        "minNs": 6208,
+        "maxNs": 953583
       },
-      "stdDev": 7474.11,
-      "marginOfError": 29.3
+      "stdDev": 6168.32,
+      "marginOfError": 24.18
     },
     "multi-ip-1k": {
       "description": "1,000 unique IPs, typical API",
       "keys": 1000,
-      "memoryMB": 8.79,
-      "opsPerSec": 130090,
+      "memoryMB": 8.86,
+      "opsPerSec": 131412,
       "latency": {
-        "avgNs": 7687,
-        "p50Ns": 6709,
-        "p95Ns": 10584,
-        "p99Ns": 18750,
-        "minNs": 6083,
-        "maxNs": 773917
+        "avgNs": 7610,
+        "p50Ns": 6667,
+        "p95Ns": 10625,
+        "p99Ns": 21041,
+        "minNs": 6250,
+        "maxNs": 1279375
       },
-      "stdDev": 6444.14,
-      "marginOfError": 25.26
+      "stdDev": 6665.37,
+      "marginOfError": 26.13
     },
     "multi-ip-10k": {
       "description": "10,000 unique IPs, high traffic",
       "keys": 10000,
-      "memoryMB": 9.64,
-      "opsPerSec": 128334,
+      "memoryMB": 9.7,
+      "opsPerSec": 133147,
       "latency": {
-        "avgNs": 7792,
-        "p50Ns": 6833,
-        "p95Ns": 10667,
-        "p99Ns": 19541,
-        "minNs": 6084,
-        "maxNs": 819667
+        "avgNs": 7510,
+        "p50Ns": 6667,
+        "p95Ns": 10417,
+        "p99Ns": 20000,
+        "minNs": 6166,
+        "maxNs": 3222875
       },
-      "stdDev": 6230.04,
-      "marginOfError": 24.42
+      "stdDev": 8717.97,
+      "marginOfError": 34.17
     }
   }
 }

@@ -23,55 +23,55 @@
     "runs": 5,
     "totalMeasured": 250000
   },
-  "date": "2026-03-09T07:00:04.945Z",
+  "date": "2026-03-09T09:48:55.080Z",
   "scenarios": {
     "single-ip": {
       "description": "Single IP, best cache locality",
       "keys": 1,
       "memoryMB": 0.52,
-      "opsPerSec": 1196529,
+      "opsPerSec": 1223856,
       "latency": {
-        "avgNs": 836,
-        "p50Ns": 667,
-        "p95Ns": 1375,
-        "p99Ns": 1792,
+        "avgNs": 817,
+        "p50Ns": 708,
+        "p95Ns": 1209,
+        "p99Ns": 1583,
         "minNs": 500,
-        "maxNs": 308500
+        "maxNs": 364375
       },
-      "stdDev": 2235.52,
-      "marginOfError": 8.76
+      "stdDev": 1768.43,
+      "marginOfError": 6.93
     },
     "multi-ip-1k": {
       "description": "1,000 unique IPs, typical API",
       "keys": 1000,
-      "memoryMB": 9.53,
-      "opsPerSec": 1105447,
+      "memoryMB": 15.63,
+      "opsPerSec": 926290,
       "latency": {
-        "avgNs": 905,
-        "p50Ns": 750,
-        "p95Ns": 1209,
-        "p99Ns": 2334,
+        "avgNs": 1080,
+        "p50Ns": 875,
+        "p95Ns": 1583,
+        "p99Ns": 4208,
         "minNs": 541,
-        "maxNs": 995625
+        "maxNs": 1242542
       },
-      "stdDev": 4269.86,
-      "marginOfError": 16.74
+      "stdDev": 4202.87,
+      "marginOfError": 16.48
     },
     "multi-ip-10k": {
       "description": "10,000 unique IPs, high traffic",
       "keys": 10000,
-      "memoryMB": 8.29,
-      "opsPerSec": 892379,
+      "memoryMB": 6.34,
+      "opsPerSec": 824030,
       "latency": {
-        "avgNs": 1121,
-        "p50Ns": 875,
-        "p95Ns": 1916,
-        "p99Ns": 3833,
-        "minNs": 583,
-        "maxNs": 1598709
+        "avgNs": 1214,
+        "p50Ns": 917,
+        "p95Ns": 2250,
+        "p99Ns": 4834,
+        "minNs": 541,
+        "maxNs": 1523709
       },
-      "stdDev": 6963.32,
-      "marginOfError": 27.3
+      "stdDev": 6570.82,
+      "marginOfError": 25.76
     }
   }
 }

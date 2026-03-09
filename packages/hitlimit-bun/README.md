@@ -3,7 +3,7 @@
 > Rate limiting built for Bun. Not ported — built.
 
 <!-- BENCH:BUN_HERO -->
-**6.41M ops/sec** on memory. **6.06M at 10K IPs**. Native bun:sqlite. Atomic Redis Lua. Postgres. Zero dependencies.
+**7.73M ops/sec** on memory. **5.57M at 10K IPs**. Native bun:sqlite. Atomic Redis Lua. Postgres. Zero dependencies.
 <!-- /BENCH:BUN_HERO -->
 
 ```bash
@@ -154,8 +154,8 @@ Bun.serve({ fetch: hitlimit({ store: mysqlStore({ pool }) }, handler) })
 <!-- BENCH:BUN_STORE_TABLE -->
 | Store | Ops/sec | Latency | When to use |
 |-------|---------|---------|-------------|
-| Memory | 6,058,830 | 165ns | Single server, maximum speed |
-| bun:sqlite | 340,622 | 2.9μs | Single server, need persistence |
+| Memory | 5,574,103 | 179ns | Single server, maximum speed |
+| bun:sqlite | 372,247 | 2.7μs | Single server, need persistence |
 <!-- /BENCH:BUN_STORE_TABLE -->
 
 ### Valkey (Redis Alternative)
@@ -230,12 +230,12 @@ Bun.serve({
 <!-- BENCH:BUN_VS_NODE_TABLE -->
 | Runtime | Ops/sec | |
 |---------|---------|---|
-| **Bun** | **6,058,830** | ████████████████████ |
-| Node.js | 5,206,854 | █████████████████ |
+| **Bun** | **5,574,103** | ████████████████████ |
+| Node.js | 4,082,874 | ███████████████ |
 <!-- /BENCH:BUN_VS_NODE_TABLE -->
 
 <!-- BENCH:BUN_VS_NODE_TEXT -->
-Bun leads at 10K IPs (6.06M vs 5.21M) and single-IP (6.41M vs 8.38M). Same library, same algorithm, **memory store**. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. Run them yourself.
+Bun leads at 10K IPs (5.57M vs 4.08M) and single-IP (7.73M vs 5.96M). Same library, same algorithm, **memory store**. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. Run them yourself.
 <!-- /BENCH:BUN_VS_NODE_TEXT -->
 
 ### Why bun:sqlite is faster than better-sqlite3
