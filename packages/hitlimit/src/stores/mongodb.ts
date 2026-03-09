@@ -43,41 +43,52 @@ class MongoStore implements HitLimitStore {
     await this.col('violations').createIndex({ key: 1 }, { unique: true })
   }
 
-  async hit(key: string, windowMs: number, _limit: number): Promise<StoreResult> {
-    if (!this.ready) await this.indexesReady
+  /**
+   * Atomic increment using $inc + $setOnInsert (fast path).
+   * If the document's window has expired but MongoDB TTL hasn't cleaned it yet,
+   * we get an E11000 duplicate key error on upsert — in that case we replace
+   * the expired document and retry.
+   */
+  private async atomicIncrement(
+    collection: any,
+    key: string,
+    windowMs: number
+  ): Promise<{ count: number; resetAt: number }> {
     const now = Date.now()
     const resetAt = now + windowMs
+    const expireAt = new Date(resetAt)
 
-    const result = await this.col('hits').findOneAndUpdate(
-      { key },
-      [{
-        $set: {
-          count: {
-            $cond: {
-              if: { $and: [{ $gt: ['$resetAt', null] }, { $gt: ['$resetAt', now] }] },
-              then: { $add: ['$count', 1] },
-              else: 1
-            }
-          },
-          resetAt: {
-            $cond: {
-              if: { $and: [{ $gt: ['$resetAt', null] }, { $gt: ['$resetAt', now] }] },
-              then: '$resetAt',
-              else: resetAt
-            }
-          },
-          expireAt: {
-            $cond: {
-              if: { $and: [{ $gt: ['$resetAt', null] }, { $gt: ['$resetAt', now] }] },
-              then: '$expireAt',
-              else: new Date(resetAt)
-            }
-          }
+    try {
+      const result = await collection.findOneAndUpdate(
+        { key, resetAt: { $gt: now } },
+        {
+          $inc: { count: 1 },
+          $setOnInsert: { key, resetAt, expireAt }
+        },
+        { upsert: true, returnDocument: 'after' }
+      )
+      return { count: result.count, resetAt: result.resetAt }
+    } catch (err: any) {
+      if (err?.code === 11000) {
+        // Expired doc exists but TTL hasn't cleaned it — replace it
+        const replaced = await collection.findOneAndUpdate(
+          { key, resetAt: { $lte: now } },
+          { $set: { count: 1, resetAt, expireAt } },
+          { returnDocument: 'after' }
+        )
+        if (replaced) {
+          return { count: replaced.count, resetAt: replaced.resetAt }
         }
-      }],
-      { upsert: true, returnDocument: 'after' }
-    )
-    return { count: result.count, resetAt: result.resetAt }
+        // Another thread beat us to the replace — retry the fast path
+        return this.atomicIncrement(collection, key, windowMs)
+      }
+      throw err
+    }
+  }
+
+  async hit(key: string, windowMs: number, _limit: number): Promise<StoreResult> {
+    if (!this.ready) await this.indexesReady
+    return this.atomicIncrement(this.col('hits'), key, windowMs)
   }
 
   async hitWithBan(key: string, windowMs: number, limit: number, banThreshold: number, banDurationMs: number): Promise<HitWithBanResult> {
@@ -99,71 +110,13 @@ class MongoStore implements HitLimitStore {
     }
 
     // Atomic hit
-    const hitResult = await this.col('hits').findOneAndUpdate(
-      { key },
-      [{
-        $set: {
-          count: {
-            $cond: {
-              if: { $and: [{ $gt: ['$resetAt', null] }, { $gt: ['$resetAt', now] }] },
-              then: { $add: ['$count', 1] },
-              else: 1
-            }
-          },
-          resetAt: {
-            $cond: {
-              if: { $and: [{ $gt: ['$resetAt', null] }, { $gt: ['$resetAt', now] }] },
-              then: '$resetAt',
-              else: resetAt
-            }
-          },
-          expireAt: {
-            $cond: {
-              if: { $and: [{ $gt: ['$resetAt', null] }, { $gt: ['$resetAt', now] }] },
-              then: '$expireAt',
-              else: new Date(resetAt)
-            }
-          }
-        }
-      }],
-      { upsert: true, returnDocument: 'after' }
-    )
-
+    const hitResult = await this.atomicIncrement(this.col('hits'), key, windowMs)
     const hitCount = hitResult.count
     const hitResetAt = hitResult.resetAt
 
     // Track violations if over limit
     if (hitCount > limit) {
-      const violationResult = await this.col('violations').findOneAndUpdate(
-        { key },
-        [{
-          $set: {
-            count: {
-              $cond: {
-                if: { $and: [{ $gt: ['$resetAt', null] }, { $gt: ['$resetAt', now] }] },
-                then: { $add: ['$count', 1] },
-                else: 1
-              }
-            },
-            resetAt: {
-              $cond: {
-                if: { $and: [{ $gt: ['$resetAt', null] }, { $gt: ['$resetAt', now] }] },
-                then: '$resetAt',
-                else: banExpiresAt
-              }
-            },
-            expireAt: {
-              $cond: {
-                if: { $and: [{ $gt: ['$resetAt', null] }, { $gt: ['$resetAt', now] }] },
-                then: '$expireAt',
-                else: new Date(banExpiresAt)
-              }
-            }
-          }
-        }],
-        { upsert: true, returnDocument: 'after' }
-      )
-
+      const violationResult = await this.atomicIncrement(this.col('violations'), key, banDurationMs)
       const violations = violationResult.count
       const shouldBan = violations >= banThreshold
 
@@ -211,38 +164,7 @@ class MongoStore implements HitLimitStore {
 
   async recordViolation(key: string, windowMs: number): Promise<number> {
     if (!this.ready) await this.indexesReady
-    const now = Date.now()
-    const resetAt = now + windowMs
-
-    const result = await this.col('violations').findOneAndUpdate(
-      { key },
-      [{
-        $set: {
-          count: {
-            $cond: {
-              if: { $and: [{ $gt: ['$resetAt', null] }, { $gt: ['$resetAt', now] }] },
-              then: { $add: ['$count', 1] },
-              else: 1
-            }
-          },
-          resetAt: {
-            $cond: {
-              if: { $and: [{ $gt: ['$resetAt', null] }, { $gt: ['$resetAt', now] }] },
-              then: '$resetAt',
-              else: resetAt
-            }
-          },
-          expireAt: {
-            $cond: {
-              if: { $and: [{ $gt: ['$resetAt', null] }, { $gt: ['$resetAt', now] }] },
-              then: '$expireAt',
-              else: new Date(resetAt)
-            }
-          }
-        }
-      }],
-      { upsert: true, returnDocument: 'after' }
-    )
+    const result = await this.atomicIncrement(this.col('violations'), key, windowMs)
     return result.count
   }
 
