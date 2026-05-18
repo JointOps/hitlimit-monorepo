@@ -25,16 +25,16 @@ import Tabs from '../../../components/Tabs.astro';
 
   <h2 id="module-setup">Module Setup</h2>
 
-  <p>Import the HitlimitModule in your app module:</p>
+  <p>Import the HitLimitModule in your app module:</p>
 
   <div class="code-block">
     <div class="code-header"><span class="code-label">app.module.ts</span></div>
     <pre><code><span class="kw">import</span> {"{"} Module {"}"} <span class="kw">from</span> <span class="str">'@nestjs/common'</span>
-<span class="kw">import</span> {"{"} HitlimitModule {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
+<span class="kw">import</span> {"{"} HitLimitModule {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
 
 @<span class="fn">Module</span>({"{"}
   imports: [
-    HitlimitModule.<span class="fn">forRoot</span>({"{"}
+    HitLimitModule.<span class="fn">register</span>({"{"}
       limit: <span class="num">100</span>,
       window: <span class="str">'1m'</span>
     {"}"})
@@ -49,7 +49,7 @@ import Tabs from '../../../components/Tabs.astro';
 
   <div class="code-block">
     <div class="code-header"><span class="code-label">app.module.ts</span></div>
-    <pre><code>HitlimitModule.<span class="fn">forRootAsync</span>({"{"}
+    <pre><code>HitLimitModule.<span class="fn">registerAsync</span>({"{"}
   imports: [ConfigModule],
   inject: [ConfigService],
   useFactory: (config: ConfigService) => ({"{"}
@@ -65,13 +65,13 @@ import Tabs from '../../../components/Tabs.astro';
 
   <div class="code-block">
     <div class="code-header"><span class="code-label">main.ts</span></div>
-    <pre><code><span class="kw">import</span> {"{"} HitlimitGuard {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
+    <pre><code><span class="kw">import</span> {"{"} HitLimitGuard {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
 
 <span class="kw">async function</span> <span class="fn">bootstrap</span>() {"{"}
   <span class="kw">const</span> app = <span class="kw">await</span> NestFactory.<span class="fn">create</span>(AppModule)
 
   <span class="cm">// Apply globally</span>
-  app.<span class="fn">useGlobalGuards</span>(<span class="kw">new</span> <span class="fn">HitlimitGuard</span>())
+  app.<span class="fn">useGlobalGuards</span>(<span class="kw">new</span> <span class="fn">HitLimitGuard</span>())
 
   <span class="kw">await</span> app.<span class="fn">listen</span>(<span class="num">3000</span>)
 {"}"}</code></pre>
@@ -79,56 +79,39 @@ import Tabs from '../../../components/Tabs.astro';
 
   <h2 id="decorator">Using the Decorator</h2>
 
-  <p>Apply custom limits to specific routes using the <code>@RateLimit</code> decorator:</p>
+  <p>Apply custom limits to specific routes using the <code>@HitLimit</code> decorator:</p>
 
   <div class="code-block">
     <div class="code-header"><span class="code-label">users.controller.ts</span></div>
     <pre><code><span class="kw">import</span> {"{"} Controller, Get, Post {"}"} <span class="kw">from</span> <span class="str">'@nestjs/common'</span>
-<span class="kw">import</span> {"{"} RateLimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
+<span class="kw">import</span> {"{"} HitLimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
 
 @<span class="fn">Controller</span>(<span class="str">'users'</span>)
 <span class="kw">export class</span> UsersController {"{"}
 
   @<span class="fn">Get</span>()
-  @<span class="fn">RateLimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
+  @<span class="fn">HitLimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
   <span class="fn">findAll</span>() {"{"}
     <span class="kw">return</span> <span class="kw">this</span>.usersService.<span class="fn">findAll</span>()
   {"}"}
 
   @<span class="fn">Post</span>(<span class="str">'login'</span>)
-  @<span class="fn">RateLimit</span>({"{"} limit: <span class="num">5</span>, window: <span class="str">'15m'</span> {"}"})
+  @<span class="fn">HitLimit</span>({"{"} limit: <span class="num">5</span>, window: <span class="str">'15m'</span> {"}"})
   <span class="fn">login</span>() {"{"}
     <span class="kw">return</span> <span class="kw">this</span>.authService.<span class="fn">login</span>()
   {"}"}
 {"}"}</code></pre>
   </div>
 
-  <h2 id="skip-decorator">Skip Rate Limiting</h2>
-
-  <p>Use the <code>@SkipRateLimit</code> decorator to bypass rate limiting:</p>
-
-  <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} SkipRateLimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/nest'</span>
-
-@<span class="fn">Get</span>(<span class="str">'health'</span>)
-@<span class="fn">SkipRateLimit</span>()
-<span class="fn">healthCheck</span>() {"{"}
-  <span class="kw">return</span> {"{"} status: <span class="str">'ok'</span> {"}"}
-{"}"}</code></pre>
-  </div>
-
   <h2 id="custom-key">Custom Key Extraction</h2>
 
-  <p>Extract rate limit key from the execution context:</p>
+  <p>Extract the rate limit key from the request:</p>
 
   <div class="code-block">
-    <pre><code>HitlimitModule.<span class="fn">forRoot</span>({"{"}
+    <pre><code>HitLimitModule.<span class="fn">register</span>({"{"}
   limit: <span class="num">100</span>,
   window: <span class="str">'1m'</span>,
-  key: (context) => {"{"}
-    <span class="kw">const</span> request = context.<span class="fn">switchToHttp</span>().<span class="fn">getRequest</span>()
-    <span class="kw">return</span> request.user?.id || request.ip
-  {"}"}
+  key: (req) => req.user?.id || req.ip
 {"}"})</code></pre>
   </div>
 
@@ -139,7 +122,7 @@ import Tabs from '../../../components/Tabs.astro';
   <div class="code-block">
     <pre><code><span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
 
-HitlimitModule.<span class="fn">forRoot</span>({"{"}
+HitLimitModule.<span class="fn">register</span>({"{"}
   limit: <span class="num">100</span>,
   window: <span class="str">'1m'</span>,
   store: <span class="fn">redisStore</span>({"{"}

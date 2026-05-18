@@ -16,10 +16,10 @@ import Tabs from '../../../components/Tabs.astro';
 
   <Tabs
     tabs={[
-      { label: 'npm', content: 'npm install @joint-ops/hitlimit fastify fastify-plugin' },
-      { label: 'pnpm', content: 'pnpm add @joint-ops/hitlimit fastify fastify-plugin' },
-      { label: 'yarn', content: 'yarn add @joint-ops/hitlimit fastify fastify-plugin' },
-      { label: 'bun', content: 'bun add @joint-ops/hitlimit fastify fastify-plugin' },
+      { label: 'npm', content: 'npm install @joint-ops/hitlimit' },
+      { label: 'pnpm', content: 'pnpm add @joint-ops/hitlimit' },
+      { label: 'yarn', content: 'yarn add @joint-ops/hitlimit' },
+      { label: 'bun', content: 'bun add @joint-ops/hitlimit' },
     ]}
   />
 
@@ -192,8 +192,6 @@ app.<span class="fn">register</span>(<span class="kw">async</span> (scope) => {"
       </tbody>
     </table>
   </div>
-
-  <p>See the <a href="/docs/comparison#vs-fastify-rate-limit">full comparison</a> for more details.</p>
 
   <h2 id="advanced">Advanced: Ban + Group Features</h2>
 
