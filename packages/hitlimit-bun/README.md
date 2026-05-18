@@ -178,13 +178,31 @@ Peer dep: `ioredis`
 </details>
 
 <details>
-<summary><b>PostgreSQL</b> — use your existing database</summary>
+<summary><b>PostgreSQL</b> — Bun native SQL, no extra dependencies</summary>
 
+**Connection string (recommended):**
 ```typescript
 import { postgresStore } from '@joint-ops/hitlimit-bun/stores/postgres'
-Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' }) }, handler) })
+Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: process.env.DATABASE_URL }) }, handler) })
 ```
-Peer dep: `pg`
+
+**Caller-owned Bun SQL client:**
+```typescript
+import { SQL } from 'bun'
+import { postgresStore } from '@joint-ops/hitlimit-bun/stores/postgres'
+const client = new SQL(process.env.DATABASE_URL)
+Bun.serve({ fetch: hitlimit({ store: postgresStore({ client }) }, handler) })
+```
+
+**Legacy pg.Pool (deprecated — use `url` or `client` instead):**
+```typescript
+import pg from 'pg'
+import { postgresStore } from '@joint-ops/hitlimit-bun/stores/postgres'
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
+Bun.serve({ fetch: hitlimit({ store: postgresStore({ pool }) }, handler) }) // deprecated
+```
+
+Optional peer dep: `pg` — only required if you use the deprecated `{ pool }` option.
 </details>
 
 <details>

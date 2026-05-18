@@ -59,7 +59,7 @@ const searchData: SearchItem[] = [
   { title: 'Memory Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/memory', content: `bun memory store in-memory default ${formatOps(bench.bun.memory.singleIp.opsPerSec)} ops/sec fastest`, headings: ['Usage', 'Characteristics', 'Performance'], runtime: 'bun' },
   { title: 'SQLite Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/sqlite', content: `bun sqlite bun:sqlite native store persistent ${formatOps(bench.bun.sqlite.multi10k.opsPerSec)} ops/sec zero dependencies`, headings: ['Installation', 'Usage', 'Options', 'vs Node.js'], runtime: 'bun' },
   { title: 'Redis Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/redis', content: 'bun redis store distributed ioredis lua scripts network-bound', headings: ['Installation', 'Usage', 'Options', 'Lua Scripts'], runtime: 'bun' },
-  { title: 'Postgres Store (Bun)', section: 'Bun Stores', href: '/docs/stores/postgres', content: 'bun postgres postgresql store distributed pg pool network-bound', headings: ['Installation', 'Usage', 'Options', 'Schema'], runtime: 'bun' },
+  { title: 'Postgres Store (Bun)', section: 'Bun Stores', href: '/docs/stores/postgres', content: 'bun postgres postgresql store distributed native sql bun native no pg required network-bound', headings: ['Installation', 'Usage', 'Options', 'Schema'], runtime: 'bun' },
 
   // Bun Guides
   { title: 'Configuration (Bun)', section: 'Bun Guides', href: '/docs/bun/configuration', content: 'bun configuration options settings limit window store key skip headers ban', headings: ['Basic Options', 'Advanced Options', 'Ban', 'Tiered Limits'], runtime: 'bun' },

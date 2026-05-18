@@ -435,10 +435,22 @@ import { bench, formatOps, formatLatencyApprox } from '../../../../data/benchmar
     </thead>
     <tbody>
       <tr>
+        <td><code>url</code></td>
+        <td><code>string</code></td>
+        <td>—</td>
+        <td>Connection string. Store creates and owns a Bun SQL client. Closed on <code>shutdown()</code>.</td>
+      </tr>
+      <tr>
+        <td><code>client</code></td>
+        <td><code>SQL</code></td>
+        <td>—</td>
+        <td>Caller-owned Bun <code>SQL</code> instance. Store uses it but does not close it.</td>
+      </tr>
+      <tr>
         <td><code>pool</code></td>
         <td><code>Pool</code></td>
         <td>—</td>
-        <td>A <code>pg.Pool</code> instance (required).</td>
+        <td><strong>Deprecated.</strong> Legacy <code>pg.Pool</code>. Caller-owned, store does not close it.</td>
       </tr>
       <tr>
         <td><code>tablePrefix</code></td>
@@ -474,14 +486,11 @@ import { bench, formatOps, formatLatencyApprox } from '../../../../data/benchmar
     </div>
     <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 <span class="kw">import</span> {"{"} postgresStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/postgres'</span>
-<span class="kw">import</span> {"{"} Pool {"}"} <span class="kw">from</span> <span class="str">'pg'</span>
-
-<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({"{"} connectionString: <span class="str">'postgres://localhost:5432/mydb'</span> {"}"})
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
   window: <span class="str">'1m'</span>,
-  store: <span class="fn">postgresStore</span>({"{"} pool {"}"})
+  store: <span class="fn">postgresStore</span>({"{"} url: <span class="str">'postgres://localhost:5432/mydb'</span> {"}"})
 {"}"})</code></pre>
   </div>
 
