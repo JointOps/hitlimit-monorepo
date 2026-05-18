@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import pg from 'pg'
+import { SQL } from 'bun'
 import { run } from '../../../lib/runner.js'
 import { Hono } from 'hono'
 import { hitlimit } from '../../../../packages/hitlimit-bun/dist/hono.js'
@@ -7,20 +7,16 @@ import { postgresStore } from '../../../../packages/hitlimit-bun/dist/stores/pos
 
 const version = fs.readFileSync(new URL('../../../../VERSION', import.meta.url), 'utf-8').trim()
 
-const pool = new pg.Pool({
-  connectionString: 'postgres://hitlimit:hitlimit@localhost:5433/hitlimit_test'
-})
+const client = new SQL('postgres://hitlimit:hitlimit@localhost:5433/hitlimit_test')
 
 try {
-  const client = await pool.connect()
-  await client.query('SELECT 1')
-  client.release()
+  await client`SELECT 1`
 } catch {
   console.log('Postgres not available, skipping')
   process.exit(0)
 }
 
-const store = postgresStore({ pool, tablePrefix: 'bench_bun_hono_hl' })
+const store = postgresStore({ client, tablePrefix: 'bench_bun_hono_hl' })
 const app = new Hono()
 
 app.use(hitlimit({
@@ -36,11 +32,16 @@ await run({
   library: 'hitlimit',
   store: 'postgres',
   runtime: 'bun',
-  versions: { 'hitlimit-bun': version, hono: JSON.parse(fs.readFileSync(new URL('../../../node_modules/hono/package.json', import.meta.url), 'utf-8')).version, pg: JSON.parse(fs.readFileSync(new URL('../../../node_modules/pg/package.json', import.meta.url), 'utf-8')).version },
+  versions: {
+    'hitlimit-bun': version,
+    hono: JSON.parse(fs.readFileSync(new URL('../../../node_modules/hono/package.json', import.meta.url), 'utf-8')).version
+  },
   fn: (key) => app.request('/test', { headers: { 'x-forwarded-for': key } }),
   isSync: false,
   cleanup: async () => {
-    await pool.query('DROP TABLE IF EXISTS bench_bun_hono_hl_hits')
-    await pool.end()
+    await client.unsafe('DROP TABLE IF EXISTS bench_bun_hono_hl_hits')
+    await client.unsafe('DROP TABLE IF EXISTS bench_bun_hono_hl_bans')
+    await client.unsafe('DROP TABLE IF EXISTS bench_bun_hono_hl_violations')
+    await client.close()
   }
 })
