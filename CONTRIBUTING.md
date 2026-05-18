@@ -259,14 +259,14 @@ Releases are handled by maintainers:
 
 ```bash
 # 1. Update VERSION file (CI validates tag matches this)
-echo "1.4.0" > VERSION
+echo "1.5.0" > VERSION
 
 # 2. Bump all package versions
 ./scripts/bump-version.sh
 
 # 3. Commit
 git add VERSION packages/*/package.json
-git commit -m "chore: bump version to 1.4.0"
+git commit -m "chore: bump version to 1.5.0"
 
 # 4. Release
 ./scripts/release.sh

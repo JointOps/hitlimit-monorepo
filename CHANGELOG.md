@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-05-18
+
+### Changed
+- **Bun postgres store** (`@joint-ops/hitlimit-bun`) — migrated from `pg` to Bun native SQL
+  - New `url` option: pass a connection string, store creates and owns a `Bun.SQL` client (no extra dependencies)
+  - New `client` option: pass a caller-owned `Bun.SQL` instance (store does not close it on `shutdown()`)
+  - `pool` option (`pg.Pool`) is now **deprecated** — still works but `url` or `client` are preferred for Bun
+  - Removed `--external=pg` from Bun build script — `pg` is no longer imported at build time
+  - `pg` retained as an optional peer dependency for the deprecated `pool` path only
+  - Full driver-matrix test suite covering all three connection modes
+
+---
+
 ## [1.4.0] - 2026-03-09
 
 ### Added

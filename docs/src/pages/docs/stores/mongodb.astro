@@ -105,7 +105,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
   <ul>
     <li><strong>Persistence:</strong> Full MongoDB durability (journaling, replica sets)</li>
     <li><strong>Scalability:</strong> Shared across all server instances</li>
-    <li><strong>Atomic:</strong> <code>findOneAndUpdate</code> with aggregation pipeline ensures race-condition-free increments</li>
+    <li><strong>Atomic:</strong> <code>findOneAndUpdate</code> via <code>$inc</code> and <code>$setOnInsert</code> ensures race-condition-free increments</li>
     <li><strong>Cleanup:</strong> Automatic via MongoDB TTL indexes (no timers needed)</li>
     <li><strong>Dependencies:</strong> Requires <code>mongodb</code> driver (>=6.0.0)</li>
   </ul>

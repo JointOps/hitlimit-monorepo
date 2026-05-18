@@ -106,7 +106,7 @@ Pick the right backend for your deployment. All built in, no extra packages.
 app.use(hitlimit())                                            // Memory (default)
 app.use(hitlimit({ store: sqliteStore({ path: './rl.db' }) })) // SQLite
 app.use(hitlimit({ store: redisStore({ url: '...' }) }))       // Redis / Valkey / Dragonfly
-app.use(hitlimit({ store: postgresStore({ url: '...' }) }))    // PostgreSQL
+app.use(hitlimit({ store: postgresStore({ pool }) }))           // PostgreSQL (pg.Pool)
 app.use(hitlimit({ store: mongoStore({ db }) }))               // MongoDB
 app.use(hitlimit({ store: mysqlStore({ pool }) }))             // MySQL
 ```

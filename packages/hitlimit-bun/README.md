@@ -3,7 +3,7 @@
 > Rate limiting built for Bun. Not ported — built.
 
 <!-- BENCH:BUN_HERO -->
-**7.73M ops/sec** on memory. **5.57M at 10K IPs**. Native bun:sqlite. Atomic Redis Lua. Postgres. Zero dependencies.
+**7.73M ops/sec** at single IP. **5.57M at 10K unique IPs**. Native bun:sqlite. Atomic Lua. Postgres via Bun SQL. Zero dependencies.
 <!-- /BENCH:BUN_HERO -->
 
 ```bash
@@ -11,18 +11,20 @@ bun add @joint-ops/hitlimit-bun
 ```
 
 ```typescript
+import { hitlimit } from '@joint-ops/hitlimit-bun'
+
 Bun.serve({
   fetch: hitlimit({}, (req) => new Response('Hello!'))
 })
 ```
 
-One line. Done. Works with **Bun.serve**, **Elysia**, and **Hono** out of the box.
+100 req/min per IP. Done. Works with **Bun.serve**, **Elysia**, and **Hono** — no adapter packages, no wrappers.
 
-**[Docs](https://hitlimit.jointops.dev/docs/bun)** · **[GitHub](https://github.com/JointOps/hitlimit-monorepo)** · **[Benchmarks](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks)**
+**[Full Docs](https://hitlimit.jointops.dev/docs/bun)** · **[GitHub](https://github.com/JointOps/hitlimit-monorepo)**
 
 ---
 
-## 30 Seconds to Production
+## Frameworks
 
 ### Bun.serve
 
@@ -62,52 +64,17 @@ Bun.serve({ port: 3000, fetch: app.fetch })
 
 ---
 
-## What You Get
+## 8 Storage Backends
 
-**Tiered limits** — Free, Pro, Enterprise:
-
-```typescript
-hitlimit({
-  tiers: { free: { limit: 100, window: '1h' }, pro: { limit: 5000, window: '1h' } },
-  tier: (req) => req.headers.get('x-tier') || 'free'
-}, handler)
-```
-
-**Auto-ban** — Repeat offenders get blocked:
-
-```typescript
-hitlimit({ limit: 10, window: '1m', ban: { threshold: 5, duration: '1h' } }, handler)
-```
-
-**Custom keys** — Rate limit by anything:
-
-```typescript
-hitlimit({ key: (req) => req.headers.get('x-api-key') || 'anon' }, handler)
-```
-
-**Route-specific limits** (Elysia):
-
-```typescript
-new Elysia()
-  .use(hitlimit({ limit: 100, window: '1m', name: 'global' }))
-  .group('/auth', app => app.use(hitlimit({ limit: 5, window: '15m', name: 'auth' })))
-  .listen(3000)
-```
-
----
-
-## Pick Your Store
-
-Every store is built in. Swap one line — your rate limiting code stays the same.
+One line to swap. Your rate limiting logic stays exactly the same.
 
 ```
                Single Server                          Multi-Server
           ┌──────────────────────┐          ┌──────────────────────────┐
           │  Memory  │  SQLite   │          │  Redis   │  Postgres    │
-          │  (default) (bun:sqlite)         │  Valkey  │  MongoDB     │
-          │                      │          │  Dragonfly  MySQL       │
+          │ (default) (bun:sqlite)          │  Valkey  │  MongoDB     │
+          │                      │          │ Dragonfly│  MySQL       │
           └──────────────────────┘          └──────────────────────────┘
-             No dependencies at all            Your existing infra, zero lock-in
 ```
 
 <!-- BENCH:BUN_STORE_TABLE -->
@@ -118,133 +85,293 @@ Every store is built in. Swap one line — your rate limiting code stays the sam
 | MongoDB | 2,132 | 469μs | Multi-server / NoSQL infrastructure |
 <!-- /BENCH:BUN_STORE_TABLE -->
 
-> Redis, Valkey, DragonflyDB, Postgres, and MySQL are network-bound (~200–3,500 ops/sec). Benchmarks at [hitlimit.jointops.dev/docs/benchmarks](https://hitlimit.jointops.dev/docs/benchmarks).
+> Redis, Valkey, DragonflyDB, Postgres, and MySQL are network-bound. Full numbers at [hitlimit.jointops.dev/docs/benchmarks](https://hitlimit.jointops.dev/docs/benchmarks).
 
-### The pattern is always the same
+### Memory — default, zero config, zero dependencies
 
 ```typescript
-import { hitlimit } from '@joint-ops/hitlimit-bun'
-import { ______Store } from '@joint-ops/hitlimit-bun/stores/______'
-
-Bun.serve({ fetch: hitlimit({ store: ______Store({ /* config */ }) }, handler) })
+Bun.serve({ fetch: hitlimit({}, handler) })
 ```
 
-<details>
-<summary><b>Memory</b> — default, zero config</summary>
+### bun:sqlite — native, no N-API, no C++ bindings, survives restarts
 
 ```typescript
-Bun.serve({ fetch: hitlimit({}, handler) }) // that's it
-```
-</details>
+import { sqliteStore } from '@joint-ops/hitlimit-bun/stores/sqlite'
 
-<details>
-<summary><b>bun:sqlite</b> — native, no N-API, no FFI, survives restarts</summary>
-
-```typescript
-import { sqliteStore } from '@joint-ops/hitlimit-bun'
 Bun.serve({ fetch: hitlimit({ store: sqliteStore({ path: './ratelimit.db' }) }, handler) })
 ```
-No peer dependency — `bun:sqlite` is built into Bun.
-</details>
 
-<details>
-<summary><b>Redis</b> — distributed, atomic Lua scripts</summary>
+No peer dependency — `bun:sqlite` is built into Bun.
+
+### Redis — distributed, atomic Lua scripts, single round-trip
 
 ```typescript
 import { redisStore } from '@joint-ops/hitlimit-bun/stores/redis'
+
 Bun.serve({ fetch: hitlimit({ store: redisStore({ url: 'redis://localhost:6379' }) }, handler) })
 ```
-Peer dep: `ioredis`
-</details>
 
-<details>
-<summary><b>Valkey</b> — open-source Redis fork, drop-in replacement</summary>
+Peer dep: `ioredis`
+
+### Valkey — open-source Redis fork (BSD-3), drop-in replacement
 
 ```typescript
 import { valkeyStore } from '@joint-ops/hitlimit-bun/stores/valkey'
+
 Bun.serve({ fetch: hitlimit({ store: valkeyStore({ url: 'redis://localhost:6379' }) }, handler) })
 ```
-Peer dep: `ioredis`
-</details>
 
-<details>
-<summary><b>DragonflyDB</b> — Redis-compatible, higher throughput</summary>
+Peer dep: `ioredis`
+
+### DragonflyDB — Redis-compatible, handles more throughput
 
 ```typescript
 import { dragonflyStore } from '@joint-ops/hitlimit-bun/stores/dragonfly'
+
 Bun.serve({ fetch: hitlimit({ store: dragonflyStore({ url: 'redis://localhost:6379' }) }, handler) })
 ```
-Peer dep: `ioredis`
-</details>
 
-<details>
-<summary><b>PostgreSQL</b> — use your existing database</summary>
+Peer dep: `ioredis`
+
+### PostgreSQL — Bun native SQL, no extra driver needed
+
+**Connection string (recommended):**
 
 ```typescript
 import { postgresStore } from '@joint-ops/hitlimit-bun/stores/postgres'
-Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: 'postgres://localhost:5432/mydb' }) }, handler) })
-```
-Peer dep: `pg`
-</details>
 
-<details>
-<summary><b>MongoDB</b> — NoSQL, TTL indexes, MEAN/MERN stacks</summary>
+Bun.serve({ fetch: hitlimit({ store: postgresStore({ url: process.env.DATABASE_URL }) }, handler) })
+```
+
+**Caller-owned `Bun.SQL` client:**
 
 ```typescript
-import { mongoStore } from '@joint-ops/hitlimit-bun/stores/mongodb'
+import { SQL } from 'bun'
+import { postgresStore } from '@joint-ops/hitlimit-bun/stores/postgres'
+
+const sql = new SQL(process.env.DATABASE_URL)
+Bun.serve({ fetch: hitlimit({ store: postgresStore({ client: sql }) }, handler) })
+```
+
+**Legacy `pg.Pool` (deprecated — `url` or `client` preferred):**
+
+```typescript
+import pg from 'pg'
+import { postgresStore } from '@joint-ops/hitlimit-bun/stores/postgres'
+
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
+Bun.serve({ fetch: hitlimit({ store: postgresStore({ pool }) }, handler) })
+```
+
+Optional peer dep: `pg` — only needed if you use the deprecated `{ pool }` option.
+
+### MongoDB — TTL indexes, MEAN/MERN stacks
+
+```typescript
 import { MongoClient } from 'mongodb'
+import { mongoStore } from '@joint-ops/hitlimit-bun/stores/mongodb'
 
 const client = new MongoClient('mongodb://localhost:27017')
-const db = client.db('myapp')
-Bun.serve({ fetch: hitlimit({ store: mongoStore({ db }) }, handler) })
+await client.connect()
+Bun.serve({ fetch: hitlimit({ store: mongoStore({ db: client.db('myapp') }) }, handler) })
 ```
-Peer dep: `mongodb`
-</details>
 
-<details>
-<summary><b>MySQL</b> — SQL distributed, LAMP stacks</summary>
+Peer dep: `mongodb`
+
+### MySQL / MariaDB — LAMP stacks, PlanetScale, RDS
 
 ```typescript
-import { mysqlStore } from '@joint-ops/hitlimit-bun/stores/mysql'
 import mysql from 'mysql2/promise'
+import { mysqlStore } from '@joint-ops/hitlimit-bun/stores/mysql'
 
-const pool = mysql.createPool('mysql://root@localhost:3306/mydb')
+const pool = mysql.createPool({ host: 'localhost', database: 'myapp', user: 'root', password: '' })
 Bun.serve({ fetch: hitlimit({ store: mysqlStore({ pool }) }, handler) })
 ```
+
 Peer dep: `mysql2`
-</details>
 
 ---
 
-## Performance
+## Features
 
-### Bun vs Node.js — Memory Store, 10K unique IPs
+### Tiered limits — Free, Pro, Enterprise in one config
 
-<!-- BENCH:BUN_VS_NODE_TABLE -->
-| Runtime | Ops/sec | |
-|---------|---------|---|
-| **Bun** | **5,574,103** | ████████████████████ |
-| Node.js | 4,082,874 | ███████████████ |
-<!-- /BENCH:BUN_VS_NODE_TABLE -->
-
-<!-- BENCH:BUN_VS_NODE_TEXT -->
-Bun leads at 10K IPs (5.57M vs 4.08M) and single-IP (7.73M vs 5.96M). Same library, same algorithm, **memory store**. For Redis, Postgres, and cross-store breakdowns, see the [full benchmark results](https://github.com/JointOps/hitlimit-monorepo/tree/main/benchmarks). Controlled-environment microbenchmarks with transparent methodology. Run them yourself.
-<!-- /BENCH:BUN_VS_NODE_TEXT -->
-
-### Why bun:sqlite doesn't need bindings
-
-```
-Node.js: JS → N-API → C++ binding → SQLite
-Bun:     JS → Native call → SQLite (no overhead)
+```typescript
+hitlimit({
+  tiers: {
+    free:       { limit: 100,   window: '1h' },
+    pro:        { limit: 5000,  window: '1h' },
+    enterprise: { limit: 50000, window: '1h' }
+  },
+  tier: (req) => req.headers.get('x-tier') || 'free'
+}, handler)
 ```
 
-No N-API. No C++ bindings. No FFI. Bun calls SQLite directly.
+### Auto-ban — block repeat offenders automatically
+
+```typescript
+hitlimit({
+  limit: 100,
+  window: '1m',
+  ban: {
+    threshold: 5,   // ban after 5 violations
+    duration: '1h'  // ban lasts 1 hour
+  }
+}, handler)
+```
+
+When a client is banned: response includes `X-RateLimit-Ban: true` and `X-RateLimit-Ban-Expires`, body includes `banned: true`.
+
+### Group limits — shared quotas across clients
+
+```typescript
+hitlimit({
+  limit: 10000,
+  window: '1h',
+  group: (req) => new URL(req.url).searchParams.get('teamId') || 'default'
+}, handler)
+```
+
+### Custom rate limit key
+
+```typescript
+hitlimit({
+  key: (req) => req.headers.get('x-api-key') || 'anon'
+}, handler)
+```
+
+### Skip rules — whitelist whatever you want
+
+```typescript
+hitlimit({
+  skip: (req) => new URL(req.url).pathname === '/health'
+}, handler)
+```
+
+### Custom response body
+
+```typescript
+hitlimit({
+  response: (info) => ({
+    error: 'RATE_LIMITED',
+    message: `Slow down. Try again in ${info.resetIn}s.`,
+    limit: info.limit,
+    remaining: info.remaining
+  })
+}, handler)
+```
+
+### Rate limit headers
+
+```typescript
+hitlimit({
+  headers: {
+    standard: true,   // RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset (IETF)
+    legacy: true,     // X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset
+    retryAfter: true  // Retry-After on 429 responses
+  }
+}, handler)
+```
+
+### Store error handling — allow or deny on failure
+
+```typescript
+hitlimit({
+  onStoreError: (err, req) => {
+    if (new URL(req.url).pathname.startsWith('/admin')) return 'deny'
+    return 'allow'
+  }
+}, handler)
+```
+
+### Built-in logger
+
+```typescript
+import { consoleLogger } from '@joint-ops/hitlimit-bun/loggers/console'
+
+hitlimit({ logger: consoleLogger() }, handler)
+```
+
+---
+
+## `createHitLimit` — Manual Control
+
+For when you need to check the limit yourself and handle the rest:
+
+```typescript
+import { createHitLimit } from '@joint-ops/hitlimit-bun'
+
+const limiter = createHitLimit({ limit: 100, window: '1m' })
+
+Bun.serve({
+  fetch: async (req, server) => {
+    const blocked = await limiter.check(req, server)
+    if (blocked) return blocked  // 429 Response
+
+    // Your logic here
+    return new Response('OK')
+  }
+})
+```
+
+`check()` returns a `Response` if the request is blocked, `null` if it's allowed. Reset a key manually:
+
+```typescript
+await limiter.reset('some-key')
+```
+
+---
+
+## Default 429 Response
+
+```json
+{
+  "hitlimit": true,
+  "message": "Whoa there! Rate limit exceeded.",
+  "limit": 100,
+  "remaining": 0,
+  "resetIn": 42
+}
+```
+
+---
+
+## All Options
+
+```typescript
+hitlimit({
+  limit: 100,              // max requests per window (default: 100)
+  window: '1m',            // time window: 's', 'm', 'h', 'd' or milliseconds (default: '1m')
+  key: (req) => req.headers.get('x-api-key') || 'anon',  // what to rate limit by (default: IP)
+
+  tiers: { free: { limit: 100, window: '1h' } },
+  tier:  (req) => req.headers.get('x-tier') || 'free',
+
+  ban: { threshold: 5, duration: '1h' },
+
+  group: (req) => req.headers.get('x-team-id') || 'default',
+
+  skip: (req) => new URL(req.url).pathname === '/health',
+
+  response: (info) => ({ error: 'Too many requests', retryAfter: info.resetIn }),
+
+  headers: { standard: true, legacy: false, retryAfter: true },
+
+  store: redisStore({ url: 'redis://localhost:6379' }),
+
+  onStoreError: (err, req) => 'allow',
+
+  logger: consoleLogger()
+}, handler)
+```
 
 ---
 
 ## Related
 
-- **[@joint-ops/hitlimit](https://www.npmjs.com/package/@joint-ops/hitlimit)** — Node.js variant for Express, Fastify, Hono, NestJS
+- **[@joint-ops/hitlimit](https://www.npmjs.com/package/@joint-ops/hitlimit)** — same thing, built for Node.js (Express, Fastify, Hono, NestJS)
+
+**[Full Documentation](https://hitlimit.jointops.dev/docs/bun)** · **[GitHub](https://github.com/JointOps/hitlimit-monorepo)**
 
 ## License
 

@@ -290,16 +290,10 @@ import { bench, formatOps, formatLatencyApprox } from '../../../../data/benchmar
         <td>Valkey connection URL (uses <code>redis://</code> scheme).</td>
       </tr>
       <tr>
-        <td><code>client</code></td>
-        <td><code>Redis</code></td>
-        <td>—</td>
-        <td>Existing ioredis client instance.</td>
-      </tr>
-      <tr>
-        <td><code>prefix</code></td>
+        <td><code>keyPrefix</code></td>
         <td><code>string</code></td>
         <td><code>'hitlimit:'</code></td>
-        <td>Key prefix for rate limit entries.</td>
+        <td>Prefix prepended to all Valkey keys.</td>
       </tr>
     </tbody>
   </table>
@@ -366,16 +360,10 @@ import { bench, formatOps, formatLatencyApprox } from '../../../../data/benchmar
         <td>DragonflyDB connection URL (uses <code>redis://</code> scheme).</td>
       </tr>
       <tr>
-        <td><code>client</code></td>
-        <td><code>Redis</code></td>
-        <td>—</td>
-        <td>Existing ioredis client instance.</td>
-      </tr>
-      <tr>
-        <td><code>prefix</code></td>
+        <td><code>keyPrefix</code></td>
         <td><code>string</code></td>
         <td><code>'hitlimit:'</code></td>
-        <td>Key prefix for rate limit entries.</td>
+        <td>Prefix prepended to all DragonflyDB keys.</td>
       </tr>
     </tbody>
   </table>
@@ -435,10 +423,22 @@ import { bench, formatOps, formatLatencyApprox } from '../../../../data/benchmar
     </thead>
     <tbody>
       <tr>
+        <td><code>url</code></td>
+        <td><code>string</code></td>
+        <td>—</td>
+        <td>Connection string. Store creates and owns a Bun SQL client. Closed on <code>shutdown()</code>.</td>
+      </tr>
+      <tr>
+        <td><code>client</code></td>
+        <td><code>SQL</code></td>
+        <td>—</td>
+        <td>Caller-owned Bun <code>SQL</code> instance. Store uses it but does not close it.</td>
+      </tr>
+      <tr>
         <td><code>pool</code></td>
         <td><code>Pool</code></td>
         <td>—</td>
-        <td>A <code>pg.Pool</code> instance (required).</td>
+        <td><strong>Deprecated.</strong> Legacy <code>pg.Pool</code>. Caller-owned, store does not close it.</td>
       </tr>
       <tr>
         <td><code>tablePrefix</code></td>
@@ -474,14 +474,11 @@ import { bench, formatOps, formatLatencyApprox } from '../../../../data/benchmar
     </div>
     <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 <span class="kw">import</span> {"{"} postgresStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun/stores/postgres'</span>
-<span class="kw">import</span> {"{"} Pool {"}"} <span class="kw">from</span> <span class="str">'pg'</span>
-
-<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({"{"} connectionString: <span class="str">'postgres://localhost:5432/mydb'</span> {"}"})
 
 <span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
   window: <span class="str">'1m'</span>,
-  store: <span class="fn">postgresStore</span>({"{"} pool {"}"})
+  store: <span class="fn">postgresStore</span>({"{"} url: <span class="str">'postgres://localhost:5432/mydb'</span> {"}"})
 {"}"})</code></pre>
   </div>
 
@@ -593,6 +590,22 @@ import { bench, formatOps, formatLatencyApprox } from '../../../../data/benchmar
       </tr>
       <tr>
         <td><strong>Postgres</strong></td>
+        <td>Network-bound</td>
+        <td>Network-bound</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td><strong>MongoDB</strong></td>
+        <td>Network-bound</td>
+        <td>Network-bound</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td><strong>MySQL</strong></td>
         <td>Network-bound</td>
         <td>Network-bound</td>
         <td>Yes</td>

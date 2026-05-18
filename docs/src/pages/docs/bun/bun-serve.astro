@@ -27,29 +27,17 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
       </div>
       <span class="code-filename">server.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} createHitLimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
-<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
+<span class="kw">const</span> limiter = <span class="fn">createHitLimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
 
 Bun.<span class="fn">serve</span>({"{"}
   port: <span class="num">3000</span>,
-  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
-    <span class="kw">const</span> {"{"} allowed, remaining, reset, limit {"}"} = <span class="kw">await</span> limiter.<span class="fn">check</span>(req)
+  <span class="kw">async</span> <span class="fn">fetch</span>(req, server) {"{"}
+    <span class="kw">const</span> response = <span class="kw">await</span> limiter.<span class="fn">check</span>(req, server)
+    <span class="kw">if</span> (response) <span class="kw">return</span> response
 
-    <span class="kw">const</span> headers = {"{"}
-      <span class="str">'X-RateLimit-Limit'</span>: String(limit),
-      <span class="str">'X-RateLimit-Remaining'</span>: String(remaining),
-      <span class="str">'X-RateLimit-Reset'</span>: String(reset)
-    {"}"}
-
-    <span class="kw">if</span> (!allowed) {"{"}
-      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Rate limit exceeded'</span>, {"{"}
-        status: <span class="num">429</span>,
-        headers: {"{"} ...headers, <span class="str">'Retry-After'</span>: String(reset) {"}"}
-      {"}"})
-    {"}"}
-
-    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Hello World!'</span>, {"{"} headers {"}"})
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Hello World!'</span>)
   {"}"}
 {"}"})</code></pre>
   </div>
@@ -67,16 +55,16 @@ Bun.<span class="fn">serve</span>({"{"}
       </div>
       <span class="code-filename">routes.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} createHitLimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
 <span class="cm">// Different limiters for different endpoints</span>
-<span class="kw">const</span> apiLimiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
-<span class="kw">const</span> authLimiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">5</span>, window: <span class="str">'15m'</span> {"}"})
-<span class="kw">const</span> uploadLimiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">10</span>, window: <span class="str">'1h'</span> {"}"})
+<span class="kw">const</span> apiLimiter = <span class="fn">createHitLimit</span>({"{"} limit: <span class="num">100</span>, window: <span class="str">'1m'</span> {"}"})
+<span class="kw">const</span> authLimiter = <span class="fn">createHitLimit</span>({"{"} limit: <span class="num">5</span>, window: <span class="str">'15m'</span> {"}"})
+<span class="kw">const</span> uploadLimiter = <span class="fn">createHitLimit</span>({"{"} limit: <span class="num">10</span>, window: <span class="str">'1h'</span> {"}"})
 
 Bun.<span class="fn">serve</span>({"{"}
   port: <span class="num">3000</span>,
-  <span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+  <span class="kw">async</span> <span class="fn">fetch</span>(req, server) {"{"}
     <span class="kw">const</span> url = <span class="kw">new</span> <span class="fn">URL</span>(req.url)
 
     <span class="cm">// Select limiter based on route</span>
@@ -87,11 +75,8 @@ Bun.<span class="fn">serve</span>({"{"}
       limiter = uploadLimiter
     {"}"}
 
-    <span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(req)
-
-    <span class="kw">if</span> (!result.allowed) {"{"}
-      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Rate limited'</span>, {"{"} status: <span class="num">429</span> {"}"})
-    {"}"}
+    <span class="kw">const</span> response = <span class="kw">await</span> limiter.<span class="fn">check</span>(req, server)
+    <span class="kw">if</span> (response) <span class="kw">return</span> response
 
     <span class="cm">// Route handling...</span>
     <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'OK'</span>)
@@ -112,9 +97,9 @@ Bun.<span class="fn">serve</span>({"{"}
       </div>
       <span class="code-filename">ip-extraction.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} createHitLimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
-<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+<span class="kw">const</span> limiter = <span class="fn">createHitLimit</span>({"{"}
   limit: <span class="num">100</span>,
   window: <span class="str">'1m'</span>,
   <span class="fn">key</span>(req, server) {"{"}
@@ -147,19 +132,16 @@ Bun.<span class="fn">serve</span>({"{"}
       </div>
       <span class="code-filename">websocket.ts</span>
     </div>
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+    <pre><code><span class="kw">import</span> {"{"} createHitLimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
-<span class="kw">const</span> wsLimiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">10</span>, window: <span class="str">'1m'</span> {"}"})
+<span class="kw">const</span> wsLimiter = <span class="fn">createHitLimit</span>({"{"} limit: <span class="num">10</span>, window: <span class="str">'1m'</span> {"}"})
 
 Bun.<span class="fn">serve</span>({"{"}
   port: <span class="num">3000</span>,
   <span class="kw">async</span> <span class="fn">fetch</span>(req, server) {"{"}
     <span class="kw">if</span> (req.headers.<span class="fn">get</span>(<span class="str">'upgrade'</span>) === <span class="str">'websocket'</span>) {"{"}
-      <span class="kw">const</span> result = <span class="kw">await</span> wsLimiter.<span class="fn">check</span>(req)
-
-      <span class="kw">if</span> (!result.allowed) {"{"}
-        <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Too many connections'</span>, {"{"} status: <span class="num">429</span> {"}"})
-      {"}"}
+      <span class="kw">const</span> response = <span class="kw">await</span> wsLimiter.<span class="fn">check</span>(req, server)
+      <span class="kw">if</span> (response) <span class="kw">return</span> response
 
       server.<span class="fn">upgrade</span>(req)
       <span class="kw">return</span>
@@ -180,12 +162,10 @@ Bun.<span class="fn">serve</span>({"{"}
   <p>Handle rate limiter errors gracefully:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">async</span> <span class="fn">fetch</span>(req) {"{"}
+    <pre><code><span class="kw">async</span> <span class="fn">fetch</span>(req, server) {"{"}
   <span class="kw">try</span> {"{"}
-    <span class="kw">const</span> result = <span class="kw">await</span> limiter.<span class="fn">check</span>(req)
-    <span class="kw">if</span> (!result.allowed) {"{"}
-      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(<span class="str">'Rate limited'</span>, {"{"} status: <span class="num">429</span> {"}"})
-    {"}"}
+    <span class="kw">const</span> response = <span class="kw">await</span> limiter.<span class="fn">check</span>(req, server)
+    <span class="kw">if</span> (response) <span class="kw">return</span> response
   {"}"} <span class="kw">catch</span> (error) {"{"}
     <span class="cm">// Log error but allow request (fail-open)</span>
     console.<span class="fn">error</span>(<span class="str">'Rate limiter error:'</span>, error)
@@ -198,10 +178,9 @@ Bun.<span class="fn">serve</span>({"{"}
   <h2 id="next-steps">Next Steps</h2>
 
   <ul>
-    <li><a href="/docs/bun/hono">Hono</a> - Use with Hono framework</li>
+    <li><a href="/docs/adapters/hono">Hono</a> - Use with Hono framework</li>
     <li><a href="/docs/bun/elysia">Elysia Plugin</a> - Use with Elysia framework</li>
-    <li><a href="/docs/bun/stores">Stores</a> - Native SQLite configuration</li>
-    <li><a href="/docs/bun/performance">Performance</a> - Optimization tips</li>
+    <li><a href="/docs/bun/api/stores">Stores</a> - Native SQLite configuration</li>
   </ul>
 </DocsLayout>
 

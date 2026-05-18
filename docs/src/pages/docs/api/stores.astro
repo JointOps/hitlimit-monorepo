@@ -15,35 +15,31 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
     counterpartLabel="Bun Stores API"
   />
 
-  <p>Stores manage rate limit data persistence. All stores implement the <code>Store</code> interface.</p>
+  <p>Stores manage rate limit data persistence. All stores implement the <code>HitLimitStore</code> interface.</p>
 
   <h2 id="interface">Store Interface</h2>
 
   <div class="code-block">
-    <pre><code><span class="kw">interface</span> Store {"{"}
-  <span class="fn">get</span>(key: <span class="kw">string</span>): Promise&lt;RateLimitInfo | <span class="kw">null</span>&gt;
-  <span class="fn">increment</span>(key: <span class="kw">string</span>, windowMs: <span class="kw">number</span>): Promise&lt;RateLimitInfo&gt;
-  <span class="fn">reset</span>(key: <span class="kw">string</span>): Promise&lt;<span class="kw">void</span>&gt;
-  <span class="fn">close</span>?(): Promise&lt;<span class="kw">void</span>&gt;
+    <pre><code><span class="kw">interface</span> HitLimitStore {"{"}
+  <span class="fn">hit</span>(key: <span class="kw">string</span>, windowMs: <span class="kw">number</span>, limit: <span class="kw">number</span>): Promise&lt;StoreResult&gt; | StoreResult
+  <span class="fn">reset</span>(key: <span class="kw">string</span>): Promise&lt;<span class="kw">void</span>&gt; | <span class="kw">void</span>
+  <span class="fn">shutdown</span>?(): Promise&lt;<span class="kw">void</span>&gt; | <span class="kw">void</span>
+{"}"}
+
+<span class="kw">interface</span> StoreResult {"{"}
+  count: <span class="kw">number</span>
+  resetAt: <span class="kw">number</span>
 {"}"}</code></pre>
   </div>
 
   <h2 id="methods">Methods</h2>
 
-  <h3>get(key)</h3>
-  <p>Retrieves current rate limit info for a key.</p>
-
-  <div class="code-block">
-    <pre><code><span class="kw">const</span> info = <span class="kw">await</span> store.<span class="fn">get</span>(<span class="str">'user:123'</span>)
-<span class="cm">// Returns: {"{"} count: 42, resetTime: 1640000060000 {"}"} or null</span></code></pre>
-  </div>
-
-  <h3>increment(key, windowMs)</h3>
+  <h3>hit(key, windowMs, limit)</h3>
   <p>Increments the request count and returns updated info.</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">const</span> info = <span class="kw">await</span> store.<span class="fn">increment</span>(<span class="str">'user:123'</span>, <span class="num">60000</span>)
-<span class="cm">// Returns: {"{"} count: 43, resetTime: 1640000060000 {"}"}</span></code></pre>
+    <pre><code><span class="kw">const</span> result = <span class="kw">await</span> store.<span class="fn">hit</span>(<span class="str">'user:123'</span>, <span class="num">60000</span>, <span class="num">100</span>)
+<span class="cm">// Returns: {"{"} count: 43, resetAt: 1640000060000 {"}"}</span></code></pre>
   </div>
 
   <h3>reset(key)</h3>
@@ -53,11 +49,11 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
     <pre><code><span class="kw">await</span> store.<span class="fn">reset</span>(<span class="str">'user:123'</span>)</code></pre>
   </div>
 
-  <h3>close()</h3>
+  <h3>shutdown()</h3>
   <p>Optional cleanup method for closing connections.</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">await</span> store.<span class="fn">close</span>()</code></pre>
+    <pre><code><span class="kw">await</span> store.<span class="fn">shutdown</span>()</code></pre>
   </div>
 
   <h2 id="built-in-stores">Built-in Stores</h2>
@@ -68,9 +64,7 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
   <div class="code-block">
     <pre><code><span class="kw">import</span> {"{"} memoryStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
-<span class="kw">const</span> store = <span class="fn">memoryStore</span>({"{"}
-  cleanupInterval: <span class="num">60000</span>  <span class="cm">// Clean expired entries every 60s</span>
-{"}"})</code></pre>
+<span class="kw">const</span> store = <span class="fn">memoryStore</span>()</code></pre>
   </div>
 
   <h3>sqliteStore()</h3>
@@ -80,8 +74,7 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
     <pre><code><span class="kw">import</span> {"{"} sqliteStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/sqlite'</span>
 
 <span class="kw">const</span> store = <span class="fn">sqliteStore</span>({"{"}
-  path: <span class="str">'./rate-limits.db'</span>,
-  tableName: <span class="str">'rate_limits'</span>  <span class="cm">// Optional</span>
+  path: <span class="str">'./rate-limits.db'</span>
 {"}"})</code></pre>
   </div>
 
@@ -93,7 +86,7 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
 
 <span class="kw">const</span> store = <span class="fn">redisStore</span>({"{"}
   url: <span class="str">'redis://localhost:6379'</span>,
-  prefix: <span class="str">'rl:'</span>  <span class="cm">// Key prefix</span>
+  keyPrefix: <span class="str">'rl:'</span>
 {"}"})</code></pre>
   </div>
 
@@ -105,7 +98,7 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
 
 <span class="kw">const</span> store = <span class="fn">valkeyStore</span>({"{"}
   url: <span class="str">'redis://localhost:6379'</span>,
-  prefix: <span class="str">'rl:'</span>  <span class="cm">// Key prefix</span>
+  keyPrefix: <span class="str">'rl:'</span>
 {"}"})</code></pre>
   </div>
 
@@ -117,7 +110,7 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
 
 <span class="kw">const</span> store = <span class="fn">dragonflyStore</span>({"{"}
   url: <span class="str">'redis://localhost:6379'</span>,
-  prefix: <span class="str">'rl:'</span>  <span class="cm">// Key prefix</span>
+  keyPrefix: <span class="str">'rl:'</span>
 {"}"})</code></pre>
   </div>
 
@@ -140,30 +133,26 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
   <h2 id="custom-store">Creating a Custom Store</h2>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store, RateLimitInfo {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} HitLimitStore, StoreResult {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
-<span class="kw">class</span> MyStore <span class="kw">implements</span> Store {"{"}
-  <span class="kw">private</span> data = <span class="kw">new</span> <span class="fn">Map</span>&lt;<span class="kw">string</span>, RateLimitInfo&gt;()
+<span class="kw">class</span> MyStore <span class="kw">implements</span> HitLimitStore {"{"}
+  <span class="kw">private</span> data = <span class="kw">new</span> <span class="fn">Map</span>&lt;<span class="kw">string</span>, StoreResult&gt;()
 
-  <span class="kw">async</span> <span class="fn">get</span>(key: <span class="kw">string</span>) {"{"}
-    <span class="kw">return</span> <span class="kw">this</span>.data.<span class="fn">get</span>(key) || <span class="kw">null</span>
-  {"}"}
-
-  <span class="kw">async</span> <span class="fn">increment</span>(key: <span class="kw">string</span>, windowMs: <span class="kw">number</span>) {"{"}
+  <span class="fn">hit</span>(key: <span class="kw">string</span>, windowMs: <span class="kw">number</span>): StoreResult {"{"}
     <span class="kw">const</span> now = Date.<span class="fn">now</span>()
     <span class="kw">const</span> existing = <span class="kw">this</span>.data.<span class="fn">get</span>(key)
 
-    <span class="kw">if</span> (existing && existing.resetTime > now) {"{"}
+    <span class="kw">if</span> (existing && existing.resetAt > now) {"{"}
       existing.count++
       <span class="kw">return</span> existing
     {"}"}
 
-    <span class="kw">const</span> info = {"{"} count: <span class="num">1</span>, resetTime: now + windowMs {"}"}
-    <span class="kw">this</span>.data.<span class="fn">set</span>(key, info)
-    <span class="kw">return</span> info
+    <span class="kw">const</span> result = {"{"} count: <span class="num">1</span>, resetAt: now + windowMs {"}"}
+    <span class="kw">this</span>.data.<span class="fn">set</span>(key, result)
+    <span class="kw">return</span> result
   {"}"}
 
-  <span class="kw">async</span> <span class="fn">reset</span>(key: <span class="kw">string</span>) {"{"}
+  <span class="fn">reset</span>(key: <span class="kw">string</span>) {"{"}
     <span class="kw">this</span>.data.<span class="fn">delete</span>(key)
   {"}"}
 {"}"}</code></pre>

@@ -46,9 +46,14 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
       <tr><td><code>key</code></td><td>(req) => string</td><td>req.ip</td><td>Key extraction function</td></tr>
       <tr><td><code>store</code></td><td>Store</td><td>memoryStore()</td><td>Storage backend</td></tr>
       <tr><td><code>skip</code></td><td>(req) => boolean</td><td>undefined</td><td>Skip rate limiting</td></tr>
-      <tr><td><code>headers</code></td><td>boolean</td><td>true</td><td>Include rate limit headers</td></tr>
-      <tr><td><code>statusCode</code></td><td>number</td><td>429</td><td>Status code when limited</td></tr>
-      <tr><td><code>response</code></td><td>object | function</td><td>-</td><td>Custom error response</td></tr>
+      <tr><td><code>headers</code></td><td>HeadersConfig</td><td>-</td><td>Rate limit response headers</td></tr>
+      <tr><td><code>response</code></td><td>object | (info) =&gt; object</td><td>-</td><td>Custom error response body</td></tr>
+      <tr><td><code>tiers</code></td><td>Record&lt;string, TierConfig&gt;</td><td>-</td><td>Named tier configurations</td></tr>
+      <tr><td><code>tier</code></td><td>(req) =&gt; string</td><td>-</td><td>Resolve tier name per request</td></tr>
+      <tr><td><code>ban</code></td><td>BanConfig</td><td>-</td><td>Auto-ban after repeated violations</td></tr>
+      <tr><td><code>onStoreError</code></td><td>(error, req) =&gt; void</td><td>-</td><td>Handler when the store throws</td></tr>
+      <tr><td><code>logger</code></td><td>{"{"} warn(msg): void {"}"}</td><td>-</td><td>Logger for internal events</td></tr>
+      <tr><td><code>group</code></td><td>string | (req) =&gt; string</td><td>-</td><td>Group identifier for shared limits</td></tr>
     </tbody>
   </table>
 
@@ -89,20 +94,19 @@ import RuntimeBanner from '../../../components/RuntimeBanner.astro';
   <h2 id="advanced-example">Advanced Example</h2>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+    <pre><code><span class="kw">import</span> {"{"} createHitLimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/node'</span>
 <span class="kw">import</span> {"{"} redisStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit/stores/redis'</span>
 
-<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"}
+<span class="kw">const</span> limiter = <span class="fn">createHitLimit</span>({"{"}
   limit: <span class="num">1000</span>,
   window: <span class="str">'1h'</span>,
-  key: (req) => req.headers[<span class="str">'x-api-key'</span>] || req.ip,
+  key: (req) => req.headers[<span class="str">'x-api-key'</span>] || req.socket.remoteAddress,
   store: <span class="fn">redisStore</span>({"{"} url: <span class="str">'redis://localhost:6379'</span> {"}"}),
-  skip: (req) => req.path === <span class="str">'/health'</span>,
-  headers: <span class="kw">true</span>,
-  statusCode: <span class="num">429</span>,
-  response: (req, res) => ({"{"}
+  skip: (req) => req.url === <span class="str">'/health'</span>,
+  headers: {"{"} standard: <span class="kw">true</span>, retryAfter: <span class="kw">true</span> {"}"},
+  response: (info) => ({"{"}
     error: <span class="str">'Rate limit exceeded'</span>,
-    retryAfter: res.getHeader(<span class="str">'Retry-After'</span>)
+    retryAfter: info.resetIn
   {"}"})
 {"}"})</code></pre>
   </div>

@@ -35,9 +35,10 @@ import { bench, formatOps } from '../../../data/benchmarks';
     </thead>
     <tbody>
       <tr><td><code>skip</code></td><td>function</td><td>undefined</td><td>Skip rate limiting for certain requests</td></tr>
-      <tr><td><code>headers</code></td><td>boolean</td><td>true</td><td>Include rate limit headers</td></tr>
-      <tr><td><code>statusCode</code></td><td>number</td><td>429</td><td>HTTP status when rate limited</td></tr>
-      <tr><td><code>response</code></td><td>object | function</td><td>-</td><td>Custom response body</td></tr>
+      <tr><td><code>headers</code></td><td>HeadersConfig</td><td>-</td><td>Rate limit response headers configuration</td></tr>
+      <tr><td><code>response</code></td><td>object | (info) =&gt; object</td><td>-</td><td>Custom response body</td></tr>
+      <tr><td><code>onStoreError</code></td><td>(error, req) =&gt; void</td><td>-</td><td>Handler when the store throws</td></tr>
+      <tr><td><code>logger</code></td><td>{"{"} warn(msg): void {"}"}</td><td>-</td><td>Logger for internal events</td></tr>
     </tbody>
   </table>
 
@@ -105,9 +106,12 @@ import { bench, formatOps } from '../../../data/benchmarks';
       <tbody>
         <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">{formatOps(bench.node.memory.multi10k.opsPerSec)} ops/s</td></tr>
         <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts</td><td>{formatOps(bench.node.sqlite.multi10k.opsPerSec)} ops/s</td></tr>
-        <tr><td><code>mongoStore()</code></td><td>Teams already using MongoDB</td><td>{formatOps(bench.node.mongodb.multi10k.opsPerSec)} ops/s</td></tr>
         <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>Network-bound</td></tr>
+        <tr><td><code>valkeyStore()</code></td><td>Distributed, open-source Redis alternative</td><td>Network-bound</td></tr>
+        <tr><td><code>dragonflyStore()</code></td><td>High-throughput distributed</td><td>Network-bound</td></tr>
         <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>Network-bound</td></tr>
+        <tr><td><code>mongoStore()</code></td><td>Teams already using MongoDB</td><td>Network-bound</td></tr>
+        <tr><td><code>mysqlStore()</code></td><td>Teams already using MySQL/MariaDB</td><td>Network-bound</td></tr>
       </tbody>
     </table>
   </div>
@@ -121,7 +125,11 @@ import { bench, formatOps } from '../../../data/benchmarks';
         <tr><td><code>memoryStore()</code></td><td>Single-process, highest performance</td><td class="highlight">{formatOps(bench.bun.memory.multi10k.opsPerSec)} ops/s</td></tr>
         <tr><td><code>sqliteStore()</code></td><td>Persistence across restarts (bun:sqlite)</td><td>{formatOps(bench.bun.sqlite.multi10k.opsPerSec)} ops/s</td></tr>
         <tr><td><code>redisStore()</code></td><td>Distributed / multi-server deployments</td><td>Network-bound</td></tr>
-        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres</td><td>Network-bound</td></tr>
+        <tr><td><code>valkeyStore()</code></td><td>Distributed, open-source Redis alternative</td><td>Network-bound</td></tr>
+        <tr><td><code>dragonflyStore()</code></td><td>High-throughput distributed</td><td>Network-bound</td></tr>
+        <tr><td><code>postgresStore()</code></td><td>Teams already using Postgres (Bun native)</td><td>Network-bound</td></tr>
+        <tr><td><code>mongoStore()</code></td><td>Teams already using MongoDB</td><td>Network-bound</td></tr>
+        <tr><td><code>mysqlStore()</code></td><td>Teams already using MySQL/MariaDB</td><td>Network-bound</td></tr>
       </tbody>
     </table>
   </div>
@@ -140,9 +148,8 @@ import { bench, formatOps } from '../../../data/benchmarks';
   key: (req) => req.headers[<span class="str">'x-api-key'</span>] || req.ip,
   store: <span class="fn">sqliteStore</span>({"{"} path: <span class="str">'./limits.db'</span> {"}"}),
   skip: (req) => req.path === <span class="str">'/health'</span>,
-  headers: <span class="kw">true</span>,
-  statusCode: <span class="num">429</span>,
-  response: {"{"} error: <span class="str">'Too many requests'</span> {"}"},
+  headers: {"{"} standard: <span class="kw">true</span>, retryAfter: <span class="kw">true</span> {"}"},
+  response: (info) => ({"{"} error: <span class="str">'Too many requests'</span>, retryAfter: info.resetIn {"}"}),
   ban: {"{"} threshold: <span class="num">5</span>, duration: <span class="str">'1h'</span> {"}"},
   group: (req) => req.headers[<span class="str">'x-api-key'</span>] || <span class="str">'default'</span>
 {"}"})</code></pre>

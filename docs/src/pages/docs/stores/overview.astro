@@ -49,7 +49,7 @@ import { bench, formatOps, formatOpsPlus } from '../../../data/benchmarks';
         <tr><td><a href="/docs/stores/redis">Redis</a></td><td>Yes</td><td>Yes</td><td>Distributed (network-bound)</td></tr>
         <tr><td><a href="/docs/stores/valkey">Valkey</a></td><td>Yes</td><td>Yes</td><td>Distributed, open-source — same as Redis</td></tr>
         <tr><td><a href="/docs/stores/dragonfly">DragonflyDB</a></td><td>Yes</td><td>Yes</td><td>High-throughput distributed</td></tr>
-        <tr><td><a href="/docs/stores/postgres">Postgres</a></td><td>Yes</td><td>Yes</td><td>Distributed SQL (network-bound)</td></tr>
+        <tr><td><a href="/docs/stores/postgres">Postgres</a></td><td>Yes</td><td>Yes</td><td>Distributed SQL, Bun native (no <code>pg</code> required)</td></tr>
         <tr><td><a href="/docs/stores/mongodb">MongoDB</a></td><td>Yes</td><td>Yes</td><td>Distributed NoSQL</td></tr>
         <tr><td><a href="/docs/stores/mysql">MySQL</a></td><td>Yes</td><td>Yes</td><td>Distributed SQL — MySQL/MariaDB</td></tr>
       </tbody>
@@ -81,12 +81,16 @@ import { bench, formatOps, formatOpsPlus } from '../../../data/benchmarks';
   <p>All stores implement the same interface:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">interface</span> Store {"{"}
-  <span class="fn">increment</span>(key: <span class="str">string</span>, window: <span class="str">number</span>): <span class="fn">Promise</span>&lt;{"{"}
-    count: <span class="str">number</span>
-    resetAt: <span class="str">number</span>
-  {"}"}&gt;
-  <span class="fn">reset</span>(key: <span class="str">string</span>): <span class="fn">Promise</span>&lt;<span class="str">void</span>&gt;
+    <pre><code><span class="kw">interface</span> HitLimitStore {"{"}
+  <span class="fn">hit</span>(key: <span class="str">string</span>, windowMs: <span class="str">number</span>, limit: <span class="str">number</span>): <span class="fn">Promise</span>&lt;StoreResult&gt; | StoreResult
+  <span class="fn">reset</span>(key: <span class="str">string</span>): <span class="fn">Promise</span>&lt;<span class="str">void</span>&gt; | <span class="str">void</span>
+  <span class="fn">shutdown</span>?(): <span class="fn">Promise</span>&lt;<span class="str">void</span>&gt; | <span class="str">void</span>
+{"}"}
+
+<span class="cm">// StoreResult</span>
+<span class="kw">interface</span> StoreResult {"{"}
+  count: <span class="str">number</span>
+  resetAt: <span class="str">number</span>
 {"}"}</code></pre>
   </div>
 

@@ -44,7 +44,7 @@ All benchmark numbers across the entire docs site come from a **single JSON file
 ### How it works
 
 ```
-benchmarks/results/v1.4.0/*.json   ← raw benchmark outputs
+benchmarks/results/v1.5.0/*.json   ← raw benchmark outputs
         ↓
 benchmarks/scripts/generate-benchmark-data.ts   ← generator script
         ↓

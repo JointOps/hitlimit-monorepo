@@ -47,22 +47,21 @@ const searchData: SearchItem[] = [
 
   // Bun
   { title: 'Introduction', section: 'Bun', href: '/docs/bun', content: 'bun runtime fast performance native typescript', headings: ['Why Bun', 'Features'], runtime: 'bun' },
-  { title: 'Installation', section: 'Bun', href: '/docs/bun/installation', content: 'bun install add package setup', headings: ['Installation'], runtime: 'bun' },
+  { title: 'Installation', section: 'Bun', href: '/docs/installation', content: 'bun install add package setup', headings: ['Installation'], runtime: 'bun' },
   { title: 'Quick Start', section: 'Bun', href: '/docs/bun/quick-start', content: 'bun quick start getting started basic', headings: ['Basic Usage'], runtime: 'bun' },
   { title: 'Bun.serve', section: 'Bun', href: '/docs/bun/bun-serve', content: 'bun serve server http native handler fetch', headings: ['Usage', 'Configuration'], runtime: 'bun' },
   { title: 'Elysia Plugin', section: 'Bun', href: '/docs/bun/elysia', content: 'elysia plugin framework web bun fast', headings: ['Installation', 'Usage', 'Options'], runtime: 'bun' },
   { title: 'Hono (Bun)', section: 'Bun', href: '/docs/bun/hono', content: `hono bun middleware rate limiting ${formatOps(bench.bun.memory.singleIp.opsPerSec)} ops/sec high performance`, headings: ['Installation', 'Usage', 'Performance', 'Options'], runtime: 'bun' },
-  { title: 'Stores', section: 'Bun', href: '/docs/bun/stores', content: 'bun stores sqlite memory redis postgres native', headings: ['Memory', 'SQLite', 'Redis', 'Postgres'], runtime: 'bun' },
-  { title: 'Performance', section: 'Bun', href: '/docs/bun/performance', content: 'performance benchmarks fast speed optimization', headings: ['Benchmarks', 'Tips'], runtime: 'bun' },
+  { title: 'Stores', section: 'Bun', href: '/docs/bun/api/stores', content: 'bun stores sqlite memory redis postgres native', headings: ['Memory', 'SQLite', 'Redis', 'Postgres'], runtime: 'bun' },
 
   // Bun Stores
-  { title: 'Memory Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/memory', content: `bun memory store in-memory default ${formatOps(bench.bun.memory.singleIp.opsPerSec)} ops/sec fastest`, headings: ['Usage', 'Characteristics', 'Performance'], runtime: 'bun' },
-  { title: 'SQLite Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/sqlite', content: `bun sqlite bun:sqlite native store persistent ${formatOps(bench.bun.sqlite.multi10k.opsPerSec)} ops/sec zero dependencies`, headings: ['Installation', 'Usage', 'Options', 'vs Node.js'], runtime: 'bun' },
-  { title: 'Redis Store (Bun)', section: 'Bun Stores', href: '/docs/bun/stores/redis', content: 'bun redis store distributed ioredis lua scripts network-bound', headings: ['Installation', 'Usage', 'Options', 'Lua Scripts'], runtime: 'bun' },
-  { title: 'Postgres Store (Bun)', section: 'Bun Stores', href: '/docs/stores/postgres', content: 'bun postgres postgresql store distributed pg pool network-bound', headings: ['Installation', 'Usage', 'Options', 'Schema'], runtime: 'bun' },
+  { title: 'Memory Store (Bun)', section: 'Bun Stores', href: '/docs/stores/memory', content: `bun memory store in-memory default ${formatOps(bench.bun.memory.singleIp.opsPerSec)} ops/sec fastest`, headings: ['Usage', 'Characteristics', 'Performance'], runtime: 'bun' },
+  { title: 'SQLite Store (Bun)', section: 'Bun Stores', href: '/docs/stores/sqlite', content: `bun sqlite bun:sqlite native store persistent ${formatOps(bench.bun.sqlite.multi10k.opsPerSec)} ops/sec zero dependencies`, headings: ['Installation', 'Usage', 'Options', 'vs Node.js'], runtime: 'bun' },
+  { title: 'Redis Store (Bun)', section: 'Bun Stores', href: '/docs/stores/redis', content: 'bun redis store distributed ioredis lua scripts network-bound', headings: ['Installation', 'Usage', 'Options', 'Lua Scripts'], runtime: 'bun' },
+  { title: 'Postgres Store (Bun)', section: 'Bun Stores', href: '/docs/stores/postgres', content: 'bun postgres postgresql store distributed native sql bun native no pg required network-bound', headings: ['Installation', 'Usage', 'Options', 'Schema'], runtime: 'bun' },
 
   // Bun Guides
-  { title: 'Configuration (Bun)', section: 'Bun Guides', href: '/docs/bun/configuration', content: 'bun configuration options settings limit window store key skip headers ban', headings: ['Basic Options', 'Advanced Options', 'Ban', 'Tiered Limits'], runtime: 'bun' },
+  { title: 'Configuration (Bun)', section: 'Bun Guides', href: '/docs/configuration/options', content: 'bun configuration options settings limit window store key skip headers ban', headings: ['Basic Options', 'Advanced Options', 'Ban', 'Tiered Limits'], runtime: 'bun' },
   { title: 'Production (Bun)', section: 'Bun Guides', href: '/docs/bun/guides/production', content: 'bun production deployment best practices redis graceful shutdown', headings: ['Store Selection', 'Redis Setup', 'Environment', 'Shutdown'], runtime: 'bun' },
   { title: 'Scaling (Bun)', section: 'Bun Guides', href: '/docs/bun/guides/scaling', content: 'bun scaling horizontal distributed memory sqlite redis migration', headings: ['Single Instance', 'Persistence', 'Redis', 'Migration'], runtime: 'bun' },
 

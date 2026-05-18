@@ -14,18 +14,18 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 
   <h2 id="installation">Installation</h2>
 
-  <p>The Postgres store requires <code>pg</code> as a peer dependency:</p>
+  <p>Node requires <code>pg</code> as a peer dependency. Bun uses native SQL — no extra install needed.</p>
 
   <RuntimeCodeTabs
     node='npm install pg\n<span class="cm"># or: pnpm add pg</span>\n<span class="cm"># or: yarn add pg</span>'
-    bun='bun add pg'
+    bun='<span class="cm"># No extra install needed</span>\n<span class="cm"># Bun native SQL is built in. pg is only needed for the deprecated { pool } option.</span>'
   />
 
   <h2 id="usage">Usage</h2>
 
   <RuntimeCodeTabs
     node='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n<span class="kw">import</span> { postgresStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit/stores/postgres&#39;</span>\n<span class="kw">import</span> { Pool } <span class="kw">from</span> <span class="str">&#39;pg&#39;</span>\n\n<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({ connectionString: <span class="str">&#39;postgres://localhost:5432/mydb&#39;</span> })\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">postgresStore</span>({ pool })\n}))'
-    bun='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n<span class="kw">import</span> { postgresStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/postgres&#39;</span>\n<span class="kw">import</span> { Pool } <span class="kw">from</span> <span class="str">&#39;pg&#39;</span>\n\n<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({ connectionString: <span class="str">&#39;postgres://localhost:5432/mydb&#39;</span> })\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">postgresStore</span>({ pool })\n})'
+    bun='<span class="kw">import</span> { hitlimit } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n<span class="kw">import</span> { postgresStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun/stores/postgres&#39;</span>\n\n<span class="cm">// Connection string — no extra dependencies</span>\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">postgresStore</span>({ url: <span class="str">&#39;postgres://localhost:5432/mydb&#39;</span> })\n})'
   />
 
   <h2 id="options">Options</h2>
@@ -35,7 +35,9 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
       <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
     </thead>
     <tbody>
-      <tr><td><code>pool</code></td><td>Pool</td><td>-</td><td>A <code>pg.Pool</code> instance (required)</td></tr>
+      <tr><td><code>url</code></td><td>string</td><td>-</td><td><strong>Bun only.</strong> Connection string. Store creates and owns a Bun SQL client.</td></tr>
+      <tr><td><code>client</code></td><td>SQL</td><td>-</td><td><strong>Bun only.</strong> Caller-owned Bun <code>SQL</code> instance. Store does not close it.</td></tr>
+      <tr><td><code>pool</code></td><td>Pool</td><td>-</td><td>A <code>pg.Pool</code> instance. Required for Node. <strong>Deprecated</strong> in Bun — use <code>url</code> or <code>client</code>.</td></tr>
       <tr><td><code>tablePrefix</code></td><td>string</td><td>'hitlimit'</td><td>Prefix for rate limit table names</td></tr>
       <tr><td><code>cleanupInterval</code></td><td>number</td><td>60000</td><td>Interval (ms) to clean expired entries</td></tr>
       <tr><td><code>skipTableCreation</code></td><td>boolean</td><td>false</td><td>Skip automatic table creation on startup</td></tr>
@@ -44,20 +46,21 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 
   <h2 id="connection-options">Connection Options</h2>
 
-  <p>Create a pool with a connection string:</p>
+  <div data-runtime-content="node">
+    <p>Create a pool with a connection string:</p>
 
-  <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} Pool {"}"} <span class="kw">from</span> <span class="str">'pg'</span>
+    <div class="code-block">
+      <pre><code><span class="kw">import</span> {"{"} Pool {"}"} <span class="kw">from</span> <span class="str">'pg'</span>
 
 <span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({"{"}<span class="cm">
   </span>connectionString: <span class="str">'postgres://user:password@hostname:5432/mydb'</span>
 {"}"})</code></pre>
-  </div>
+    </div>
 
-  <p>Or use individual connection parameters:</p>
+    <p>Or use individual connection parameters:</p>
 
-  <div class="code-block">
-    <pre><code><span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({"{"}<span class="cm">
+    <div class="code-block">
+      <pre><code><span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({"{"}<span class="cm">
   </span>host: <span class="str">'localhost'</span>,
   port: <span class="num">5432</span>,
   database: <span class="str">'mydb'</span>,
@@ -67,15 +70,34 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 {"}"})
 
 <span class="fn">postgresStore</span>({"{"} pool {"}"})</code></pre>
+    </div>
+  </div>
+
+  <div data-runtime-content="bun">
+    <p>Pass a connection URL — Bun creates and owns the native SQL client:</p>
+
+    <div class="code-block">
+      <pre><code><span class="fn">postgresStore</span>({"{"} url: <span class="str">'postgres://user:password@hostname:5432/mydb'</span> {"}"})</code></pre>
+    </div>
+
+    <p>Or pass a caller-owned Bun <code>SQL</code> instance (store will not close it):</p>
+
+    <div class="code-block">
+      <pre><code><span class="kw">import</span> {"{"} SQL {"}"} <span class="kw">from</span> <span class="str">'bun'</span>
+
+<span class="kw">const</span> sql = <span class="kw">new</span> <span class="fn">SQL</span>(<span class="str">'postgres://user:password@hostname:5432/mydb'</span>)
+
+<span class="fn">postgresStore</span>({"{"} client: sql {"}"})</code></pre>
+    </div>
   </div>
 
   <h3 id="full-config">Full Configuration</h3>
 
   <div class="code-block">
     <pre><code><span class="fn">postgresStore</span>({"{"}<span class="cm">
-  </span>pool,
+  </span>pool,                           <span class="cm">// Node: pg.Pool</span>
   tablePrefix: <span class="str">'api_limits'</span>,
-  cleanupInterval: <span class="num">300000</span>,  <span class="cm">// Clean every 5 minutes</span>
+  cleanupInterval: <span class="num">300000</span>,       <span class="cm">// Clean every 5 minutes</span>
   skipTableCreation: <span class="kw">false</span>
 {"}"})</code></pre>
   </div>
@@ -107,7 +129,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
     <li><strong>Persistence:</strong> Full PostgreSQL durability (WAL, replication)</li>
     <li><strong>Scalability:</strong> Shared across all server instances</li>
     <li><strong>Atomic:</strong> Upsert queries ensure race-condition-free increments</li>
-    <li><strong>Dependencies:</strong> Requires <code>pg</code> (node-postgres)</li>
+    <li><strong>Dependencies:</strong> Node requires <code>pg</code> (node-postgres). Bun uses native SQL — no extra dependencies.</li>
   </ul>
 
   <h2 id="when-to-use">When to Use</h2>

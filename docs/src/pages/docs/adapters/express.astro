@@ -102,12 +102,10 @@ app.<span class="fn">use</span>(<span class="str">'/auth/login'</span>, authLimi
     <pre><code><span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
   window: <span class="str">'1m'</span>,
-  onLimit: (req, res) => {"{"}
-    res.<span class="fn">status</span>(<span class="num">429</span>).<span class="fn">json</span>({"{"}
-      error: <span class="str">'Rate limit exceeded'</span>,
-      retryAfter: res.<span class="fn">getHeader</span>(<span class="str">'Retry-After'</span>)
-    {"}"})
-  {"}"}
+  response: (info) => ({"{"}
+    error: <span class="str">'Rate limit exceeded'</span>,
+    retryAfter: info.resetIn
+  {"}"})
 {"}"})</code></pre>
   </div>
 
