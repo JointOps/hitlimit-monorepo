@@ -9,28 +9,20 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 >
   <h1>Custom Stores</h1>
 
-  <p>Create your own store to integrate with any storage backend. All stores must implement the <code>Store</code> interface.</p>
+  <p>Create your own store to integrate with any storage backend. All stores must implement the <code>HitLimitStore</code> interface.</p>
 
   <h2 id="store-interface">Store Interface</h2>
 
   <div class="code-block">
-    <pre><code><span class="kw">interface</span> Store {"{"}
-  <span class="cm">/**
-   * Increment the counter for a key
-   * @param key - Unique identifier (e.g., IP address)
-   * @param window - Time window in milliseconds
-   * @returns Current count and reset timestamp
-   */</span>
-  <span class="fn">increment</span>(key: <span class="str">string</span>, window: <span class="str">number</span>): <span class="fn">Promise</span>&lt;{"{"}
-    count: <span class="str">number</span>
-    resetAt: <span class="str">number</span>
-  {"}"}&gt;
+    <pre><code><span class="kw">interface</span> HitLimitStore {"{"}
+  <span class="fn">hit</span>(key: <span class="str">string</span>, windowMs: <span class="str">number</span>, limit: <span class="str">number</span>): <span class="fn">Promise</span>&lt;StoreResult&gt; | StoreResult
+  <span class="fn">reset</span>(key: <span class="str">string</span>): <span class="fn">Promise</span>&lt;<span class="str">void</span>&gt; | <span class="str">void</span>
+  <span class="fn">shutdown</span>?(): <span class="fn">Promise</span>&lt;<span class="str">void</span>&gt; | <span class="str">void</span>
+{"}"}
 
-  <span class="cm">/**
-   * Reset the counter for a key
-   * @param key - Unique identifier to reset
-   */</span>
-  <span class="fn">reset</span>(key: <span class="str">string</span>): <span class="fn">Promise</span>&lt;<span class="str">void</span>&gt;
+<span class="kw">interface</span> StoreResult {"{"}
+  count: <span class="str">number</span>
+  resetAt: <span class="str">number</span>
 {"}"}</code></pre>
   </div>
 
@@ -39,19 +31,19 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
   <p>A simple in-memory store implementation:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} HitLimitStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
-<span class="kw">export function</span> <span class="fn">myStore</span>(): Store {"{"}
+<span class="kw">export function</span> <span class="fn">myStore</span>(): HitLimitStore {"{"}
   <span class="kw">const</span> data = <span class="kw">new</span> <span class="fn">Map</span>&lt;<span class="str">string</span>, {"{"} count: <span class="str">number</span>; resetAt: <span class="str">number</span> {"}"}&gt;()
 
   <span class="kw">return</span> {"{"}
-    <span class="kw">async</span> <span class="fn">increment</span>(key, window) {"{"}
+    <span class="fn">hit</span>(key, windowMs) {"{"}
       <span class="kw">const</span> now = Date.<span class="fn">now</span>()
       <span class="kw">const</span> entry = data.<span class="fn">get</span>(key)
 
       <span class="cm">// Reset if window expired</span>
       <span class="kw">if</span> (!entry || now >= entry.resetAt) {"{"}
-        <span class="kw">const</span> record = {"{"} count: <span class="num">1</span>, resetAt: now + window {"}"}
+        <span class="kw">const</span> record = {"{"} count: <span class="num">1</span>, resetAt: now + windowMs {"}"}
         data.<span class="fn">set</span>(key, record)
         <span class="kw">return</span> record
       {"}"}
@@ -61,7 +53,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
       <span class="kw">return</span> {"{"} count: entry.count, resetAt: entry.resetAt {"}"}
     {"}"},
 
-    <span class="kw">async</span> <span class="fn">reset</span>(key) {"{"}
+    <span class="fn">reset</span>(key) {"{"}
       data.<span class="fn">delete</span>(key)
     {"}"}
   {"}"}
@@ -86,20 +78,20 @@ app.<span class="fn">use</span>(<span class="fn">hitlimit</span>({"{"}
   <p>Example using a generic database client:</p>
 
   <div class="code-block">
-    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} Store {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
+    <pre><code><span class="kw">import</span> <span class="kw">type</span> {"{"} HitLimitStore {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit'</span>
 
 <span class="kw">interface</span> DbStoreOptions {"{"}
   client: <span class="str">any</span>
   tableName?: <span class="str">string</span>
 {"}"}
 
-<span class="kw">export function</span> <span class="fn">dbStore</span>(options: DbStoreOptions): Store {"{"}
+<span class="kw">export function</span> <span class="fn">dbStore</span>(options: DbStoreOptions): HitLimitStore {"{"}
   <span class="kw">const</span> {"{"} client, tableName = <span class="str">'rate_limits'</span> {"}"} = options
 
   <span class="kw">return</span> {"{"}
-    <span class="kw">async</span> <span class="fn">increment</span>(key, window) {"{"}
+    <span class="kw">async</span> <span class="fn">hit</span>(key, windowMs) {"{"}
       <span class="kw">const</span> now = Date.<span class="fn">now</span>()
-      <span class="kw">const</span> resetAt = now + window
+      <span class="kw">const</span> resetAt = now + windowMs
 
       <span class="cm">// Upsert with atomic increment</span>
       <span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">query</span>(<span class="str">`

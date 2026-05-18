@@ -74,7 +74,7 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
     <tbody>
       <tr><td><strong>Atomicity</strong></td><td><code>INSERT ON DUPLICATE KEY UPDATE</code> + <code>LAST_INSERT_ID()</code></td><td><code>ON CONFLICT DO UPDATE</code> + named prepared statements</td></tr>
       <tr><td><strong>Cleanup</strong></td><td>Timer-based (<code>DELETE WHERE expired</code>)</td><td>Timer-based (<code>DELETE WHERE expired</code>)</td></tr>
-      <tr><td><strong>Driver</strong></td><td><code>mysql2</code></td><td><code>pg</code></td></tr>
+      <tr><td><strong>Driver</strong></td><td><code>mysql2</code></td><td><code>pg</code> (Node) / Bun native SQL — no <code>pg</code> needed</td></tr>
       <tr><td><strong>Extra infra</strong></td><td>None (use existing DB)</td><td>None (use existing DB)</td></tr>
       <tr><td><strong>Compatibility</strong></td><td>MySQL 5.7+, MariaDB, PlanetScale</td><td>PostgreSQL 12+</td></tr>
     </tbody>

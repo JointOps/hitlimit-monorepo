@@ -25,22 +25,9 @@ import { bench, formatOps, formatLatencyApprox } from '../../../data/benchmarks'
   <p>Or explicitly configure it:</p>
 
   <RuntimeCodeTabs
-    node='<span class="kw">import</span> { hitlimit, memoryStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">memoryStore</span>({\n    cleanupInterval: <span class="num">60000</span>  <span class="cm">// Clean expired entries every 60s</span>\n  })\n}))'
-    bun='<span class="kw">import</span> { hitlimit, memoryStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">memoryStore</span>()  <span class="cm">// No options needed — Bun handles cleanup internally</span>\n})'
+    node='<span class="kw">import</span> { hitlimit, memoryStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit&#39;</span>\n\napp.<span class="fn">use</span>(<span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">memoryStore</span>()\n}))'
+    bun='<span class="kw">import</span> { hitlimit, memoryStore } <span class="kw">from</span> <span class="str">&#39;@joint-ops/hitlimit-bun&#39;</span>\n\n<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({\n  limit: <span class="num">100</span>,\n  window: <span class="str">&#39;1m&#39;</span>,\n  store: <span class="fn">memoryStore</span>()\n})'
   />
-
-  <div data-runtime-content="node">
-    <h2 id="options">Options</h2>
-
-    <table class="options-table">
-      <thead>
-        <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><code>cleanupInterval</code></td><td>number</td><td>60000</td><td>Interval (ms) to clean expired entries</td></tr>
-      </tbody>
-    </table>
-  </div>
 
   <h2 id="characteristics">Characteristics</h2>
 

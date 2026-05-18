@@ -46,20 +46,21 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 
   <h2 id="connection-options">Connection Options</h2>
 
-  <p>Create a pool with a connection string:</p>
+  <div data-runtime-content="node">
+    <p>Create a pool with a connection string:</p>
 
-  <div class="code-block">
-    <pre><code><span class="kw">import</span> {"{"} Pool {"}"} <span class="kw">from</span> <span class="str">'pg'</span>
+    <div class="code-block">
+      <pre><code><span class="kw">import</span> {"{"} Pool {"}"} <span class="kw">from</span> <span class="str">'pg'</span>
 
 <span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({"{"}<span class="cm">
   </span>connectionString: <span class="str">'postgres://user:password@hostname:5432/mydb'</span>
 {"}"})</code></pre>
-  </div>
+    </div>
 
-  <p>Or use individual connection parameters:</p>
+    <p>Or use individual connection parameters:</p>
 
-  <div class="code-block">
-    <pre><code><span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({"{"}<span class="cm">
+    <div class="code-block">
+      <pre><code><span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({"{"}<span class="cm">
   </span>host: <span class="str">'localhost'</span>,
   port: <span class="num">5432</span>,
   database: <span class="str">'mydb'</span>,
@@ -69,15 +70,34 @@ import RuntimeCodeTabs from '../../../components/RuntimeCodeTabs.astro';
 {"}"})
 
 <span class="fn">postgresStore</span>({"{"} pool {"}"})</code></pre>
+    </div>
+  </div>
+
+  <div data-runtime-content="bun">
+    <p>Pass a connection URL — Bun creates and owns the native SQL client:</p>
+
+    <div class="code-block">
+      <pre><code><span class="fn">postgresStore</span>({"{"} url: <span class="str">'postgres://user:password@hostname:5432/mydb'</span> {"}"})</code></pre>
+    </div>
+
+    <p>Or pass a caller-owned Bun <code>SQL</code> instance (store will not close it):</p>
+
+    <div class="code-block">
+      <pre><code><span class="kw">import</span> {"{"} SQL {"}"} <span class="kw">from</span> <span class="str">'bun'</span>
+
+<span class="kw">const</span> sql = <span class="kw">new</span> <span class="fn">SQL</span>(<span class="str">'postgres://user:password@hostname:5432/mydb'</span>)
+
+<span class="fn">postgresStore</span>({"{"} client: sql {"}"})</code></pre>
+    </div>
   </div>
 
   <h3 id="full-config">Full Configuration</h3>
 
   <div class="code-block">
     <pre><code><span class="fn">postgresStore</span>({"{"}<span class="cm">
-  </span>pool,
+  </span>pool,                           <span class="cm">// Node: pg.Pool</span>
   tablePrefix: <span class="str">'api_limits'</span>,
-  cleanupInterval: <span class="num">300000</span>,  <span class="cm">// Clean every 5 minutes</span>
+  cleanupInterval: <span class="num">300000</span>,       <span class="cm">// Clean every 5 minutes</span>
   skipTableCreation: <span class="kw">false</span>
 {"}"})</code></pre>
   </div>
