@@ -4,100 +4,137 @@
 [![GitHub](https://img.shields.io/github/license/JointOps/hitlimit-monorepo)](https://github.com/JointOps/hitlimit-monorepo)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 
-> TypeScript type definitions for hitlimit rate limiting libraries
+> Shared TypeScript type definitions for hitlimit rate limiting libraries
 
-This package contains shared TypeScript interfaces and types used by [@joint-ops/hitlimit](https://www.npmjs.com/package/@joint-ops/hitlimit) and [@joint-ops/hitlimit-bun](https://www.npmjs.com/package/@joint-ops/hitlimit-bun).
+This package contains the canonical interfaces and types used by both
+[@joint-ops/hitlimit](https://www.npmjs.com/package/@joint-ops/hitlimit) and
+[@joint-ops/hitlimit-bun](https://www.npmjs.com/package/@joint-ops/hitlimit-bun).
 
 ## Installation
 
-This package is automatically installed as a dependency of `hitlimit` and `hitlimit-bun`. You don't need to install it directly.
+This package is installed automatically as a dependency of `hitlimit` and `hitlimit-bun`.
+You do not need to install it directly unless you are building a custom store or plugin.
 
 ```bash
-# Install hitlimit (includes types automatically)
+# Comes bundled — no direct install needed
 npm install @joint-ops/hitlimit
-
-# Or for Bun
 bun add @joint-ops/hitlimit-bun
 ```
 
-## Usage
+## Types
 
 Types are re-exported from the main packages:
 
 ```typescript
 import type {
-  HitLimitConfig,
-  RateLimitResult,
-  Store,
-  TierConfig
+  HitLimitOptions,
+  HitLimitInfo,
+  HitLimitResult,
+  HitLimitStore,
+  StoreResult,
+  HeadersConfig,
+  TierConfig,
+  HitLimitLogger
 } from '@joint-ops/hitlimit'
 
 // Or from hitlimit-bun
-import type { HitLimitConfig, Store } from '@joint-ops/hitlimit-bun'
+import type { HitLimitOptions, HitLimitStore, StoreResult } from '@joint-ops/hitlimit-bun'
 ```
 
-## Available Types
+## Core Interfaces
 
-### Core Types
+### HitLimitOptions
 
 ```typescript
-// Main configuration
-interface HitLimitConfig {
+interface HitLimitOptions<TRequest = any> {
   limit?: number
   window?: string | number
-  key?: (req: Request) => string | Promise<string>
+  key?: (req: TRequest) => string | Promise<string>
   tiers?: Record<string, TierConfig>
-  tier?: (req: Request) => string | Promise<string>
-  response?: RateLimitResponse | ((info: RateLimitInfo) => RateLimitResponse)
+  tier?: (req: TRequest) => string | Promise<string>
+  response?: Record<string, any> | ((info: HitLimitInfo) => Record<string, any>)
   headers?: HeadersConfig
-  store?: Store
-  skip?: (req: Request) => boolean | Promise<boolean>
-  onStoreError?: (error: Error, req: Request) => 'allow' | 'deny'
+  store?: HitLimitStore
+  skip?: (req: TRequest) => boolean | Promise<boolean>
+  onStoreError?: (error: Error, req: TRequest) => void
+  logger?: HitLimitLogger
+  ban?: { threshold: number; duration: string | number }
+  group?: string | ((req: TRequest) => string | Promise<string>)
 }
+```
 
-// Store interface for custom backends
-interface Store {
-  increment(key: string, window: number): Promise<RateLimitResult>
-  decrement?(key: string): Promise<void>
-  reset?(key: string): Promise<void>
-  close?(): Promise<void>
-}
+### HitLimitInfo
 
-// Rate limit result
-interface RateLimitResult {
-  allowed: boolean
+Rate limit state passed to `response` callbacks and available on request objects:
+
+```typescript
+interface HitLimitInfo {
   limit: number
   remaining: number
-  resetAt: number
+  resetIn: number    // seconds until window resets
+  resetAt: number    // unix timestamp (ms) when window resets
+  key: string
+  tier?: string
+  banned?: boolean
+  banExpiresAt?: number
+  violations?: number
+  group?: string
+}
+```
+
+### HitLimitStore + StoreResult
+
+Implement this interface to build a custom storage backend:
+
+```typescript
+interface HitLimitStore {
+  isSync?: boolean
+  hit(key: string, windowMs: number, limit: number): Promise<StoreResult> | StoreResult
+  reset(key: string): Promise<void> | void
+  shutdown?(): Promise<void> | void
 }
 
-// Tier configuration
+interface StoreResult {
+  count: number    // current request count in this window
+  resetAt: number  // unix timestamp (ms) when the window resets
+}
+```
+
+### HeadersConfig
+
+```typescript
+interface HeadersConfig {
+  standard?: boolean   // RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset
+  legacy?: boolean     // X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset
+  retryAfter?: boolean // Retry-After (on 429 responses only)
+}
+```
+
+### TierConfig
+
+```typescript
 interface TierConfig {
   limit: number
   window?: string | number
 }
 ```
 
-### Logger Types
+### HitLimitLogger
 
 ```typescript
-interface Logger {
-  debug(message: string, meta?: Record<string, unknown>): void
-  info(message: string, meta?: Record<string, unknown>): void
-  warn(message: string, meta?: Record<string, unknown>): void
-  error(message: string, meta?: Record<string, unknown>): void
+interface HitLimitLogger {
+  debug(message: string, meta?: Record<string, any>): void
+  info(message: string, meta?: Record<string, any>): void
+  warn(message: string, meta?: Record<string, any>): void
+  error(message: string, meta?: Record<string, any>): void
 }
 ```
 
 ## Related Packages
 
-- [@joint-ops/hitlimit](https://www.npmjs.com/package/@joint-ops/hitlimit) - Rate limiting for Node.js (Express, NestJS)
-- [@joint-ops/hitlimit-bun](https://www.npmjs.com/package/@joint-ops/hitlimit-bun) - Rate limiting for Bun (Bun.serve, Elysia)
+- [@joint-ops/hitlimit](https://www.npmjs.com/package/@joint-ops/hitlimit) — Rate limiting for Node.js (Express, Fastify, Hono, NestJS)
+- [@joint-ops/hitlimit-bun](https://www.npmjs.com/package/@joint-ops/hitlimit-bun) — Rate limiting for Bun (Bun.serve, Elysia, Hono)
 
 ## License
 
 MIT
-
-## Keywords
-
-rate limit types, typescript rate limit, rate limiter types, hitlimit, api types, middleware types, typescript definitions
