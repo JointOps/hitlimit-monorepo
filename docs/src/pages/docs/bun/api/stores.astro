@@ -290,16 +290,10 @@ import { bench, formatOps, formatLatencyApprox } from '../../../../data/benchmar
         <td>Valkey connection URL (uses <code>redis://</code> scheme).</td>
       </tr>
       <tr>
-        <td><code>client</code></td>
-        <td><code>Redis</code></td>
-        <td>—</td>
-        <td>Existing ioredis client instance.</td>
-      </tr>
-      <tr>
-        <td><code>prefix</code></td>
+        <td><code>keyPrefix</code></td>
         <td><code>string</code></td>
         <td><code>'hitlimit:'</code></td>
-        <td>Key prefix for rate limit entries.</td>
+        <td>Prefix prepended to all Valkey keys.</td>
       </tr>
     </tbody>
   </table>
@@ -366,16 +360,10 @@ import { bench, formatOps, formatLatencyApprox } from '../../../../data/benchmar
         <td>DragonflyDB connection URL (uses <code>redis://</code> scheme).</td>
       </tr>
       <tr>
-        <td><code>client</code></td>
-        <td><code>Redis</code></td>
-        <td>—</td>
-        <td>Existing ioredis client instance.</td>
-      </tr>
-      <tr>
-        <td><code>prefix</code></td>
+        <td><code>keyPrefix</code></td>
         <td><code>string</code></td>
         <td><code>'hitlimit:'</code></td>
-        <td>Key prefix for rate limit entries.</td>
+        <td>Prefix prepended to all DragonflyDB keys.</td>
       </tr>
     </tbody>
   </table>
@@ -602,6 +590,22 @@ import { bench, formatOps, formatLatencyApprox } from '../../../../data/benchmar
       </tr>
       <tr>
         <td><strong>Postgres</strong></td>
+        <td>Network-bound</td>
+        <td>Network-bound</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td><strong>MongoDB</strong></td>
+        <td>Network-bound</td>
+        <td>Network-bound</td>
+        <td>Yes</td>
+        <td>Yes</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td><strong>MySQL</strong></td>
         <td>Network-bound</td>
         <td>Network-bound</td>
         <td>Yes</td>
