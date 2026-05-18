@@ -3,92 +3,118 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 ---
 
 <DocsLayout
-  title="Rate Limit Headers - hitlimit | X-RateLimit Headers & IETF Draft Spec"
-  description="Configure rate limit response headers including X-RateLimit-Limit, X-RateLimit-Remaining, and Retry-After. Support for IETF draft-7 specification and custom header names."
-  keywords="rate limit headers, x-ratelimit-limit, x-ratelimit-remaining, retry-after header, ietf rate limit draft, ratelimit headers, api response headers, http rate limit headers"
+  title="Rate Limit Headers - hitlimit | X-RateLimit Headers Configuration"
+  description="Configure rate limit response headers with hitlimit. Standard IETF RateLimit headers, legacy X-RateLimit headers, and Retry-After support via HeadersConfig."
+  keywords="rate limit headers, x-ratelimit-limit, x-ratelimit-remaining, retry-after header, ratelimit headers, api response headers, http rate limit headers, hitlimit headers config"
 >
   <h1>Rate Limit Headers</h1>
-  <p>Configure the rate limit response headers sent with each request.</p>
+  <p>Configure which rate limit response headers hitlimit sends with each request using the <code>headers</code> option.</p>
 
-  <h2 id="default-headers">Default Headers</h2>
-  <p>By default, hitlimit includes standard rate limit headers in all responses.</p>
+  <h2 id="headers-config">HeadersConfig</h2>
 
-  <div class="code-block">
-    <pre><code>X-RateLimit-Limit: <span class="num">100</span>
-X-RateLimit-Remaining: <span class="num">95</span>
-X-RateLimit-Reset: <span class="num">1706284800</span></code></pre>
-  </div>
-
-  <h2 id="header-descriptions">Header Descriptions</h2>
+  <p>The <code>headers</code> option accepts a <code>HeadersConfig</code> object with three boolean fields:</p>
 
   <table class="headers-table">
     <thead>
-      <tr><th>Header</th><th>Description</th></tr>
+      <tr><th>Field</th><th>Type</th><th>Default</th><th>Headers emitted</th></tr>
     </thead>
     <tbody>
-      <tr><td><code>X-RateLimit-Limit</code></td><td>Maximum requests allowed in the window</td></tr>
-      <tr><td><code>X-RateLimit-Remaining</code></td><td>Number of requests remaining in the current window</td></tr>
-      <tr><td><code>X-RateLimit-Reset</code></td><td>Unix timestamp when the rate limit window resets</td></tr>
-      <tr><td><code>Retry-After</code></td><td>Seconds until the rate limit resets (only on 429 responses)</td></tr>
+      <tr><td><code>standard</code></td><td>boolean</td><td>true</td><td><code>RateLimit-Limit</code>, <code>RateLimit-Remaining</code>, <code>RateLimit-Reset</code></td></tr>
+      <tr><td><code>legacy</code></td><td>boolean</td><td>false</td><td><code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>, <code>X-RateLimit-Reset</code></td></tr>
+      <tr><td><code>retryAfter</code></td><td>boolean</td><td>false</td><td><code>Retry-After</code> (only on 429 responses)</td></tr>
     </tbody>
   </table>
 
-  <h2 id="disable-headers">Disable Headers</h2>
-  <p>Turn off rate limit headers entirely.</p>
+  <h2 id="standard-headers">Standard Headers (IETF)</h2>
+
+  <p>Enable standard headers using the IETF <code>RateLimit-*</code> naming (no <code>X-</code> prefix):</p>
 
   <div class="code-block">
     <pre><code><span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
   window: <span class="str">'1m'</span>,
-  headers: <span class="kw">false</span>
-{"}"})</code></pre>
-  </div>
-
-  <h2 id="custom-header-names">Custom Header Names</h2>
-  <p>Use custom header names for compatibility with your API standards.</p>
-
-  <div class="code-block">
-    <pre><code><span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">100</span>,
-  window: <span class="str">'1m'</span>,
-  headers: {"{"}
-    limit: <span class="str">'RateLimit-Limit'</span>,
-    remaining: <span class="str">'RateLimit-Remaining'</span>,
-    reset: <span class="str">'RateLimit-Reset'</span>
-  {"}"}
-{"}"})</code></pre>
-  </div>
-
-  <h2 id="draft-spec">IETF Draft Specification</h2>
-  <p>Use headers compliant with the IETF rate limit header draft specification.</p>
-
-  <div class="code-block">
-    <pre><code><span class="fn">hitlimit</span>({"{"}
-  limit: <span class="num">100</span>,
-  window: <span class="str">'1m'</span>,
-  headers: <span class="str">'draft-7'</span>
+  headers: {"{"} standard: <span class="kw">true</span> {"}"}
 {"}"})
 
-<span class="cm">// Results in headers:</span>
+<span class="cm">// Each response includes:</span>
 <span class="cm">// RateLimit-Limit: 100</span>
 <span class="cm">// RateLimit-Remaining: 95</span>
-<span class="cm">// RateLimit-Reset: 60</span></code></pre>
+<span class="cm">// RateLimit-Reset: 1706284860  (Unix timestamp)</span></code></pre>
   </div>
 
-  <h2 id="selective-headers">Selective Headers</h2>
-  <p>Include only specific headers by setting others to <code>false</code>.</p>
+  <h2 id="legacy-headers">Legacy Headers</h2>
+
+  <p>Enable legacy <code>X-RateLimit-*</code> headers for compatibility with older clients:</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  headers: {"{"} legacy: <span class="kw">true</span> {"}"}
+{"}"})
+
+<span class="cm">// Each response includes:</span>
+<span class="cm">// X-RateLimit-Limit: 100</span>
+<span class="cm">// X-RateLimit-Remaining: 95</span>
+<span class="cm">// X-RateLimit-Reset: 1706284860</span></code></pre>
+  </div>
+
+  <h2 id="retry-after">Retry-After Header</h2>
+
+  <p>Enable <code>Retry-After</code> to tell rate-limited clients how many seconds to wait. Only sent on 429 responses:</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>,
+  headers: {"{"} retryAfter: <span class="kw">true</span> {"}"}
+{"}"})
+
+<span class="cm">// On 429 responses only:</span>
+<span class="cm">// Retry-After: 42  (seconds until window resets)</span></code></pre>
+  </div>
+
+  <h2 id="combined">Combining Headers</h2>
+
+  <p>Enable any combination of the three fields:</p>
 
   <div class="code-block">
     <pre><code><span class="fn">hitlimit</span>({"{"}
   limit: <span class="num">100</span>,
   window: <span class="str">'1m'</span>,
   headers: {"{"}
-    limit: <span class="str">'X-RateLimit-Limit'</span>,
-    remaining: <span class="kw">false</span>,  <span class="cm">// Don't expose remaining count</span>
-    reset: <span class="str">'X-RateLimit-Reset'</span>
+    standard: <span class="kw">true</span>,    <span class="cm">// RateLimit-* (IETF)</span>
+    legacy: <span class="kw">true</span>,      <span class="cm">// X-RateLimit-* (legacy)</span>
+    retryAfter: <span class="kw">true</span>  <span class="cm">// Retry-After on 429</span>
   {"}"}
 {"}"})</code></pre>
   </div>
+
+  <h2 id="disable-headers">Disable All Headers</h2>
+
+  <p>Omit the <code>headers</code> option entirely — no rate limit headers are sent by default unless you enable them:</p>
+
+  <div class="code-block">
+    <pre><code><span class="fn">hitlimit</span>({"{"}
+  limit: <span class="num">100</span>,
+  window: <span class="str">'1m'</span>
+  <span class="cm">// headers omitted — no rate limit headers sent</span>
+{"}"})</code></pre>
+  </div>
+
+  <h2 id="ban-headers">Ban Headers</h2>
+
+  <p>When a client is banned (via <code>ban.threshold</code>), two additional headers are always included regardless of the <code>headers</code> config:</p>
+
+  <table class="headers-table">
+    <thead>
+      <tr><th>Header</th><th>Value</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>X-RateLimit-Ban</code></td><td><code>true</code></td></tr>
+      <tr><td><code>X-RateLimit-Ban-Expires</code></td><td>Unix timestamp when the ban expires</td></tr>
+    </tbody>
+  </table>
 </DocsLayout>
 
 <style>
