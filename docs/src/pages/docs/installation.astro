@@ -41,9 +41,9 @@ import RuntimeCodeTabs from '../../components/RuntimeCodeTabs.astro';
         </div>
         <span class="code-filename">test.ts</span>
       </div>
-      <pre><code><span class="kw">import</span> {"{"} hitlimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
+      <pre><code><span class="kw">import</span> {"{"} createHitLimit {"}"} <span class="kw">from</span> <span class="str">'@joint-ops/hitlimit-bun'</span>
 
-<span class="kw">const</span> limiter = <span class="fn">hitlimit</span>({"{"} limit: <span class="num">10</span>, window: <span class="str">'1m'</span> {"}"})
+<span class="kw">const</span> limiter = <span class="fn">createHitLimit</span>({"{"} limit: <span class="num">10</span>, window: <span class="str">'1m'</span> {"}"})
 
 console.<span class="fn">log</span>(<span class="str">'hitlimit-bun installed successfully!'</span>)</code></pre>
     </div>
