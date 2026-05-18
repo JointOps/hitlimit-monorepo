@@ -115,7 +115,6 @@ export const nodeNavigation: NavSection[] = [
     icon: 'activity',
     items: [
       { label: 'Performance Results', href: '/docs/benchmarks' },
-      { label: 'Comparison Overview', href: '/docs/comparison' },
     ],
   },
 ];
@@ -204,7 +203,6 @@ export const bunNavigation: NavSection[] = [
     icon: 'activity',
     items: [
       { label: 'Performance Results', href: '/docs/benchmarks' },
-      { label: 'Comparison Overview', href: '/docs/comparison' },
     ],
   },
 ];
